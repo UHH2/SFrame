@@ -1,0 +1,86 @@
+// Dear emacs, this is -*- c++ -*-
+// $Id: SCycleBaseHist.icc,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Core
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
+
+#ifndef SFRAME_CORE_SCycleBaseHist_ICC
+#define SFRAME_CORE_SCycleBaseHist_ICC
+
+// System include(s):
+#include <string.h>
+
+// ROOT include(s):
+#include <TROOT.h>
+#include <TH1.h>
+
+/**
+ * Function for creating any kind of object inheriting from TObject and
+ * which has a correct dictionary loaded, in the output file.
+ */
+template< class T >
+T* SCycleBaseHist::Book( const T& histo,
+                         const char* directory ) throw( SError ) {
+
+   // Find the correct directory in the output file:
+   TDirectory* dir = 0;
+   if( strcmp( directory, "" ) ) {
+      dir = this->CdInOutput( directory );
+   } else {
+      dir = m_outputFile;
+   }
+   dir->cd();
+
+   // Search for an object with this name in the directory. If there is
+   // none, create one:
+   T* h = dynamic_cast< T* >( dir->FindObject( histo.GetName() ) );
+   if( ! h ) {
+      h = dynamic_cast< T* >( histo.Clone() );
+   }
+
+   gROOT->cd(); // So that the temporary objects would not be
+                // created in the file itself...
+
+   if( ( ! TH1::GetDefaultSumw2() ) && ( ! h->GetSumw2N() ) ) {
+      h->Sumw2();
+   }
+
+   return h;
+}
+
+/**
+ * Function searching for any kind of object (inheriting from TObject)
+ * in the output file.
+ */
+template< class T >
+T* SCycleBaseHist::Retrieve( const char* name,
+                             const char* directory ) throw( SError ) {
+
+   // Look for an object with this name in the specified directory:
+   TDirectory* dir = 0;
+   if( strcmp( directory, "" ) ) {
+      dir = this->CdInOutput( directory );
+   } else {
+      dir = m_outputFile;
+   }
+   T* h = dynamic_cast< T* >( dir->FindObject( name ) );
+   if( ! h ) {
+      m_logger << ERROR << "Couldn't access object with name: " << name
+               << " in directory: " << directory << SLogger::endmsg;
+   }
+
+   gROOT->cd(); // So that the temporary objects would not be
+                // created in the file itself...
+
+   return h;
+}
+
+#endif // SFRAME_CORE_SCycleBaseHist_ICC

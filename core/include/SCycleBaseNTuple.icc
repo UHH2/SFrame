@@ -1,0 +1,345 @@
+// Dear emacs, this is -*- c++ -*-
+// $Id: SCycleBaseNTuple.icc,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Core
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
+
+#ifndef SFRAME_CORE_SCycleBaseNTuple_ICC
+#define SFRAME_CORE_SCycleBaseNTuple_ICC
+
+// System include(s):
+#include <string.h>
+#include <cxxabi.h>
+
+// STL include(s):
+#include <sstream>
+#include <typeinfo>
+
+// ROOT include(s):
+#include <TTree.h>
+#include <TBranch.h>
+
+
+/**
+ * This is a tricky function. To connect to "primitive" types in the input TTree
+ * (ints, doubles, etc.) you have to define the variable itself, then give this
+ * variable to the function. (The function takes a reference of the variable.)
+ *
+ * For objects (vectors, maps, you name it) you have to define a pointer to
+ * such an object, and give this pointer to the function. You don't need to
+ * initialise the pointer to anything, the function will take care about that.
+ *
+ * See the example cycles for some details.
+ */
+template< typename T >
+void SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branchName,
+                                        T& variable ) throw ( SError ) {
+
+   // Access the TTree. The function will throw an exception if unsuccessful
+   TTree* tree = GetTree( treeName );
+   TBranch* br = 0;
+
+   //
+   // Detect what kind of variable we're dealing with:
+   //
+   const char* type_name = typeid( variable ).name();
+   if( strlen( type_name ) == 1 ) {
+
+      // For primitive types nothing fancy needs to be done
+      m_logger << VERBOSE << "The supplied variable is a \"primitive\""
+               << SLogger::endmsg;
+      tree->SetBranchAddress( branchName, &variable, &br );
+
+   } else {
+
+      // The object pointers have to be initialised to zero before
+      // connecting them to the branches
+      m_logger << VERBOSE << "The supplied variable is an object pointer"
+               << SLogger::endmsg;
+      variable = 0;
+      tree->SetBranchAddress( branchName, &variable, &br );
+
+   }
+
+   this->RegisterInputBranch( br );
+   m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
+            << treeName << "\"" << SLogger::endmsg;
+
+   return;
+
+}
+
+/**
+ * Function that lets the user define a variable "spreading accross" multiple
+ * EventView input trees. The user has to provide the base name of the EV trees,
+ * the name of the variable (branch) and a vector that will store the variables
+ * from the different EV trees.
+ *
+ * The function returns a pointer to the variable in the "collection tree" that
+ * says how many views are avaiable for a given event. (The vector will always
+ * have the maximal size, but only the first n elements will be valid for the
+ * actual event.)
+ */
+template< typename T >
+const Int_t* SCycleBaseNTuple::ConnectEventViewVariable( const char* baseName,
+                                                         const char* branchName,
+                                                         std::vector< T >& variables ) throw( SError ) {
+
+   variables.clear();
+
+   TTree* EVInTree = 0;
+   std::map< TTree*, std::string >::const_iterator it = m_EVInTreeToBaseName.begin();
+   for( ; it != m_EVInTreeToBaseName.end(); ++it ) {
+
+      // Search for the TTrees belonging to this "view":
+      if( it->second != baseName ) continue;
+      EVInTree = it->first;
+
+      //
+      // Find the branch in this tree for the specified variable:
+      //
+      TBranch* br = EVInTree->GetBranch( branchName );
+      if( ! br ) {
+         SError error( SError::SkipFile );
+         error << "Branch \"" << branchName << "\" not found in tree \""
+               << EVInTree->GetName() << "\" !";
+         throw error;
+      }
+
+      m_logger << DEBUG << "Connect branch " << br->GetName() 
+               << " in EV tree " << EVInTree->GetName() <<  std::endl;
+
+      m_EVInputBranchesToBaseName[ br ] = baseName;
+
+      //
+      // Find out which number this view has:
+      //
+      std::map< TTree*, Int_t >::const_iterator viewNumber =
+         m_EVInTreeToViewNumber.find( EVInTree );
+      if( viewNumber == m_EVInTreeToViewNumber.end() ) {
+         SError error( SError::SkipInputData );
+         error << "ConnectEventViewVariable> View number not found for tree '"
+               << EVInTree->GetName() << "'";
+         throw error;
+      } else {
+         m_logger << DEBUG << "ConnectEventViewVariable> ViewNumber for tree '"
+                  << EVInTree->GetName() << "' is " << viewNumber->second
+                  << SLogger::endmsg;
+      }
+      m_EVInputBranchesToViewNumber[ br ] = viewNumber->second;
+
+      // remember position
+      u_int pos = variables.size();
+      // make entry for the current EV
+      variables.push_back( T() );
+      EVInTree->SetBranchAddress( branchName, &variables[ pos ], &br );
+
+      m_logger << DEBUG << "Insert EV input branch " << br->GetName() 
+               << " view " << viewNumber->second << " baseName " 
+               << baseName << SLogger::endmsg;
+
+   }
+
+   std::map< TTree*, std::string >::const_iterator itCollTreeName = 
+      m_EVInTreeToCollTreeName.find( EVInTree );
+   if( itCollTreeName == m_EVInTreeToCollTreeName.end() ) {
+      SError error( SError::SkipInputData );
+      error << "Name of collection tree for EV tree \"" << EVInTree << "\" not found!";
+      throw error;
+   }
+
+   TTree* collTree = 0;
+   for( std::vector< TTree* >::const_iterator itCollTree = m_inputTrees.begin();
+        itCollTree != m_inputTrees.end(); ++itCollTree ) {
+      if( ( *itCollTree )->GetName() == itCollTreeName->second ) {
+         collTree = ( *itCollTree );
+      }
+   }
+   if( ! collTree ) {
+      SError error( SError::SkipInputData );
+      error << "Couldn't find collection tree ('" << itCollTreeName->second
+            << "') for EV tree '" << EVInTree->GetName() << "'";
+      throw error;
+   }
+
+   // now make sure that the variable in the CollectionTree that is
+   // used to sync the EV trees is loaded for every event, i.e. make
+   // sure the corresponding branch of the CollectionTree is in the
+   // map of input branches
+
+   std::ostringstream varname;
+   varname << baseName << "NInstance";
+   // now get the branch pointer
+   TBranch* br = collTree->GetBranch( varname.str().c_str() );
+   // throw exception if branch not found
+   if( ! br ) {
+      SError error( SError::SkipFile );
+      error << "Branch \"" << varname.str() << "\" not found in tree \""
+            << collTree->GetName() << "\" !";
+      throw error;
+   }
+
+   this->RegisterInputBranch( br );
+   std::map< std::string, Int_t >::const_iterator varIt =
+      m_EVBaseNameToCollVar.find( baseName );
+   if( varIt == m_EVBaseNameToCollVar.end() ) {
+      SError error( SError::StopExecution );
+      error << "Collection-tree variable to sync EV trees for baseName \"" << baseName 
+            << "\" not found !";
+      throw error;
+   } else {
+      return &( varIt->second );
+   }
+
+   return 0;
+}
+
+/**
+ * Function putting an output variable in (one of) the output tree(s). The function
+ * is quite complicated, but it is for the reason for making it very easy to use.
+ * The user just has to give a reference to the output object, a name under which
+ * it should appear in the output tree, and the tree name if multiple output trees
+ * have been defined.
+ *
+ * The function detects the type of the user supplied variable, and puts it in the
+ * output tree in a way depending on the object's type.
+ */
+template < class T >
+TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
+                                            const char* treeName ) throw( SError ) {
+
+   TTree*   tree = 0;
+   TBranch* branch = 0;
+
+   //
+   // Find the pointer to the output tree:
+   //
+   if( treeName ) {
+
+      for( std::vector< TTree* >::iterator otree = m_outputTrees.begin();
+           otree != m_outputTrees.end(); ++otree ) {
+         if( ! strcmp( ( *otree )->GetName(), treeName ) ) {
+            tree = *otree;
+            break;
+         }
+      }
+
+   } else {
+
+      if( m_outputTrees.size() != 1 ) {
+         SError error( SError::SkipInputData );
+         error << "There can't be other than 1 output tree defined in order not to\n";
+         error << "define a tree name in SCycleBaseNTuple::DeclareVariable(...)!";
+         throw error;
+      }
+
+      tree = m_outputTrees.front();
+
+   }
+
+   //
+   // Check if the tree has been found:
+   //
+   if( ! tree ) {
+      SError error( SError::SkipInputData );
+      if( treeName ) {
+         error << "Couldn't find output tree with name: " << treeName;
+      } else {
+         error << "Couldn't find default output tree";
+      }
+      throw error;
+   }
+
+   m_logger << VERBOSE << "Found output tree with name: " << tree->GetName()
+            << SLogger::endmsg;
+
+   // Check if the branch exists already:
+   branch = tree->GetBranch( name );
+   if( ! branch ) {
+
+      //
+      // This branch doesn't exist yet. We have to (try to) create it.
+      //
+      m_logger << DEBUG << "Creating new output branch with name: " << name
+               << SLogger::endmsg;
+
+      // First of all, lets figure out what kind of object we're dealing with
+      const char* type_name = typeid( obj ).name();
+
+      if( strlen( type_name ) == 1 ) {
+
+         //
+         // This is a simple variable:
+         //
+         m_logger << VERBOSE << "The supplied variable is a \"primitive\""
+                  << SLogger::endmsg;
+
+         std::ostringstream leaflist;
+         leaflist << name << "/" << RootType( type_name );
+         branch = tree->Branch( name, &obj, leaflist.str().c_str() );
+
+      } else {
+
+         //
+         // This is an object:
+         //
+         m_logger << VERBOSE << "The supplied variable is an object" << SLogger::endmsg;
+
+         int status;
+         char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
+         if( status ) {
+            SError error( SError::StopExecution );
+            error << "Couldn't demangle type name: " << type_name;
+            throw error;
+         }
+
+         m_logger << VERBOSE << "Mangled name of object: " << type_name
+                  << SLogger::endmsg;
+         m_logger << VERBOSE << "De-mangled name of object: " << real_type_name
+                  << SLogger::endmsg;
+
+         //
+         // Then try to add the object to the TTree. We have to do it in such a weird way,
+         // since the "pointer" variable is going to disappear at the end of this function
+         // so giving "&pointer" to TTree::Bronch would cause quite a crash when you're
+         // writing out the event. (Trust me, I *know*... :-)) I'm storing the pointers
+         // in an std::list, since lists don't move their elements around.
+         // (vectors are allowed to do that. This one I've just read... :-))
+         //
+         T* pointer = &obj;
+         m_outputVarPointers.push_back( pointer );
+         branch = tree->Bronch( name, real_type_name, &m_outputVarPointers.back() );
+
+         free( real_type_name );
+
+      }
+
+      if( ! branch ) {
+         SError error( SError::SkipInputData );
+         error << "Couldn't create branch with name: " << name;
+         throw error;
+      }
+
+      m_logger << VERBOSE << "Successfully added branch" << SLogger::endmsg;
+
+   } else {
+
+      m_logger << WARNING << "A branch with the name \"" << name << "\" already exists"
+               << SLogger::endmsg;
+      m_logger << WARNING << "New object not added to tree!" << SLogger::endmsg;
+
+   }
+
+   return branch;
+
+}
+
+#endif // SFRAME_CORE_SCycleBaseNTuple_ICC

@@ -1,0 +1,6 @@
+2007.11.13. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Created first version of the "SFramePlugIns" library.
+	* The package should be a collection of useful tools
+	  built on top of SFrame/ROOT.
+	* As a placekeeper, I added the good old SParticle class
+	  to the library.

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- ======================================================================= -->
+<!-- @Project: SFrame - ROOT-based analysis framework for ATLAS              -->
+<!-- @Package: User                                                          -->
+<!--                                                                         -->
+<!-- @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester    -->
+<!-- @author David Berge      <David.Berge@cern.ch>          - CERN          -->
+<!-- @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg       -->
+<!-- @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN          -->
+<!-- @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen -->
+<!--                                                                         -->
+<!-- This is the dtd that can be used to configure an SFrame job             -->
+<!--                                                                         -->
+<!-- ======================================================================= -->
+
+<!ELEMENT JobConfiguration (Library*,Cycle+)>
+<!ATTLIST JobConfiguration
+        JobName              CDATA            #REQUIRED
+        OutputLevel          CDATA            "INFO"
+>
+
+<!ELEMENT Library EMPTY>
+<!ATTLIST Library
+        Name                 CDATA            #REQUIRED
+>
+
+<!ELEMENT Cycle (InputData+,UserConfig?)>
+<!ATTLIST Cycle 
+        Name                 ID               #REQUIRED
+        OutputDirectory      CDATA            #REQUIRED
+        PostFix              CDATA            #REQUIRED
+        TargetLumi           CDATA            #REQUIRED
+>
+
+<!ELEMENT InputData (GeneratorCut*,In+,InputTree*,ObjInputTree*,EVInputTree*,OutputTree*)>
+<!ATTLIST InputData
+        Type                 CDATA            #REQUIRED
+        Version              (Reco|AtlFast)   "Reco"
+        Lumi                 CDATA            "0.0"
+        NEventsMax           CDATA            "-1"
+>
+
+<!ELEMENT GeneratorCut EMPTY>
+<!ATTLIST GeneratorCut
+        Tree                 CDATA            #REQUIRED
+        Formula              CDATA            #REQUIRED
+>
+
+<!ELEMENT In EMPTY>
+<!ATTLIST In
+        FileName              CDATA            #REQUIRED
+        Lumi                  CDATA            #REQUIRED
+>
+
+<!ELEMENT OutputTree EMPTY>
+<!ATTLIST OutputTree
+        Name                  CDATA            #REQUIRED
+>
+
+<!ELEMENT InputTree EMPTY>
+<!ATTLIST InputTree
+        Name                  CDATA            #REQUIRED
+>
+
+<!ELEMENT EVInputTree EMPTY>
+<!ATTLIST EVInputTree
+        BaseName              CDATA            #REQUIRED
+        Number                CDATA            #REQUIRED
+        CollTreeName          CDATA            #REQUIRED
+>
+
+<!ELEMENT UserConfig (Item*)>
+
+<!ELEMENT Item EMPTY>
+<!ATTLIST Item
+        Name                 CDATA            #REQUIRED
+        Value                CDATA            #REQUIRED
+>

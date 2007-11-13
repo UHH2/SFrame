@@ -1,0 +1,6 @@
+2007.11.13. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Created first version of the "SFrameUser" library.
+	* The package holds two example analysis cycles that
+	  can be good starting points for newcomers.
+	* Cleanded-up and extended the descriptions in the
+	  XML configuration files a bit.

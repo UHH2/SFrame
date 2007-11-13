@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE JobConfiguration PUBLIC "" "JobConfig.dtd">
+
+<!-- ======================================================================= -->
+<!-- @Project: SFrame - ROOT-based analysis framework for ATLAS              -->
+<!-- @Package: User                                                          -->
+<!--                                                                         -->
+<!-- @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester    -->
+<!-- @author David Berge      <David.Berge@cern.ch>          - CERN          -->
+<!-- @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg       -->
+<!-- @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN          -->
+<!-- @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen -->
+<!--                                                                         -->
+<!-- ======================================================================= -->
+
+<!--OutputLevel: Possibilities: VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS -->
+<JobConfiguration JobName="TestJob" OutputLevel="INFO">
+
+  <!-- List of libraries to be loaded for the analysis.             -->
+  <!-- Note the MathCore is needed to import the dictionary for the -->
+  <!-- SParticle base class.                                        -->
+  <Library Name="libMathCore" />
+  <Library Name="libSFramePlugIns" />
+  <Library Name="libSFrameUser" />
+
+  <!-- List of cycles to be executed.                                       -->
+  <!-- Name: specifies the class name to be executed in this cycle          -->
+  <!-- name of Output-File: automically give by Name+Type+PostFix+".root"   -->
+  <!-- OutputDirectory: directory to which output is written                -->
+  <!--                  must finish with an "/"                             --> 
+  <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
+  <Cycle Name="SecondCycle" OutputDirectory="" PostFix="" TargetLumi="1." >
+
+    <!-- list of input data for given data type                                   -->
+    <!-- type: type of events: e.g. "Zee", "ttbar", ...                           -->
+    <!--       names are up to the user; exception: for data use "data"!          -->  
+    <!-- Lumi: either specify it in InputData (ie. the luminosity sum of all <In> -->
+    <!--       or specify it in each <In> separately                              -->
+    <!--       In case both are filled the sum in <InputData> is used.            -->
+    <!--       The values in <In> are ignored                                     -->
+    <!--       units: [pb^-1]                                                     -->
+    <!-- NEventsMax: optional, specifies the number of events that are looped     -->
+    <!--             over.                                                        -->
+    <!--             If not existant: all events of this InputData set are used   -->
+    <!--             Please Note: NEventsMax is a mean to shorten the event loop  -->
+    <!--                          for test runs;                                  -->
+    <!--             the weights of the events are adapted.                       -->
+    <!--             For final plots, i.e. maximum statistics, NEventsMax         -->
+    <!--             shouldn't be used.                                           -->
+
+    <InputData Type="Data2" Version="Reco" Lumi="0." NEventsMax="-1">
+
+      <!-- List of input files                -->
+      <!-- Lumi: optional, see comments above -->
+      <In FileName="FirstCycle.Data2.root" Lumi="209.8" />
+
+      <!-- Specification of the input and output trees. -->
+      <!-- Name: Name of the tree in the ROOT file      -->
+      <InputTree Name="FirstCycleTree" />
+
+    </InputData>
+    
+    <!-- User configuration: properties -->
+    <UserConfig>
+      <Item Name="FirstCycleTreeString" Value="FirstCycleTree" />
+    </UserConfig>
+    
+  </Cycle>
+  
+</JobConfiguration>

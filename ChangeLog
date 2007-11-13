@@ -1,0 +1,17 @@
+2007.11.13. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Created first version of the re-organised SFrame
+	  source.
+	* It is divided into 3 separate libraries:
+	  - SFrameCore: Holding the framework base classes that
+	                normal users should not touch.
+	  - SFramePlugIns: Holding useful tools for analysis.
+	  - SFrameUser: Holding the user analysis code.
+	* The idea is that the user can take the "user/" directory
+	  as a starting point for creating an analysis in SFrame.
+	  The directory can be copied out of its default location,
+	  after being modified it can be checked in to the users
+	  private CVS space, so can be handled pretty independently
+	  of the rest of the SFrame code.
+	* Not obvious how to write multiple user libraries that include
+	  header files from each other at the moment.
+	* Tagging as SFrame-02-00-00

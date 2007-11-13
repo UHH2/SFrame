@@ -1,0 +1,10 @@
+2007.11.13. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Created first version of the "SFrameCore" library.
+	* The makefile also automatically compiles and links the
+	  "sframe_main" executable. One shortcoming is that
+	  "make clean" doesn't delete the executable...
+	* Added appropriate headers with the SFrame authors to
+	  all the files.
+	* Used a little C++ magic in SCycleBase to make it impossible
+	  for the users to call internal functions of the class that
+	  they're not supposed to.
