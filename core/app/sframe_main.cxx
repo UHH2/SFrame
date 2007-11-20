@@ -1,4 +1,4 @@
-// $Id: sframe_main.cxx,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: sframe_main.cxx,v 1.2 2007-11-20 15:38:04 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -33,13 +33,12 @@ void usage( char** argv );
 
 int main( int argc, char** argv ) {
 
-   const char* filename = "example_config.xml";
-   if( argc > 2 || ( argc == 2 && std::string( argv[ 1 ] ) == "-h" ) ) {
+   if( ( argc != 2 ) || ( argc == 2 && std::string( argv[ 1 ] ) == "-h" ) ) {
       usage( argv );
       return 1;
    }
 
-   if( argc == 2 ) filename = argv[ 1 ];
+   const char* filename = argv[ 1 ];
 
    try { // This is where I catch anything not handled internally...
 
@@ -77,7 +76,7 @@ void usage( char** argv ) {
    g_logger << INFO << SLogger::endmsg;
    g_logger << INFO << "Main executable to run an SFrame-based cycle analysis."
             << SLogger::endmsg;
-   g_logger << INFO << "\n\t\t" << argv[ 0 ] << " \'xml filename\' [example_config.xml]"
+   g_logger << INFO << "\n\tUsage: " << argv[ 0 ] << " \'xml filename\'"
             << std::endl << SLogger::endmsg;
 
    return;

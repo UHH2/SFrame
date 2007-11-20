@@ -1,3 +1,14 @@
+2007.11.20. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Disabled the "parameter-less" running of sframe_main.
+	  Now one always has to define exactly one XML file on
+	  the command prompt, else the usage help is printed.
+	* Added the possibility to use a new feature of ROOT.
+	  (Awailable in ROOT >= 5.17/04) This new feature makes
+	  it possible to use a bit more complicated XML files
+	  for configuring the job. It is only used when compiling
+	  against a proper ROOT version. (Pre-processor
+	  conditional statements rule...)
+
 2007.11.13. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Created first version of the "SFrameCore" library.
 	* The makefile also automatically compiles and links the

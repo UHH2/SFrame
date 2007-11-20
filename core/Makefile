@@ -1,4 +1,4 @@
- # $Id: Makefile,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+ # $Id: Makefile,v 1.2 2007-11-20 15:38:04 krasznaa Exp $
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  # @Package: Core                                                          #
@@ -34,7 +34,8 @@ $(SFRAME_BIN_PATH)/sframe_main: sframe_main.o $(SHLIBFILE)
 	@$(LD) $(LDFLAGS) $(OBJDIR)/sframe_main.o -L$(SFRAME_LIB_PATH) -lSFrameCore \
 		$(ROOTLIBS) -lTreePlayer -lXMLParser -o $@
 
-sframe_main.o: app/sframe_main.cxx
+sframe_main.o: app/sframe_main.cxx include/SCycleController.h \
+               include/SError.h include/SLogger.h
 	@echo "Compiling $<"
 	@mkdir -p $(OBJDIR)
 	@$(CXX) $(CXXFLAGS) -g -O2 -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES)

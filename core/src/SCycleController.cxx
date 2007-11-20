@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.2 2007-11-20 15:38:04 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -58,6 +58,16 @@ void SCycleController::Initialize() throw( SError ) {
    m_logger << INFO << "read xml file: '" << m_xmlConfigFile << "'" << SLogger::endmsg;
 
    TDOMParser xmlparser;
+
+   // This is a new feature only available in the newest ROOT
+   // nightlies. It makes it possible to have the input file
+   // definitions in external XML files that are imported in
+   // the main configuration XML file. It's conventient when
+   // using a lot of the same input files in different cycles.
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 17, 4 )
+   xmlparser.SetReplaceEntities( kTRUE );
+#endif
+
    Int_t parseError = xmlparser.ParseFile( m_xmlConfigFile );
    if( parseError ) {
       SError error( SError::StopExecution );
