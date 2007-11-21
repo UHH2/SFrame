@@ -60,7 +60,7 @@
 
       <!-- List of input files                -->
       <!-- Lumi: optional, see comments above -->
-      <In FileName="/space/haller/sframe_example/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />
+      <In FileName="/afs/cern.ch/atlas/maxidisk/d181/SFrame/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />
 
       <!-- Specification of the input and output trees. -->
       <!-- Name: Name of the tree in the ROOT file      -->
@@ -77,7 +77,7 @@
       <GeneratorCut Tree="FullRec0" Formula="SumEt>200000" />
 
       <!-- list of input files -->
-      <In FileName="/space/haller/sframe_example/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />
+      <In FileName="/afs/cern.ch/atlas/maxidisk/d181/SFrame/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />
 
       <!-- Specification of the input and output trees. -->
       <InputTree Name="CollectionTree" />
