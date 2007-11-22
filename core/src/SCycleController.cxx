@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.2 2007-11-20 15:38:04 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.3 2007-11-22 18:19:26 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -6,7 +6,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -29,14 +28,29 @@
 #include "../include/SCycleBase.h"
 #include "../include/SLogWriter.h"
 
+#ifndef DOXYGEN_IGNORE
 ClassImp( SCycleController );
+#endif // DOXYGEN_IGNORE
 
+/**
+ * The user has to specify a configuration file already at the construction
+ * of the object. This configuration file will be used later in
+ * SCycleController::Initialize to perform the configuration of the
+ * analysis job.
+ *
+ * @param xmlConfigFile The name of the configuration file
+ */
 SCycleController::SCycleController( const TString& xmlConfigFile )
    : m_curCycle( 0 ), m_isInitialized( kFALSE ), m_xmlConfigFile( xmlConfigFile ),
      m_logger( this ) {
 
 }
 
+/**
+ * This destructor actually does something. (Yay!)
+ * It deletes all the analysis cycles that have been created from the
+ * configuration in the XML file.
+ */
 SCycleController::~SCycleController() {
 
    std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
@@ -46,6 +60,14 @@ SCycleController::~SCycleController() {
 
 }
 
+/**
+ * This is the first function that should be called for the object after
+ * it is created. It reads in the configuration of the analysis from
+ * the configuration file specified earlier, creates and configures
+ * all the analysis cycles defined in the configuration.
+ *
+ * @callgraph
+ */
 void SCycleController::Initialize() throw( SError ) {
 
    m_logger << INFO << "Initializing" << SLogger::endmsg;
@@ -102,7 +124,7 @@ void SCycleController::Initialize() throw( SError ) {
       else if( outputLevelString == "ERROR" )   type = ERROR;
       else if( outputLevelString == "FATAL" )   type = FATAL;
       else if( outputLevelString == "ALWAYS" )  type = ALWAYS;
-      SLogWriter::instance()->setMinType( type );
+      SLogWriter::Instance()->SetMinType( type );
 
       TXMLNode* nodes = rootNode->GetChildren();
 
@@ -224,6 +246,17 @@ void SCycleController::Initialize() throw( SError ) {
    return;
 }
 
+/**
+ * This function runs all the analysis cycles that were configured
+ * one after another. The main program should call this after
+ * SCycleController::Initialize.
+ *
+ * It actually uses SCycleController::ExecuteNextCycle to execute each
+ * of the cycles.
+ *
+ * @see SCycleController::ExecuteNextCycle
+ * @callgraph
+ */
 void SCycleController::ExecuteAllCycles() throw( SError ) {
 
    if( ! m_isInitialized ) {
@@ -241,6 +274,14 @@ void SCycleController::ExecuteAllCycles() throw( SError ) {
    return;
 }
 
+/**
+ * This function is responsible for calling the functions of the current
+ * cycle in line to execute its analysis. It also measures the time needed
+ * to execute the cycles, and prints it as an info message after the
+ * analysis has finished.
+ *
+ * @callgraph
+ */
 void SCycleController::ExecuteNextCycle() throw( SError ) {
 
    std::string cycleName = m_analysisCycles.at( m_curCycle )->GetName();
@@ -294,6 +335,14 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
    return;
 }
 
+/**
+ * This function could be used to add a cycle created in the main executable
+ * by hand, but it's not being used. Instead all the cycles are created
+ * by this class internally according to the configuration in the
+ * XML file.
+ *
+ * @param cycleAlg The cycle that should be added
+ */
 void SCycleController::AddAnalysisCycle( SCycleBase* cycleAlg ) {
 
    m_analysisCycles.push_back( cycleAlg );
@@ -301,9 +350,9 @@ void SCycleController::AddAnalysisCycle( SCycleBase* cycleAlg ) {
 
 }
 
-/*
-  Delete all analysis cycle objects from memory!
-*/
+/**
+ *  Delete all analysis cycle objects from memory!
+ */
 void SCycleController::DeleteAllAnalysisCycles() {
 
    m_logger << INFO << "Deleting all analysis cycle algorithms from memory"

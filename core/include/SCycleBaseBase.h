@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseBase.h,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleBaseBase.h,v 1.2 2007-11-22 18:19:24 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -22,20 +21,36 @@
 #include "SLogger.h"
 
 /**
- * Absolute base object in the SCycleBase hierarchy. All "parts" of SCycleBase
- * have to inherit from this with "public virtual", so that it only gets created
- * once in memory for each cycle...
+ *   @short Absolute base of all analysis cycles
+ *
+ *          Absolute base object in the SCycleBase hierarchy. All "parts"
+ *          of SCycleBase have to inherit from this with "public virtual",
+ *          so that it only gets created once in memory for each cycle...
+ *
+ * @version $Revision: 1.2 $
  */
 class SCycleBaseBase : public virtual TObject {
 
 public:
+   /// Default constructor
    SCycleBaseBase();
+   /// Default destructor
    virtual ~SCycleBaseBase();
 
 protected:
+   /// Object used for output messages to the terminal
+   /**
+    * In the whole SFrame framework, terminal messages are printed
+    * using the SLogger class. This makes it possible to print nice
+    * formatted messages to the teminal. The user should preferably
+    * use this object to write messages instead of using std::cout
+    * directly.
+    */
    mutable SLogger m_logger;
 
+#ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseBase, 0 );
+#endif // DOXYGEN_IGNORE
 
 }; // class SCycleBaseBase
 

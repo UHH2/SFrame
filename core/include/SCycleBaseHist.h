@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.h,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleBaseHist.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -26,24 +25,34 @@
 class TDirectory;
 
 /**
- * Class holding all the histogramming functionality available
- * to the analysis cycles. Unfortunately the object has to be
- * initialised for each new InputData, which is done in the
- * SCycleBase::ExecuteInputData() function. It's error prone, but
- * I haven't found any nicer way of doing it...
+ *   @short Histogramming part of SCycleBase
+ *
+ *          Class holding all the histogramming functionality
+ *          available to the analysis cycles. Unfortunately
+ *          the object has to be initialised for each new InputData,
+ *          which is done in the SCycleBase::ExecuteInputData function.
+ *          It's error prone, but I haven't found any nicer way of
+ *          doing it...
+ *
+ * @version $Revision: 1.2 $
  */
 class SCycleBaseHist : public virtual SCycleBaseBase {
 
 public:
+   /// Default constructor
    SCycleBaseHist();
+   /// Default destructor
    virtual ~SCycleBaseHist();
 
 protected:
+   /// Function placing a ROOT object in the output file
    template< class T > T* Book( const T& histo,
-                                const char* directory = "" ) throw( SError );
+                                const char* directory = 0 ) throw( SError );
+   /// Function searching for a ROOT object in the output file
    template< class T > T* Retrieve( const char* name,
-                                    const char* directory = "" ) throw( SError );
+                                    const char* directory = 0 ) throw( SError );
 
+   /// Function initialising the object
    void InitHistogramming( TDirectory* outputFile, const TString& outputFileName );
 
 private:
@@ -52,7 +61,9 @@ private:
    TDirectory* m_outputFile;
    TString     m_outputFileName;
 
+#ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseHist, 0 );
+#endif // DOXYGEN_IGNORE
 
 }; // class SCycleBaseHist
 

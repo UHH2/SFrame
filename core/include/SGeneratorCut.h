@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SGeneratorCut.h,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SGeneratorCut.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -20,23 +19,50 @@
 #include "TString.h"
 
 /**
- * Class defining ensamble of cuts applied at MC-generation level.
- * Used for normalising MC samples with different generator cuts to
- * each other.
+ *   @short Class describing a set of MC generator cuts
+ *
+ *          Class defining ensamble of cuts applied at MC-generation
+ *          level. Used for normalising MC samples with different
+ *          generator cuts to each other.
+ *
+ * @version $Revision: 1.2 $
  */
 class SGeneratorCut : public TObject {
 
 public:
-   SGeneratorCut( TString treename, TString formula )
-      : m_tree( treename ), m_formula ( formula ) {}
+   /// Constructor specifying a tree name and a formula
+   SGeneratorCut( const TString& treename, const TString& formula );
+   /// Default destructor
+	virtual ~SGeneratorCut();
 
-	~SGeneratorCut() {}
+   /// Get the name of the tree
+   /**
+    * Cuts can be defined on variables that are available in one of
+    * the input trees. (True particle p<sub>T</sub>, missing
+    * E<sub>T</sub>, etc.) This property specifies the name of the
+    * tree in the input file that holds the variables that we want
+    * to cut on.
+    */
+   const TString& GetTreeName() const { return m_tree; }
+   /// Get the formula of the generator cut
+   /**
+    * The cut formula follows the syntax accepted by TTreeFormula.
+    * This means that the user can specify formulas like he would when
+    * using TTree::Draw. For instance the following would be
+    * acceptable:
+    *
+    * <code>
+    *   "MissingEt>10000"
+    *   "Mu_p_T[0]>20000"
+    * </code>
+    */
+   const TString& GetFormula()  const { return m_formula; }
 
-   TString GetTreeName() const { return m_tree; }
-   TString GetFormula()  const { return m_formula; }
-
+   /// Assignment operator
    SGeneratorCut& operator=  ( const SGeneratorCut& parent );
+   /// Equality operator
    Bool_t         operator== ( const SGeneratorCut& rh ) const;
+   /// Non-equality operator
    Bool_t         operator!= ( const SGeneratorCut& rh ) const;
 
 private:

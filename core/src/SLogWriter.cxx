@@ -1,4 +1,4 @@
-// $Id: SLogWriter.cxx,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SLogWriter.cxx,v 1.2 2007-11-22 18:19:27 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -6,7 +6,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -24,7 +23,13 @@ using namespace std;
 
 SLogWriter* SLogWriter::m_instance = 0;
 
-SLogWriter* SLogWriter::instance() {
+/**
+ * This function implements the singleton design pattern for the
+ * class. Since the constructor of the class is "protected", the
+ * user can not create it manually. He/she has to access a (single)
+ * instance of the object with this function.
+ */
+SLogWriter* SLogWriter::Instance() {
 
    if( ! m_instance ) {
       m_instance = new SLogWriter();
@@ -33,11 +38,22 @@ SLogWriter* SLogWriter::instance() {
    return m_instance;
 }
 
+/**
+ * This is also one of the "don't do anything" destructors.
+ */
 SLogWriter::~SLogWriter() {
 
 }
 
-void SLogWriter::write( SMsgType type, const std::string& line ) const {
+/**
+ * This function is the heavy-lifter of the class. It writes the received
+ * message to the console. The function assumes that the message has no
+ * line breaks and that it has been formatted by SLogger.
+ *
+ * @param type The message type
+ * @param line A single line of message to be displayed.
+ */
+void SLogWriter::Write( SMsgType type, const std::string& line ) const {
 
    if( type < m_minType ) return;
    map< SMsgType, std::string >::const_iterator stype;
@@ -53,19 +69,36 @@ void SLogWriter::write( SMsgType type, const std::string& line ) const {
 
 }
 
-void SLogWriter::setMinType( SMsgType type ) {
+/**
+ * This function sets the minimum message type that should still be
+ * displayed. All messages having a higher priority will be displayed
+ * as well of course.
+ *
+ * @param type The value of the minimum type
+ * @see SLogWriter::GetMinType
+ */
+void SLogWriter::SetMinType( SMsgType type ) {
 
    m_minType = type;
    return;
 
 }
 
-SMsgType SLogWriter::minType() const {
+/**
+ * Not much to say here.
+ *
+ * @see SLogWriter::SetMinType
+ */
+SMsgType SLogWriter::GetMinType() const {
 
    return m_minType;
 
 }
 
+/**
+ * The constructor takes care of filling the two std::map-s that are
+ * used for generating the nice colured output.
+ */
 SLogWriter::SLogWriter() {
 
    m_typeMap[ VERBOSE ] = "VERBOSE";

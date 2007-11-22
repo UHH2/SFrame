@@ -1,4 +1,4 @@
-// $Id: SInputData.cxx,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SInputData.cxx,v 1.2 2007-11-22 18:19:27 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -6,7 +6,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -16,6 +15,9 @@
 
 using namespace std;
 
+/**
+ * It is only necessary for some technical affairs.
+ */
 SFile& SFile::operator= ( const SFile& parent ) {
 
    this->file = parent.file;
@@ -26,6 +28,15 @@ SFile& SFile::operator= ( const SFile& parent ) {
 
 }
 
+/**
+ * The equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 == inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
 Bool_t SFile::operator== ( const SFile& rh ) const {
 
    if( ( this->file == rh.file ) && ( this->lumi == rh.lumi ) &&
@@ -37,12 +48,24 @@ Bool_t SFile::operator== ( const SFile& rh ) const {
 
 }
 
+/**
+ * The non-equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 != inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
 Bool_t SFile::operator!= ( const SFile& rh ) const {
 
    return ( ! ( *this == rh ) );
 
 }
 
+/**
+ * It is only necessary for some technical affairs.
+ */
 STree& STree::operator= ( const STree& parent ) {
 
    this->treeName = parent.treeName;
@@ -51,6 +74,15 @@ STree& STree::operator= ( const STree& parent ) {
 
 }
 
+/**
+ * The equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 == inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
 Bool_t STree::operator== ( const STree& rh ) const {
 
    if( this->treeName == rh.treeName ) {
@@ -61,12 +93,24 @@ Bool_t STree::operator== ( const STree& rh ) const {
 
 }
 
+/**
+ * The non-equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 != inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
 Bool_t STree::operator!= ( const STree& rh ) const {
 
    return ( ! ( *this == rh ) );
 
 }
 
+/**
+ * It is only necessary for some technical affairs.
+ */
 SEVTree& SEVTree::operator= ( const SEVTree& parent ) {
 
    this->treeName = parent.treeName;
@@ -78,6 +122,15 @@ SEVTree& SEVTree::operator= ( const SEVTree& parent ) {
 
 }
 
+/**
+ * The equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 == inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
 Bool_t SEVTree::operator== ( const SEVTree& rh ) const {
 
    if( ( this->treeName == rh.treeName ) &&
@@ -90,25 +143,48 @@ Bool_t SEVTree::operator== ( const SEVTree& rh ) const {
 
 }
 
+/**
+ * The non-equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 != inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
 Bool_t SEVTree::operator!= ( const SEVTree& rh ) const {
 
    return ( ! ( *this == rh ) );
 
 }
 
+/**
+ * The constructor initialises all member data to some initial value.
+ */
 SInputData::SInputData()
    : m_type( "unknown" ), m_version( 0 ), m_totalLumiGiven( 0 ),
-     m_totalLumiSum( 0 ), m_eventsTotal(0), m_neventsmax( -1 ), m_logger( "SInputData" ) {
+     m_totalLumiSum( 0 ), m_eventsTotal( 0 ), m_neventsmax( -1 ),
+     m_logger( "SInputData" ) {
 
    m_logger << VERBOSE << "In constructor" << SLogger::endmsg;
 }
 
+/**
+ * Another one of the "I don't do anything" destructors.
+ */
 SInputData::~SInputData() {
 
    m_logger << VERBOSE << "In destructor" << SLogger::endmsg;
 
 }
 
+/**
+ * The function adds a new input file to the input data, correctly adding
+ * the luminosity of the file to the total luminosity sum of the input
+ * data.
+ *
+ * @param sfile The file to add to the input data
+ */
 void SInputData::AddSFileIn( const SFile& sfile ) {
 
    m_sfileIn.push_back( sfile );
@@ -120,7 +196,7 @@ Double_t SInputData::GetTotalLumi() const {
   
    Double_t return_lumi = 0.;
    // use the given luminosity for this InputData in case it is specified
-   if (m_totalLumiGiven) return_lumi = m_totalLumiGiven;
+   if( m_totalLumiGiven ) return_lumi = m_totalLumiGiven;
    // otherwise use the sum of all files
    else return_lumi = m_totalLumiSum;
   
@@ -144,6 +220,9 @@ Double_t SInputData::GetScaledLumi() const {
    return scaled_lumi;
 }
 
+/**
+ * It is only necessary for some technical affairs.
+ */
 SInputData& SInputData::operator= ( const SInputData& parent ) {
 
    this->m_type = parent.m_type;
@@ -162,6 +241,15 @@ SInputData& SInputData::operator= ( const SInputData& parent ) {
 
 }
 
+/**
+ * The equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 == inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
 Bool_t SInputData::operator== ( const SInputData& rh ) const {
 
    if( ( this->m_type == rh.m_type ) && ( this->m_version == rh.m_version ) &&
@@ -180,12 +268,26 @@ Bool_t SInputData::operator== ( const SInputData& rh ) const {
 
 }
 
+/**
+ * The non-equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 != inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
 Bool_t SInputData::operator!= ( const SInputData& rh ) const {
 
    return ( ! ( *this == rh ) );
 
 }
 
+/**
+ * At initialisation the cycles print the configuration of the input data
+ * which was configured in the XML file. This function is used to print
+ * the configuration of a given input data object.
+ */
 void SInputData::print() const {
 
    m_logger << INFO << " ---------------------------------------------------------" << endl;

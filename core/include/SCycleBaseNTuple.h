@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.h,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleBaseNTuple.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -32,44 +31,62 @@ class TBranch;
 class SInputData;
 
 /**
- * This is the most complex constituent of all the SCycleBase
- * classes. It is responsible for handling input and output
- * TTree-s.
+ *   @short NTuple handling part of SCycleBase
+ *
+ *          This is the most complex constituent of all the
+ *          SCycleBase classes. It is responsible for handling
+ *          input and output TTree-s. It has quite a number of
+ *          protected functions which are used by SCycleBase, and
+ *          are hidden from the user by that class. (A little
+ *          C++ magic...)
+ *
+ * @version $Revision: 1.2 $
  */
 class SCycleBaseNTuple : public virtual SCycleBaseConfig {
 
 public:
+   /// Default constructor
    SCycleBaseNTuple();
+   /// Default destructor
    virtual ~SCycleBaseNTuple();
 
 protected:
-   //
-   // The functions for connecting input variables:
-   //
+   /// Connect an input variable
    template< typename T >
    void ConnectVariable( const char* treeName, const char* branchName,
                          T& variable ) throw ( SError );
+   /// Connect an input variable that is available in multiple views
    template< typename T >
    const Int_t* ConnectEventViewVariable( const char* baseName, const char* branchName,
                                           std::vector< T >& variables ) throw( SError );
 
-   //
-   // This is the function that creates/connects to an output object/variable:
-   //
+   /// Declare an output variable
    template< class T >
    TBranch* DeclareVariable( T& obj, const char* name, const char* treeName = 0 ) throw( SError );
 
-   //
-   // Functions called by the framework:
-   //
+   //////////////////////////////////////////////////////////
+   //                                                      //
+   //          Functions called by the framework:          //
+   //                                                      //
+   //////////////////////////////////////////////////////////
+
+   /// Open the output file and create the output trees
    void CreateOutputTrees( const SInputData&, std::vector< TTree* >&, TFile*& ) throw( SError );
+   /// Open the input file and load the input trees
    void LoadInputTrees( const SInputData&, const std::string&, TFile*& ) throw( SError );
+   /// Initialise the EventView tree synchronisation
    void ConnectEVSyncVariable() throw( SError );
+   /// Read in the event from the "normal" trees
    void GetEntry( Long64_t entry ) throw( SError );
+   /// Synchronise the EventView trees to the current event
    void SyncEVTrees() throw( SError );
+   /// Return the number of events (???)
    Long64_t GetNEvents() const { return m_nEvents; }
+   /// Calculate the weight of the current event
    Double_t CalculateWeight( const SInputData& inputData, Long64_t entry );
+   /// Open an input file
    TFile* OpenInputFile( const char* filename ) throw( SError );
+   /// Return the name of the active output file
    const char* GetOutputFileName() const { return m_outputFileName; }
 
 private:
@@ -113,7 +130,9 @@ private:
    // pointer issue by itself...
    std::list< void* > m_outputVarPointers;
 
+#ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseNTuple, 0 );
+#endif // DOXYGEN_IGNORE
 
 }; // class SCycleBaseNTuple
 

@@ -1,4 +1,4 @@
-// $Id: SCycleBaseHist.cxx,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleBaseHist.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -6,7 +6,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -21,27 +20,40 @@
 // Local inlcude(s):
 #include "../include/SCycleBaseHist.h"
 
+#ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseHist );
+#endif // DOXYGEN_IGNORE
 
 using namespace std;
 
 /**
- * Default constructor.
+ * The constructor initialises the base class and the member variables.
  */
 SCycleBaseHist::SCycleBaseHist()
-   : m_outputFile( 0 ), m_outputFileName( "" ) {
+   : SCycleBaseBase(), m_outputFile( 0 ), m_outputFileName( "" ) {
+
+   m_logger << VERBOSE << "SCycleBaseHist constructed" << SLogger::endmsg;
 
 }
 
 /**
- * Default destructor.
+ * Another one of the "I don't do anything" destructors.
  */
 SCycleBaseHist::~SCycleBaseHist() {
 
+   m_logger << VERBOSE << "SCycleBaseHist destructed" << SLogger::endmsg;
+
 }
 
 /**
- * Function to be called for each new output file.
+ * This function is called by the framework to get the object in a
+ * configured state when running the analysis. The user is not actually
+ * allowed to call this function as its hidden by SCycleBase, but
+ * nevertheless: <strong>The users should leave this function
+ * alone.</strong>
+ *
+ * @param outputFile     Pointer to the output file's top directory
+ * @param outputFileName Name of the output file
  */
 void SCycleBaseHist::InitHistogramming( TDirectory* outputFile,
                                         const TString& outputFileName ) {

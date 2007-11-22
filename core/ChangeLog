@@ -1,3 +1,23 @@
+2007.11.22. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a *lot* of Doxygen documentation to the code.
+	  Added a new directory called "doc/" which contains a
+	  single header (mainpage.h) by default, and in which
+	  the HTML documentation is put by Doxygen when calling
+	  "doxygen" in the current directory.
+	* Added a file called "Doxyfile" that describes the
+	  project to Doxygen. It is currently configured to use
+	  a tool called "dot" to create the graphs for the
+	  documentation. Unfortunately it is not available on
+	  SLC by default, but it can easily be installed. To
+	  disable the usage of "dot", change the line in the
+	  configuration file
+
+	    HAVE_DOT = YES
+
+	  to
+
+	    HAVE_DOT = NO
+
 2007.11.20. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Disabled the "parameter-less" running of sframe_main.
 	  Now one always has to define exactly one XML file on

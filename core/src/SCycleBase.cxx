@@ -1,4 +1,4 @@
-// $Id: SCycleBase.cxx,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleBase.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -6,7 +6,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -23,26 +22,38 @@
 #include "../include/SCycleBase.h"
 #include "../include/SInputData.h"
 
+#ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBase );
+#endif // DOXYGEN_IGNORE
 
 using namespace std;
 
+/**
+ * The constructor only silently creates the base objects and initialises
+ * memer variables.
+ */
 SCycleBase::SCycleBase()
    : m_nProcessedEvents( 0 ) {
 
-   m_logger << VERBOSE << "Object constructed" << SLogger::endmsg;
+   m_logger << VERBOSE << "SCycleBase constructed" << SLogger::endmsg;
 
 }
 
 
+/**
+ * Another one of the "I don't do anything" destructors.
+ */
 SCycleBase::~SCycleBase() {
 
-   m_logger << VERBOSE << "In the destructor" << SLogger::endmsg;
+   m_logger << VERBOSE << "SCycleBase destructed" << SLogger::endmsg;
 
 }
 
 /**
- * Function steering the execution of the analysis cycle.
+ * Function steering the execution of the analysis cycle. This is the function
+ * called by the framework to issue the cycle to perform the analysis.
+ *
+ * @callgraph
  */
 void SCycleBase::ExecuteInputData() throw( SError ) {
 

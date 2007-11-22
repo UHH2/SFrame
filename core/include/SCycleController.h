@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleController.h,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleController.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -30,29 +29,49 @@
 class SCycleBase;
 
 /**
- * This is the main class that should be instantiated by the user in
- * an analysis. It takes care of reading the analysis's configuration
- * from an XML file, creating, configuring and running all the
- * analysis "cycles".
+ *   @short Class controlling SFrame analyses
+ *
+ *          This is the main class that should be instantiated by
+ *          the user in an analysis. It takes care of reading the
+ *          analysis's configuration from an XML file, creating,
+ *          configuring and running all the analysis "cycles".
+ *
+ *          It is instantiated and configured correctly in the
+ *          <strong>sframe_main</strong> executable, so the user
+ *          should probably not care about it too much.
+ *
+ * @version $Revision: 1.2 $
  */
 class SCycleController : public TObject {
 
 public:
+   /// Constructor specifying the configuration file
    SCycleController( const TString& xmlConfigFile );
+   /// Default destructor
    virtual ~SCycleController();
 
+   /// Initialise the analysis from the configuration file
    virtual void Initialize() throw( SError );
+   /// Execute the analysis loop for all configured cycles
    virtual void ExecuteAllCycles() throw( SError );
+   /// Execute the analysis loop for the cycle next in line
    virtual void ExecuteNextCycle() throw( SError );
+   /// Set the name of the configuration file
+   /**
+    * All configuration of the analysis is done in a single XML file.
+    * The file name from which this configuration should be read
+    * is specified with this function.
+    */
    virtual void SetConfig( const TString& xmlConfigFile ) { m_xmlConfigFile = xmlConfigFile; }
 
-   /// Add one analysis cycle to the end of all existing cycles.
+   /// Add one analysis cycle to the end of all existing cycles
    void AddAnalysisCycle( SCycleBase* cycleAlg );
 
-   virtual UInt_t GetCurCycle() { return m_curCycle; }
+   /// Get the index of the current cycle
+   UInt_t GetCurCycle() { return m_curCycle; }
 
 private:
-   /// Delete all analysis cycle objects from memory!
+   /// Delete all analysis cycle objects from memory
    void DeleteAllAnalysisCycles();
 
    /// vector holding all analysis cycles to be executed
@@ -64,7 +83,9 @@ private:
 
    mutable SLogger m_logger;
 
+#ifndef DOXYGEN_IGNORE
    ClassDef( SCycleController, 0 );
+#endif // DOXYGEN_IGNORE
 
 }; // class SCycleController
 

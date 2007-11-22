@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.icc,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleBaseHist.icc,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -15,16 +14,26 @@
 #ifndef SFRAME_CORE_SCycleBaseHist_ICC
 #define SFRAME_CORE_SCycleBaseHist_ICC
 
-// System include(s):
-#include <string.h>
-
 // ROOT include(s):
 #include <TROOT.h>
 #include <TH1.h>
 
 /**
- * Function for creating any kind of object inheriting from TObject and
- * which has a correct dictionary loaded, in the output file.
+ * Function for creating any kind of object inheriting from TH1 and
+ * which has a correct dictionary loaded, in the output file. You either
+ * have to give it an already existing object, which will be copied to
+ * the output, or you can use a formalism like this:
+ *
+ * <code>
+ *   TH1D* hist = Book( TH1D( "hist", "Histogram", 100, 0.0, 100.0 ) );
+ * </code>
+ *
+ * @warning The function returns a pointer to the created object in
+ *          the file. It is a good practice to keep the pointer to
+ *          the object, as SCycleBaseHist::Book and
+ *          SCycleBaseHist::Retrieve are quite slow.
+ *
+ * @see SCycleBaseHist::Retrieve
  */
 template< class T >
 T* SCycleBaseHist::Book( const T& histo,
@@ -32,7 +41,7 @@ T* SCycleBaseHist::Book( const T& histo,
 
    // Find the correct directory in the output file:
    TDirectory* dir = 0;
-   if( strcmp( directory, "" ) ) {
+   if( directory ) {
       dir = this->CdInOutput( directory );
    } else {
       dir = m_outputFile;
@@ -58,7 +67,17 @@ T* SCycleBaseHist::Book( const T& histo,
 
 /**
  * Function searching for any kind of object (inheriting from TObject)
- * in the output file.
+ * in the output file. You have to specify the return type to the
+ * function explicitely, as the compiler can't know this from the
+ * argument list.
+ *
+ * Example:
+ *
+ * <code>
+ *   TH1* hist = Retrieve< TH1 >( "hist" );
+ * </code>
+ *
+ * @see SCycleBaseHist::Book
  */
 template< class T >
 T* SCycleBaseHist::Retrieve( const char* name,
@@ -66,7 +85,7 @@ T* SCycleBaseHist::Retrieve( const char* name,
 
    // Look for an object with this name in the specified directory:
    TDirectory* dir = 0;
-   if( strcmp( directory, "" ) ) {
+   if( directory ) {
       dir = this->CdInOutput( directory );
    } else {
       dir = m_outputFile;

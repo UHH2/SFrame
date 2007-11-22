@@ -1,4 +1,4 @@
-// $Id: SCycleBaseConfig.cxx,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleBaseConfig.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -6,7 +6,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -21,28 +20,40 @@
 #include "../include/SCycleBaseConfig.h"
 #include "../include/SGeneratorCut.h"
 
+#ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseConfig );
+#endif // DOXYGEN_IGNORE
 
 using namespace std;
 
 /**
- * Default constructor.
+ * The constructor only initialises the base class.
  */
 SCycleBaseConfig::SCycleBaseConfig()
    : SCycleBaseBase() {
 
+   m_logger << VERBOSE << "SCycleBaseConfig constructed" << SLogger::endmsg;
+
 }
 
 /**
- * Default destructor.
+ * Another one of the "I don't do anything" destructors.
  */
 SCycleBaseConfig::~SCycleBaseConfig() {
 
+   m_logger << VERBOSE << "SCycleBaseConfig destructed" << SLogger::endmsg;
+
 }
 
 /**
- * Function reading the part of the configuration XML that describes this
- * cycle.
+ * Basically everything about an analysis in SFrame is set up through
+ * a main XML configuration file that describes the given analysis.
+ * This function is called by the framework to initialise the cycle
+ * based on the part of the XML that describes it.
+ *
+ * <strong>It should generally not be called by the user.</strong>
+ *
+ * @param node The top XML node describing the cycle
  */
 void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
 
@@ -90,6 +101,14 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
 
+/**
+ * Use this function in the constructor of your analysis cycle to declare
+ * an std::string object as a property to be set up by the framework
+ * according to the configuration set in the XML file.
+ *
+ * @param name  The name under which the property appears in XML
+ * @param value The std::string object that you use as the property
+ */
 void SCycleBaseConfig::DeclareProperty( const std::string& name, std::string& value ) {
 
    m_stringPrefs[ name ] = &value;
@@ -97,6 +116,14 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name, std::string& va
 
 }
 
+/**
+ * Use this function in the constructor of your analysis cycle to declare
+ * an int variable as a property to be set up by the framework
+ * according to the configuration set in the XML file.
+ *
+ * @param name  The name under which the property appears in XML
+ * @param value The int variable that you use as the property
+ */
 void SCycleBaseConfig::DeclareProperty( const std::string& name, int& value ) {
 
    m_intPrefs[ name ] = &value;
@@ -104,6 +131,14 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name, int& value ) {
 
 }
 
+/**
+ * Use this function in the constructor of your analysis cycle to declare
+ * a double variable as a property to be set up by the framework
+ * according to the configuration set in the XML file.
+ *
+ * @param name  The name under which the property appears in XML
+ * @param value The double variable that you use as the property
+ */
 void SCycleBaseConfig::DeclareProperty( const std::string& name, double& value ) {
 
    m_doublePrefs[ name ] = &value;
@@ -111,6 +146,15 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name, double& value )
 
 }
 
+/**
+ * Use this function in the constructor of your analysis cycle to declare
+ * a vector of std::string objects as a property to be set up by the framework
+ * according to the configuration set in the XML file. The strings have to be
+ * put as a space separated list in the XML.
+ *
+ * @param name  The name under which the property appears in XML
+ * @param value The object that you use as the property
+ */
 void SCycleBaseConfig::DeclareProperty( const std::string& name,
                                         std::vector< std::string >& value ) {
 
@@ -119,6 +163,15 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name,
 
 }
 
+/**
+ * Use this function in the constructor of your analysis cycle to declare
+ * a vector of int variables as a property to be set up by the framework
+ * according to the configuration set in the XML file. Ints have to be
+ * put as a space separated list in the XML.
+ *
+ * @param name  The name under which the property appears in XML
+ * @param value The object that you use as the property
+ */
 void SCycleBaseConfig::DeclareProperty( const std::string& name,
                                         std::vector< int >& value ) {
 
@@ -127,6 +180,15 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name,
 
 }
 
+/**
+ * Use this function in the constructor of your analysis cycle to declare
+ * a vector of double variables as a property to be set up by the framework
+ * according to the configuration set in the XML file. Doubles have to be
+ * put as a space separated list in the XML.
+ *
+ * @param name  The name under which the property appears in XML
+ * @param value The object that you use as the property
+ */
 void SCycleBaseConfig::DeclareProperty( const std::string& name,
                                         std::vector< double >& value ) {
 

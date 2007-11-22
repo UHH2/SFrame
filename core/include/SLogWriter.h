@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SLogWriter.h,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SLogWriter.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -23,21 +22,36 @@
 #include "SMsgType.h"
 
 /**
- * Singleton class for actually writing the formatted messages
- * to the console.
+ *   @short Message writing class
+ *
+ *          Singleton class for actually writing the formatted
+ *          messages to the console.
+ *
+ *          Right now it only writes messages to the terminal, but
+ *          one possibility would be to write messages to a file
+ *          for batch running later on. (Just an idea...)
+ *
+ *     @see SLogger
+ * @version $Revision: 1.2 $
  */
 class SLogWriter {
 
 public:
-   static SLogWriter* instance();
+   /// Function for accessing the single object
+   static SLogWriter* Instance();
+   /// Default destructor
    ~SLogWriter();
 
-   void write( SMsgType type, const std::string& line ) const;
+   /// Function writing a message to the output
+   void Write( SMsgType type, const std::string& line ) const;
 
-   void setMinType( SMsgType type );
-   SMsgType minType() const;
+   /// Set the message type above which messages are printed
+   void SetMinType( SMsgType type );
+   /// Get the message type above which messages are printed
+   SMsgType GetMinType() const;
 
 protected:
+   /// Protected default constructor
    SLogWriter();
 
 private:

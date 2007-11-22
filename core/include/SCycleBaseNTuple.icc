@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.icc,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleBaseNTuple.icc,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -33,7 +32,7 @@
  * (ints, doubles, etc.) you have to define the variable itself, then give this
  * variable to the function. (The function takes a reference of the variable.)
  *
- * For objects (vectors, maps, you name it) you have to define a pointer to
+ * For STL objects (vectors, maps, you name it) you have to define a pointer to
  * such an object, and give this pointer to the function. You don't need to
  * initialise the pointer to anything, the function will take care about that.
  *
@@ -87,6 +86,9 @@ void SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
  * says how many views are avaiable for a given event. (The vector will always
  * have the maximal size, but only the first n elements will be valid for the
  * actual event.)
+ *
+ * @warning The function has not been seriously tested yet, so beware when
+ *          using it!
  */
 template< typename T >
 const Int_t* SCycleBaseNTuple::ConnectEventViewVariable( const char* baseName,
@@ -211,6 +213,16 @@ const Int_t* SCycleBaseNTuple::ConnectEventViewVariable( const char* baseName,
  *
  * The function detects the type of the user supplied variable, and puts it in the
  * output tree in a way depending on the object's type.
+ *
+ * Example:
+ *
+ * <code>
+ *   Double_t m_var1;
+ *   DeclareVariable( m_var1, "var1" );
+ *   ...
+ *   std::vector< int > m_var2;
+ *   DeclareVariable( m_var2, "var2", "MyTree" );
+ * </code>
  */
 template < class T >
 TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,

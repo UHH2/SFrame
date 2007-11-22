@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SLogger.h,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SLogger.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -28,45 +27,67 @@ class TObject;
 class SLogWriter;
 
 /**
- * Class that should be used in the whole framework for printing messages
- * on the terminal. It produces nicely formatted log messages using the
- * SLogWriter class.
+ *   @short Universal message logging class
+ *
+ *          Class that should be used in the whole framework for printing
+ *          messages on the terminal. It produces nicely formatted log
+ *          messages using the SLogWriter class.
+ *
+ *          It prints the source of each message which makes reading
+ *          debugging messages a bit easier. Every message has a type.
+ *          This type controls how/if they should be printed to the
+ *          terminal with the current configuration.
+ *
+ *     @see SLogWriter
+ *     @see SMsgType
+ * @version $Revision: 1.2 $
  */
 class SLogger : public std::ostringstream {
 
 public:
+   /// Constructor with pointer to the parent object
    SLogger( const TObject* source );
+   /// Constructor with a name of the parent object
    SLogger( const std::string& source );
+   /// Copy constructor
    SLogger( const SLogger& parent );
-   ~SLogger();
+   /// Default destructor
+   virtual ~SLogger();
 
-   // Needed for copying:
+   /// Copy operator
    SLogger& operator= ( const SLogger& parent );
 
-   // Stream modifier(s):
+   /// Stream modifier to send a message
    static SLogger& endmsg( SLogger& logger );
 
-   // Accept stream modifiers:
+   /// Operator accepting SLogger stream modifiers
    SLogger& operator<< ( SLogger& ( *_f )( SLogger& ) );
+   /// Operator accepting std::ostream stream modifiers
    SLogger& operator<< ( std::ostream& ( *_f )( std::ostream& ) );
+   /// Operator accepting std::ios stream modifiers
    SLogger& operator<< ( std::ios& ( *_f )( std::ios& ) );
 
-   // Accept message type specification:
+   /// Operator accepting message type setting
    SLogger& operator<< ( SMsgType type );
 
-   // For all the "conventional" inputs:
+   /// Operator accepting basically any kind of argument
+   /**
+    * SLogger was designed to give all the features that std::ostream
+    * objects usually provide. This operator handles all kinds of
+    * arguments and passes it on to the std::ostringstream base class.
+    */
    template < class T > SLogger& operator<< ( T arg ) {
-      if( m_activeType >= m_logWriter->minType() ) {
+      if( m_activeType >= m_logWriter->GetMinType() ) {
          ( * ( std::ostringstream* ) this ) << arg;
       }
       return *this;
    }
 
-   // The old style message sender function:
-   void send( SMsgType type, const std::string& message ) const;
+   /// Old style message sender function
+   void Send( SMsgType type, const std::string& message ) const;
 
 private:
-   void send();
+   void Send();
 
    const TObject* m_objSource;
    std::string    m_strSource;
@@ -82,30 +103,53 @@ private:
 //                                                                  //
 //////////////////////////////////////////////////////////////////////
 
+/**
+ * This operator handles all stream modifiers that have been written
+ * to work on SLogger objects specifically. Right now there is basically
+ * only the SLogger::endmsg stream modifier that is such.
+ */
 inline SLogger& SLogger::operator<< ( SLogger& ( *_f )( SLogger& ) ) {
 
    return ( _f )( *this );
 
 }
 
+/**
+ * This operator handles all stream modifiers that have been written
+ * to work on std::ostream objects. Most of the message formatting
+ * modifiers are such.
+ */
 inline SLogger& SLogger::operator<< ( std::ostream& ( *_f )( std::ostream& ) ) {
 
-   if( m_activeType >= m_logWriter->minType() ) {
+   if( m_activeType >= m_logWriter->GetMinType() ) {
       ( _f )( *this );
    }
    return *this;
 
 }
 
+/**
+ * This operator handles all stream modifiers that have been written
+ * to work on std::ios objects. I have to admit I don't remember exactly
+ * which operators these are, but some formatting operations need this.
+ */
 inline SLogger& SLogger::operator<< ( std::ios& ( *_f )( std::ios& ) ) {
 
-   if( m_activeType >= m_logWriter->minType() ) {
+   if( m_activeType >= m_logWriter->GetMinType() ) {
       ( _f )( *this );
    }
    return *this;
 
 }
 
+/**
+ * Messages have a type, defined by the SMsgType enumeration. This operator
+ * allows the user to write intuitive message lines in the code like this:
+ *
+ * <code>
+ *   logger << INFO << "This is an info message" << SLogger::endmsg;
+ * </code>
+ */
 inline SLogger& SLogger::operator<< ( SMsgType type ) {
 
    m_activeType = type;

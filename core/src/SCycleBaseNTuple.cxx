@@ -1,4 +1,4 @@
-// $Id: SCycleBaseNTuple.cxx,v 1.1.1.1 2007-11-13 12:42:21 krasznaa Exp $
+// $Id: SCycleBaseNTuple.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -6,7 +6,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -32,23 +31,30 @@
 #include "../include/SCycleBaseNTuple.h"
 #include "../include/SInputData.h"
 
+#ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseNTuple );
+#endif // DOXYGEN_IGNORE
 
 using namespace std;
 
 static Double_t EPSILON = 1e-15;
 
 /**
- * Default constructor.
+ * The constructor is only initialising the base class.
  */
-SCycleBaseNTuple::SCycleBaseNTuple() {
+SCycleBaseNTuple::SCycleBaseNTuple()
+   : SCycleBaseConfig() {
+
+   m_logger << VERBOSE << "SCycleBaseNTuple constructed" << SLogger::endmsg;
 
 }
 
 /**
- * Default destructor.
+ * Another one of the "I don't do anything" destructors.
  */
 SCycleBaseNTuple::~SCycleBaseNTuple() {
+
+   m_logger << VERBOSE << "SCycleBaseNTuple destructed" << SLogger::endmsg;
 
 }
 
@@ -57,6 +63,12 @@ SCycleBaseNTuple::~SCycleBaseNTuple() {
  * It opens the output file and creates the output trees defined in the
  * cycle configuration in it. Note, that the created trees are empty,
  * no branches are added to them by default anymore.
+ *
+ * <strong>The function is used internally by the framework!</strong>
+ *
+ * @param iD       The input data that we're handling at the moment
+ * @param outTrees The collection of output trees that will be created
+ * @param fileOut  Pointer to the output file that the function opens
  */
 void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
                                           std::vector< TTree* >& outTrees,
@@ -122,6 +134,12 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
  * Function called first for each new input file. It opens the file, and accesses
  * the trees defined in the cycle configuration. It also starts the book-keeping
  * for the EventView input trees, if such things are defined.
+ *
+ * <strong>The function is used internally by the framework!</strong>
+ *
+ * @param iD       The input data that we're handling at the moment
+ * @param filename The full name of the input file
+ * @param file     Pointer to the input file that the function opens
  */
 void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD, const std::string& filename,
                                        TFile*& file ) throw( SError ) {
@@ -233,6 +251,8 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD, const std::string& 
  *
  * For each view, this function tries to find the variable in the collection
  * tree that can be used for the synchronisation.
+ *
+ * <strong>The function is used internally by the framework!</strong>
  */
 void SCycleBaseNTuple::ConnectEVSyncVariable() throw( SError ) {
 
@@ -303,6 +323,10 @@ void SCycleBaseNTuple::ConnectEVSyncVariable() throw( SError ) {
 /**
  * Function reading in the same entry for each of the connected branches.
  * It is called first for each new event.
+ *
+ * <strong>The function is used internally by the framework!</strong>
+ *
+ * @param entry The event number to read in
  */
 void SCycleBaseNTuple::GetEntry( Long64_t entry ) throw( SError ) {
 
@@ -318,6 +342,8 @@ void SCycleBaseNTuple::GetEntry( Long64_t entry ) throw( SError ) {
  * Function synchronising the branches of the EventView trees. It is quite
  * complicated, so optimisation is always welcome. It is called for each event
  * after SCycleBaseNTuple::GetEntry(...).
+ *
+ * <strong>The function is used internally by the framework!</strong>
  */
 void SCycleBaseNTuple::SyncEVTrees() throw( SError ) {
 
@@ -449,6 +475,11 @@ void SCycleBaseNTuple::SyncEVTrees() throw( SError ) {
 
 /**
  * Function calculating the event weight for the MC event for each event.
+ *
+ * <strong>The function is used internally by the framework!</strong>
+ *
+ * @param inputData The input data that we're processing at the moment
+ * @param entry     The event number
  */
 Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,  Long64_t entry ) {
 
@@ -506,6 +537,10 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,  Long64
  * This function is used to open the input files for reading. It has the nice
  * property of automatically checking whether the file has been found and
  * correctly opened.
+ *
+ * <strong>The function is used internally by the framework!</strong>
+ *
+ * @param filename Name of the input file to open
  */
 TFile* SCycleBaseNTuple::OpenInputFile( const char* filename ) throw( SError ) {
 
