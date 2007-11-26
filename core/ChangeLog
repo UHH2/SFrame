@@ -1,3 +1,12 @@
+2007.11.26. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added something to SCycleBaseHist that I wanted to do
+	  for a while now: the SCycleBaseHist::Hist(...)
+	  function. It can be used to *quickly* retrieve
+	  (1-dimensional) histograms from the output file. It
+	  proved to be very useful for me when handling a lot
+	  of output histograms. See the Doxygen documentation
+	  for further details.:-)
+
 2007.11.22. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a *lot* of Doxygen documentation to the code.
 	  Added a new directory called "doc/" which contains a

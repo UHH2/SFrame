@@ -1,4 +1,4 @@
-// $Id: SCycleBaseHist.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
+// $Id: SCycleBaseHist.cxx,v 1.3 2007-11-26 14:55:57 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -16,6 +16,7 @@
 
 // ROOT include(s):
 #include <TDirectory.h>
+#include <TH1.h>
 
 // Local inlcude(s):
 #include "../include/SCycleBaseHist.h"
@@ -46,6 +47,52 @@ SCycleBaseHist::~SCycleBaseHist() {
 }
 
 /**
+ * This function is very similar to SCycleBaseHist::Retrieve. It looks for
+ * a <strong>1-dimensional histogram</strong> in the output file with a
+ * given name in a given directory and returns a pointer to it.
+ *
+ * The important difference wrt. SCycleBaseHist::Retrieve is that it only
+ * uses the slow ROOT methods for finding the histogram once for each
+ * new output file. It uses a caching mechanism for all histograms that
+ * were already searched for, making the n-th search much faster than
+ * that performed by SCycleBaseHist::Retrieve. It's still slower than
+ * using separate pointers, but not by much.
+ *
+ * It should be especially useful when handling a lot of histograms.
+ * Having a pointer for each of these histograms can be a pain above
+ * a certain number. Instead you can book a histogram once in
+ * SCycleBase::BeginInputData and then you can access it with:
+ *
+ * <code>
+ *  In BeginInputData:
+ *    Book( TH1D( "hist", "Histogram", 100, 0.0, 100.0 ) );
+ *
+ *  In ExecuteEvent:
+ *    Hist( "hist" )->Fill( 50.0 );
+ * </code>
+ *
+ * @param name The name of the histogram
+ * @param dir  The name of the directory the histogram is in
+ */
+TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) {
+
+   TH1* result;
+
+   pair< const char*, const char* > this_pair( name, dir );
+   map< pair< const char*, const char* >, TH1* >::const_iterator it;
+   if( ( it = m_histoMap.find( this_pair ) ) != m_histoMap.end() ) {
+      result = it->second;
+   } else {
+      m_logger << VERBOSE << "Hist(): Using Retrieve for name \""
+               << name << "\" and dir \"" << ( dir ? dir : "" ) << "\"" << SLogger::endmsg;
+      result = m_histoMap[ this_pair ] = Retrieve< TH1 >( name, dir );
+   }
+
+   return result;
+
+}
+
+/**
  * This function is called by the framework to get the object in a
  * configured state when running the analysis. The user is not actually
  * allowed to call this function as its hidden by SCycleBase, but
@@ -60,6 +107,7 @@ void SCycleBaseHist::InitHistogramming( TDirectory* outputFile,
 
    m_outputFile = outputFile;
    m_outputFileName = outputFileName;
+   m_histoMap.clear();
    return;
 
 }

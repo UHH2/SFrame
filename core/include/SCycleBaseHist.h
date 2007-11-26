@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
+// $Id: SCycleBaseHist.h,v 1.3 2007-11-26 14:55:56 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -14,6 +14,9 @@
 #ifndef SFRAME_CORE_SCycleBaseHist_H
 #define SFRAME_CORE_SCycleBaseHist_H
 
+// STL include(s):
+#include <map>
+
 // ROOT include(s):
 #include <TString.h>
 
@@ -23,6 +26,7 @@
 
 // Forward declaration(s):
 class TDirectory;
+class TH1;
 
 /**
  *   @short Histogramming part of SCycleBase
@@ -34,7 +38,7 @@ class TDirectory;
  *          It's error prone, but I haven't found any nicer way of
  *          doing it...
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class SCycleBaseHist : public virtual SCycleBaseBase {
 
@@ -52,6 +56,9 @@ protected:
    template< class T > T* Retrieve( const char* name,
                                     const char* directory = 0 ) throw( SError );
 
+   /// Function searching for 1-dimensional histograms in the output file
+   TH1* Hist( const char* name, const char* dir = 0 );
+
    /// Function initialising the object
    void InitHistogramming( TDirectory* outputFile, const TString& outputFileName );
 
@@ -60,6 +67,8 @@ private:
 
    TDirectory* m_outputFile;
    TString     m_outputFileName;
+   /// Map used by the Hist function
+   std::map< std::pair< const char*, const char* >, TH1* > m_histoMap;
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseHist, 0 );
