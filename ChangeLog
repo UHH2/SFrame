@@ -1,3 +1,9 @@
+2008.01.25. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Introduced all the changes needed by SFrameARA.
+	* All the changes should be backward compatible with
+	  existing user code.
+	* Tagging as SFrame-02-01-00
+
 2007.11.21. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Small updates to core/ and user/
 	* Version used for writing the documentation on the TWiki
