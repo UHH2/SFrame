@@ -1,4 +1,4 @@
-// $Id: SInputData.cxx,v 1.2 2007-11-22 18:19:27 krasznaa Exp $
+// $Id: SInputData.cxx,v 1.3 2008-01-25 14:33:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -231,6 +231,7 @@ SInputData& SInputData::operator= ( const SInputData& parent ) {
    this->m_gencuts = parent.m_gencuts;
    this->m_sfileIn = parent.m_sfileIn;
    this->m_inputTrees = parent.m_inputTrees;
+   this->m_persTrees = parent.m_persTrees;
    this->m_evInputTrees = parent.m_evInputTrees;
    this->m_outputTrees = parent.m_outputTrees;
    this->m_totalLumiSum = parent.m_totalLumiSum;
@@ -256,6 +257,7 @@ Bool_t SInputData::operator== ( const SInputData& rh ) const {
        ( this->m_totalLumiGiven == rh.m_totalLumiGiven ) &&
        ( this->m_gencuts == rh.m_gencuts ) && ( this->m_sfileIn == rh.m_sfileIn ) &&
        ( this->m_inputTrees == rh.m_inputTrees ) &&
+       ( this->m_persTrees == rh.m_persTrees ) &&
        ( this->m_evInputTrees == rh.m_evInputTrees ) &&
        ( this->m_outputTrees == rh.m_outputTrees ) &&
        ( this->m_totalLumiSum == rh.m_totalLumiSum ) &&
@@ -308,6 +310,9 @@ void SInputData::print() const {
    for( std::vector< STree >::const_iterator t = m_inputTrees.begin();
         t != m_inputTrees.end(); ++t )
       m_logger << " Input tree         : " << "'" << t->treeName << "'" << endl;
+   for( std::vector< STree >::const_iterator t = m_persTrees.begin();
+        t != m_persTrees.end(); ++t )
+      m_logger << " Persistent tree    : " << "'" << t->treeName << "'" << endl;
    for( std::vector< SEVTree >::const_iterator t = m_evInputTrees.begin();
         t != m_evInputTrees.end(); ++t )
       m_logger << " EV Input tree      : " << "'" << t->treeName << "' (tree) | '"

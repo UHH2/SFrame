@@ -1,4 +1,4 @@
-// $Id: SCycleBaseNTuple.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
+// $Id: SCycleBaseNTuple.cxx,v 1.3 2008-01-25 14:33:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -240,82 +240,11 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD, const std::string& 
       }
    }
 
-   return;
-}
-
-/**
- * This function is called after SCycleBaseNTuple::LoadInputTrees(...).
- * The EventView trees hold different number of events. These events can
- * be synchronised through additional variables found in separate
- * (collection) trees.
- *
- * For each view, this function tries to find the variable in the collection
- * tree that can be used for the synchronisation.
- *
- * <strong>The function is used internally by the framework!</strong>
- */
-void SCycleBaseNTuple::ConnectEVSyncVariable() throw( SError ) {
-
-   if( ! m_inputTrees.size() ) {
-      SError error( SError::SkipInputData );
-      error << "SCycleBase::ConnectInputTrees> No input trees defined!";
-      throw error;
-   }
-   if( ! m_EVinputTrees.size() ) {
-      return;
-   }
-
-   // Clear the map(s) helping in synchronizing the EV trees:
-   m_EVBaseNameToCollVar.clear();
-
-   // now connect EV trees if they're defined
-   for( vector< TTree* >::iterator it = m_EVinputTrees.begin();
-        it != m_EVinputTrees.end(); ++it ) {
-
-      //
-      // Get the info to find the variable to synchronize this tree with:
-      //
-      map< TTree*, string >::const_iterator collTreeName =
-         m_EVInTreeToCollTreeName.find( *it );
-      if( collTreeName == m_EVInTreeToCollTreeName.end() ) {
-         SError error( SError::SkipInputData );
-         error << "Collection tree name for " << ( *it )->GetName() << " not found";
-         throw error;
-      }
-      map< TTree*, string >::const_iterator baseName = m_EVInTreeToBaseName.find( *it );
-      if( baseName == m_EVInTreeToBaseName.end() ) {
-         SError error( SError::SkipInputData );
-         error << "Base name for " << ( *it )->GetName() << " not found";
-         throw error;
-      }
-
-      //
-      // Find the collection tree for this EV tree:
-      //
-      TTree* collTree = 0;
-      for( vector< TTree* >::iterator coll_it = m_inputTrees.begin();
-           coll_it != m_inputTrees.end(); ++coll_it ) {
-         if( ( *coll_it )->GetName() == collTreeName->second ) {
-            collTree = *coll_it;
-            break;
-         }
-      }
-      if( ! collTree ) {
-         SError error( SError::SkipInputData );
-         error << "Couldn't find collection tree ('" << collTreeName->second
-               << "') for EV tree '" << ( *it )->GetName();
-         throw error;
-      }
-
-      //
-      // Connect to the variable allowing the synchronization of this tree:
-      //
-      m_EVBaseNameToCollVar[ baseName->second ] = 0;
-      std::ostringstream varname;
-      varname << baseName->second << "NInstance";
-      collTree->SetBranchAddress( varname.str().c_str(),
-                                  &m_EVBaseNameToCollVar[ baseName->second ] );
-   }
+   //
+   // Finally finish the EV tree initialisation by connecting the
+   // synchronisation variables:
+   //
+   this->ConnectEVSyncVariable();
 
    return;
 }
@@ -330,145 +259,14 @@ void SCycleBaseNTuple::ConnectEVSyncVariable() throw( SError ) {
  */
 void SCycleBaseNTuple::GetEntry( Long64_t entry ) throw( SError ) {
 
+   // Load the current entry for all the regular input variables:
    for( vector< TBranch* >::const_iterator it = m_inputBranches.begin();
         it != m_inputBranches.end(); ++it ) {
       ( *it )->GetEntry( entry );
    }
 
-   return;
-}
-
-/**
- * Function synchronising the branches of the EventView trees. It is quite
- * complicated, so optimisation is always welcome. It is called for each event
- * after SCycleBaseNTuple::GetEntry(...).
- *
- * <strong>The function is used internally by the framework!</strong>
- */
-void SCycleBaseNTuple::SyncEVTrees() throw( SError ) {
-
-   m_logger << VERBOSE << "In SyncEVTrees()" << SLogger::endmsg;
-
-   //
-   // Return right away if there are no EV trees defined:
-   //
-   if( ! m_EVInputBranchesToBaseName.size() ) return;
-
-   //
-   // Loop over all the EV Trees, and find the ones for which a new entry should be loaded:
-   //
-   for( vector< TTree* >::const_iterator evtree = m_EVinputTrees.begin();
-        evtree != m_EVinputTrees.end(); ++evtree ) {
-
-      // Find the "view number" of this EV tree:
-      map< TTree*, Int_t >::const_iterator viewNumber = m_EVInTreeToViewNumber.find( *evtree );
-      if( viewNumber == m_EVInTreeToViewNumber.end() ) {
-         SError error( SError::SkipInputData );
-         error << "SyncEVTrees> View number not found for tree '" << ( *evtree )->GetName()
-               << "'";
-         throw error;
-      } else {
-         m_logger << VERBOSE << "SyncEVTrees> ViewNumber for tree '" << ( *evtree )->GetName() << "' is "
-                  << viewNumber->second << SLogger::endmsg;
-      }
-
-      // Find the "base name" of this EV tree:
-      map< TTree*, string >::const_iterator baseName = m_EVInTreeToBaseName.find( *evtree );
-      if( baseName == m_EVInTreeToBaseName.end() ) {
-         SError error( SError::SkipInputData );
-         error << "SyncEVTrees> Base name for '" << ( *evtree )->GetName() << "' not found";
-         throw error;
-      } else {
-         m_logger << VERBOSE << "SyncEVTrees> Base name for '" << ( *evtree )->GetName() << "' is '"
-                  << baseName->second << "'" << SLogger::endmsg;
-      }
-
-      // Find the variable describing how many views of this type are there for this event:
-      map< string, Int_t >::const_iterator viewsInEvent =
-         m_EVBaseNameToCollVar.find( baseName->second );
-      if( viewsInEvent == m_EVBaseNameToCollVar.end() ) {
-         SError error( SError::SkipInputData );
-         error << "SyncEVTrees> Collection tree variable not found for tree '"
-               << ( *evtree )->GetName() << "'";
-         throw error;
-      } else {
-         m_logger << VERBOSE << "SyncEVTrees> Number of views in current event is "
-                  << viewsInEvent->second << SLogger::endmsg;
-      }
-
-      //
-      // Continue only, if the tree has to be updated:
-      //
-      if( viewNumber->second < viewsInEvent->second ) {
-
-         m_logger << VERBOSE << "SyncEVTrees> A new entry is to be loaded for tree '"
-                  << ( *evtree )->GetName() << "'" << SLogger::endmsg;
-
-         // Find the entry number to load:
-         map< TTree*, Int_t >::iterator entryNumber =
-            m_EVInTreeToCounters.find( *evtree );
-         if( entryNumber == m_EVInTreeToCounters.end() ) {
-            SError error( SError::SkipInputData );
-            error << "SyncEVTrees> Entry counter not found for tree '" << ( *evtree )->GetName()
-                  << "'";
-            throw error;
-         } else {
-            m_logger << VERBOSE << "SyncEVTrees> The entry to load for tree '" << ( *evtree )->GetName()
-                     << "' is " << entryNumber->second << SLogger::endmsg;
-         }
-
-         // Check if this is a valid entry number:
-         if( entryNumber->second >= ( *evtree )->GetEntries() ) {
-            SError error( SError::SkipEvent );
-            error << "SyncEVTrees> Entry " << entryNumber->second
-                  << " requested for tree '" << ( *evtree )->GetName()
-                  << "' (" << ( *evtree )->GetEntries() << " entries) in current event";
-            throw error;
-         } else {
-            m_logger << VERBOSE << "SyncEVTrees> This is a valid entry" << SLogger::endmsg;
-         }
-
-         //
-         // Load the correct entry, and increment the counter:
-         //
-         //
-         //  The previous method was actually fine, since the elements in both maps were
-         //  ordered in the same way. But I found it fragile to depend on this. Hence, here
-         //  is a new, (hopefully) more robust implementation.
-         //
-         for( vector< TBranch* >::iterator branch = m_inputBranches.begin();
-              branch != m_inputBranches.end(); ++branch ) {
-
-            map< TBranch*, string >::const_iterator brBaseName =
-               m_EVInputBranchesToBaseName.find( *branch );
-            map< TBranch*, Int_t >::const_iterator viewNumber =
-               m_EVInputBranchesToViewNumber.find( *branch );
-            if( ( brBaseName == m_EVInputBranchesToBaseName.end() ) ||
-                ( viewNumber == m_EVInputBranchesToViewNumber.end() ) ) {
-               // This is not an EV branch...
-               continue;
-            }
-            if( ( brBaseName->second != baseName->second ) ||
-                ( viewNumber->second >= viewsInEvent->second ) ) {
-               // This branch doesn't have to be updated...
-               continue;
-            }
-
-            // Load the correct entry for this branch:
-            m_logger << VERBOSE << "GetEntry(" << entryNumber->second 
-                     << ") for tree '" << ( *evtree )->GetName()
-                     << "' (view " << viewNumber->second 
-                     << "), branch '" << ( *branch )->GetName()
-                     << "'" << SLogger::endmsg;
-            ( *branch )->GetEntry( entryNumber->second );
-
-         }
-
-         // Now that all branches are loaded, increment the counter
-         ++( entryNumber->second );
-      }
-
-   } // End of loop over EV trees
+   // Now synchronise the EV input trees:
+   this->SyncEVTrees();
 
    return;
 }
@@ -675,6 +473,218 @@ void SCycleBaseNTuple::RegisterInputBranch( TBranch* br ) throw( SError ) {
    } else {
       m_inputBranches.push_back( br );
    }
+
+   return;
+}
+
+/**
+ * This function is called after SCycleBaseNTuple::LoadInputTrees(...).
+ * The EventView trees hold different number of events. These events can
+ * be synchronised through additional variables found in separate
+ * (collection) trees.
+ *
+ * For each view, this function tries to find the variable in the collection
+ * tree that can be used for the synchronisation.
+ *
+ * <strong>The function is used internally by the framework!</strong>
+ */
+void SCycleBaseNTuple::ConnectEVSyncVariable() throw( SError ) {
+
+   if( ! m_inputTrees.size() ) {
+      m_logger << DEBUG << "ConnectEVSyncVariable> No input trees defined"
+               << SLogger::endmsg;
+      return;
+   }
+   if( ! m_EVinputTrees.size() ) {
+      return;
+   }
+
+   // Clear the map(s) helping in synchronizing the EV trees:
+   m_EVBaseNameToCollVar.clear();
+
+   // now connect EV trees if they're defined
+   for( vector< TTree* >::iterator it = m_EVinputTrees.begin();
+        it != m_EVinputTrees.end(); ++it ) {
+
+      //
+      // Get the info to find the variable to synchronize this tree with:
+      //
+      map< TTree*, string >::const_iterator collTreeName =
+         m_EVInTreeToCollTreeName.find( *it );
+      if( collTreeName == m_EVInTreeToCollTreeName.end() ) {
+         SError error( SError::SkipInputData );
+         error << "Collection tree name for " << ( *it )->GetName() << " not found";
+         throw error;
+      }
+      map< TTree*, string >::const_iterator baseName = m_EVInTreeToBaseName.find( *it );
+      if( baseName == m_EVInTreeToBaseName.end() ) {
+         SError error( SError::SkipInputData );
+         error << "Base name for " << ( *it )->GetName() << " not found";
+         throw error;
+      }
+
+      //
+      // Find the collection tree for this EV tree:
+      //
+      TTree* collTree = 0;
+      for( vector< TTree* >::iterator coll_it = m_inputTrees.begin();
+           coll_it != m_inputTrees.end(); ++coll_it ) {
+         if( ( *coll_it )->GetName() == collTreeName->second ) {
+            collTree = *coll_it;
+            break;
+         }
+      }
+      if( ! collTree ) {
+         SError error( SError::SkipInputData );
+         error << "Couldn't find collection tree ('" << collTreeName->second
+               << "') for EV tree '" << ( *it )->GetName();
+         throw error;
+      }
+
+      //
+      // Connect to the variable allowing the synchronization of this tree:
+      //
+      m_EVBaseNameToCollVar[ baseName->second ] = 0;
+      std::ostringstream varname;
+      varname << baseName->second << "NInstance";
+      collTree->SetBranchAddress( varname.str().c_str(),
+                                  &m_EVBaseNameToCollVar[ baseName->second ] );
+   }
+
+   return;
+}
+
+/**
+ * Function synchronising the branches of the EventView trees. It is quite
+ * complicated, so optimisation is always welcome. It is called for each event
+ * from SCycleBaseNTuple::GetEntry(...).
+ *
+ * <strong>The function is used internally by the framework!</strong>
+ */
+void SCycleBaseNTuple::SyncEVTrees() throw( SError ) {
+
+   m_logger << VERBOSE << "In SyncEVTrees()" << SLogger::endmsg;
+
+   //
+   // Return right away if there are no EV trees defined:
+   //
+   if( ! m_EVInputBranchesToBaseName.size() ) return;
+
+   //
+   // Loop over all the EV Trees, and find the ones for which a new entry should be loaded:
+   //
+   for( vector< TTree* >::const_iterator evtree = m_EVinputTrees.begin();
+        evtree != m_EVinputTrees.end(); ++evtree ) {
+
+      // Find the "view number" of this EV tree:
+      map< TTree*, Int_t >::const_iterator viewNumber = m_EVInTreeToViewNumber.find( *evtree );
+      if( viewNumber == m_EVInTreeToViewNumber.end() ) {
+         SError error( SError::SkipInputData );
+         error << "SyncEVTrees> View number not found for tree '" << ( *evtree )->GetName()
+               << "'";
+         throw error;
+      } else {
+         m_logger << VERBOSE << "SyncEVTrees> ViewNumber for tree '" << ( *evtree )->GetName() << "' is "
+                  << viewNumber->second << SLogger::endmsg;
+      }
+
+      // Find the "base name" of this EV tree:
+      map< TTree*, string >::const_iterator baseName = m_EVInTreeToBaseName.find( *evtree );
+      if( baseName == m_EVInTreeToBaseName.end() ) {
+         SError error( SError::SkipInputData );
+         error << "SyncEVTrees> Base name for '" << ( *evtree )->GetName() << "' not found";
+         throw error;
+      } else {
+         m_logger << VERBOSE << "SyncEVTrees> Base name for '" << ( *evtree )->GetName() << "' is '"
+                  << baseName->second << "'" << SLogger::endmsg;
+      }
+
+      // Find the variable describing how many views of this type are there for this event:
+      map< string, Int_t >::const_iterator viewsInEvent =
+         m_EVBaseNameToCollVar.find( baseName->second );
+      if( viewsInEvent == m_EVBaseNameToCollVar.end() ) {
+         SError error( SError::SkipInputData );
+         error << "SyncEVTrees> Collection tree variable not found for tree '"
+               << ( *evtree )->GetName() << "'";
+         throw error;
+      } else {
+         m_logger << VERBOSE << "SyncEVTrees> Number of views in current event is "
+                  << viewsInEvent->second << SLogger::endmsg;
+      }
+
+      //
+      // Continue only, if the tree has to be updated:
+      //
+      if( viewNumber->second < viewsInEvent->second ) {
+
+         m_logger << VERBOSE << "SyncEVTrees> A new entry is to be loaded for tree '"
+                  << ( *evtree )->GetName() << "'" << SLogger::endmsg;
+
+         // Find the entry number to load:
+         map< TTree*, Int_t >::iterator entryNumber =
+            m_EVInTreeToCounters.find( *evtree );
+         if( entryNumber == m_EVInTreeToCounters.end() ) {
+            SError error( SError::SkipInputData );
+            error << "SyncEVTrees> Entry counter not found for tree '" << ( *evtree )->GetName()
+                  << "'";
+            throw error;
+         } else {
+            m_logger << VERBOSE << "SyncEVTrees> The entry to load for tree '" << ( *evtree )->GetName()
+                     << "' is " << entryNumber->second << SLogger::endmsg;
+         }
+
+         // Check if this is a valid entry number:
+         if( entryNumber->second >= ( *evtree )->GetEntries() ) {
+            SError error( SError::SkipEvent );
+            error << "SyncEVTrees> Entry " << entryNumber->second
+                  << " requested for tree '" << ( *evtree )->GetName()
+                  << "' (" << ( *evtree )->GetEntries() << " entries) in current event";
+            throw error;
+         } else {
+            m_logger << VERBOSE << "SyncEVTrees> This is a valid entry" << SLogger::endmsg;
+         }
+
+         //
+         // Load the correct entry, and increment the counter:
+         //
+         //
+         //  The previous method was actually fine, since the elements in both maps were
+         //  ordered in the same way. But I found it fragile to depend on this. Hence, here
+         //  is a new, (hopefully) more robust implementation.
+         //
+         for( vector< TBranch* >::iterator branch = m_inputBranches.begin();
+              branch != m_inputBranches.end(); ++branch ) {
+
+            map< TBranch*, string >::const_iterator brBaseName =
+               m_EVInputBranchesToBaseName.find( *branch );
+            map< TBranch*, Int_t >::const_iterator viewNumber =
+               m_EVInputBranchesToViewNumber.find( *branch );
+            if( ( brBaseName == m_EVInputBranchesToBaseName.end() ) ||
+                ( viewNumber == m_EVInputBranchesToViewNumber.end() ) ) {
+               // This is not an EV branch...
+               continue;
+            }
+            if( ( brBaseName->second != baseName->second ) ||
+                ( viewNumber->second >= viewsInEvent->second ) ) {
+               // This branch doesn't have to be updated...
+               continue;
+            }
+
+            // Load the correct entry for this branch:
+            m_logger << VERBOSE << "GetEntry(" << entryNumber->second 
+                     << ") for tree '" << ( *evtree )->GetName()
+                     << "' (view " << viewNumber->second 
+                     << "), branch '" << ( *branch )->GetName()
+                     << "'" << SLogger::endmsg;
+            ( *branch )->GetEntry( entryNumber->second );
+
+         }
+
+         // Now that all branches are loaded, increment the counter
+         ++( entryNumber->second );
+      }
+
+   } // End of loop over EV trees
 
    return;
 }

@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
+// $Id: SCycleBaseNTuple.h,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -21,6 +21,7 @@
 #include <list>
 
 // Local include(s):
+#include "ISCycleBaseNTuple.h"
 #include "SCycleBaseConfig.h"
 #include "SError.h"
 
@@ -40,9 +41,10 @@ class SInputData;
  *          are hidden from the user by that class. (A little
  *          C++ magic...)
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-class SCycleBaseNTuple : public virtual SCycleBaseConfig {
+class SCycleBaseNTuple : public virtual ISCycleBaseNTuple,
+                         public virtual SCycleBaseConfig {
 
 public:
    /// Default constructor
@@ -62,7 +64,8 @@ protected:
 
    /// Declare an output variable
    template< class T >
-   TBranch* DeclareVariable( T& obj, const char* name, const char* treeName = 0 ) throw( SError );
+   TBranch* DeclareVariable( T& obj, const char* name,
+                             const char* treeName = 0 ) throw( SError );
 
    //////////////////////////////////////////////////////////
    //                                                      //
@@ -74,13 +77,9 @@ protected:
    void CreateOutputTrees( const SInputData&, std::vector< TTree* >&, TFile*& ) throw( SError );
    /// Open the input file and load the input trees
    void LoadInputTrees( const SInputData&, const std::string&, TFile*& ) throw( SError );
-   /// Initialise the EventView tree synchronisation
-   void ConnectEVSyncVariable() throw( SError );
    /// Read in the event from the "normal" trees
    void GetEntry( Long64_t entry ) throw( SError );
-   /// Synchronise the EventView trees to the current event
-   void SyncEVTrees() throw( SError );
-   /// Return the number of events (???)
+   /// Return the number of events in the currently open file
    Long64_t GetNEvents() const { return m_nEvents; }
    /// Calculate the weight of the current event
    Double_t CalculateWeight( const SInputData& inputData, Long64_t entry );
@@ -93,6 +92,10 @@ private:
    static const char* RootType( const char* typeid_type );
    TTree* GetTree( const std::string& treeName ) throw( SError );
    void RegisterInputBranch( TBranch* br ) throw( SError );
+   /// Initialise the EventView tree synchronisation
+   void ConnectEVSyncVariable() throw( SError );
+   /// Synchronise the EventView trees to the current event
+   void SyncEVTrees() throw( SError );
 
    //
    // These are the objects used to handle the input data:

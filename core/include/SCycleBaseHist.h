@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.h,v 1.3 2007-11-26 14:55:56 krasznaa Exp $
+// $Id: SCycleBaseHist.h,v 1.4 2008-01-25 14:33:53 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -21,6 +21,7 @@
 #include <TString.h>
 
 // Local include(s):
+#include "ISCycleBaseHist.h"
 #include "SCycleBaseBase.h"
 #include "SError.h"
 
@@ -38,9 +39,10 @@ class TH1;
  *          It's error prone, but I haven't found any nicer way of
  *          doing it...
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-class SCycleBaseHist : public virtual SCycleBaseBase {
+class SCycleBaseHist : public virtual ISCycleBaseHist,
+                       public virtual SCycleBaseBase {
 
 public:
    /// Default constructor

@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.3 2007-11-22 18:19:26 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.4 2008-01-25 14:33:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -13,6 +13,7 @@
 // STL include(s):
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 // ROOT include(s):
 #include "TDOMParser.h"
@@ -22,10 +23,13 @@
 #include "TStopwatch.h"
 #include "TSystem.h"
 #include "TClass.h"
+#include "TList.h"
+#include "TROOT.h"
+#include "TPython.h"
 
 // Local include(s):
 #include "../include/SCycleController.h"
-#include "../include/SCycleBase.h"
+#include "../include/ISCycleBase.h"
 #include "../include/SLogWriter.h"
 
 #ifndef DOXYGEN_IGNORE
@@ -53,7 +57,7 @@ SCycleController::SCycleController( const TString& xmlConfigFile )
  */
 SCycleController::~SCycleController() {
 
-   std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
+   std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it) {
       delete ( *it );
    }
@@ -71,6 +75,11 @@ SCycleController::~SCycleController() {
 void SCycleController::Initialize() throw( SError ) {
 
    m_logger << INFO << "Initializing" << SLogger::endmsg;
+
+   // Just for kicks, lets measure the time it needs to initialise the
+   // analysis:
+   TStopwatch timer;
+   timer.Start();
 
    // first clean up everything in case this is called multiple times
    m_curCycle = 0;
@@ -157,13 +166,14 @@ void SCycleController::Initialize() throw( SError ) {
                      targetlumi = atof ( curAttr->GetValue() );
                }
 
-               TClass* tmp = gROOT->GetClass( cycleName.c_str(), true );
-               if( !tmp || !tmp->InheritsFrom( "SCycleBase" ) ) {
+               TClass* cycleClass = gROOT->GetClass( cycleName.c_str(), true );
+               if( ! cycleClass || ! cycleClass->InheritsFrom( "ISCycleBase" ) ) {
                   SError error( SError::SkipCycle );
                   error << "Loading of class \"" << cycleName << "\" failed";
                   throw error;
                }
-               SCycleBase* cycle = ( SCycleBase* )tmp->New();
+
+               ISCycleBase* cycle = reinterpret_cast< ISCycleBase* >( cycleClass->New() );
                cycle->SetOutputDirectory( outputdirectory );
                cycle->SetPostFix( postfix );
                cycle->SetTargetLumi( targetlumi );
@@ -204,6 +214,23 @@ void SCycleController::Initialize() throw( SError ) {
                   throw error;
                }
 
+            } else if( nodes->GetNodeName() == TString( "PyLibrary" ) ) {
+
+               std::string libraryName = "";
+               attribIt = nodes->GetAttributes();
+               curAttr = 0;
+               while ( ( curAttr = dynamic_cast< TXMLAttr* >( attribIt() ) ) != 0 ) {
+                  if( curAttr->GetName() == TString( "Name" ) )
+                     libraryName = curAttr->GetValue();
+               }
+               m_logger << DEBUG << "Trying to load python library \"" << libraryName << "\""
+                        << SLogger::endmsg;
+
+               std::ostringstream command;
+               command << "import " << libraryName;
+
+               TPython::Exec( command.str().c_str() );
+
             }
 
          } catch( const SError& error ) {
@@ -240,6 +267,12 @@ void SCycleController::Initialize() throw( SError ) {
 
    // --------------- end of xml interpretation
 
+   // Print how much time it took to initialise the analysis:
+   timer.Stop();
+   m_logger << INFO << "Time needed for initialisation: " << std::setw( 6 )
+            << std::setprecision( 2 ) << timer.RealTime() << " s"
+            << SLogger::endmsg;
+
    // set object status to be ready
    m_isInitialized = kTRUE;
 
@@ -266,7 +299,7 @@ void SCycleController::ExecuteAllCycles() throw( SError ) {
 
    m_logger << INFO << "entering ExecuteAllCycles()" << SLogger::endmsg;
 
-   std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
+   std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it ) {
       this->ExecuteNextCycle();
    }
@@ -323,6 +356,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
 
    timer.Stop();
 
+   m_logger << INFO << "Overall cycle statistics:" << SLogger::endmsg;
    m_logger.setf( std::ios::fixed );
    m_logger << INFO << std::setw( 10 ) << std::setfill( ' ' ) << std::setprecision( 0 )
             << nev << " Events - Real time " << std::setw( 6 ) << std::setprecision( 2 )
@@ -343,7 +377,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
  *
  * @param cycleAlg The cycle that should be added
  */
-void SCycleController::AddAnalysisCycle( SCycleBase* cycleAlg ) {
+void SCycleController::AddAnalysisCycle( ISCycleBase* cycleAlg ) {
 
    m_analysisCycles.push_back( cycleAlg );
    return;
@@ -358,7 +392,7 @@ void SCycleController::DeleteAllAnalysisCycles() {
    m_logger << INFO << "Deleting all analysis cycle algorithms from memory"
             << SLogger::endmsg;
 
-   std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
+   std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it ) {
       delete ( *it );
    }

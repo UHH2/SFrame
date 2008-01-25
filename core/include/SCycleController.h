@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleController.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
+// $Id: SCycleController.h,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -26,7 +26,7 @@
 #include "SError.h"
 
 // Forward declaration(s):
-class SCycleBase;
+class ISCycleBase;
 
 /**
  *   @short Class controlling SFrame analyses
@@ -40,7 +40,7 @@ class SCycleBase;
  *          <strong>sframe_main</strong> executable, so the user
  *          should probably not care about it too much.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class SCycleController : public TObject {
 
@@ -65,7 +65,7 @@ public:
    virtual void SetConfig( const TString& xmlConfigFile ) { m_xmlConfigFile = xmlConfigFile; }
 
    /// Add one analysis cycle to the end of all existing cycles
-   void AddAnalysisCycle( SCycleBase* cycleAlg );
+   void AddAnalysisCycle( ISCycleBase* cycleAlg );
 
    /// Get the index of the current cycle
    UInt_t GetCurCycle() { return m_curCycle; }
@@ -75,7 +75,7 @@ private:
    void DeleteAllAnalysisCycles();
 
    /// vector holding all analysis cycles to be executed
-   std::vector< SCycleBase* > m_analysisCycles;
+   std::vector< ISCycleBase* > m_analysisCycles;
 
    UInt_t  m_curCycle;
    Bool_t  m_isInitialized;

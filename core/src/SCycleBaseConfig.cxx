@@ -1,4 +1,4 @@
-// $Id: SCycleBaseConfig.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
+// $Id: SCycleBaseConfig.cxx,v 1.3 2008-01-25 14:33:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -265,7 +265,6 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
          inputData.AddSFileIn( SFile( fileName, lumi ) );
 
       }
-
       // get a "regular" input tree
       else if( child->GetNodeName() == TString( "InputTree" ) ) {
          std::string treeName = "";
@@ -276,6 +275,18 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
                treeName = attribute->GetValue();
          }
          inputData.AddInputSTree( STree( treeName ) );
+
+      }
+      // get a "persistent" input tree (aka. DPD)
+      else if( child->GetNodeName() == TString( "PersTree" ) ) {
+         std::string treeName = "";
+
+         attribute = 0;
+         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
+            if( attribute->GetName() == TString( "Name" ) )
+               treeName = attribute->GetValue();
+         }
+         inputData.AddPersSTree( STree( treeName ) );
 
       }
       // get an EventView input tree
@@ -403,13 +414,6 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
    return;
 }
 
-/**
- * Function called at the beginning of the data processing of the cycle.
- * It loops through each input file, check the event numbers in them
- * (and that they can be read) so that the event weight calculation
- * would give proper weights in case of only running over a subset
- * of the events.
- */
 void SCycleBaseConfig::CheckForMultipleInputData() throw ( SError ) {
 
    // multimap to hold all type strings of InputData objects; will be

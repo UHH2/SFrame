@@ -1,3 +1,35 @@
+2008.01.25. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made big structural changes in the SCycleBase class.
+	  - The SCycleBase class doesn't hold any code itself now,
+	  but is "just" a composite object made from the
+	  various SCycleBase* classes.
+	  - Introduced a new class, SCycleBaseExec. Its function
+	  is to provide the event looping functionality to
+	  SCycleBase.
+	  - All components of SCycleBase have an interface class
+	  now. SCycleBaseExec can access the other parts of the
+	  SCycleBase object through these interfaces. If the
+	  functionality of SCycleBase has to be extended, it's
+	  enough to create a new kind of SCycleBase class that
+	  inherits from different kind of constituents. (For instance
+	  the SCycleBaseNTuple constituent can be replaced
+	  while not touching the SCycleBaseExec class.)
+	* Extended SInputData. It now holds a new kind of input
+	  tree, called "persistent tree". This is used to describe
+	  input trees from POOL based DPD files. The name of the
+	  persistent tree is practically always "CollectionTree",
+	  but it is configurable through XML nevertheless.
+	* A new kind of property can be defined for the
+	  <JobConfiguration>, <PyLibrary>. It is very similar to
+	  the <Library> property, but it defines a Python module
+	  that should be loaded by the framework at initialisation.
+	* The EventView tree handling functions don't have to be
+	  called separately by SCycleBaseExec anymore. They are
+	  called internally in SCycleBaseNTuple by the functions
+	  that used to only handle the regular input trees. (This
+	  way the transient input trees can be handled just by
+	  overwriting these functions.)
+
 2007.11.26. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added something to SCycleBaseHist that I wanted to do
 	  for a while now: the SCycleBaseHist::Hist(...)

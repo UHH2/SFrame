@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SInputData.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
+// $Id: SInputData.h,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -18,7 +18,6 @@
 #include <vector>
 
 // ROOT include(s):
-#include "TObject.h"
 #include "TString.h"
 
 // Local include(s):
@@ -31,7 +30,7 @@
  *          It is used to describe one input or output file (as defined
  *          in the configuration XML file) to the framework.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class SFile {
 
@@ -84,7 +83,7 @@ public:
  *          property actually, its name. The name of the tree is taken
  *          from the configuration XML file.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class STree {
 
@@ -122,7 +121,7 @@ public:
  *          name, all of which are needed to perform synchronisation
  *          between the trees.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 class SEVTree {
 
@@ -180,9 +179,9 @@ public:
  *          by the framework from the configuration values put in the
  *          configuration XML file.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-class SInputData : public TObject {
+class SInputData {
 
 public:
    /// Default constructor
@@ -205,6 +204,8 @@ public:
    void AddSFileIn      ( const SFile& sfile );
    /// Add a new input tree to the input data
    void AddInputSTree   ( const STree& stree )           { m_inputTrees.push_back( stree ); }
+   /// Add a new persistent tree to the input data
+   void AddPersSTree    ( const STree& ptree )           { m_persTrees.push_back( ptree ); }
    /// Add a new output tree to the input data
    void AddOutputSTree  ( const STree& stree )           { m_outputTrees.push_back( stree ); }
    /// Add a new input EventView tree to the input data
@@ -223,11 +224,13 @@ public:
    /// Get all the defined input files
    std::vector< SFile >&                GetSFileIn()              { return m_sfileIn; }
    /// Get all the defined input trees
-   const std::vector< STree >&          GetInputTrees() const     { return m_inputTrees;}
+   const std::vector< STree >&          GetInputTrees() const     { return m_inputTrees; }
+   /// Get all the defined "persistent" trees
+   const std::vector< STree >&          GetPersTrees() const      { return m_persTrees; }
    /// Get all the defined output trees
-   const std::vector< STree >&          GetOutputTrees() const    { return m_outputTrees;}
+   const std::vector< STree >&          GetOutputTrees() const    { return m_outputTrees; }
    /// Get all the defined input EventView trees
-   const std::vector< SEVTree >&        GetEVInputTrees() const   { return m_evInputTrees;}
+   const std::vector< SEVTree >&        GetEVInputTrees() const   { return m_evInputTrees; }
    /// Get the total luminosity of the input data
    Double_t                             GetTotalLumi() const;
    /// Get the total luminosity scaled to the number of events to process
@@ -255,6 +258,7 @@ private:
    std::vector< SFile >            m_sfileIn;
    std::vector< STree >            m_inputTrees;
    std::vector< SEVTree >          m_evInputTrees;
+   std::vector< STree >            m_persTrees;
    std::vector< STree >            m_outputTrees;
    Double_t                        m_totalLumiSum;
    Long64_t                        m_eventsTotal;

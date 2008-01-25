@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseConfig.h,v 1.2 2007-11-22 18:19:24 krasznaa Exp $
+// $Id: SCycleBaseConfig.h,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -22,6 +22,7 @@
 #include <TString.h>
 
 // Local include(s):
+#include "ISCycleBaseConfig.h"
 #include "SCycleBaseBase.h"
 #include "SError.h"
 #include "SInputData.h"
@@ -39,9 +40,10 @@ class TXMLNode;
  *          all these information for the "higher level" parts
  *          of the SCycleBase code.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-class SCycleBaseConfig : public virtual SCycleBaseBase {
+class SCycleBaseConfig : public virtual ISCycleBaseConfig,
+                         public virtual SCycleBaseBase {
 
 public:
    /// Default constructor
@@ -61,7 +63,9 @@ public:
     *
     * @see SCycleBaseConfig::GetOutputDirectory
     */
-   void SetOutputDirectory( const TString& outputdirectory ) { m_outputDirectory = outputdirectory; }
+   void SetOutputDirectory( const TString& outputdirectory ) {
+      m_outputDirectory = outputdirectory;
+   }
    /// Set the output file post-fix
    /**
     * The post-fix that should be appended to the output ROOT
@@ -114,9 +118,6 @@ protected:
    void DeclareProperty( const std::string& name, std::vector< int >& value );
    /// Declare a <strong>std::vector<double></strong> property
    void DeclareProperty( const std::string& name, std::vector< double >& value );
-
-   /// List of input data to run over
-   std::vector< SInputData > m_inputData;
 
 private:
    //
