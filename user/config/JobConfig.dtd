@@ -14,10 +14,15 @@
 <!--                                                                         -->
 <!-- ======================================================================= -->
 
-<!ELEMENT JobConfiguration (Library*,Cycle+)>
+<!ELEMENT JobConfiguration (PyLibrary*,Library*,Cycle+)>
 <!ATTLIST JobConfiguration
         JobName              CDATA            #REQUIRED
         OutputLevel          CDATA            "INFO"
+>
+
+<!ELEMENT PyLibrary EMPTY>
+<!ATTLIST PyLibrary
+        Name                 CDATA            #REQUIRED
 >
 
 <!ELEMENT Library EMPTY>
@@ -33,7 +38,7 @@
         TargetLumi           CDATA            #REQUIRED
 >
 
-<!ELEMENT InputData (GeneratorCut*,In+,InputTree*,ObjInputTree*,EVInputTree*,OutputTree*)>
+<!ELEMENT InputData (GeneratorCut*,In+,PersTree*,InputTree*,EVInputTree*,OutputTree*)>
 <!ATTLIST InputData
         Type                 CDATA            #REQUIRED
         Version              (Reco|AtlFast)   "Reco"
@@ -60,6 +65,11 @@
 
 <!ELEMENT InputTree EMPTY>
 <!ATTLIST InputTree
+        Name                  CDATA            #REQUIRED
+>
+
+<!ELEMENT PersTree EMPTY>
+<!ATTLIST PersTree
         Name                  CDATA            #REQUIRED
 >
 
