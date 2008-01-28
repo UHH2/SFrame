@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.4 2008-01-25 14:33:54 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.5 2008-01-28 18:40:33 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -273,6 +273,15 @@ void SCycleController::Initialize() throw( SError ) {
             << std::setprecision( 2 ) << timer.RealTime() << " s"
             << SLogger::endmsg;
 
+   // Print memory consumption after initialising the analysis:
+   ProcInfo_t procinfo;
+   gSystem->GetProcInfo( &procinfo );
+   m_logger << DEBUG << "Memory consumption after initialisation:" << SLogger::endmsg;
+   m_logger.setf( std::ios::fixed );
+   m_logger << DEBUG << "  Resident mem.: " << std::setw( 7 ) << procinfo.fMemResident
+            << " kB; Virtual mem.: " << std::setw( 7 ) << procinfo.fMemVirtual
+            << " kB" << SLogger::endmsg;
+
    // set object status to be ready
    m_isInitialized = kTRUE;
 
@@ -329,6 +338,10 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
    TStopwatch timer;
    timer.Start();
 
+   // Retrieve memory consumption before executing the analysis:
+   ProcInfo_t mem_before;
+   gSystem->GetProcInfo( &mem_before );
+
    try {
 
       m_analysisCycles.at( m_curCycle )->BeginCycle();
@@ -351,6 +364,10 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       }
    }
 
+   // Retrieve memory consumption after executing the analysis:
+   ProcInfo_t mem_after;
+   gSystem->GetProcInfo( &mem_after );
+
    Double_t nev = static_cast< Double_t >( m_analysisCycles.at( m_curCycle )->NumberOfProcessedEvents() );
    ++m_curCycle;
 
@@ -365,6 +382,17 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
             << std::setw( 6 ) << std::setprecision( 2 ) << timer.CpuTime() << " s  - "
             << std::setw( 5 ) << std::setprecision( 0 ) << ( nev / timer.CpuTime() )
             << " Hz" << SLogger::endmsg;
+   m_logger << DEBUG << "Memory growth while executing cycle:" << SLogger::endmsg;
+   m_logger << DEBUG << "   Resident mem.: " << std::setw( 6 )
+            << ( mem_after.fMemResident - mem_before.fMemResident )
+            << " kB; " << std::setw( 7 )
+            << ( ( mem_after.fMemResident - mem_before.fMemResident ) / nev )
+            << " kB / event" << SLogger::endmsg;
+   m_logger << DEBUG << "   Virtual mem. : " << std::setw( 6 )
+            << ( mem_after.fMemVirtual - mem_before.fMemVirtual )
+            << " kB; " << std::setw( 7 )
+            << ( ( mem_after.fMemVirtual - mem_before.fMemVirtual ) / nev )
+            << " kB / event" << SLogger::endmsg;
 
    return;
 }

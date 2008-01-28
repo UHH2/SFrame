@@ -1,4 +1,4 @@
-// $Id: SCycleBaseHist.cxx,v 1.3 2007-11-26 14:55:57 krasznaa Exp $
+// $Id: SCycleBaseHist.cxx,v 1.4 2008-01-28 18:40:33 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -44,6 +44,52 @@ SCycleBaseHist::~SCycleBaseHist() {
 
    m_logger << VERBOSE << "SCycleBaseHist destructed" << SLogger::endmsg;
 
+}
+
+/**
+ * Function for writing any kind of object inheriting from TObject into
+ * the output file. It is meant to be used with objects that are
+ * created once, then they don't have to be touched again. (Like
+ * TGraph and friends.)
+ *
+ * To write out a TGraph for instance, you could write something like:
+ *
+ * <code>
+ *   TGraph mygraph( n, x_array, y_array );
+ *   mygraph.SetName( "MyGraph" );
+ *   Write( mygraph );
+ * </code>
+ *
+ * @param obj       Constant reference to the object to be written out
+ * @param directory Optional directory name in which to save the object
+ */
+void SCycleBaseHist::Write( const TObject& obj,
+                            const char* directory ) throw( SError ) {
+
+   // Find the correct directory in the output file:
+   TDirectory* dir = 0;
+   if( directory ) {
+      dir = this->CdInOutput( directory );
+   } else {
+      dir = m_outputFile;
+   }
+   dir->cd();
+
+   // Persistify the object:
+   if( ! obj.Write() ) {
+      m_logger << ERROR << "Couldn't write out object \"" << obj.GetName()
+               << "\" to directory: " << ( directory ? directory : "" )
+               << SLogger::endmsg;
+   } else {
+      m_logger << VERBOSE << "Persistified object \"" << obj.GetName()
+               << "\" to directory: " << ( directory ? directory : "" )
+               << SLogger::endmsg;
+   }
+
+   gROOT->cd(); // So that the temporary objects would not be
+                // created in the file itself...
+
+   return;
 }
 
 /**

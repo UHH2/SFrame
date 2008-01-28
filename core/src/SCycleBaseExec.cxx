@@ -1,4 +1,4 @@
-// $Id: SCycleBaseExec.cxx,v 1.1 2008-01-25 14:33:54 krasznaa Exp $
+// $Id: SCycleBaseExec.cxx,v 1.2 2008-01-28 18:40:33 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -17,6 +17,7 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TStopwatch.h>
+#include <TSystem.h>
 
 // Local include(s):
 #include "../include/SCycleBaseExec.h"
@@ -118,6 +119,7 @@ void SCycleBaseExec::ExecuteInputData() throw( SError ) {
 
          // count the number of events processed for this SInputData
          Long64_t nProcessedEventsForThisInputData = 0;
+         Long64_t nProcessedEventsForThisInputFile = 0;
 
          // get the number of events to be processed for this SInputData
          Long64_t evToProcess = iD->GetNEventsMax();
@@ -148,6 +150,7 @@ void SCycleBaseExec::ExecuteInputData() throw( SError ) {
               sf != sfile.end(); ++sf ) {
 
             TFile* file = 0;
+            nProcessedEventsForThisInputFile = 0;
 
             try { // For catching input file level problems...
 
@@ -160,6 +163,10 @@ void SCycleBaseExec::ExecuteInputData() throw( SError ) {
                   InputDataIsInitialised = true;
                }
                this->BeginInputFile( *iD );
+
+               // Measure used memory before the event loop:
+               ProcInfo_t mem_before;
+               gSystem->GetProcInfo( &mem_before );
 
                // Start the timer:
                timer.Start( kFALSE );
@@ -175,6 +182,9 @@ void SCycleBaseExec::ExecuteInputData() throw( SError ) {
 
                      // count the number of processed events in this SInputData
                      nProcessedEventsForThisInputData++;
+
+                     // count the number of processed events in the input file
+                     nProcessedEventsForThisInputFile++;
 
                      // count the number of processed events in this cycle
                      m_nProcessedEvents++;
@@ -223,6 +233,24 @@ void SCycleBaseExec::ExecuteInputData() throw( SError ) {
 
                // Stop the timer:
                timer.Stop();
+
+               // Measure used memory after the event loop:
+               ProcInfo_t mem_after;
+               gSystem->GetProcInfo( &mem_after );
+
+               m_logger << DEBUG << "Memory leaks while processing file:" << SLogger::endmsg;
+               m_logger << DEBUG << "   Resident mem.: " << std::setw( 6 )
+                        << ( mem_after.fMemResident - mem_before.fMemResident )
+                        << " kB; " << std::setw( 7 )
+                        << ( ( mem_after.fMemResident - mem_before.fMemResident ) /
+                             static_cast< double >( nProcessedEventsForThisInputFile ) )
+                        << " kB / event" << SLogger::endmsg;
+               m_logger << DEBUG << "   Virtual mem. : " << std::setw( 6 )
+                        << ( mem_after.fMemVirtual - mem_before.fMemVirtual )
+                        << " kB; " << std::setw( 7 )
+                        << ( ( mem_after.fMemVirtual - mem_before.fMemVirtual ) /
+                             static_cast< double >( nProcessedEventsForThisInputFile ) )
+                        << " kB / event" << SLogger::endmsg;
 
                // close file
                file->Close();

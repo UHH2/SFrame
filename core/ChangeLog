@@ -1,3 +1,12 @@
+2008.01.28. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added memory consumption and memory leak DEBUG printouts.
+	  (Should be useful for finding problems with code.)
+	* Added new function (SCycleBaseHist::Write(...)) for
+	  persistifying non-TH1 objects in the output. (Putting
+	  a special emphasis on persistifying TGraph-like
+	  objects.) Usage instructions are in the Doxygen
+	  documentation.
+
 2008.01.25. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made big structural changes in the SCycleBase class.
 	  - The SCycleBase class doesn't hold any code itself now,
