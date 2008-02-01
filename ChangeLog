@@ -1,3 +1,13 @@
+2008.02.01. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added python script/module. The script can be used to
+	  create <In ... /> XML nodes for analyses in an
+	  automatised way.
+	* Changed how the Doxygen documentation is made. The
+	  Doxyfile file is now in the main directory, and it
+	  requires version 1.5.4 of Doxygen. (Available under
+	  /afs/cern.ch/sw/lcg/external/doxygen/1.5.4.)
+	* Tagging as SFrame-02-01-01
+
 2008.01.25. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Introduced all the changes needed by SFrameARA.
 	* All the changes should be backward compatible with
