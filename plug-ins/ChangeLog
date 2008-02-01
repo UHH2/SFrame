@@ -1,3 +1,7 @@
+2008.02.01. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a lot of Doxygen documentation to the code, as
+	  it is now also parsed.
+
 2007.11.13. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Created first version of the "SFramePlugIns" library.
 	* The package should be a collection of useful tools

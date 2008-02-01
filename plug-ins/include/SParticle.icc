@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SParticle.icc,v 1.1.1.1 2007-11-13 12:41:09 krasznaa Exp $
+// $Id: SParticle.icc,v 1.2 2008-02-01 14:28:45 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Plug-ins
@@ -7,7 +7,6 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
@@ -15,6 +14,17 @@
 #ifndef SFRAME_PLUGINS_SParticle_ICC
 #define SFRAME_PLUGINS_SParticle_ICC
 
+/**
+ * This copy constructor can basically copy any kind of LorentzVector.
+ * It doesn't matter if the parent has been declared in another geometry.
+ * The constructor allows statements like:
+ *
+ * <code>
+ *  SParticle p( p1 + p2 );
+ * </code>
+ *
+ * @param parent Any kind of LorentzVector that we want to copy
+ */
 template< class Geom >
 SParticle::SParticle( const ROOT::Math::LorentzVector< Geom >& parent )
    : ROOT::Math::LorentzVector< ROOT::Math::PtEtaPhiE4D< Double32_t > >(),
@@ -27,6 +37,17 @@ SParticle::SParticle( const ROOT::Math::LorentzVector< Geom >& parent )
 
 }
 
+/**
+ * This operator is needed to allow arithmetic expressions that are defined
+ * for the LorentzVector class, to work on SParticle objects. It allows
+ * statements like:
+ *
+ * <code>
+ *  SParticle p = p1 + p2;
+ * </code>
+ *
+ * @param rh The LorentzVector on the right-hand side of the equation sign
+ */
 template< class Geom > 
 SParticle& SParticle::operator= ( const ROOT::Math::LorentzVector< Geom >& rh ) {
 
