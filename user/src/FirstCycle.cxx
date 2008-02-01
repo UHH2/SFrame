@@ -1,4 +1,4 @@
-// $Id: FirstCycle.cxx,v 1.1.1.1 2007-11-13 12:41:09 krasznaa Exp $
+// $Id: FirstCycle.cxx,v 1.2 2008-02-01 14:31:13 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User
@@ -6,13 +6,13 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
 
 // ROOT include(s):
 #include "TH1F.h"
+#include "TGraph.h"
 
 // Local include(s):
 #include "../include/FirstCycle.h"
@@ -104,6 +104,13 @@ void FirstCycle::BeginInputData( const SInputData& ) throw( SError ) {
 }
 
 void FirstCycle::EndInputData( const SInputData& ) throw( SError ) {
+
+   static const Int_t n = 5;
+   Float_t x_array[ n ] = { 0.0, 1.0, 2.0, 3.0, 4.0 };
+   Float_t y_array[ n ] = { 0.0, 2.0, 4.0, 6.0, 8.0 };
+   TGraph mygraph( n, x_array, y_array );
+   mygraph.SetName( "MyGraph" );
+   Write( mygraph, "graph_dir" );
 
    return;
 }

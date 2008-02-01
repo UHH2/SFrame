@@ -1,3 +1,6 @@
+2008.02.01. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Very small changes in the documentation...
+
 2007.11.21. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed the location of the example input file in
 	  FirstCycle_config.xml. The file is put on AFS now,
