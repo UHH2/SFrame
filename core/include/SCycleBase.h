@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBase.h,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
+// $Id: SCycleBase.h,v 1.4 2008-02-01 14:22:01 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -44,7 +44,7 @@
  *          class is instantiated only once inside the SCycleBase
  *          object. (virtual inheritance...)
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 class SCycleBase : public virtual ISCycleBase,
                    public virtual SCycleBaseNTuple,
@@ -63,5 +63,29 @@ public:
 #endif // DOXYGEN_IGNORE
 
 }; // class SCycleBase
+
+/** @example FirstCycle.h
+ *           This is an example cycle using SCycleBase. It can be used
+ *           out of the box on lxplus or any computer havin access to
+ *           /afs/cern.ch/.
+ */
+
+/** @example FirstCycle.cxx
+ *           This is an example cycle using SCycleBase. It can be used
+ *           out of the box on lxplus or any computer havin access to
+ *           /afs/cern.ch/.
+ */
+
+/** @example SecondCycle.h
+ *           This is an example cycle using SCycleBase. It can be used
+ *           after running FirstCycle. It demonstrates how to read back
+ *           the ntuple produced by a user cycle.
+ */
+
+/** @example SecondCycle.cxx
+ *           This is an example cycle using SCycleBase. It can be used
+ *           after running FirstCycle. It demonstrates how to read back
+ *           the ntuple produced by a user cycle.
+ */
 
 #endif // SFRAME_CORE_SCycleBase_H

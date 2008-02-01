@@ -43,7 +43,7 @@
 
      > cvs co -d SFrame groups/sframe/SFrame
 
-     > cd SFrame/core
+     > cd SFrame
 
      > doxygen
    </code>

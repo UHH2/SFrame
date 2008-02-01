@@ -1,4 +1,4 @@
- # $Id: Makefile,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
+ # $Id: Makefile,v 1.4 2008-02-01 14:21:59 krasznaa Exp $
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  # @Package: Core                                                          #
@@ -6,7 +6,6 @@
  # @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester    #
  # @author David Berge      <David.Berge@cern.ch>          - CERN          #
  # @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg       #
- # @author Andreas Hoecker  <Andreas.Hocker@cern.ch>       - CERN          #
  # @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen #
  #                                                                         #
  # Makefile compiling the SFrameCore library.                              #

@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.5 2008-01-28 18:40:33 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.6 2008-02-01 14:22:01 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -382,7 +382,8 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
             << std::setw( 6 ) << std::setprecision( 2 ) << timer.CpuTime() << " s  - "
             << std::setw( 5 ) << std::setprecision( 0 ) << ( nev / timer.CpuTime() )
             << " Hz" << SLogger::endmsg;
-   m_logger << DEBUG << "Memory growth while executing cycle:" << SLogger::endmsg;
+   m_logger << DEBUG << "Memory growth while executing cycle #"
+            << m_curCycle << ":" << SLogger::endmsg;
    m_logger << DEBUG << "   Resident mem.: " << std::setw( 6 )
             << ( mem_after.fMemResident - mem_before.fMemResident )
             << " kB; " << std::setw( 7 )

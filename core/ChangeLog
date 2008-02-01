@@ -1,3 +1,8 @@
+2008.02.01. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Removed the Doxyfile file from this directory and put
+	  it directly under SFrame/
+	* Updated/extended the documentation in a number of files.
+
 2008.01.28. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added memory consumption and memory leak DEBUG printouts.
 	  (Should be useful for finding problems with code.)
