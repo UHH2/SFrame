@@ -1,4 +1,4 @@
- # $Id: Makefile,v 1.4 2008-02-01 14:21:59 krasznaa Exp $
+ # $Id: Makefile,v 1.5 2008-02-04 15:48:59 krasznaa Exp $
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  # @Package: Core                                                          #
@@ -27,6 +27,9 @@ include $(SFRAME_DIR)/Makefile.common
 
 #
 # Rules for compiling the executable
+#
+# Reminder: $(ROOTLIBS) comes from Makefile.arch which is picked up from the ROOT
+# sources by Makefile.common...
 #
 $(SFRAME_BIN_PATH)/sframe_main: sframe_main.o $(SHLIBFILE)
 	@echo "Linking " $@
