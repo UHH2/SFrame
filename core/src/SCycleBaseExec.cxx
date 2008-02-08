@@ -1,4 +1,4 @@
-// $Id: SCycleBaseExec.cxx,v 1.2 2008-01-28 18:40:33 krasznaa Exp $
+// $Id: SCycleBaseExec.cxx,v 1.3 2008-02-08 16:21:10 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -134,10 +134,10 @@ void SCycleBaseExec::ExecuteInputData() throw( SError ) {
 
          Bool_t InputDataIsInitialised = false;
 
-         outputTrees.clear();
-         outputFile = 0;
          if( m_firstInputDataOfMany ) {
             // open output file and create output trees therein
+            outputTrees.clear();
+            outputFile = 0;
             this->CreateOutputTrees( *iD, outputTrees, outputFile );
             this->InitHistogramming( outputFile, this->GetOutputFileName() );
          }

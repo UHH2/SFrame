@@ -1,3 +1,9 @@
+2008.02.08. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added new feature to sframe_input.py: It is now able to
+	  create <In> XML nodes from "data" files. (I used it
+	  with streamtest files.) When using this option,
+	  the user doesn't have to define a cross-section.
+
 2008.02.04. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixing compilation against 32-bit ROOT binaries on a
 	  64-bit system.

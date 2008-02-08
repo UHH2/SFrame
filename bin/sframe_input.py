@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# $Id: sframe_input.py,v 1.1 2008-02-01 14:39:26 krasznaa Exp $
+# $Id: sframe_input.py,v 1.2 2008-02-08 16:21:10 krasznaa Exp $
 #***************************************************************************
 #* @Project: SFrame - ROOT-based analysis framework for ATLAS
 #* @Package: Core
@@ -43,6 +43,9 @@ def main():
   parser.add_option( "-x", "--xsection", dest="xsection",
                      action="store", type="float", default=1.0,
                      help="Cross-section of the MC data in pb-1" )
+  parser.add_option( "-d", "--data", dest="data",
+                     action="store_true",
+                     help="The input files are DATA" )
   parser.add_option( "-o", "--output",  dest="output",
                      action="store", type="string", default="data.xml",
                      help="Output XML file" )
@@ -55,9 +58,16 @@ def main():
     parser.print_help()
     return
 
-  # Call the function doing the actual work:
+  # Call the actual function:
   import SFrameHelpers
-  SFrameHelpers.CreateInput( options.xsection, files, options.output )
+  if options.data:
+    print "The input files are DATA files"
+    print ""
+    SFrameHelpers.CreateDataInput( files, options.output )
+  else:
+    print "The input files are Monte Carlo files"
+    print ""
+    SFrameHelpers.CreateInput( options.xsection, files, options.output )
 
 # Call the main function:
 if __name__ == "__main__":
