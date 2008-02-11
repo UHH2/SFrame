@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: FirstCycle.h,v 1.2 2008-02-01 14:31:12 krasznaa Exp $
+// $Id: FirstCycle.h,v 1.3 2008-02-11 14:03:48 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User
@@ -54,9 +54,11 @@ private:
    std::string m_stringVariable;
    int         m_intVariable;
    double      m_doubleVariable;
+   bool        m_boolVariable;
    std::vector< int >         m_intVecVariable;
    std::vector< double >      m_doubleVecVariable;
    std::vector< std::string > m_stringVecVariable;
+   std::vector< bool >        m_boolVecVariable;
 
    //
    // The input variables

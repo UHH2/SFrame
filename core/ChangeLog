@@ -1,3 +1,10 @@
+2008.02.11. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added new type of property: bool
+	  Such properties can now be used in the same way as all
+	  the others. See the Doxygen documentation for details.
+	* Removed "u_int" in SCycleBaseNTuple.icc that caused problems
+	  on MacOS X 10.5 / ROOT 5.18.
+
 2008.02.08. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed bug in SCycleBaseExec that caused a crash when
 	  running over multiple InputData of the same type.

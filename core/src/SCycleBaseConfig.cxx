@@ -1,4 +1,4 @@
-// $Id: SCycleBaseConfig.cxx,v 1.3 2008-01-25 14:33:54 krasznaa Exp $
+// $Id: SCycleBaseConfig.cxx,v 1.4 2008-02-11 14:03:48 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -148,6 +148,25 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name, double& value )
 
 /**
  * Use this function in the constructor of your analysis cycle to declare
+ * a bool variable as a property to be set up by the framework
+ * according to the configuration set in the XML file. The boolean
+ * property can be specified in a number of ways. Either with the
+ * (case insensitive) "true" and "false" words, or with the 0 (false)
+ * and 1 (true) numbers. (Actually all non-zero numbers are translated
+ * as "true".)
+ *
+ * @param name  The name under which the property appears in XML
+ * @param value The bool variable that you use as the property
+ */
+void SCycleBaseConfig::DeclareProperty( const std::string& name, bool& value ) {
+
+   m_boolPrefs[ name ] = &value;
+   return;
+
+}
+
+/**
+ * Use this function in the constructor of your analysis cycle to declare
  * a vector of std::string objects as a property to be set up by the framework
  * according to the configuration set in the XML file. The strings have to be
  * put as a space separated list in the XML.
@@ -193,6 +212,27 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name,
                                         std::vector< double >& value ) {
 
    m_doubleListPrefs[ name ] = &value;
+   return;
+
+}
+
+/**
+ * Use this function in the constructor of your analysis cycle to declare
+ * a vector of bool variables as a property to be set up by the framework
+ * according to the configuration set in the XML file. Bools have to be
+ * put as a space separated list in the XML. A boolean
+ * property can be specified in a number of ways. Either with the
+ * (case insensitive) "true" and "false" words, or with the 0 (false)
+ * and 1 (true) numbers. (Actually all non-zero numbers are translated
+ * as "true".) They can be freely mixed.
+ *
+ * @param name  The name under which the property appears in XML
+ * @param value The object that you use as the property
+ */
+void SCycleBaseConfig::DeclareProperty( const std::string& name,
+                                        std::vector< bool >& value ) {
+
+   m_boolListPrefs[ name ] = &value;
    return;
 
 }
@@ -371,6 +411,10 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
          double value = atof( stringValue.c_str() );
          ( *m_doublePrefs[ name ] ) = value;
       }
+      // If it's a boolean property:
+      else if( m_boolPrefs.find( name ) != m_boolPrefs.end() ) {
+         ( *m_boolPrefs[ name ] ) = ToBool( stringValue );
+      }
       // If it's a string list property:
       else if( m_stringListPrefs.find( name ) != m_stringListPrefs.end() ) {
          m_stringListPrefs[ name ]->clear();
@@ -399,6 +443,16 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
             double value;
             stream >> value;
             m_doubleListPrefs[ name ]->push_back( value );
+         }
+      }
+      // If it's a boolean list property:
+      else if( m_boolListPrefs.find( name ) != m_boolListPrefs.end() ) {
+         m_boolListPrefs[ name ]->clear();
+         istringstream stream( stringValue );
+         while( ! stream.eof() ) {
+            std::string value;
+            stream >> value;
+            m_boolListPrefs[ name ]->push_back( ToBool( value ) );
          }
       }
       // If it hasn't been requested by the analysis cycle, issue a warning.
@@ -462,4 +516,29 @@ void SCycleBaseConfig::CheckForMultipleInputData() throw ( SError ) {
    }
 
    return;
+}
+
+/**
+ * This function is used in InitializeUserConfig to translate the value(s)
+ * given in the XML configuration to boolean values.
+ */
+bool SCycleBaseConfig::ToBool( const std::string& value ) throw( SError ) {
+
+   TString tvalue( value );
+   if( tvalue.IsAlpha() ) {
+      if( tvalue.Contains( "true", TString::kIgnoreCase ) ) {
+         return true;
+      } else if( tvalue.Contains( "false", TString::kIgnoreCase ) ) {
+         return false;
+      }
+   } else if( tvalue.IsDigit() ) {
+      return tvalue.Atoi();
+   }
+
+   SError error( SError::SkipCycle );
+   error << "Can't translate \"" << value << "\" to boolean";
+   throw error;
+
+   return false;
+
 }

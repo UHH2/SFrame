@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseConfig.h,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
+// $Id: SCycleBaseConfig.h,v 1.4 2008-02-11 14:03:47 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -40,7 +40,7 @@ class TXMLNode;
  *          all these information for the "higher level" parts
  *          of the SCycleBase code.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 class SCycleBaseConfig : public virtual ISCycleBaseConfig,
                          public virtual SCycleBaseBase {
@@ -112,12 +112,16 @@ protected:
    void DeclareProperty( const std::string& name, int& value );
    /// Declare a <strong>double</strong> property
    void DeclareProperty( const std::string& name, double& value );
+   /// Declare a <strong>bool</strong> property
+   void DeclareProperty( const std::string& name, bool& value );
    /// Declare a <strong>std::vector<std::string></strong> property
    void DeclareProperty( const std::string& name, std::vector< std::string >& value );
    /// Declare a <strong>std::vector<int></strong> property
    void DeclareProperty( const std::string& name, std::vector< int >& value );
    /// Declare a <strong>std::vector<double></strong> property
    void DeclareProperty( const std::string& name, std::vector< double >& value );
+   /// Declare a <strong>std::vector<bool></strong> property
+   void DeclareProperty( const std::string& name, std::vector< bool >& value );
 
 private:
    //
@@ -126,6 +130,9 @@ private:
    void InitializeInputData( TXMLNode* ) throw( SError );
    void InitializeUserConfig( TXMLNode* ) throw( SError );
    void CheckForMultipleInputData() throw ( SError );
+
+   /// Function for decoding a string to bool:
+   bool ToBool( const std::string& value ) throw( SError );
 
    //
    // Properties set on the cycle level:
@@ -141,9 +148,11 @@ private:
    std::map< const std::string, std::string* >                m_stringPrefs;
    std::map< const std::string, int* >                        m_intPrefs;
    std::map< const std::string, double* >                     m_doublePrefs;
+   std::map< const std::string, bool* >                       m_boolPrefs;
    std::map< const std::string, std::vector< std::string >* > m_stringListPrefs;
    std::map< const std::string, std::vector< int >* >         m_intListPrefs;
    std::map< const std::string, std::vector< double >* >      m_doubleListPrefs;
+   std::map< const std::string, std::vector< bool >* >        m_boolListPrefs;
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseConfig, 0 );

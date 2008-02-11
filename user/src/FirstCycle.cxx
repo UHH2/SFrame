@@ -1,4 +1,4 @@
-// $Id: FirstCycle.cxx,v 1.2 2008-02-01 14:31:13 krasznaa Exp $
+// $Id: FirstCycle.cxx,v 1.3 2008-02-11 14:03:48 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User
@@ -28,9 +28,11 @@ FirstCycle::FirstCycle()
    DeclareProperty( "TestString", m_stringVariable );
    DeclareProperty( "TestInt", m_intVariable );
    DeclareProperty( "TestDouble", m_doubleVariable );
+   DeclareProperty( "TestBool", m_boolVariable );
    DeclareProperty( "TestIntVector", m_intVecVariable );
    DeclareProperty( "TestDoubleVector", m_doubleVecVariable );
    DeclareProperty( "TestStringVector", m_stringVecVariable );
+   DeclareProperty( "TestBoolVector", m_boolVecVariable );
    DeclareProperty( "RecoTreeString", m_RecoTreeName );
 
 }
@@ -50,6 +52,8 @@ void FirstCycle::BeginCycle() throw( SError ) {
             << SLogger::endmsg;
    m_logger << INFO << "Value of double property: " << m_doubleVariable
             << SLogger::endmsg;
+   m_logger << INFO << "Value of bool property  : " << ( m_boolVariable ? "true" : "false" )
+            << SLogger::endmsg;
    m_logger << INFO << "Values of int vector property   : ";
    for( std::vector< int >::const_iterator it = m_intVecVariable.begin();
         it != m_intVecVariable.end(); ++it ) {
@@ -66,6 +70,12 @@ void FirstCycle::BeginCycle() throw( SError ) {
    for( std::vector< std::string >::const_iterator it = m_stringVecVariable.begin();
         it != m_stringVecVariable.end(); ++it ) {
       m_logger << *it << "; ";
+   }
+   m_logger << SLogger::endmsg;
+   m_logger << INFO << "Values of bool vector property: ";
+   for( std::vector< bool >::const_iterator it = m_boolVecVariable.begin();
+        it != m_boolVecVariable.end(); ++it ) {
+      m_logger << ( *it ? "true" : "false" ) << "; ";
    }
    m_logger << SLogger::endmsg;
 

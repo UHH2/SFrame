@@ -96,9 +96,11 @@
       <Item Name="TestString" Value="It works!" />
       <Item Name="TestInt" Value="666" />
       <Item Name="TestDouble" Value="3.141592" />
+      <Item Name="TestBool" Value="True" />
       <Item Name="TestIntVector" Value="5 4 3 2 1" />
       <Item Name="TestDoubleVector" Value="3.141592 2.718281" />
       <Item Name="TestStringVector" Value="one two three" />
+      <Item Name="TestBoolVector" Value="True False 1 0" />
       <Item Name="RecoTreeString" Value="FullRec0" />
     </UserConfig>
 
