@@ -1,3 +1,9 @@
+2008.02.14. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Now SCycleBaseNTuple opens the input files through
+	  TFile::Open(...) rather than creating a TFile object
+	  itself. According to Wolfgang, SFrame should play more
+	  nicely with dCache and Castor like this...
+
 2008.02.11. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added new type of property: bool
 	  Such properties can now be used in the same way as all

@@ -1,4 +1,4 @@
-// $Id: SCycleBaseNTuple.cxx,v 1.3 2008-01-25 14:33:54 krasznaa Exp $
+// $Id: SCycleBaseNTuple.cxx,v 1.4 2008-02-14 17:55:45 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -342,7 +342,7 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,  Long64
  */
 TFile* SCycleBaseNTuple::OpenInputFile( const char* filename ) throw( SError ) {
 
-   TFile* file = new TFile( filename );
+   TFile* file = TFile::Open( filename );
    if( ! file || file->IsZombie() ) {
       SError error( SError::SkipFile );
       error << "Failed to open input file " << filename;
