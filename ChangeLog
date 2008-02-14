@@ -1,3 +1,17 @@
+2008.02.15. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added new python script/module.
+	  (sframe_create_cycle.py/CycleCreators.py) They can be
+	  used to quickly add a new analysis cycle to an already
+	  existing user library.
+
+	  There has been such code in the old SFrame CVS tree,
+	  but that never got updated to the new features.
+	  This implementation is maybe a little shorter, but
+	  not by much... :-P
+	* Added Wolfgang's suggestion to
+	  SCycleBaseNTuple::OpenInputFile.
+	* Tagging as SFrame-02-01-04
+
 2008.02.11. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Extended SCycleBaseConfig
 	* Fixed compilation problem from SCycleBaseNTuple
