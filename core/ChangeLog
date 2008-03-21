@@ -1,3 +1,7 @@
+2008.03.21. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added libutil to the list of libraries that sframe_main
+	  is lined against. (Needed when compiling with gcc >=4.1)
+
 2008.02.14. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Now SCycleBaseNTuple opens the input files through
 	  TFile::Open(...) rather than creating a TFile object

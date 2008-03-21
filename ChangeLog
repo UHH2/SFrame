@@ -1,3 +1,7 @@
+2008.03.21. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Now linking sframe_main against libutil
+	* Tagging as SFrame-02-01-05
+
 2008.02.15. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added new python script/module.
 	  (sframe_create_cycle.py/CycleCreators.py) They can be
