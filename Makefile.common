@@ -1,5 +1,5 @@
  # Dear emacs, this is a -*- makefile -*-
- # $Id: Makefile.common,v 1.4 2008-07-30 14:32:57 krasznaa Exp $
+ # $Id: Makefile.common,v 1.5 2008-07-30 14:49:49 krasznaa Exp $
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  #                                                                         #
@@ -35,14 +35,18 @@ ARCH_LOC_3 := $(wildcard $(shell root-config --prefix)/share/doc/root/test/Makef
 ifneq ($(strip $(ARCH_LOC_1)),)
   $(info Using $(ARCH_LOC_1))
   include $(ARCH_LOC_1)
-else ifneq ($(strip $(ARCH_LOC_2)),)
-  $(info Using $(ARCH_LOC_2))
-  include $(ARCH_LOC_2)
-else ifneq ($(strip $(ARCH_LOC_3)),)
-  $(info Using $(ARCH_LOC_3))
-  include $(ARCH_LOC_3)
 else
-  $(error Could not find Makefile.arch!)
+  ifneq ($(strip $(ARCH_LOC_2)),)
+    $(info Using $(ARCH_LOC_2))
+    include $(ARCH_LOC_2)
+  else
+    ifneq ($(strip $(ARCH_LOC_3)),)
+      $(info Using $(ARCH_LOC_3))
+      include $(ARCH_LOC_3)
+    else
+      $(error Could not find Makefile.arch!)
+    endif
+  endif
 endif
 
 # Some compilation options
