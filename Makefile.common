@@ -1,5 +1,5 @@
  # Dear emacs, this is a -*- makefile -*-
- # $Id: Makefile.common,v 1.3 2008-02-04 15:48:48 krasznaa Exp $
+ # $Id: Makefile.common,v 1.4 2008-07-30 14:32:57 krasznaa Exp $
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  #                                                                         #
@@ -31,16 +31,18 @@ MAKEFLAGS = --no-print-directory -r -s -j2
 #
 ARCH_LOC_1 := $(wildcard $(shell root-config --prefix)/test/Makefile.arch)
 ARCH_LOC_2 := $(wildcard $(shell root-config --prefix)/share/root/test/Makefile.arch)
-ifeq ($(strip $(ARCH_LOC_1)),)
-ifeq ($(strip $(ARCH_LOC_2)),)
-$(error Could not find Makefile.arch!)
+ARCH_LOC_3 := $(wildcard $(shell root-config --prefix)/share/doc/root/test/Makefile.arch)
+ifneq ($(strip $(ARCH_LOC_1)),)
+  $(info Using $(ARCH_LOC_1))
+  include $(ARCH_LOC_1)
+else ifneq ($(strip $(ARCH_LOC_2)),)
+  $(info Using $(ARCH_LOC_2))
+  include $(ARCH_LOC_2)
+else ifneq ($(strip $(ARCH_LOC_3)),)
+  $(info Using $(ARCH_LOC_3))
+  include $(ARCH_LOC_3)
 else
-$(info Using $(ARCH_LOC_2))
-include $(ARCH_LOC_2)
-endif
-else
-$(info Using $(ARCH_LOC_1))
-include $(ARCH_LOC_1)
+  $(error Could not find Makefile.arch!)
 endif
 
 # Some compilation options
@@ -87,9 +89,9 @@ $(DICTOBJ): $(DICTFILE)
 	$(CXX) $(CXXFLAGS) -g -O2 -c $(INCLUDES) -o $@ $<
 
 # Rule that creates various symbolic links
-setlinks:
-	if [[ ( `root-config --platform` == "macosx" ) && \
-			( ! -e $(SFRAME_LIB_PATH)/lib$(LIBRARY).so ) ]]; then \
+setlinks: $(SHLIBFILE)
+	if [ `root-config --platform` = "macosx" -a \
+        ! -e $(SFRAME_LIB_PATH)/lib$(LIBRARY).so ]; then \
 		echo "Linking $(SHLIBFILE) to $(SFRAME_LIB_PATH)/lib$(LIBRARY).so"; \
 		ln -s $(SHLIBFILE) $(SFRAME_LIB_PATH)/lib$(LIBRARY).so; \
 	fi
