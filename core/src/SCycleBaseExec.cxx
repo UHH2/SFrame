@@ -1,4 +1,4 @@
-// $Id: SCycleBaseExec.cxx,v 1.3 2008-02-08 16:21:10 krasznaa Exp $
+// $Id: SCycleBaseExec.cxx,v 1.4 2008-10-14 09:45:26 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -120,10 +120,12 @@ void SCycleBaseExec::ExecuteInputData() throw( SError ) {
          // count the number of events processed for this SInputData
          Long64_t nProcessedEventsForThisInputData = 0;
          Long64_t nProcessedEventsForThisInputFile = 0;
+         Long64_t nSkippedEventsForThisInputData = 0;
 
          // get the number of events to be processed for this SInputData
          Long64_t evToProcess = iD->GetNEventsMax();
          Long64_t totalEvents = iD->GetEventsTotal();
+         Long64_t skippedEvents = iD->GetNEventsSkip();
          if( evToProcess < 0 ) {
             evToProcess = totalEvents;
             m_logger << INFO << "Events to process : " << evToProcess << SLogger::endmsg;
@@ -179,19 +181,26 @@ void SCycleBaseExec::ExecuteInputData() throw( SError ) {
 
                      // stop the loop if number of processed events exceeds maxevents
                      if( nProcessedEventsForThisInputData >= evToProcess ) break;
+                     if( nSkippedEventsForThisInputData < skippedEvents ) {
+                        ++nSkippedEventsForThisInputData;
+                        throw SError( "Skipping event", SError::SkipEvent );
+                     }
 
                      // count the number of processed events in this SInputData
-                     nProcessedEventsForThisInputData++;
+                     ++nProcessedEventsForThisInputData;
 
                      // count the number of processed events in the input file
-                     nProcessedEventsForThisInputFile++;
+                     ++nProcessedEventsForThisInputFile;
 
                      // count the number of processed events in this cycle
-                     m_nProcessedEvents++;
+                     ++m_nProcessedEvents;
 
                      if( ( currentEvent % 1000 ) == 0 ) {
-                        m_logger << INFO << "Processed events: " << currentEvent << " / "
-                                 << GetNEvents() << SLogger::endmsg;
+                        m_logger << INFO << "Processing event: "
+                                 << currentEvent << " / "
+                                 << GetNEvents() << " ("
+                                 << ( nProcessedEventsForThisInputData - 1 )
+                                 << " events processed so far)" << SLogger::endmsg;
                      }
 
                      this->GetEntry( currentEvent );
@@ -452,6 +461,21 @@ void SCycleBaseExec::CheckInputFiles( SInputData& iD ) throw( SError ) {
       if( file ) delete file;
    }
 
+   //
+   // Check that the specified maximum number of events and the number of events to
+   // skip, make sense:
+   //
+   if( iD.GetNEventsSkip() + iD.GetNEventsMax() > iD.GetEventsTotal() ) {
+      if( iD.GetNEventsSkip() >= iD.GetEventsTotal() ) {
+         iD.SetNEventsMax( 0 );
+      } else {
+         iD.SetNEventsMax( iD.GetEventsTotal() - iD.GetNEventsSkip() );
+      }
+   }
+
+   //
+   // Print some status:
+   //
    m_logger << INFO << "Input type \"" << iD.GetType() << "\" version \"" 
             << iD.GetVersion() << "\" : " << iD.GetEventsTotal() << " events" 
             << SLogger::endmsg;

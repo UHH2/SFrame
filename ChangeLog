@@ -1,6 +1,6 @@
 2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added new XML property for <InputData>, "NEventsSkip".
-	* Tagging as SFrame-02-01-06
+	* Tagging as SFrame-02-01-07
 
 2008.03.21. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Now linking sframe_main against libutil

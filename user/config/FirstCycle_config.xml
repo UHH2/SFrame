@@ -46,8 +46,13 @@
     <!--             the weights of the events are adapted.                       -->
     <!--             For final plots, i.e. maximum statistics, NEventsMax         -->
     <!--             shouldn't be used.                                           -->
+    <!-- NEventsSkip: optional, specifies the number of events that should be     -->
+    <!--              disregarded at the beginning of the InputData.              -->
+    <!--                                                                          -->
+    <!-- Some run-time checking is done on these parameters that they would make  -->
+    <!-- sense, but in general be careful when using them.                        -->
 
-    <InputData Type="Data1" Version="Reco" Lumi="0." NEventsMax="2000">
+    <InputData Type="Data1" Version="Reco" Lumi="0." NEventsMax="2000" NEventsSkip="2000" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting.                                                     -->

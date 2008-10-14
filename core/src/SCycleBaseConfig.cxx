@@ -1,4 +1,4 @@
-// $Id: SCycleBaseConfig.cxx,v 1.4 2008-02-11 14:03:48 krasznaa Exp $
+// $Id: SCycleBaseConfig.cxx,v 1.5 2008-10-14 09:45:26 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -264,6 +264,8 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
          inputData.SetTotalLumi( atof( curAttr->GetValue() ) );
       if( curAttr->GetName() == TString( "NEventsMax" ) ) 
          inputData.SetNEventsMax( atoi( curAttr->GetValue() ) );
+      if( curAttr->GetName() == TString( "NEventsSkip" ) ) 
+         inputData.SetNEventsSkip( atoi( curAttr->GetValue() ) );
    }
 
    TXMLNode* child = node->GetChildren();

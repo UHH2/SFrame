@@ -43,6 +43,7 @@
         Version              (Reco|AtlFast)   "Reco"
         Lumi                 CDATA            "0.0"
         NEventsMax           CDATA            "-1"
+        NEventsSkip          CDATA            "0"
 >
 
 <!ELEMENT GeneratorCut EMPTY>

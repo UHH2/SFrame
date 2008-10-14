@@ -1,3 +1,6 @@
+2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added example usage of "NEventsSkip" to FirstCycle_config.xml.
+
 2008.02.11. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Extended FirstCycle to give examples of how to use
 	  boolean properties.
