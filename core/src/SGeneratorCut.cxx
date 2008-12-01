@@ -1,4 +1,4 @@
-// $Id: SGeneratorCut.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
+// $Id: SGeneratorCut.cxx,v 1.2.2.1 2008-12-01 14:52:57 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -12,6 +12,10 @@
 
 // Local include(s):
 #include "../include/SGeneratorCut.h"
+
+#ifndef DOXYGEN_IGNORE
+ClassImp( SGeneratorCut );
+#endif // DOXYGEN_IGNORE
 
 /**
  * Not much to say about the constructor. It just initialises the member

@@ -1,4 +1,4 @@
-// $Id: SInputData.cxx,v 1.4 2008-10-14 09:45:26 krasznaa Exp $
+// $Id: SInputData.cxx,v 1.4.2.1 2008-12-01 14:52:57 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -12,6 +12,13 @@
 
 // Local include(s):
 #include "../include/SInputData.h"
+
+#ifndef DOXYGEN_IGNORE
+ClassImp( SFile );
+ClassImp( STree );
+ClassImp( SEVTree );
+ClassImp( SInputData );
+#endif // DOXYGEN_IGNORE
 
 using namespace std;
 
@@ -161,10 +168,10 @@ Bool_t SEVTree::operator!= ( const SEVTree& rh ) const {
 /**
  * The constructor initialises all member data to some initial value.
  */
-SInputData::SInputData()
-   : m_type( "unknown" ), m_version( 0 ), m_totalLumiGiven( 0 ),
-     m_totalLumiSum( 0 ), m_eventsTotal( 0 ), m_neventsmax( -1 ),
-     m_neventsskip( 0 ), m_logger( "SInputData" ) {
+SInputData::SInputData( const char* name )
+   : TNamed( name, "SFrame input data object" ), m_type( "unknown" ),
+     m_version( 0 ), m_totalLumiGiven( 0 ), m_totalLumiSum( 0 ),
+     m_eventsTotal( 0 ), m_neventsmax( -1 ), m_logger( "SInputData" ) {
 
    m_logger << VERBOSE << "In constructor" << SLogger::endmsg;
 }
@@ -237,7 +244,6 @@ SInputData& SInputData::operator= ( const SInputData& parent ) {
    this->m_totalLumiSum = parent.m_totalLumiSum;
    this->m_eventsTotal = parent.m_eventsTotal;
    this->m_neventsmax = parent.m_neventsmax;
-   this->m_neventsskip = parent.m_neventsskip;
 
    return *this;
 
@@ -263,8 +269,7 @@ Bool_t SInputData::operator== ( const SInputData& rh ) const {
        ( this->m_outputTrees == rh.m_outputTrees ) &&
        ( this->m_totalLumiSum == rh.m_totalLumiSum ) &&
        ( this->m_eventsTotal == rh.m_eventsTotal ) &&
-       ( this->m_neventsmax == rh.m_neventsmax ) &&
-       ( this->m_neventsskip == rh.m_neventsskip ) ) {
+       ( this->m_neventsmax == rh.m_neventsmax ) ) {
       return kTRUE;
    } else {
       return kFALSE;
@@ -299,7 +304,6 @@ void SInputData::print() const {
    m_logger << " Version            : " << GetVersion() << endl;
    m_logger << " Total luminosity   : " << GetTotalLumi() << "pb-1" << endl;
    m_logger << " NEventsMax         : " << GetNEventsMax() << endl;
-   m_logger << " NEventsSkip        : " << GetNEventsSkip() << endl;
 
    for( vector< SGeneratorCut >::const_iterator gc = m_gencuts.begin();
         gc != m_gencuts.end(); ++gc )

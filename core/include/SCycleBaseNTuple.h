@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.h,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
+// $Id: SCycleBaseNTuple.h,v 1.3.2.1 2008-12-01 14:52:56 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -21,8 +21,9 @@
 #include <list>
 
 // Local include(s):
+#include "ISCycleBaseConfig.h"
 #include "ISCycleBaseNTuple.h"
-#include "SCycleBaseConfig.h"
+#include "SCycleBaseBase.h"
 #include "SError.h"
 
 // Forward declaration(s):
@@ -41,10 +42,11 @@ class SInputData;
  *          are hidden from the user by that class. (A little
  *          C++ magic...)
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
-class SCycleBaseNTuple : public virtual ISCycleBaseNTuple,
-                         public virtual SCycleBaseConfig {
+class SCycleBaseNTuple : public virtual ISCycleBaseConfig,
+                         public virtual ISCycleBaseNTuple,
+                         public virtual SCycleBaseBase {
 
 public:
    /// Default constructor
@@ -52,15 +54,14 @@ public:
    /// Default destructor
    virtual ~SCycleBaseNTuple();
 
+   virtual void SetNTupleOutput( TList* output );
+   virtual TList* GetNTupleOutput() const;
+
 protected:
    /// Connect an input variable
    template< typename T >
    void ConnectVariable( const char* treeName, const char* branchName,
                          T& variable ) throw ( SError );
-   /// Connect an input variable that is available in multiple views
-   template< typename T >
-   const Int_t* ConnectEventViewVariable( const char* baseName, const char* branchName,
-                                          std::vector< T >& variables ) throw( SError );
 
    /// Declare an output variable
    template< class T >
@@ -73,58 +74,30 @@ protected:
    //                                                      //
    //////////////////////////////////////////////////////////
 
-   /// Open the output file and create the output trees
-   void CreateOutputTrees( const SInputData&, std::vector< TTree* >&, TFile*& ) throw( SError );
-   /// Open the input file and load the input trees
-   void LoadInputTrees( const SInputData&, const std::string&, TFile*& ) throw( SError );
+   /// Create the output trees
+   void CreateOutputTrees( const SInputData& id,
+                           std::vector< TTree* >& outTrees ) throw( SError );
+   /// Load the input trees
+   void LoadInputTrees( const SInputData& id, TTree* main_tree ) throw( SError );
    /// Read in the event from the "normal" trees
-   void GetEntry( Long64_t entry ) throw( SError );
-   /// Return the number of events in the currently open file
-   Long64_t GetNEvents() const { return m_nEvents; }
+   void GetEvent( Long64_t entry ) throw( SError );
    /// Calculate the weight of the current event
    Double_t CalculateWeight( const SInputData& inputData, Long64_t entry );
-   /// Open an input file
-   TFile* OpenInputFile( const char* filename ) throw( SError );
-   /// Return the name of the active output file
-   const char* GetOutputFileName() const { return m_outputFileName; }
 
 private:
    static const char* RootType( const char* typeid_type );
-   TTree* GetTree( const std::string& treeName ) throw( SError );
+   TTree* GetInputTree( const std::string& treeName ) throw( SError );
+   TTree* GetOutputTree( const std::string& treeName ) throw( SError );
    void RegisterInputBranch( TBranch* br ) throw( SError );
-   /// Initialise the EventView tree synchronisation
-   void ConnectEVSyncVariable() throw( SError );
-   /// Synchronise the EventView trees to the current event
-   void SyncEVTrees() throw( SError );
 
    //
-   // These are the objects used to handle the input data:
+   // These are the objects used to handle the input and output data:
    //
-   std::vector< TTree* >             m_inputTrees; // List of input TTree pointers
-   std::vector< TTree* >             m_EVinputTrees; // List of input EV TTree pointers
-   std::map< TTree*, Int_t >         m_EVInTreeToCounters; // Map storing the last loaded entry for all EV trees
-   std::map< TTree*, std::string >   m_EVInTreeToCollTreeName; // Map storing the name of the collection tree
-                                                               // for each EV tree
-   std::map< TTree*, std::string >   m_EVInTreeToBaseName; // Map storing the base name of the EV trees
-   std::map< TTree*, Int_t >         m_EVInTreeToViewNumber; // Map storing the "view number" of the EV trees
-   std::map< std::string, Int_t >    m_EVBaseNameToCollVar; // Map associating "view groups" to a collection
-                                                            // tree variable
-
-   std::vector< TBranch* > m_inputBranches; // map of input branch pointers registered for the
-                                            // current cycle
-   std::map< TBranch*, std::string > m_EVInputBranchesToBaseName; // map to hold branch pointers and basename for 
-                                                                  // EV variables registered for the current cycle
-   std::map< TBranch*, Int_t >       m_EVInputBranchesToViewNumber; // map to hold branch pointers and basename for 
-                                                                    // EV variables registered for the current cycle
-
+   std::vector< TTree* >   m_inputTrees; // List of input TTree pointers
+   std::vector< TBranch* > m_inputBranches; // vector of input branch pointers
+                                            // registered for the current cycle
    // Vector to hold the output trees
    std::vector< TTree* > m_outputTrees;
-
-   // Number of events in the input file:
-   Long64_t m_nEvents;
-
-   // Name of the output file:
-   TString m_outputFileName;
 
    // We have to keep the pointers to the output variables defined by the user.
    // ROOT keeps track of the objects by storing pointers to pointers to the
@@ -133,9 +106,13 @@ private:
    // pointer issue by itself...
    std::list< void* > m_outputVarPointers;
 
+   TList* m_output;
+
+   /*
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseNTuple, 0 );
 #endif // DOXYGEN_IGNORE
+   */
 
 }; // class SCycleBaseNTuple
 

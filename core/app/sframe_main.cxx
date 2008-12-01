@@ -1,4 +1,4 @@
-// $Id: sframe_main.cxx,v 1.3 2008-02-01 14:22:00 krasznaa Exp $
+// $Id: sframe_main.cxx,v 1.3.2.1 2008-12-01 14:52:56 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -19,6 +19,9 @@
 #include <string>
 #include <iostream>
 
+// ROOT include(s):
+#include <TROOT.h>
+
 // SFrame include(s):
 #include "../include/SCycleController.h"
 #include "../include/SError.h"
@@ -38,6 +41,8 @@ int main( int argc, char** argv ) {
    }
 
    const char* filename = argv[ 1 ];
+
+   gROOT->SetBatch( kTRUE );
 
    try { // This is where I catch anything not handled internally...
 

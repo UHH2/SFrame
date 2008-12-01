@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseExec.h,v 1.1 2008-01-25 14:33:53 krasznaa Exp $
+// $Id: SCycleBaseExec.h,v 1.1.2.1 2008-12-01 14:52:56 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -14,12 +14,21 @@
 #ifndef SFRAME_CORE_SCycleBaseExec_H
 #define SFRAME_CORE_SCycleBaseExec_H
 
+// STL include(s):
+#include <vector>
+
+// ROOT include(s):
+#include <TSelector.h>
+
 // Local include(s):
 #include "ISCycleBaseConfig.h"
-#include "ISCycleBaseNTuple.h"
 #include "ISCycleBaseHist.h"
-#include "ISCycleBaseExec.h"
+#include "ISCycleBaseNTuple.h"
 #include "SCycleBaseBase.h"
+
+// Forward declaration(s):
+class TTree;
+class SInputData;
 
 /**
  *   @short The SCycleBase constituent responsible for running the cycle
@@ -30,12 +39,12 @@
  *          (like SCycleBaseNTuple for ARA) can be exchanged for another
  *          one.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
-class SCycleBaseExec : public virtual ISCycleBaseConfig,
-                       public virtual ISCycleBaseNTuple,
+class SCycleBaseExec : public TSelector,
+                       public virtual ISCycleBaseConfig,
                        public virtual ISCycleBaseHist,
-                       public virtual ISCycleBaseExec,
+                       public virtual ISCycleBaseNTuple,
                        public virtual SCycleBaseBase {
 
 public:
@@ -43,9 +52,6 @@ public:
    SCycleBaseExec();
    /// Default destructor
    virtual ~SCycleBaseExec();
-
-   /// Loop over all SInputData
-   void ExecuteInputData() throw( SError );
 
    /// Number of events processed already
    /**
@@ -57,11 +63,42 @@ public:
 
    ///////////////////////////////////////////////////////////////////////////
    //                                                                       //
+   //   The following are the functions inherited from TSelector.           //
+   //                                                                       //
+   ///////////////////////////////////////////////////////////////////////////
+
+   virtual void   Begin( TTree* );
+   virtual void   SlaveBegin( TTree* );
+   virtual void   Init( TTree* main_tree );
+   virtual Bool_t Notify();
+   virtual Bool_t Process( Long64_t entry );
+   virtual void   SlaveTerminate();
+   virtual void   Terminate();
+   /// Function declaring the version of the selector
+   virtual Int_t  Version() const { return 2; }
+
+   ///////////////////////////////////////////////////////////////////////////
+   //                                                                       //
    //   The following are the functions to be implemented in the derived    //
    //   classes.                                                            //
    //                                                                       //
    ///////////////////////////////////////////////////////////////////////////
 
+   /// Initialisation called at the beginning of a full cycle
+   /**
+    * Analysis-wide configurations, like the setup of some reconstruction
+    * algorithm based on properties configured in XML should be done here.
+    */
+   virtual void BeginCycle() throw( SError ) = 0;
+
+   /// Finalisation called at the end of a full cycle
+   /**
+    * This is the last function called after an analysis run, so it
+    * could be a good place to print some statistics about the running,
+    * maybe close helper files (not input or output files!) used in
+    * the analysis.
+    */
+   virtual void EndCycle() throw( SError ) = 0;
    /// Initialisation called for each input data type
    /**
     * This is the place to declare the output variables for the output
@@ -92,8 +129,6 @@ public:
    virtual void ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) = 0;
 
 private:
-   void CheckInputFiles( SInputData& ) throw( SError );
-
    // The number of already processed events
    Long64_t m_nProcessedEvents;
 
@@ -101,6 +136,10 @@ private:
    // the same type, that are written to the same output file
    Bool_t m_keepOutputFile;
    Bool_t m_firstInputDataOfMany;
+
+   TTree*                m_inputTree;
+   SInputData*           m_inputData;
+   std::vector< TTree* > m_outputTrees;
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseExec, 0 );

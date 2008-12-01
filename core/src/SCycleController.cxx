@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.6 2008-02-01 14:22:01 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.6.2.1 2008-12-01 14:52:56 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -26,10 +26,15 @@
 #include "TList.h"
 #include "TROOT.h"
 #include "TPython.h"
+#include <TChain.h>
+#include <TList.h>
+#include <TFile.h>
+#include <TProof.h>
+#include <TDSet.h>
 
 // Local include(s):
 #include "../include/SCycleController.h"
-#include "../include/ISCycleBase.h"
+#include "../include/SCycleBase.h"
 #include "../include/SLogWriter.h"
 
 #ifndef DOXYGEN_IGNORE
@@ -46,20 +51,27 @@ ClassImp( SCycleController );
  */
 SCycleController::SCycleController( const TString& xmlConfigFile )
    : m_curCycle( 0 ), m_isInitialized( kFALSE ), m_xmlConfigFile( xmlConfigFile ),
-     m_logger( this ) {
+     m_proof( 0 ), m_logger( this ) {
 
 }
 
 /**
  * This destructor actually does something. (Yay!)
  * It deletes all the analysis cycles that have been created from the
- * configuration in the XML file.
+ * configuration in the XML file, and closes the connection to the
+ * PROOF server.
  */
 SCycleController::~SCycleController() {
 
-   std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
+   std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it) {
       delete ( *it );
+   }
+
+   if( m_proof ) {
+      TProofMgr* mgr = m_proof->GetManager();
+      delete m_proof;
+      delete mgr;
    }
 
 }
@@ -84,6 +96,7 @@ void SCycleController::Initialize() throw( SError ) {
    // first clean up everything in case this is called multiple times
    m_curCycle = 0;
    this->DeleteAllAnalysisCycles();
+   m_parPackages.clear();
 
    // --------------- xml read
    m_logger << INFO << "read xml file: '" << m_xmlConfigFile << "'" << SLogger::endmsg;
@@ -149,50 +162,28 @@ void SCycleController::Initialize() throw( SError ) {
             if( nodes->GetNodeName() == TString( "Cycle" ) ) {
 
                std::string cycleName = "";
-               TString outputdirectory = "";
-               TString postfix = "";
-               Double_t targetlumi= 0.;
 
                attribIt = nodes->GetAttributes();
                curAttr = 0;
                while ( ( curAttr = dynamic_cast< TXMLAttr* >( attribIt() ) ) != 0 ) {
                   if( curAttr->GetName() == TString( "Name" ) )
                      cycleName = curAttr->GetValue();
-                  else if( curAttr->GetName() == TString( "OutputDirectory" ) )
-                     outputdirectory = curAttr->GetValue();
-                  else if( curAttr->GetName() == TString( "PostFix" ) )
-                     postfix = curAttr->GetValue();
-                  else if( curAttr->GetName() == TString( "TargetLumi" ) )
-                     targetlumi = atof ( curAttr->GetValue() );
                }
 
                TClass* cycleClass = gROOT->GetClass( cycleName.c_str(), true );
-               if( ! cycleClass || ! cycleClass->InheritsFrom( "ISCycleBase" ) ) {
+               if( ! cycleClass || ! cycleClass->InheritsFrom( "SCycleBase" ) ) {
                   SError error( SError::SkipCycle );
                   error << "Loading of class \"" << cycleName << "\" failed";
                   throw error;
                }
 
-               ISCycleBase* cycle = reinterpret_cast< ISCycleBase* >( cycleClass->New() );
-               cycle->SetOutputDirectory( outputdirectory );
-               cycle->SetPostFix( postfix );
-               cycle->SetTargetLumi( targetlumi );
+               SCycleBase* cycle = reinterpret_cast< SCycleBase* >( cycleClass->New() );
 
-               m_logger << INFO << "Found cycle '" << cycleName <<"' with"<< SLogger::endmsg;
-               m_logger << INFO << "OutputDirectory '" << outputdirectory 
-                        << "'; PostFix = '" << postfix 
-                        << "'; targetlumi = " << targetlumi << SLogger::endmsg;
+               m_logger << INFO << "Created cycle '" << cycleName << "'"
+                        << SLogger::endmsg;
 
-               TXMLNode* xmlNode = nodes->GetChildren();
-               if( xmlNode != 0 ) {
-                  cycle->Initialize( xmlNode );
-                  this->AddAnalysisCycle( cycle );
-               } else {
-                  SError error( SError::SkipCycle );
-                  error << "Cycle xml node \"" << nodes->GetNodeName()
-                        << "\" has no children";
-                  throw error;
-               }
+               cycle->Initialize( nodes );
+               this->AddAnalysisCycle( cycle );
 
             } else if( nodes->GetNodeName() == TString( "Library" ) ) {
 
@@ -205,12 +196,14 @@ void SCycleController::Initialize() throw( SError ) {
                }
                m_logger << VERBOSE << "Trying to load library \"" << libraryName << "\""
                         << SLogger::endmsg;
-               if( ! gSystem->Load( libraryName.c_str() ) ) {
+               int ret = 0;
+               if( ( ret = gSystem->Load( libraryName.c_str() ) ) >= 0 ) {
                   m_logger << DEBUG << "Library loaded: \"" << libraryName << "\"" 
                            << SLogger::endmsg;
                } else {
                   SError error( SError::StopExecution );
-                  error << "Library failed to load: \"" << libraryName << "\"";
+                  error << "Library failed to load: \"" << libraryName
+                        << "\"\nRet. Val.: " << ret;
                   throw error;
                }
 
@@ -223,13 +216,27 @@ void SCycleController::Initialize() throw( SError ) {
                   if( curAttr->GetName() == TString( "Name" ) )
                      libraryName = curAttr->GetValue();
                }
-               m_logger << DEBUG << "Trying to load python library \"" << libraryName << "\""
-                        << SLogger::endmsg;
+               m_logger << DEBUG << "Trying to load python library \"" << libraryName
+                        << "\"" << SLogger::endmsg;
 
                std::ostringstream command;
                command << "import " << libraryName;
 
                TPython::Exec( command.str().c_str() );
+
+            } else if( nodes->GetNodeName() == TString( "Package" ) ) {
+
+               TString packageName;
+               attribIt = nodes->GetAttributes();
+               curAttr = 0;
+               while ( ( curAttr = dynamic_cast< TXMLAttr* >( attribIt() ) ) != 0 ) {
+                  if( curAttr->GetName() == TString( "Name" ) )
+                     packageName = curAttr->GetValue();
+               }
+               m_logger << DEBUG << "Using PROOF ARchive package: " << packageName
+                        << SLogger::endmsg;
+
+               m_parPackages.push_back( packageName );
 
             }
 
@@ -308,7 +315,7 @@ void SCycleController::ExecuteAllCycles() throw( SError ) {
 
    m_logger << INFO << "entering ExecuteAllCycles()" << SLogger::endmsg;
 
-   std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
+   std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it ) {
       this->ExecuteNextCycle();
    }
@@ -326,10 +333,6 @@ void SCycleController::ExecuteAllCycles() throw( SError ) {
  */
 void SCycleController::ExecuteNextCycle() throw( SError ) {
 
-   std::string cycleName = m_analysisCycles.at( m_curCycle )->GetName();
-   m_logger << INFO << "Executing Cycle #" << m_curCycle << " ('" << cycleName << "')"
-            << SLogger::endmsg;
-
    if( ! m_isInitialized ) {
       throw SError( "SCycleController is not initialized",
                     SError::StopExecution );
@@ -342,26 +345,156 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
    ProcInfo_t mem_before;
    gSystem->GetProcInfo( &mem_before );
 
-   try {
+   SCycleBase* cycle     = m_analysisCycles.at( m_curCycle );
+   std::string cycleName = cycle->GetName();
 
-      m_analysisCycles.at( m_curCycle )->BeginCycle();
-      m_analysisCycles.at( m_curCycle )->ExecuteInputData();
-      m_analysisCycles.at( m_curCycle )->EndCycle();
+   SCycleConfig config = cycle->GetConfig();
+   config.SetName( "CycleConfig" );
 
-      m_logger << INFO << "Executed Cycle #" << m_curCycle << " ('" << cycleName << "')"
+   m_logger << INFO << "Executing Cycle #" << m_curCycle << " ('" << cycleName << "') "
+            << ( config.GetRunMode() == SCycleConfig::LOCAL ? "locally" :
+                 "on PROOF" )
+            << SLogger::endmsg;
+
+   if( config.GetRunMode() == SCycleConfig::PROOF ) {
+      //
+      // Connect to the PROOF server:
+      //
+      InitProof( config.GetProofServer() );
+
+      //
+      // Upload and compile all the packages specified in the configuration:
+      //
+      for( std::vector< TString >::const_iterator package = m_parPackages.begin();
+           package != m_parPackages.end(); ++package ) {
+         TString pkg = *package;
+         m_logger << VERBOSE << "Uploading package: " << pkg << SLogger::endmsg;
+         m_proof->UploadPackage( pkg );
+
+         Ssiz_t slash_pos = pkg.Last( '/' );
+         pkg.Remove( 0, slash_pos + 1 );
+         if( pkg.EndsWith( ".par", TString::kIgnoreCase ) ) {
+            pkg.Remove( pkg.Length() - 4, 4 );
+         }
+
+         m_logger << DEBUG << "Enabling package: " << pkg << SLogger::endmsg;
+         m_proof->EnablePackage( pkg, kTRUE );
+
+      }
+   } else {
+      //
+      // Shut down a possibly open connection:
+      //
+      ShutDownProof();
+   }
+
+   for( SCycleConfig::id_type::const_iterator id = config.GetInputData().begin();
+        id != config.GetInputData().end(); ++id ) {
+
+      if( ! id->GetInputTrees().size() ) {
+         throw SError( "No input trees defined", SError::SkipCycle );
+      }
+
+      m_logger << INFO << "Processing input data: " << id->GetType()
                << SLogger::endmsg;
 
-   } catch( const SError& error ) {
-      //
-      // This is where I catch "cycle level" problems:
-      //
-      if( error.request() <= SError::SkipCycle ) {
-         m_logger << ERROR << "Caught exception in  Cycle #" << m_curCycle
-                  << " ('" << cycleName << "')" << SLogger::endmsg;
-         m_logger << ERROR << "Message: " << error.what() << SLogger::endmsg;
-      } else {
-         throw;
+      SInputData inputData = *id;
+      inputData.SetName( "CurrentInputData" );
+
+      TChain chain( id->GetInputTrees().at( 0 ).treeName );
+      for( std::vector< SFile >::const_iterator file = id->GetSFileIn().begin();
+           file != id->GetSFileIn().end(); ++file ) {
+         chain.Add( file->file );
       }
+
+      Long64_t evmax = ( id->GetNEventsMax() == -1 ? 100000000 :
+                         id->GetNEventsMax() );
+      TList* outputs = 0;
+
+      if( config.GetRunMode() == SCycleConfig::LOCAL ) {
+
+         TList list;
+         list.Add( &config );
+         list.Add( &inputData );
+         cycle->SetInputList( &list );
+
+         chain.Process( cycle, "", evmax );
+         outputs = cycle->GetOutputList();
+
+         /*
+         m_logger << INFO << "Writing output of \"" << cycle->GetName() << "\" to: "
+                  << filename << SLogger::endmsg;
+         TFile outputFile( filename, "RECREATE" );
+
+         TList* outputs = cycle->GetOutputList();
+         for( Int_t i = 0; i < outputs->GetSize(); ++i ) {
+            SCycleOutput* output = dynamic_cast< SCycleOutput* >( outputs->At( i ) );
+            if( output ) {
+               m_logger << DEBUG << "Writing out: " << output->GetName() << SLogger::endmsg;
+               TObject* object = output->GetObject();
+               TTree* tree = 0;
+               if( ( tree = dynamic_cast< TTree* >( object ) ) ) {
+                  tree->SetDirectory( &outputFile );
+               }
+               object->Write();
+               if( tree ) {
+                  tree->SetDirectory( 0 );
+               }
+            } else {
+               outputs->At( i )->Write();
+            }
+         }
+
+         outputFile.Close();
+         outputs->Clear();
+         */
+
+      } else if( config.GetRunMode() == SCycleConfig::PROOF ) {
+
+         m_proof->ClearInput();
+         m_proof->AddInput( &config );
+         m_proof->AddInput( &inputData );
+
+         TDSet set( chain );
+         m_proof->Process( &set, cycle->GetName(), "", evmax );
+         outputs = m_proof->GetOutputList();
+
+         /*
+         m_logger << INFO << "Writing output of \"" << cycle->GetName() << "\" to: "
+                  << filename << SLogger::endmsg;
+         TFile outputFile( filename, "RECREATE" );
+
+         TList* outputs = m_proof->GetOutputList();
+         for( Int_t i = 0; i < outputs->GetSize(); ++i ) {
+            SCycleOutput* output = dynamic_cast< SCycleOutput* >( outputs->At( i ) );
+            if( output ) {
+               m_logger << DEBUG << "Writing out: " << output->GetName() << SLogger::endmsg;
+               TObject* object = output->GetObject();
+               TTree* tree = 0;
+               if( ( tree = dynamic_cast< TTree* >( object ) ) ) {
+                  tree->SetDirectory( &outputFile );
+               }
+               object->Write();
+               if( tree ) {
+                  tree->SetDirectory( 0 );
+               }
+            } else {
+               outputs->At( i )->Write();
+            }
+         }
+
+         outputFile.Close();
+         outputs->Clear();
+         */
+
+      } else {
+         throw SError( "Running mode not recognised!", SError::SkipCycle );
+      }
+
+      WriteCycleOutput( outputs, TString( cycleName.c_str() ) + "." +
+                        id->GetType() + ".root" );
+      outputs->Clear();
+
    }
 
    // Retrieve memory consumption after executing the analysis:
@@ -406,7 +539,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
  *
  * @param cycleAlg The cycle that should be added
  */
-void SCycleController::AddAnalysisCycle( ISCycleBase* cycleAlg ) {
+void SCycleController::AddAnalysisCycle( SCycleBase* cycleAlg ) {
 
    m_analysisCycles.push_back( cycleAlg );
    return;
@@ -421,7 +554,7 @@ void SCycleController::DeleteAllAnalysisCycles() {
    m_logger << INFO << "Deleting all analysis cycle algorithms from memory"
             << SLogger::endmsg;
 
-   std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
+   std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it ) {
       delete ( *it );
    }
@@ -429,4 +562,68 @@ void SCycleController::DeleteAllAnalysisCycles() {
    m_analysisCycles.clear();
 
    return;
+}
+
+void SCycleController::InitProof( const TString& server ) {
+
+   if( m_proof ) {
+      if( m_proof->GetManager()->GetUrl() == server ) return;
+      ShutDownProof();
+   }
+
+   m_logger << INFO << "Opening PROOF connection to: " << server
+            << SLogger::endmsg;
+
+   m_proof = TProof::Open( server );
+
+   return;
+
+}
+
+void SCycleController::ShutDownProof() {
+
+   if( ! m_proof ) return;
+
+   m_logger << DEBUG << "Closing PROOF connection to: "
+            << m_proof->GetManager()->GetUrl() << SLogger::endmsg;
+
+   TProofMgr* mgr = m_proof->GetManager();
+   delete m_proof;
+   delete mgr;
+
+   m_proof = 0;
+
+   return;
+
+}
+
+void SCycleController::WriteCycleOutput( TList* olist,
+                                         const TString& filename ) const {
+
+   m_logger << INFO << "Writing output of \""
+            << m_analysisCycles.at( m_curCycle )->GetName() << "\" to: "
+            << filename << SLogger::endmsg;
+
+   //
+   // Open the output file:
+   //
+   TFile outputFile( filename, "RECREATE" );
+
+   //
+   // Write out each output object:
+   //
+   for( Int_t i = 0; i < olist->GetSize(); ++i ) {
+
+      outputFile.cd();
+      olist->At( i )->Write();
+      m_logger << DEBUG << "Written object: " << olist->At( i )->GetName()
+               << SLogger::endmsg;
+
+   }
+
+   outputFile.Write();
+   outputFile.Close();
+
+   return;
+
 }

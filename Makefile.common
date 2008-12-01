@@ -1,5 +1,5 @@
  # Dear emacs, this is a -*- makefile -*-
- # $Id: Makefile.common,v 1.5 2008-07-30 14:49:49 krasznaa Exp $
+ # $Id: Makefile.common,v 1.5.2.1 2008-12-01 14:52:55 krasznaa Exp $
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  #                                                                         #
@@ -66,7 +66,7 @@ SHLIBFILE = $(SFRAME_LIB_PATH)/lib$(LIBRARY).$(DllSuf)
 UNAME = $(shell uname)
 
 # Set up the default targets
-default: shlib setlinks 
+default: shlib setlinks par
 
 # List of all header and source files to build
 HLIST   = $(filter-out $(SKIPHLIST),$(wildcard include/*.h))
@@ -99,6 +99,11 @@ setlinks: $(SHLIBFILE)
 		echo "Linking $(SHLIBFILE) to $(SFRAME_LIB_PATH)/lib$(LIBRARY).so"; \
 		ln -s $(SHLIBFILE) $(SFRAME_LIB_PATH)/lib$(LIBRARY).so; \
 	fi
+
+# Rule that creates a PAR package for this library:
+par:
+	@sframe_parMaker.py -s ./ -o $(SFRAME_LIB_PATH)/$(LIBRARY).par \
+		-i $(INCDIR) -c $(SRCDIR)
 
 ##############################
 # The dependencies section   
@@ -135,9 +140,7 @@ shlib: $(SHLIBFILE)
 
 clean:
 	rm -f $(DICTFILE) $(DICTHEAD)
-	rm -f $(SHLIBFILE)
 	rm -f $(OBJDIR)/*.o
-	rm -f $(DEPDIR)/*.d
 	rm -f $(LIBFILE)
 	rm -f $(SHLIBFILE)
 	rm -f $(DLLIBFILE)
@@ -145,14 +148,12 @@ clean:
 
 distclean:
 	rm -rf $(OBJDIR)
-	rm -f *~
+	rm -rf $(DEPDIR)
 	rm -f $(DICTFILE) $(DICTHEAD)
-	rm -f *_Dict*
-	rm -f $(DEPDIR)/*.d
-	rm -f $(SHLIBFILE)
 	rm -f $(LIBFILE)
 	rm -f $(SHLIBFILE)
 	rm -f $(DLLIBFILE)
 	rm -f $(SFRAME_LIB_PATH)/lib$(LIBRARY).so
+	rm -f $(SFRAME_LIB_PATH)/*.par
 
 .PHONY : winlib shlib lib default clean

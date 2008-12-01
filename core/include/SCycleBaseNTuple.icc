@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.icc,v 1.3 2008-02-11 14:03:47 krasznaa Exp $
+// $Id: SCycleBaseNTuple.icc,v 1.3.2.1 2008-12-01 14:52:56 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -43,7 +43,7 @@ void SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
                                         T& variable ) throw ( SError ) {
 
    // Access the TTree. The function will throw an exception if unsuccessful
-   TTree* tree = GetTree( treeName );
+   TTree* tree = GetInputTree( treeName );
    TBranch* br = 0;
 
    //
@@ -74,134 +74,6 @@ void SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 
    return;
 
-}
-
-/**
- * Function that lets the user define a variable "spreading accross" multiple
- * EventView input trees. The user has to provide the base name of the EV trees,
- * the name of the variable (branch) and a vector that will store the variables
- * from the different EV trees.
- *
- * The function returns a pointer to the variable in the "collection tree" that
- * says how many views are avaiable for a given event. (The vector will always
- * have the maximal size, but only the first n elements will be valid for the
- * actual event.)
- *
- * @warning The function has not been seriously tested yet, so beware when
- *          using it!
- */
-template< typename T >
-const Int_t* SCycleBaseNTuple::ConnectEventViewVariable( const char* baseName,
-                                                         const char* branchName,
-                                                         std::vector< T >& variables ) throw( SError ) {
-
-   variables.clear();
-
-   TTree* EVInTree = 0;
-   std::map< TTree*, std::string >::const_iterator it = m_EVInTreeToBaseName.begin();
-   for( ; it != m_EVInTreeToBaseName.end(); ++it ) {
-
-      // Search for the TTrees belonging to this "view":
-      if( it->second != baseName ) continue;
-      EVInTree = it->first;
-
-      //
-      // Find the branch in this tree for the specified variable:
-      //
-      TBranch* br = EVInTree->GetBranch( branchName );
-      if( ! br ) {
-         SError error( SError::SkipFile );
-         error << "Branch \"" << branchName << "\" not found in tree \""
-               << EVInTree->GetName() << "\" !";
-         throw error;
-      }
-
-      m_logger << DEBUG << "Connect branch " << br->GetName() 
-               << " in EV tree " << EVInTree->GetName() <<  std::endl;
-
-      m_EVInputBranchesToBaseName[ br ] = baseName;
-
-      //
-      // Find out which number this view has:
-      //
-      std::map< TTree*, Int_t >::const_iterator viewNumber =
-         m_EVInTreeToViewNumber.find( EVInTree );
-      if( viewNumber == m_EVInTreeToViewNumber.end() ) {
-         SError error( SError::SkipInputData );
-         error << "ConnectEventViewVariable> View number not found for tree '"
-               << EVInTree->GetName() << "'";
-         throw error;
-      } else {
-         m_logger << DEBUG << "ConnectEventViewVariable> ViewNumber for tree '"
-                  << EVInTree->GetName() << "' is " << viewNumber->second
-                  << SLogger::endmsg;
-      }
-      m_EVInputBranchesToViewNumber[ br ] = viewNumber->second;
-
-      // remember position
-      typename std::vector< T >::size_type pos = variables.size();
-      // make entry for the current EV
-      variables.push_back( T() );
-      EVInTree->SetBranchAddress( branchName, &variables[ pos ], &br );
-
-      m_logger << DEBUG << "Insert EV input branch " << br->GetName() 
-               << " view " << viewNumber->second << " baseName " 
-               << baseName << SLogger::endmsg;
-
-   }
-
-   std::map< TTree*, std::string >::const_iterator itCollTreeName = 
-      m_EVInTreeToCollTreeName.find( EVInTree );
-   if( itCollTreeName == m_EVInTreeToCollTreeName.end() ) {
-      SError error( SError::SkipInputData );
-      error << "Name of collection tree for EV tree \"" << EVInTree << "\" not found!";
-      throw error;
-   }
-
-   TTree* collTree = 0;
-   for( std::vector< TTree* >::const_iterator itCollTree = m_inputTrees.begin();
-        itCollTree != m_inputTrees.end(); ++itCollTree ) {
-      if( ( *itCollTree )->GetName() == itCollTreeName->second ) {
-         collTree = ( *itCollTree );
-      }
-   }
-   if( ! collTree ) {
-      SError error( SError::SkipInputData );
-      error << "Couldn't find collection tree ('" << itCollTreeName->second
-            << "') for EV tree '" << EVInTree->GetName() << "'";
-      throw error;
-   }
-
-   // now make sure that the variable in the CollectionTree that is
-   // used to sync the EV trees is loaded for every event, i.e. make
-   // sure the corresponding branch of the CollectionTree is in the
-   // map of input branches
-
-   std::ostringstream varname;
-   varname << baseName << "NInstance";
-   // now get the branch pointer
-   TBranch* br = collTree->GetBranch( varname.str().c_str() );
-   // throw exception if branch not found
-   if( ! br ) {
-      SError error( SError::SkipFile );
-      error << "Branch \"" << varname.str() << "\" not found in tree \""
-            << collTree->GetName() << "\" !";
-      throw error;
-   }
-
-   this->RegisterInputBranch( br );
-   std::map< std::string, Int_t >::const_iterator varIt =
-      m_EVBaseNameToCollVar.find( baseName );
-   if( varIt == m_EVBaseNameToCollVar.end() ) {
-      SError error( SError::StopExecution );
-      error << "Collection-tree variable to sync EV trees for baseName \"" << baseName 
-            << "\" not found !";
-      throw error;
-   } else {
-      return &( varIt->second );
-   }
-
-   return 0;
 }
 
 /**
@@ -236,13 +108,7 @@ TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
    //
    if( treeName ) {
 
-      for( std::vector< TTree* >::iterator otree = m_outputTrees.begin();
-           otree != m_outputTrees.end(); ++otree ) {
-         if( ! strcmp( ( *otree )->GetName(), treeName ) ) {
-            tree = *otree;
-            break;
-         }
-      }
+      tree = GetOutputTree( treeName );
 
    } else {
 

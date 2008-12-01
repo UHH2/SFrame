@@ -1,4 +1,4 @@
-// $Id: SCycleBaseHist.cxx,v 1.4 2008-01-28 18:40:33 krasznaa Exp $
+// $Id: SCycleBaseHist.cxx,v 1.4.2.1 2008-12-01 14:52:56 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -17,13 +17,17 @@
 // ROOT include(s):
 #include <TDirectory.h>
 #include <TH1.h>
+#include <TList.h>
 
 // Local inlcude(s):
 #include "../include/SCycleBaseHist.h"
+#include "../include/SCycleOutput.h"
 
+/*
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseHist );
 #endif // DOXYGEN_IGNORE
+*/
 
 using namespace std;
 
@@ -31,7 +35,7 @@ using namespace std;
  * The constructor initialises the base class and the member variables.
  */
 SCycleBaseHist::SCycleBaseHist()
-   : SCycleBaseBase(), m_outputFile( 0 ), m_outputFileName( "" ) {
+   : SCycleBaseBase(), m_histoMap(), m_output( 0 ) {
 
    m_logger << VERBOSE << "SCycleBaseHist constructed" << SLogger::endmsg;
 
@@ -46,6 +50,19 @@ SCycleBaseHist::~SCycleBaseHist() {
 
 }
 
+void SCycleBaseHist::SetHistOutput( TList* output ) {
+
+   m_output = output;
+   return;
+
+}
+
+TList* SCycleBaseHist::GetHistOutput() const {
+
+   return m_output;
+
+}
+
 /**
  * Function for writing any kind of object inheriting from TObject into
  * the output file. It is meant to be used with objects that are
@@ -55,39 +72,29 @@ SCycleBaseHist::~SCycleBaseHist() {
  * To write out a TGraph for instance, you could write something like:
  *
  * <code>
- *   TGraph mygraph( n, x_array, y_array );
- *   mygraph.SetName( "MyGraph" );
- *   Write( mygraph );
+ *   TGraph mygraph( n, x_array, y_array );<br/>
+ *   mygraph.SetName( "MyGraph" );<br/>
+ *   WriteObj( mygraph );
  * </code>
  *
  * @param obj       Constant reference to the object to be written out
  * @param directory Optional directory name in which to save the object
  */
-void SCycleBaseHist::Write( const TObject& obj,
-                            const char* directory ) throw( SError ) {
+void SCycleBaseHist::WriteObj( const TObject& obj,
+                               const char* directory ) throw( SError ) {
 
-   // Find the correct directory in the output file:
-   TDirectory* dir = 0;
-   if( directory ) {
-      dir = this->CdInOutput( directory );
-   } else {
-      dir = m_outputFile;
-   }
-   dir->cd();
+   GetTempDir()->cd();
 
-   // Persistify the object:
-   if( ! obj.Write() ) {
-      m_logger << ERROR << "Couldn't write out object \"" << obj.GetName()
-               << "\" to directory: " << ( directory ? directory : "" )
-               << SLogger::endmsg;
-   } else {
-      m_logger << VERBOSE << "Persistified object \"" << obj.GetName()
-               << "\" to directory: " << ( directory ? directory : "" )
-               << SLogger::endmsg;
+   TString path = ( directory ? directory : "" ) + TString( "/" ) +
+      TString( obj.GetName() );
+   SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
+   if( ! out ) {
+      out = new SCycleOutput( obj.Clone(), path, directory );
+      m_output->Add( out );
    }
 
-   gROOT->cd(); // So that the temporary objects would not be
-                // created in the file itself...
+   gROOT->cd(); // So that the temporary objects would be created
+                // in a general memory space.
 
    return;
 }
@@ -130,7 +137,8 @@ TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) {
       result = it->second;
    } else {
       m_logger << VERBOSE << "Hist(): Using Retrieve for name \""
-               << name << "\" and dir \"" << ( dir ? dir : "" ) << "\"" << SLogger::endmsg;
+               << name << "\" and dir \"" << ( dir ? dir : "" ) << "\""
+               << SLogger::endmsg;
       result = m_histoMap[ this_pair ] = Retrieve< TH1 >( name, dir );
    }
 
@@ -138,80 +146,19 @@ TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) {
 
 }
 
-/**
- * This function is called by the framework to get the object in a
- * configured state when running the analysis. The user is not actually
- * allowed to call this function as its hidden by SCycleBase, but
- * nevertheless: <strong>The users should leave this function
- * alone.</strong>
- *
- * @param outputFile     Pointer to the output file's top directory
- * @param outputFileName Name of the output file
- */
-void SCycleBaseHist::InitHistogramming( TDirectory* outputFile,
-                                        const TString& outputFileName ) {
+TDirectory* SCycleBaseHist::GetTempDir() const {
 
-   m_outputFile = outputFile;
-   m_outputFileName = outputFileName;
-   m_histoMap.clear();
-   return;
+   static TDirectory* tempdir = 0;
 
-}
-
-/**
- * Function finding the specified directory in the output file if it exists,
- * and creating it if it doesn't. The function is quite slow, so be careful
- * with using it...
- */
-TDirectory* SCycleBaseHist::CdInOutput( const char* cpath ) throw( SError ) {
-
-   TDirectory* currentDir = 0;
-   // Check whether the directory already exists:
-   if( ! ( currentDir = m_outputFile->GetDirectory( m_outputFileName + ":/" + cpath ) ) ) {
-
-      //
-      // Break up the supplied string into the directory names that it contains:
-      //
-      string path( cpath );
-      vector< string > directories;
-      // To get rid of a leading '/':
-      string::size_type previous_pos = ( path[ 0 ] == '/' ? 1 : 0 );
-      string::size_type current_pos = 0;
-      for( ; ; ) {
-
-         current_pos = path.find( '/', previous_pos );
-         directories.push_back( path.substr( previous_pos, current_pos - previous_pos ) );
-         if( current_pos == path.npos ) break;
-         previous_pos = current_pos + 1;
-
+   if( ! tempdir ) {
+      gROOT->cd();
+      tempdir = gROOT->mkdir( "SFrameTempDir" );
+      if( ! tempdir ) {
+         m_logger << ERROR << "Temporary directory could not be created"
+                  << SLogger::endmsg;
       }
-
-      //
-      // Walk through the directories one by one, creating the ones that
-      // don't exist.
-      //
-      currentDir = m_outputFile;
-      TDirectory* tempDir = 0;
-      for( vector< string >::const_iterator dir = directories.begin();
-           dir != directories.end(); ++dir ) {
-         m_logger << VERBOSE << "Going to directory: " << *dir << SLogger::endmsg;
-         // If the directory doesn't exist, create it:
-         if( ! ( tempDir = currentDir->GetDirectory( dir->c_str() ) ) ) {
-            m_logger << VERBOSE << "Directory doesn't exist, creating it..."
-                     << SLogger::endmsg;
-            if( ! ( tempDir = currentDir->mkdir( dir->c_str(), "dummy title" ) ) ) {
-               SError error( SError::SkipInputData );
-               error << "Couldn't create directory: " << path
-                     << " in the output file!";
-               throw error;
-            }
-         }
-         currentDir = tempDir;
-      }
-
    }
 
-   currentDir->cd();
-   return currentDir;
+   return tempdir;
 
 }

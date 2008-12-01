@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleController.h,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
+// $Id: SCycleController.h,v 1.3.2.1 2008-12-01 14:52:56 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -26,7 +26,8 @@
 #include "SError.h"
 
 // Forward declaration(s):
-class ISCycleBase;
+class TProof;
+class SCycleBase;
 
 /**
  *   @short Class controlling SFrame analyses
@@ -40,7 +41,7 @@ class ISCycleBase;
  *          <strong>sframe_main</strong> executable, so the user
  *          should probably not care about it too much.
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 class SCycleController : public TObject {
 
@@ -65,7 +66,7 @@ public:
    virtual void SetConfig( const TString& xmlConfigFile ) { m_xmlConfigFile = xmlConfigFile; }
 
    /// Add one analysis cycle to the end of all existing cycles
-   void AddAnalysisCycle( ISCycleBase* cycleAlg );
+   void AddAnalysisCycle( SCycleBase* cycleAlg );
 
    /// Get the index of the current cycle
    UInt_t GetCurCycle() { return m_curCycle; }
@@ -73,13 +74,20 @@ public:
 private:
    /// Delete all analysis cycle objects from memory
    void DeleteAllAnalysisCycles();
+   void InitProof( const TString& server );
+   void ShutDownProof();
+   void WriteCycleOutput( TList* olist, const TString& filename ) const;
 
    /// vector holding all analysis cycles to be executed
-   std::vector< ISCycleBase* > m_analysisCycles;
+   std::vector< SCycleBase* > m_analysisCycles;
+   /// Packages that have to be loaded on the PROOF cluster
+   std::vector< TString > m_parPackages;
 
    UInt_t  m_curCycle;
    Bool_t  m_isInitialized;
    TString m_xmlConfigFile;
+
+   TProof* m_proof;
 
    mutable SLogger m_logger;
 

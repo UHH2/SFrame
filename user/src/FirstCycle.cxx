@@ -1,4 +1,4 @@
-// $Id: FirstCycle.cxx,v 1.3 2008-02-11 14:03:48 krasznaa Exp $
+// $Id: FirstCycle.cxx,v 1.3.2.1 2008-12-01 14:52:57 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User
@@ -120,7 +120,7 @@ void FirstCycle::EndInputData( const SInputData& ) throw( SError ) {
    Float_t y_array[ n ] = { 0.0, 2.0, 4.0, 6.0, 8.0 };
    TGraph mygraph( n, x_array, y_array );
    mygraph.SetName( "MyGraph" );
-   Write( mygraph, "graph_dir" );
+   WriteObj( mygraph, "graph_dir" );
 
    return;
 }
@@ -143,6 +143,9 @@ void FirstCycle::ExecuteEvent( const SInputData&, Double_t /*weight*/ ) throw( S
 
       // Fill a simple vector:
       m_o_El_p_T.push_back( (*m_El_p_T) [i] );
+
+      Book( TH1F( "El_p_T_hist", "Electron p_{T}", 100, 0.0,
+                  150000.0 ) )->Fill( (*m_El_p_T) [i] );
 
       // Fill a vector of objects:
       m_o_El.push_back( SParticle( ( * m_El_p_T )[ i ],

@@ -28,7 +28,7 @@
   <!-- OutputDirectory: directory to which output is written                -->
   <!--                  must finish with an "/"                             --> 
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
-  <Cycle Name="SecondCycle" OutputDirectory="" PostFix="" TargetLumi="1." >
+  <Cycle Name="SecondCycle" TargetLumi="1." RunMode="LOCAL">
 
     <!-- list of input data for given data type                                   -->
     <!-- type: type of events: e.g. "Zee", "ttbar", ...                           -->
