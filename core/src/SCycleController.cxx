@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.6 2008-02-01 14:22:01 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.7 2008-12-02 15:28:51 berge Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -205,7 +205,7 @@ void SCycleController::Initialize() throw( SError ) {
                }
                m_logger << VERBOSE << "Trying to load library \"" << libraryName << "\""
                         << SLogger::endmsg;
-               if( ! gSystem->Load( libraryName.c_str() ) ) {
+               if( gSystem->Load( libraryName.c_str() ) >= 0 ) {
                   m_logger << DEBUG << "Library loaded: \"" << libraryName << "\"" 
                            << SLogger::endmsg;
                } else {

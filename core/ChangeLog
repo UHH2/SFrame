@@ -1,3 +1,9 @@
+2008.12.02 David Berge <berge@cern.ch>
+	* Fix small bug in SCycleController, now properly checking the
+	return code of gSystem->Load('libXX'), which is 1 i.e. not zero if
+	the library was already loaded; this last case isn't an error,
+	errors are only negative return codes
+	
 2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added the feature to skip events at the beginning of
 	  an InputData. The property to specify in the header of
