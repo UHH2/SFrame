@@ -13,7 +13,7 @@
 <!-- ======================================================================= -->
 
 <!--OutputLevel: Possibilities: VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS -->
-<JobConfiguration JobName="TestJob" OutputLevel="DEBUG">
+<JobConfiguration JobName="TestJob" OutputLevel="INFO">
 
   <!-- List of libraries to be loaded for the analysis.             -->
   <!-- Note the MathCore is needed to import the dictionary for the -->
@@ -60,7 +60,7 @@
       <!-- in each event.                                                     -->
       <!-- We assume that it is stored directly in a "Tree"                   -->
       <!-- Formula: String formula of the cut that has been applied           -->
-      <GeneratorCut Tree="FullRec0" Formula="MissingEt>10000" />
+      <!--<GeneratorCut Tree="FullRec0" Formula="MissingEt>10000" />-->
 
       <!-- List of input files                -->
       <!-- Lumi: optional, see comments above -->
@@ -75,12 +75,12 @@
       <OutputTree Name="FirstCycleTree" />
 
   </InputData>
-  <InputData Type="Data2" Version="Reco" Lumi="0." >
+  <InputData Type="Data2" Version="Reco" Lumi="0." NEventsMax="-1" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting                                                      -->
-      <GeneratorCut Tree="FullRec0" Formula="MissingEt>5000" />
-      <GeneratorCut Tree="FullRec0" Formula="SumEt>200000" />
+      <!--<GeneratorCut Tree="FullRec0" Formula="MissingEt>5000" />
+      <GeneratorCut Tree="FullRec0" Formula="SumEt>200000" />-->
 
       <!-- list of input files -->
       <!--<In FileName="/home/krasznaa/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />-->

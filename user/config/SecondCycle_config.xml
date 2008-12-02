@@ -18,7 +18,7 @@
   <!-- List of libraries to be loaded for the analysis.             -->
   <!-- Note the MathCore is needed to import the dictionary for the -->
   <!-- SParticle base class.                                        -->
-  <Library Name="libMathCore" />
+  <Library Name="libGenVector" />
   <Library Name="libSFramePlugIns" />
   <Library Name="libSFrameUser" />
 

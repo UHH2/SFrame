@@ -1,3 +1,6 @@
+2008.12.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Speeded up the examples a little bit
+
 2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added example usage of "NEventsSkip" to FirstCycle_config.xml.
 

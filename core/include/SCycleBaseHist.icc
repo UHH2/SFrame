@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.icc,v 1.3.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseHist.icc,v 1.3.2.2 2008-12-02 18:50:28 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -88,7 +88,8 @@ template< class T >
 T* SCycleBaseHist::Retrieve( const char* name,
                              const char* directory ) throw( SError ) {
 
-   TString path = ( directory ? directory : "" ) + TString( name );
+   TString path = ( directory ? directory : "" ) + TString( "/" ) +
+      TString( name );
    SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
    if( ! out ) {
       SError error( SError::SkipCycle );

@@ -1,4 +1,4 @@
-// $Id: FirstCycle.cxx,v 1.3.2.1 2008-12-01 14:52:57 krasznaa Exp $
+// $Id: FirstCycle.cxx,v 1.3.2.2 2008-12-02 18:50:28 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User
@@ -21,6 +21,9 @@ ClassImp( FirstCycle );
 
 FirstCycle::FirstCycle()
    : m_El_p_T( 0 ), m_El_eta( 0 ), m_El_phi( 0 ), m_El_E( 0 ) {
+
+   // To have the correct name in the log:
+   SetLogName( this->GetName() );
 
    //
    // Declare the properties of the cycle:
@@ -87,7 +90,7 @@ void FirstCycle::EndCycle() throw( SError ) {
    return;
 }
 
-void FirstCycle::BeginInputFile( const SInputData& inputData )  throw( SError ) {
+void FirstCycle::BeginInputFile( const SInputData& )  throw( SError ) {
 
    //
    // Connect the input variables:
@@ -109,6 +112,12 @@ void FirstCycle::BeginInputData( const SInputData& ) throw( SError ) {
    DeclareVariable( m_o_example_variable, "example_variable" );
    DeclareVariable( m_o_El_p_T, "El_p_T" );
    DeclareVariable( m_o_El, "El" );
+
+   //
+   // Declare the output histograms:
+   //
+   Book( TH1F( "El_p_T_hist", "Electron p_{T}", 100, 0.0,
+               150000.0 ) );
 
    return;
 }
@@ -142,10 +151,10 @@ void FirstCycle::ExecuteEvent( const SInputData&, Double_t /*weight*/ ) throw( S
    for( Int_t i = 0; i < m_El_N; ++i ) {
 
       // Fill a simple vector:
-      m_o_El_p_T.push_back( (*m_El_p_T) [i] );
+      m_o_El_p_T.push_back( ( *m_El_p_T )[ i ] );
 
-      Book( TH1F( "El_p_T_hist", "Electron p_{T}", 100, 0.0,
-                  150000.0 ) )->Fill( (*m_El_p_T) [i] );
+      // Fill the example histogram:
+      Hist( "El_p_T_hist" )->Fill( ( *m_El_p_T )[ i ] );
 
       // Fill a vector of objects:
       m_o_El.push_back( SParticle( ( * m_El_p_T )[ i ],
@@ -181,8 +190,8 @@ void FirstCycle::FillValidationHists( ValHistsType ht, const TString& status ) {
       TString suffix = status + "General_";
       // The formalism for adding a new histogram to the output is the
       // following:
-      Book( TH1F( suffix + "example_variable", "example_variable",
-                  10, 0.0, 10.0 ) )->Fill( m_o_example_variable );
+      //      Book( TH1F( suffix + "example_variable", "example_variable",
+      //                  10, 0.0, 10.0 ) )->Fill( m_o_example_variable );
 
    } else if( ht == ELECTRON ){
 

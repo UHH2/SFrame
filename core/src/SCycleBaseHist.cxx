@@ -1,4 +1,4 @@
-// $Id: SCycleBaseHist.cxx,v 1.4.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseHist.cxx,v 1.4.2.2 2008-12-02 18:50:28 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -53,6 +53,7 @@ SCycleBaseHist::~SCycleBaseHist() {
 void SCycleBaseHist::SetHistOutput( TList* output ) {
 
    m_output = output;
+   m_histoMap.clear();
    return;
 
 }

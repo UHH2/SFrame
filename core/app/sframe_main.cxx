@@ -1,4 +1,4 @@
-// $Id: sframe_main.cxx,v 1.3.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: sframe_main.cxx,v 1.3.2.2 2008-12-02 18:50:28 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -21,11 +21,13 @@
 
 // ROOT include(s):
 #include <TROOT.h>
+#include <TError.h>
 
 // SFrame include(s):
 #include "../include/SCycleController.h"
 #include "../include/SError.h"
 #include "../include/SLogger.h"
+#include "../include/SErrorHandler.h"
 
 // Global logging object
 static SLogger g_logger( "sframe_main" );
@@ -43,6 +45,7 @@ int main( int argc, char** argv ) {
    const char* filename = argv[ 1 ];
 
    gROOT->SetBatch( kTRUE );
+   SetErrorHandler( SErrorHandler );
 
    try { // This is where I catch anything not handled internally...
 

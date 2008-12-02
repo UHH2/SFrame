@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleController.h,v 1.3.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleController.h,v 1.3.2.2 2008-12-02 18:50:28 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -41,7 +41,7 @@ class SCycleBase;
  *          <strong>sframe_main</strong> executable, so the user
  *          should probably not care about it too much.
  *
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  */
 class SCycleController : public TObject {
 
@@ -77,6 +77,7 @@ private:
    void InitProof( const TString& server );
    void ShutDownProof();
    void WriteCycleOutput( TList* olist, const TString& filename ) const;
+   void PrintWorkerLogs() const;
 
    /// vector holding all analysis cycles to be executed
    std::vector< SCycleBase* > m_analysisCycles;

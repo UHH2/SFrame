@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.6.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.6.2.2 2008-12-02 18:50:28 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -30,7 +30,10 @@
 #include <TList.h>
 #include <TFile.h>
 #include <TProof.h>
+#include <TProofLog.h>
 #include <TDSet.h>
+#include <TMacro.h>
+#include <TParameter.h>
 
 // Local include(s):
 #include "../include/SCycleController.h"
@@ -421,34 +424,6 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          chain.Process( cycle, "", evmax );
          outputs = cycle->GetOutputList();
 
-         /*
-         m_logger << INFO << "Writing output of \"" << cycle->GetName() << "\" to: "
-                  << filename << SLogger::endmsg;
-         TFile outputFile( filename, "RECREATE" );
-
-         TList* outputs = cycle->GetOutputList();
-         for( Int_t i = 0; i < outputs->GetSize(); ++i ) {
-            SCycleOutput* output = dynamic_cast< SCycleOutput* >( outputs->At( i ) );
-            if( output ) {
-               m_logger << DEBUG << "Writing out: " << output->GetName() << SLogger::endmsg;
-               TObject* object = output->GetObject();
-               TTree* tree = 0;
-               if( ( tree = dynamic_cast< TTree* >( object ) ) ) {
-                  tree->SetDirectory( &outputFile );
-               }
-               object->Write();
-               if( tree ) {
-                  tree->SetDirectory( 0 );
-               }
-            } else {
-               outputs->At( i )->Write();
-            }
-         }
-
-         outputFile.Close();
-         outputs->Clear();
-         */
-
       } else if( config.GetRunMode() == SCycleConfig::PROOF ) {
 
          m_proof->ClearInput();
@@ -459,33 +434,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          m_proof->Process( &set, cycle->GetName(), "", evmax );
          outputs = m_proof->GetOutputList();
 
-         /*
-         m_logger << INFO << "Writing output of \"" << cycle->GetName() << "\" to: "
-                  << filename << SLogger::endmsg;
-         TFile outputFile( filename, "RECREATE" );
-
-         TList* outputs = m_proof->GetOutputList();
-         for( Int_t i = 0; i < outputs->GetSize(); ++i ) {
-            SCycleOutput* output = dynamic_cast< SCycleOutput* >( outputs->At( i ) );
-            if( output ) {
-               m_logger << DEBUG << "Writing out: " << output->GetName() << SLogger::endmsg;
-               TObject* object = output->GetObject();
-               TTree* tree = 0;
-               if( ( tree = dynamic_cast< TTree* >( object ) ) ) {
-                  tree->SetDirectory( &outputFile );
-               }
-               object->Write();
-               if( tree ) {
-                  tree->SetDirectory( 0 );
-               }
-            } else {
-               outputs->At( i )->Write();
-            }
-         }
-
-         outputFile.Close();
-         outputs->Clear();
-         */
+         PrintWorkerLogs();
 
       } else {
          throw SError( "Running mode not recognised!", SError::SkipCycle );
@@ -623,6 +572,88 @@ void SCycleController::WriteCycleOutput( TList* olist,
 
    outputFile.Write();
    outputFile.Close();
+
+   return;
+
+}
+
+/**
+ * This internal function collects the log files from all the nodes (the master
+ * and the slaves) and prints them to the screen. Currently the nodes print waaay
+ * too much information. Hopefully 5.22 will remove most of these...
+ */
+void SCycleController::PrintWorkerLogs() const {
+
+   //
+   // Make sure that a connection is open:
+   //
+   if( ! m_proof ) {
+      m_logger << ERROR << "Not in PROOF mode --> Can't call PrintWorkerLogs()!"
+               << SLogger::endmsg;
+      return;
+   }
+
+   //
+   // Get info about the slaves:
+   //
+   TList* slaveInfos = m_proof->GetListOfSlaveInfos();
+
+   //
+   // Retrieve all logs:
+   //
+   TProofLog* log = m_proof->GetManager()->GetSessionLogs();
+   TList* logList = log->GetListOfLogs();
+   for( Int_t i = 0; i < logList->GetSize(); ++i ) {
+
+      //
+      // Access the log of a single node:
+      //
+      TProofLogElem* element = dynamic_cast< TProofLogElem* >( logList->At( i ) );
+      if( ! element ) {
+         m_logger << ERROR << "Log element not recognised!" << SLogger::endmsg;
+         continue;
+      }
+
+      //
+      // Find "the name" of the node. TProofLogElem objects only know that they
+      // came from node "0.2" for instance. This small loop matches these
+      // identifiers to the proper node names in the slaveInfos list.
+      //
+      // If the identifier is not found in the list, then it has to be the master:
+      TString nodeName = m_proof->GetMaster();
+      for( Int_t i = 0; i < slaveInfos->GetSize(); ++i ) {
+
+         // Access the TSlaveInfo object:
+         TSlaveInfo* info = dynamic_cast< TSlaveInfo* >( slaveInfos->At( i ) );
+         if( ! info ) {
+            m_logger << ERROR << "Couldn't use a TSlaveInfo object!" << SLogger::endmsg;
+            continue;
+         }
+         // Check if this TSlaveInfo describes the source of the log:
+         if( ! strcmp( element->GetName(), info->GetOrdinal() ) ) {
+            nodeName = info->GetName();
+            break;
+         }
+      }
+
+      //
+      // Print the log. Note that we don't need to redirect the log lines
+      // to m_logger. The log lines of the nodes will already be formatted, so
+      // printing them through SLogger would just look ugly.
+      //
+      m_logger << INFO << "=================================================="
+               << SLogger::endmsg;
+      m_logger << INFO << "Output from node: " << nodeName << " ("
+               << element->GetName() << ")" << SLogger::endmsg;
+
+      element->GetMacro()->Print();
+
+      m_logger << INFO << "=================================================="
+               << SLogger::endmsg;
+
+   }
+
+   delete log;
 
    return;
 

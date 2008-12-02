@@ -1,3 +1,9 @@
+2008.12.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Now the job automatically prints the output messages
+	  from the worker nodes once the event processing is done.
+	* Created a new function called SErrorHandler. It can
+	  be used to print the ROOT messages using SLogger.
+
 2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added the feature to skip events at the beginning of
 	  an InputData. The property to specify in the header of

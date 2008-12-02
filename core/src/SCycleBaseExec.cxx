@@ -1,4 +1,4 @@
-// $Id: SCycleBaseExec.cxx,v 1.4.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseExec.cxx,v 1.4.2.2 2008-12-02 18:50:28 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -12,11 +12,13 @@
 
 // ROOT include(s):
 #include <TTree.h>
+#include <TError.h>
 
 // Local include(s):
 #include "../include/SCycleBaseExec.h"
 #include "../include/SInputData.h"
 #include "../include/SCycleConfig.h"
+#include "../include/SErrorHandler.h"
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseExec );
@@ -29,6 +31,7 @@ SCycleBaseExec::SCycleBaseExec()
    : m_nProcessedEvents( 0 ) {
 
    SetLogName( this->GetName() );
+   SetErrorHandler( SErrorHandler ); // Redirect ROOT messages to SErrorHandler
    m_logger << VERBOSE << "SCycleBaseExec constructed" << SLogger::endmsg;
 
 }
@@ -63,6 +66,8 @@ void SCycleBaseExec::Begin( TTree* ) {
       m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
       throw;
    }
+
+   m_logger << INFO << "Initialised cycle on master node" << SLogger::endmsg;
 
    return;
 
@@ -107,6 +112,9 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
    }
 
    m_nProcessedEvents = 0;
+
+   m_logger << INFO << "Initialised InputData \"" << m_inputData->GetType()
+            << "\"on worker node" << SLogger::endmsg;
 
    return;
 
@@ -196,11 +204,14 @@ void SCycleBaseExec::SlaveTerminate() {
    try {
       this->EndInputData( *m_inputData );
    } catch( const SError& error ) {
-      m_logger << FATAL << "Exception caught while initialising cycle"
+      m_logger << FATAL << "Exception caught while ending input data"
                << SLogger::endmsg;
       m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
       throw;
    }
+
+   m_logger << INFO << "Terminated InputData \"" << m_inputData->GetType()
+            << "\"on worker node" << SLogger::endmsg;
 
    return;
 
@@ -213,7 +224,7 @@ void SCycleBaseExec::Terminate() {
    try {
       this->EndCycle();
    } catch( const SError& error ) {
-      m_logger << FATAL << "Exception caught while initialising cycle"
+      m_logger << FATAL << "Exception caught while ending cycle"
                << SLogger::endmsg;
       m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
       throw;
