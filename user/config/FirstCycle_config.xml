@@ -23,9 +23,9 @@
   <Library Name="libSFramePlugIns" />
   <Library Name="libSFrameUser" />
 
-  <Package Name="/Users/attila/ATLAS/sw/projects/sframe_dev/SFrame/lib/SFrameCore.par" />
-  <Package Name="/Users/attila/ATLAS/sw/projects/sframe_dev/SFrame/lib/SFramePlugIns.par" />
-  <Package Name="/Users/attila/ATLAS/sw/projects/sframe_dev/SFrame/lib/SFrameUser.par" />
+  <Package Name="/afs/cern.ch/user/k/krasznaa/ATLAS/sw/projects/sframe/SFramePROOF/lib/SFrameCore.par" />
+  <Package Name="/afs/cern.ch/user/k/krasznaa/ATLAS/sw/projects/sframe/SFramePROOF/lib/SFramePlugIns.par" />
+  <Package Name="/afs/cern.ch/user/k/krasznaa/ATLAS/sw/projects/sframe/SFramePROOF/lib/SFrameUser.par" />
 
   <!-- List of cycles to be executed.                                       -->
   <!-- Name: specifies the class name to be executed in this cycle          -->
@@ -33,7 +33,7 @@
   <!-- OutputDirectory: directory to which output is written                -->
   <!--                  must finish with an "/"                             --> 
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
-  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite" >
+  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="pcatlas0010" >
 
     <!-- list of input data for given data type                                   -->
     <!-- type: type of events: e.g. "Zee", "ttbar", ...                           -->
@@ -64,9 +64,7 @@
 
       <!-- List of input files                -->
       <!-- Lumi: optional, see comments above -->
-      <!--<In FileName="/home/krasznaa/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />-->
-      <In FileName="/Users/attila/ATLAS/sw/projects/pframe/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />
-      <!--<In FileName="/afs/cern.ch/atlas/maxidisk/d181/SFrame/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />-->
+      <In FileName="/afs/cern.ch/atlas/maxidisk/d181/SFrame/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />
 
       <!-- Specification of the input and output trees. -->
       <!-- Name: Name of the tree in the ROOT file      -->
@@ -83,9 +81,7 @@
       <GeneratorCut Tree="FullRec0" Formula="SumEt>200000" />-->
 
       <!-- list of input files -->
-      <!--<In FileName="/home/krasznaa/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />-->
-      <In FileName="/Users/attila/ATLAS/sw/projects/pframe/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />
-      <!--<In FileName="/afs/cern.ch/atlas/maxidisk/d181/SFrame/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />-->
+      <In FileName="/afs/cern.ch/atlas/maxidisk/d181/SFrame/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />
 
       <!-- Specification of the input and output trees. -->
       <InputTree Name="FullRec0" />

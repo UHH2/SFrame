@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.6.2.2 2008-12-02 18:50:28 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.6.2.3 2008-12-03 17:55:06 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -524,6 +524,7 @@ void SCycleController::InitProof( const TString& server ) {
             << SLogger::endmsg;
 
    m_proof = TProof::Open( server );
+   m_proof->SetParameter( "PROOF_MemLogFreq", 0 ); // This doesn't work for the moment
 
    return;
 
