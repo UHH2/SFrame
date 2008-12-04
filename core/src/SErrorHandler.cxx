@@ -1,4 +1,4 @@
-// $Id: SErrorHandler.cxx,v 1.1.2.2 2008-12-03 17:55:07 krasznaa Exp $
+// $Id: SErrorHandler.cxx,v 1.1.2.3 2008-12-04 17:02:19 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -57,12 +57,6 @@ void SErrorHandler( int level, Bool_t abort, const char* location,
       msgLevelMap[ kBreak ]    = ERROR;
       msgLevelMap[ kSysError ] = ERROR;
       msgLevelMap[ kFatal ]    = FATAL;
-   }
-
-   // Don't display service messages for the moment. (There are a lot
-   // of them...)
-   if( ( msgLevelMap[ level ] == INFO ) && ::strrchr( location, '|' ) ) {
-      return;
    }
 
    // Print the message:

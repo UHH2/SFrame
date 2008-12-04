@@ -13,7 +13,7 @@
 <!-- ======================================================================= -->
 
 <!--OutputLevel: Possibilities: VERBOSE, DEBUG, INFO, WARNING, ERROR, FATAL, ALWAYS -->
-<JobConfiguration JobName="TestJob" OutputLevel="INFO">
+<JobConfiguration JobName="TestJob" OutputLevel="DEBUG">
 
   <!-- List of libraries to be loaded for the analysis.             -->
   <!-- Note the MathCore is needed to import the dictionary for the -->
@@ -33,7 +33,7 @@
   <!-- OutputDirectory: directory to which output is written                -->
   <!--                  must finish with an "/"                             --> 
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
-  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="pcatlas0010" >
+  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite" >
 
     <!-- list of input data for given data type                                   -->
     <!-- type: type of events: e.g. "Zee", "ttbar", ...                           -->

@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.6.2.3 2008-12-03 17:55:06 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.6.2.4 2008-12-04 17:02:19 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -33,7 +33,8 @@
 #include <TProofLog.h>
 #include <TDSet.h>
 #include <TMacro.h>
-#include <TParameter.h>
+#include <TQueryResult.h>
+#include <TEnv.h>
 
 // Local include(s):
 #include "../include/SCycleController.h"
@@ -391,6 +392,9 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       ShutDownProof();
    }
 
+   // Number of processed events:
+   Long64_t nev = 0;
+
    for( SCycleConfig::id_type::const_iterator id = config.GetInputData().begin();
         id != config.GetInputData().end(); ++id ) {
 
@@ -427,11 +431,14 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       } else if( config.GetRunMode() == SCycleConfig::PROOF ) {
 
          m_proof->ClearInput();
+         m_proof->SetParameter( "PROOF_MemLogFreq", ( Long64_t ) 1000 );
+         gEnv->SetValue( "Proof.StatsHist", 1 );
          m_proof->AddInput( &config );
          m_proof->AddInput( &inputData );
 
          TDSet set( chain );
          m_proof->Process( &set, cycle->GetName(), "", evmax );
+         nev += m_proof->GetQueryResults()->GetEntries();
          outputs = m_proof->GetOutputList();
 
          PrintWorkerLogs();
@@ -450,8 +457,10 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
    ProcInfo_t mem_after;
    gSystem->GetProcInfo( &mem_after );
 
-   Double_t nev = static_cast< Double_t >( m_analysisCycles.at( m_curCycle )->NumberOfProcessedEvents() );
-   ++m_curCycle;
+   // If we ran locally then this has to be extracted here:
+   if( config.GetRunMode() != SCycleConfig::PROOF ) {
+      nev = cycle->NumberOfProcessedEvents();
+   }
 
    timer.Stop();
 
@@ -477,6 +486,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
             << ( ( mem_after.fMemVirtual - mem_before.fMemVirtual ) / nev )
             << " kB / event" << SLogger::endmsg;
 
+   ++m_curCycle;
    return;
 }
 
@@ -524,7 +534,6 @@ void SCycleController::InitProof( const TString& server ) {
             << SLogger::endmsg;
 
    m_proof = TProof::Open( server );
-   m_proof->SetParameter( "PROOF_MemLogFreq", 0 ); // This doesn't work for the moment
 
    return;
 
@@ -565,7 +574,19 @@ void SCycleController::WriteCycleOutput( TList* olist,
    for( Int_t i = 0; i < olist->GetSize(); ++i ) {
 
       outputFile.cd();
-      olist->At( i )->Write();
+      // Anything that's not wrapped in an SCycleOutput object, is
+      // produced internally by PROOF, so it's put into a directory
+      // called "PROOF":
+      if( dynamic_cast< SCycleOutput* >( olist->At( i ) ) ) {
+         olist->At( i )->Write();
+      } else {
+         TDirectory* proofdir = outputFile.GetDirectory( "PROOF" );
+         if( ! proofdir ) {
+            proofdir = outputFile.mkdir( "PROOF", "PROOF related objects" );
+         }
+         proofdir->cd();
+         olist->At( i )->Write();
+      }
       m_logger << DEBUG << "Written object: " << olist->At( i )->GetName()
                << SLogger::endmsg;
 
