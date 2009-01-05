@@ -1,4 +1,4 @@
-// $Id: SCycleBaseConfig.cxx,v 1.5 2008-10-14 09:45:26 krasznaa Exp $
+// $Id: SCycleBaseConfig.cxx,v 1.6 2009-01-05 10:14:09 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -9,6 +9,9 @@
  * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
  *
  ***************************************************************************/
+
+// System include(s):
+#include <cstdlib>
 
 // ROOT include(s):
 #include <TString.h>

@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.7 2008-12-02 15:28:51 berge Exp $
+// $Id: SCycleController.cxx,v 1.8 2009-01-05 10:14:09 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <cstdlib>
 
 // ROOT include(s):
 #include "TDOMParser.h"

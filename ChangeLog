@@ -1,3 +1,9 @@
+2009.01.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added GCC 4.3 related fixes.
+	* Updated example configuration files to work with
+	  ROOT 5.20 and 5.22 by default.
+	* Tagging as SFrame-02-01-09
+
 2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added new XML property for <InputData>, "NEventsSkip".
 	* Tagging as SFrame-02-01-07

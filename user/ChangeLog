@@ -1,3 +1,10 @@
+2009.01.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified FirstCycle_config.xml and SecondCycle_config.xml to
+	  work with ROOT 5.20 and newer versions by default. If you
+	  use an older version of ROOT, you should modify the configuration
+	  files as instructed in the comments, to run the example
+	  cycles.
+
 2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added example usage of "NEventsSkip" to FirstCycle_config.xml.
 

@@ -17,8 +17,11 @@
 
   <!-- List of libraries to be loaded for the analysis.             -->
   <!-- Note the MathCore is needed to import the dictionary for the -->
-  <!-- SParticle base class.                                        -->
-  <Library Name="libMathCore" />
+  <!-- SParticle base class when using ROOT < 5.20.                 -->
+  <!-- On ROOT 5.20 and newer versions you should load libGenVector -->
+  <!-- for this purpose instead!                                    -->
+  <!-- <Library Name="libMathCore" /> -->
+  <Library Name="libGenVector" />
   <Library Name="libSFramePlugIns" />
   <Library Name="libSFrameUser" />
 

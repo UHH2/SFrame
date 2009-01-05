@@ -1,3 +1,8 @@
+2009.01.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added missing <cstdlib> includes to fix compilation errors
+	  with GCC 4.3. The code is now tested to compile and run
+	  on SLC5 and GCC 4.3. :-)
+
 2008.12.02 David Berge <berge@cern.ch>
 	* Fix small bug in SCycleController, now properly checking the
 	return code of gSystem->Load('libXX'), which is 1 i.e. not zero if
