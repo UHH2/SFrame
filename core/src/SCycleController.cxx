@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.6.2.4 2008-12-04 17:02:19 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.6.2.5 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <cstdlib>
 
 // ROOT include(s):
 #include "TDOMParser.h"
@@ -23,7 +24,6 @@
 #include "TStopwatch.h"
 #include "TSystem.h"
 #include "TClass.h"
-#include "TList.h"
 #include "TROOT.h"
 #include "TPython.h"
 #include <TChain.h>
@@ -31,6 +31,7 @@
 #include <TFile.h>
 #include <TProof.h>
 #include <TProofLog.h>
+#include <TProofOutputFile.h>
 #include <TDSet.h>
 #include <TMacro.h>
 #include <TQueryResult.h>
@@ -40,6 +41,11 @@
 #include "../include/SCycleController.h"
 #include "../include/SCycleBase.h"
 #include "../include/SLogWriter.h"
+#include "../include/SConstants.h"
+#include "../include/SParLocator.h"
+#include "../include/SCycleStatistics.h"
+#include "../include/SFileMerger.h"
+#include "../include/SOutputFile.h"
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleController );
@@ -72,11 +78,7 @@ SCycleController::~SCycleController() {
       delete ( *it );
    }
 
-   if( m_proof ) {
-      TProofMgr* mgr = m_proof->GetManager();
-      delete m_proof;
-      delete mgr;
-   }
+   ShutDownProof();
 
 }
 
@@ -342,25 +344,37 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
                     SError::StopExecution );
    }
 
+   //
+   // Measure the total time needed for this cycle:
+   //
    TStopwatch timer;
    timer.Start();
 
-   // Retrieve memory consumption before executing the analysis:
-   ProcInfo_t mem_before;
-   gSystem->GetProcInfo( &mem_before );
-
+   //
+   // Access the current cycle:
+   //
    SCycleBase* cycle     = m_analysisCycles.at( m_curCycle );
-   std::string cycleName = cycle->GetName();
+   TString     cycleName = cycle->GetName();
 
+   //
+   // Create a copy of the cycle configuration, so that it can be given to PROOF:
+   //
    SCycleConfig config = cycle->GetConfig();
-   config.SetName( "CycleConfig" );
+   config.SetName( SFrame::CycleConfigName );
+   config.ArrangeInputData(); // To handle multiple ID of the same type...
+   config.ValidateInput(); // This is needed for the proper weighting...
+   cycle->SetConfig( config );
 
    m_logger << INFO << "Executing Cycle #" << m_curCycle << " ('" << cycleName << "') "
             << ( config.GetRunMode() == SCycleConfig::LOCAL ? "locally" :
                  "on PROOF" )
             << SLogger::endmsg;
 
+   //
+   // Make some initialisation steps before starting the cycle:
+   //
    if( config.GetRunMode() == SCycleConfig::PROOF ) {
+
       //
       // Connect to the PROOF server:
       //
@@ -371,9 +385,18 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       //
       for( std::vector< TString >::const_iterator package = m_parPackages.begin();
            package != m_parPackages.end(); ++package ) {
-         TString pkg = *package;
+
+         // Find the full path name of the package:
+         TString pkg = SParLocator::Locate( *package );
+         if( pkg == "" ) continue;
+
          m_logger << VERBOSE << "Uploading package: " << pkg << SLogger::endmsg;
-         m_proof->UploadPackage( pkg );
+         if( m_proof->UploadPackage( pkg ) ) {
+            m_logger << ERROR << "There was a problem with uploading "
+                     << *package << SLogger::endmsg;
+            throw SError( *package + " could not be uploaded to PROOF",
+                          SError::SkipCycle );
+         }
 
          Ssiz_t slash_pos = pkg.Last( '/' );
          pkg.Remove( 0, slash_pos + 1 );
@@ -382,9 +405,15 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          }
 
          m_logger << DEBUG << "Enabling package: " << pkg << SLogger::endmsg;
-         m_proof->EnablePackage( pkg, kTRUE );
+         if( m_proof->EnablePackage( pkg, kTRUE ) ) {
+            m_logger << ERROR << "There was a problem with enabling "
+                     << *package << SLogger::endmsg;
+            throw SError( *package + " could not be enabled on PROOF",
+                          SError::SkipCycle );
+         }
 
       }
+
    } else {
       //
       // Shut down a possibly open connection:
@@ -393,98 +422,173 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
    }
 
    // Number of processed events:
-   Long64_t nev = 0;
+   Long64_t procev = 0;
+   // Number of skipped events:
+   Long64_t skipev = 0;
 
+   //
+   // The begin cycle function has to be called here by hand:
+   //
+   cycle->BeginCycle();
+
+   //
+   // Loop over all defined input data types:
+   //
    for( SCycleConfig::id_type::const_iterator id = config.GetInputData().begin();
         id != config.GetInputData().end(); ++id ) {
 
-      if( ! id->GetInputTrees().size() ) {
-         throw SError( "No input trees defined", SError::SkipCycle );
+      //
+      // Decide how to write the output file at the end of processing this InputData.
+      // The InputData objects should be arranged by their type at this point...
+      //
+      Bool_t updateOutput = kFALSE;
+      SCycleConfig::id_type::const_iterator previous_id = id;
+      if( previous_id == config.GetInputData().begin() ) {
+         updateOutput = kFALSE;
+         m_logger << VERBOSE << "New output file will be opened for ID type: "
+                  << id->GetType() << SLogger::endmsg;
+      } else {
+         --previous_id;
+         if( ( previous_id->GetType() == id->GetType() ) &&
+             ( previous_id->GetVersion() == id->GetVersion() ) ) {
+            updateOutput = kTRUE;
+            m_logger << VERBOSE << "Output file will be updated for ID type: "
+                     << id->GetType() << SLogger::endmsg;
+         } else {
+            updateOutput = kFALSE;
+            m_logger << VERBOSE << "New output file will be opened for ID type: "
+                     << id->GetType() << SLogger::endmsg;
+         }
       }
 
-      m_logger << INFO << "Processing input data: " << id->GetType()
-               << SLogger::endmsg;
+      //
+      // Each input data has to have at least one input tree:
+      //
+      if( ! id->GetInputTrees().size() ) {
+         m_logger << ERROR << "No input trees defined in input data " << id->GetType()
+                  << SLogger::endmsg;
+         m_logger << ERROR << "Skipping it from processing" << SLogger::endmsg;
+         continue;
+      }
 
+      m_logger << INFO << "Processing input data type: " << id->GetType()
+               << " version: " << id->GetVersion() << SLogger::endmsg;
+
+      //
+      // Create a copy of the input data configuration, so that it can be
+      // given to PROOF:
+      //
       SInputData inputData = *id;
-      inputData.SetName( "CurrentInputData" );
+      inputData.SetName( SFrame::CurrentInputDataName );
 
+      //
+      // Create a chain with all the specified input files:
+      //
       TChain chain( id->GetInputTrees().at( 0 ).treeName );
       for( std::vector< SFile >::const_iterator file = id->GetSFileIn().begin();
            file != id->GetSFileIn().end(); ++file ) {
          chain.Add( file->file );
       }
 
+      //
+      // Calculate how many events to process:
+      //
       Long64_t evmax = ( id->GetNEventsMax() == -1 ? 100000000 :
                          id->GetNEventsMax() );
+
+      // This will point to the created output objects:
       TList* outputs = 0;
 
+      //
+      // The cycle can be run in two modes:
+      //
       if( config.GetRunMode() == SCycleConfig::LOCAL ) {
 
+         //
+         // Give the configuration to the cycle by hand:
+         //
          TList list;
          list.Add( &config );
          list.Add( &inputData );
          cycle->SetInputList( &list );
 
-         chain.Process( cycle, "", evmax );
+         //
+         // Run the cycle:
+         //
+         chain.Process( cycle, "", evmax, id->GetNEventsSkip() );
          outputs = cycle->GetOutputList();
 
       } else if( config.GetRunMode() == SCycleConfig::PROOF ) {
 
+         // This object describes how to create the temporary PROOF output
+         // files in the cycles:
+         TNamed proofOutputFile( SFrame::ProofOutputName,
+                                 SFrame::ProofOutputFileName );
+
+         //
+         // Give the configuration to PROOF, and tweak it a little:
+         //
          m_proof->ClearInput();
          m_proof->SetParameter( "PROOF_MemLogFreq", ( Long64_t ) 1000 );
          gEnv->SetValue( "Proof.StatsHist", 1 );
          m_proof->AddInput( &config );
          m_proof->AddInput( &inputData );
+         m_proof->AddInput( &proofOutputFile );
 
+         //
+         // Run the cycle on PROOF:
+         //
          TDSet set( chain );
-         m_proof->Process( &set, cycle->GetName(), "", evmax );
-         nev += m_proof->GetQueryResults()->GetEntries();
+         m_proof->Process( &set, cycle->GetName(), "", evmax, id->GetNEventsSkip() );
          outputs = m_proof->GetOutputList();
-
-         PrintWorkerLogs();
 
       } else {
          throw SError( "Running mode not recognised!", SError::SkipCycle );
       }
 
-      WriteCycleOutput( outputs, TString( cycleName.c_str() ) + "." +
-                        id->GetType() + ".root" );
+      //
+      // Collect the statistics from this input data:
+      //
+      SCycleStatistics* stat =
+         dynamic_cast< SCycleStatistics* >( outputs->FindObject( SFrame::RunStatisticsName ) );
+      if( stat ) {
+         procev += stat->GetProcessedEvents();
+         skipev += stat->GetSkippedEvents();
+      } else {
+         m_logger << WARNING << "Cycle statistics not received from: "
+                  << cycle->GetName() << SLogger::endmsg;
+         m_logger << WARNING << "Printed statistics will not be correct!"
+                  << SLogger::endmsg;
+      }
+
+      //
+      // Write out the objects produced by the cycle:
+      //
+      TString outputFileName = config.GetOutputDirectory() + cycleName + "." +
+         id->GetType() + "." + id->GetVersion() + config.GetPostFix() + ".root";
+      outputFileName.ReplaceAll( "::", "." );
+      WriteCycleOutput( outputs, outputFileName, updateOutput );
       outputs->Clear();
 
    }
 
-   // Retrieve memory consumption after executing the analysis:
-   ProcInfo_t mem_after;
-   gSystem->GetProcInfo( &mem_after );
+   //
+   // The end cycle function has to be called here by hand:
+   //
+   cycle->EndCycle();
 
-   // If we ran locally then this has to be extracted here:
-   if( config.GetRunMode() != SCycleConfig::PROOF ) {
-      nev = cycle->NumberOfProcessedEvents();
-   }
-
+   // The cycle processing is done at this point:
    timer.Stop();
 
    m_logger << INFO << "Overall cycle statistics:" << SLogger::endmsg;
    m_logger.setf( std::ios::fixed );
    m_logger << INFO << std::setw( 10 ) << std::setfill( ' ' ) << std::setprecision( 0 )
-            << nev << " Events - Real time " << std::setw( 6 ) << std::setprecision( 2 )
+            << procev << " Events - Real time " << std::setw( 6 ) << std::setprecision( 2 )
             << timer.RealTime() << " s  - " << std::setw( 5 )
-            << std::setprecision( 0 ) << ( nev / timer.RealTime() ) << " Hz | CPU time "
+            << std::setprecision( 0 ) << ( procev / timer.RealTime() ) << " Hz | CPU time "
             << std::setw( 6 ) << std::setprecision( 2 ) << timer.CpuTime() << " s  - "
-            << std::setw( 5 ) << std::setprecision( 0 ) << ( nev / timer.CpuTime() )
+            << std::setw( 5 ) << std::setprecision( 0 ) << ( procev / timer.CpuTime() )
             << " Hz" << SLogger::endmsg;
-   m_logger << DEBUG << "Memory growth while executing cycle #"
-            << m_curCycle << ":" << SLogger::endmsg;
-   m_logger << DEBUG << "   Resident mem.: " << std::setw( 6 )
-            << ( mem_after.fMemResident - mem_before.fMemResident )
-            << " kB; " << std::setw( 7 )
-            << ( ( mem_after.fMemResident - mem_before.fMemResident ) / nev )
-            << " kB / event" << SLogger::endmsg;
-   m_logger << DEBUG << "   Virtual mem. : " << std::setw( 6 )
-            << ( mem_after.fMemVirtual - mem_before.fMemVirtual )
-            << " kB; " << std::setw( 7 )
-            << ( ( mem_after.fMemVirtual - mem_before.fMemVirtual ) / nev )
-            << " kB / event" << SLogger::endmsg;
 
    ++m_curCycle;
    return;
@@ -525,14 +629,19 @@ void SCycleController::DeleteAllAnalysisCycles() {
 
 void SCycleController::InitProof( const TString& server ) {
 
+   //
+   // Check if the connection has to be (re)opened:
+   //
    if( m_proof ) {
       if( m_proof->GetManager()->GetUrl() == server ) return;
       ShutDownProof();
    }
 
+   //
+   // Open the connection:
+   //
    m_logger << INFO << "Opening PROOF connection to: " << server
             << SLogger::endmsg;
-
    m_proof = TProof::Open( server );
 
    return;
@@ -541,11 +650,32 @@ void SCycleController::InitProof( const TString& server ) {
 
 void SCycleController::ShutDownProof() {
 
+   //
+   // Check if there is a connection:
+   //
    if( ! m_proof ) return;
 
+   //
+   // Print the worker logs only in DEBUG or VERBOSE mode. Normally we're not interested
+   // in the event processing messages...
+   //
+   m_logger << INFO << "***************************************************************"
+            << SLogger::endmsg;
+   m_logger << INFO << "*                                                             *"
+            << SLogger::endmsg;
+   m_logger << INFO << "* Printing all worker logs before closing PROOF connection... *"
+            << SLogger::endmsg;
+   m_logger << INFO << "*                                                             *"
+            << SLogger::endmsg;
+   m_logger << INFO << "***************************************************************"
+            << SLogger::endmsg;
+   PrintWorkerLogs();
+
+   //
+   // Close the connection by deleting the objects in a specific order:
+   //
    m_logger << DEBUG << "Closing PROOF connection to: "
             << m_proof->GetManager()->GetUrl() << SLogger::endmsg;
-
    TProofMgr* mgr = m_proof->GetManager();
    delete m_proof;
    delete mgr;
@@ -557,7 +687,7 @@ void SCycleController::ShutDownProof() {
 }
 
 void SCycleController::WriteCycleOutput( TList* olist,
-                                         const TString& filename ) const {
+                                         const TString& filename, Bool_t update ) const {
 
    m_logger << INFO << "Writing output of \""
             << m_analysisCycles.at( m_curCycle )->GetName() << "\" to: "
@@ -566,19 +696,28 @@ void SCycleController::WriteCycleOutput( TList* olist,
    //
    // Open the output file:
    //
-   TFile outputFile( filename, "RECREATE" );
+   TFile outputFile( filename , ( update ? "UPDATE" : "RECREATE" ) );
 
    //
-   // Write out each output object:
+   // List of files holding TTrees:
+   //
+   std::vector< TString > filesToMerge;
+
+   //
+   // Merge the memory objects into the output file:
    //
    for( Int_t i = 0; i < olist->GetSize(); ++i ) {
 
       outputFile.cd();
-      // Anything that's not wrapped in an SCycleOutput object, is
-      // produced internally by PROOF, so it's put into a directory
-      // called "PROOF":
+
       if( dynamic_cast< SCycleOutput* >( olist->At( i ) ) ) {
          olist->At( i )->Write();
+      } else if( dynamic_cast< TProofOutputFile* >( olist->At( i ) ) ) {
+         TProofOutputFile* pfile = dynamic_cast< TProofOutputFile* >( olist->At( i ) );
+         filesToMerge.push_back( pfile->GetOutputFileName() );
+      } else if ( dynamic_cast< SOutputFile* >( olist->At( i ) ) ) {
+         SOutputFile* sfile = dynamic_cast< SOutputFile* >( olist->At( i ) );
+         filesToMerge.push_back( sfile->GetFileName() );
       } else {
          TDirectory* proofdir = outputFile.GetDirectory( "PROOF" );
          if( ! proofdir ) {
@@ -592,8 +731,36 @@ void SCycleController::WriteCycleOutput( TList* olist,
 
    }
 
+   //
+   // Write and close the output file:
+   //
    outputFile.Write();
    outputFile.Close();
+
+   //
+   // Merge the TTree contents of the temporary files into our output file:
+   //
+   if( filesToMerge.size() ) {
+
+      m_logger << DEBUG << "Merging disk-resident TTrees into \""
+               << filename << "\"" << SLogger::endmsg;
+
+      // Merge the files into the output file using SFileMerger:
+      SFileMerger merger;
+      for( std::vector< TString >::const_iterator mfile = filesToMerge.begin();
+           mfile != filesToMerge.end(); ++mfile ) {
+         merger.AddInput( *mfile );
+      }
+      merger.SetOutput( filename );
+      merger.Merge();
+
+      // Remove the temporary files:
+      for( std::vector< TString >::const_iterator mfile = filesToMerge.begin();
+           mfile != filesToMerge.end(); ++mfile ) {
+         gSystem->Unlink( *mfile );
+      }
+
+   }
 
    return;
 

@@ -1,4 +1,4 @@
-// $Id: SInputData.cxx,v 1.4.2.1 2008-12-01 14:52:57 krasznaa Exp $
+// $Id: SInputData.cxx,v 1.4.2.2 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -10,8 +10,13 @@
  *
  ***************************************************************************/
 
+// ROOT include(s):
+#include <TFile.h>
+#include <TTree.h>
+
 // Local include(s):
 #include "../include/SInputData.h"
+#include "../include/SError.h"
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SFile );
@@ -171,7 +176,8 @@ Bool_t SEVTree::operator!= ( const SEVTree& rh ) const {
 SInputData::SInputData( const char* name )
    : TNamed( name, "SFrame input data object" ), m_type( "unknown" ),
      m_version( 0 ), m_totalLumiGiven( 0 ), m_totalLumiSum( 0 ),
-     m_eventsTotal( 0 ), m_neventsmax( -1 ), m_logger( "SInputData" ) {
+     m_eventsTotal( 0 ), m_neventsmax( -1 ), m_neventsskip( 0 ),
+     m_logger( "SInputData" ) {
 
    m_logger << VERBOSE << "In constructor" << SLogger::endmsg;
 }
@@ -197,6 +203,136 @@ void SInputData::AddSFileIn( const SFile& sfile ) {
    m_sfileIn.push_back( sfile );
    m_totalLumiSum += sfile.lumi;
    return;
+}
+
+void SInputData::ValidateInput() {
+
+   for( std::vector< SFile >::iterator sf = m_sfileIn.begin(); sf != m_sfileIn.end(); ++sf ) {
+
+      TFile* file = TFile::Open( sf->file.Data() );
+      if( ! file || file->IsZombie() ) {
+         m_logger << WARNING << "Couldn't open file: " << sf->file.Data() << SLogger::endmsg;
+         m_logger << WARNING << "Removing it from the input file list" << SLogger::endmsg;
+         m_sfileIn.erase( sf );
+         continue;
+      }
+
+      try {
+
+         Bool_t firstPassed = kFALSE;
+         Long64_t entries = 0;
+         Int_t numberOfBranches = 0;
+         // try to load all the input trees
+         for( std::vector< STree >::const_iterator st = m_inputTrees.begin();
+              st != m_inputTrees.end(); ++st ) {
+            TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
+            if( ! tree ) {
+               m_logger << WARNING << "Couldn't find tree " << st->treeName
+                        << "in file " << sf->file.Data() << SLogger::endmsg;
+               m_logger << WARNING << "Removing file from the input file list"
+                        << SLogger::endmsg;
+               throw SError( SError::SkipFile );
+            } else {
+               if( firstPassed && tree->GetEntriesFast() != entries ) {
+                  m_logger << WARNING << "Conflict in number of entries - Tree "
+                           << tree->GetName() << " has " << tree->GetEntries()
+                           << ", NOT " << entries << SLogger::endmsg;
+                  m_logger << WARNING << "Removing " << sf->file.Data()
+                           << " from the input file list" << SLogger::endmsg;
+                  throw SError( SError::SkipFile );
+               } else if( ! firstPassed ) {
+                  firstPassed = kTRUE;
+                  entries = tree->GetEntries();
+               }
+               Int_t branchesThisTree = tree->GetNbranches();
+               m_logger << DEBUG << branchesThisTree << " branches in tree " << tree->GetName() 
+                        << SLogger::endmsg;
+               numberOfBranches += branchesThisTree;
+            }
+         }
+
+         // check EV trees
+         for( std::vector< SEVTree >::const_iterator st = m_evInputTrees.begin();
+              st != m_evInputTrees.end(); ++st ) {
+            TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
+            if( ! tree ) {
+               m_logger << WARNING << "Couldn't find tree " << st->treeName
+                        << "in file " << sf->file.Data() << SLogger::endmsg;
+               m_logger << WARNING << "Removing file from the input file list"
+                        << SLogger::endmsg;
+               throw SError( SError::SkipFile );
+            }
+            Int_t branchesThisTree = tree->GetNbranches();
+            m_logger << DEBUG << branchesThisTree << " branches in tree " << tree->GetName() 
+                     << SLogger::endmsg;
+            numberOfBranches += branchesThisTree;
+         }
+
+         // Check the persistent tree(s):
+         for( std::vector< STree >::const_iterator st = m_persTrees.begin();
+              st != m_persTrees.end(); ++st ) {
+            TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
+            if( ! tree ) {
+               m_logger << WARNING << "Couldn't find tree " << st->treeName
+                        << "in file " << sf->file.Data() << SLogger::endmsg;
+               m_logger << WARNING << "Removing file from the input file list"
+                        << SLogger::endmsg;
+               throw SError( SError::SkipFile );
+            } else {
+               if( firstPassed && tree->GetEntriesFast() != entries ) {
+                  m_logger << WARNING << "Conflict in number of entries - Tree "
+                           << tree->GetName() << " has " << tree->GetEntries()
+                           << ", NOT " << entries << SLogger::endmsg;
+                  m_logger << WARNING << "Removing " << sf->file.Data()
+                           << " from the input file list" << SLogger::endmsg;
+                  throw SError( SError::SkipFile );
+               } else if( ! firstPassed ) {
+                  firstPassed = kTRUE;
+                  entries = tree->GetEntriesFast();
+               }
+            }
+            Int_t branchesThisTree = tree->GetNbranches();
+            m_logger << DEBUG << branchesThisTree << " branches in tree " << tree->GetName() 
+                     << SLogger::endmsg;
+            numberOfBranches += branchesThisTree;
+         }
+
+         sf->events = entries;
+         AddEvents( entries );
+
+         m_logger << DEBUG << numberOfBranches << " branches in total in file "
+                  << file->GetName() << SLogger::endmsg;
+
+      } catch( const SError& ) {
+         m_sfileIn.erase( sf );
+         continue;
+      }
+
+      file->Close();
+      if( file ) delete file;
+   }
+
+   //
+   // Check that the specified maximum number of events and the number of events to
+   // skip, make sense:
+   //
+   if( GetNEventsSkip() + GetNEventsMax() > GetEventsTotal() ) {
+      if( GetNEventsSkip() >= GetEventsTotal() ) {
+         SetNEventsMax( 0 );
+      } else {
+         SetNEventsMax( GetEventsTotal() - GetNEventsSkip() );
+      }
+   }
+
+   //
+   // Print some status:
+   //
+   m_logger << INFO << "Input type \"" << GetType() << "\" version \"" 
+            << GetVersion() << "\" : " << GetEventsTotal() << " events" 
+            << SLogger::endmsg;
+
+   return;
+
 }
 
 Double_t SInputData::GetTotalLumi() const { 
@@ -244,6 +380,7 @@ SInputData& SInputData::operator= ( const SInputData& parent ) {
    this->m_totalLumiSum = parent.m_totalLumiSum;
    this->m_eventsTotal = parent.m_eventsTotal;
    this->m_neventsmax = parent.m_neventsmax;
+   this->m_neventsskip = parent.m_neventsskip;
 
    return *this;
 
@@ -269,7 +406,8 @@ Bool_t SInputData::operator== ( const SInputData& rh ) const {
        ( this->m_outputTrees == rh.m_outputTrees ) &&
        ( this->m_totalLumiSum == rh.m_totalLumiSum ) &&
        ( this->m_eventsTotal == rh.m_eventsTotal ) &&
-       ( this->m_neventsmax == rh.m_neventsmax ) ) {
+       ( this->m_neventsmax == rh.m_neventsmax ) &&
+       ( this->m_neventsskip == rh.m_neventsskip ) ) {
       return kTRUE;
    } else {
       return kFALSE;
@@ -304,6 +442,7 @@ void SInputData::print() const {
    m_logger << " Version            : " << GetVersion() << endl;
    m_logger << " Total luminosity   : " << GetTotalLumi() << "pb-1" << endl;
    m_logger << " NEventsMax         : " << GetNEventsMax() << endl;
+   m_logger << " NEventsSkip        : " << GetNEventsSkip() << endl;
 
    for( vector< SGeneratorCut >::const_iterator gc = m_gencuts.begin();
         gc != m_gencuts.end(); ++gc )

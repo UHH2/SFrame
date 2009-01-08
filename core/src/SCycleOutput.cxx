@@ -1,4 +1,14 @@
-// $Id: SCycleOutput.cxx,v 1.1.2.1 2008-12-01 14:52:57 krasznaa Exp $
+// $Id: SCycleOutput.cxx,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Core
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
 
 // System include(s):
 #include <string.h>
@@ -12,6 +22,7 @@
 #include <TMethodCall.h>
 #include <TDirectory.h>
 #include <TTree.h>
+#include <TKey.h>
 
 // Local include(s):
 #include "../include/SCycleOutput.h"
@@ -168,22 +179,98 @@ Int_t SCycleOutput::Merge( TCollection* coll ) {
 
 }
 
+/**
+ * This function is also quite tricky. It basically does two things:
+ *
+ *   - If the output file already contains an object with the same name as the
+ *     object that we want to save, then instead of overwriting it, it merges
+ *     the new object into the old one.
+ *   - If there is no pre-existing object in the file, then it just "simply"
+ *     created the specified output directory in the file, and saves the
+ *     object in it.
+ */
 Int_t SCycleOutput::Write( const char* name, Int_t option,
                            Int_t bufsize ) const {
 
+   // Nothing to be done with no object:
    if( ! m_object ) return -1;
 
+   //
+   // Remember both the current directory, and create the directory for the
+   // output object:
+   //
    TDirectory* origDir = gDirectory;
    TDirectory* outDir = MakeDirectory( m_path );
 
+   //
+   // Check if the output directory already holds such an object:
+   //
+   TObject* original_obj;
+   if( ( original_obj = outDir->Get( m_object->GetName() ) ) ) {
+
+      m_logger << DEBUG << "Merging object \"" << m_object->GetName() << "\" under \""
+               << m_path << "\" with already existing object..." << SLogger::endmsg;
+
+      //
+      // Check that it's the same type as the object that we want to save:
+      //
+      if( strcmp( original_obj->ClassName(), m_object->ClassName() ) ) {
+         m_logger << ERROR << "Object in file (\"" << original_obj->ClassName()
+                  << "\") is not the same type as the object in memory (\""
+                  << m_object->ClassName() << "\")" << SLogger::endmsg;
+         return 0;
+      }
+
+      //
+      // Try to merge the new object into the old one:
+      //
+      TMethodCall mergeMethod;
+      mergeMethod.InitWithPrototype( original_obj->IsA(), "Merge", "TCollection*" );
+      if( ! mergeMethod.IsValid() ) {
+         m_logger << ERROR << "Object type \"" << original_obj->ClassName()
+                  << "\" doesn't support merging" << SLogger::endmsg;
+         return 0;
+      }
+
+      //
+      // Remember the key of this object, to be able to remove it after the merging:
+      //
+      TKey* oldKey = outDir->GetKey( m_object->GetName() );
+
+      //
+      // Execute the merging:
+      //
+      TList list;
+      list.Add( m_object );
+      mergeMethod.SetParam( ( Long_t ) &list );
+      mergeMethod.Execute( original_obj );
+
+      //
+      // Remove the old object from the file:
+      //
+      oldKey->Delete();
+      delete oldKey;
+
+      // Return gracefully:
+      return 1;
+
+   }
+
+   //
+   // TTree-s have to be handled in a special way:
+   //
    TTree* tobject = dynamic_cast< TTree* >( m_object );
    if( tobject ) tobject->SetDirectory( outDir );
 
+   //
+   // Write out the object:
+   //
    outDir->cd();
    Int_t ret = m_object->Write( name, option, bufsize );
    if( tobject ) tobject->AutoSave();
    origDir->cd();
 
+   // Remove the memory-resident TTree from the directory:
    if( tobject ) tobject->SetDirectory( 0 );
 
    m_logger << VERBOSE << "Written object \"" << m_object->GetName()
@@ -193,16 +280,21 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
 
 }
 
-TDirectory* SCycleOutput::MakeDirectory( const TString& path ) throw( SError ) {
+/**
+ * Function accessing/creating the required directory in the output file:
+ *
+ * @param path Directory name with slashes. (e.g. "my/directory")
+ * @returns Pointer to the created directory
+ */
+TDirectory* SCycleOutput::MakeDirectory( const TString& path ) const throw( SError ) {
 
    if( ! path.Length() ) return gDirectory;
 
    TDirectory* dir = 0;
    if( ! ( dir = gDirectory->GetDirectory( path ) ) ) {
 
-      SLogger logger( "SCycleOutput" );
-      logger << VERBOSE << "Creating directory: "
-             << gDirectory->GetPath() << "/" << path << SLogger::endmsg;
+      m_logger << VERBOSE << "Creating directory: "
+               << gDirectory->GetPath() << "/" << path << SLogger::endmsg;
 
       //
       // Break up the path name at the slashes:
@@ -226,10 +318,10 @@ TDirectory* SCycleOutput::MakeDirectory( const TString& path ) throw( SError ) {
       for( std::vector< TString >::const_iterator it = directories.begin();
            it != directories.end(); ++it ) {
 
-         logger << VERBOSE << "Accessing directory: " << *it << SLogger::endmsg;
+         m_logger << VERBOSE << "Accessing directory: " << *it << SLogger::endmsg;
          if( ! ( tempDir = dir->GetDirectory( *it ) ) ) {
-            logger << VERBOSE << "Directory doesn't exist, creating it..."
-                   << SLogger::endmsg;
+            m_logger << VERBOSE << "Directory doesn't exist, creating it..."
+                     << SLogger::endmsg;
             if( ! ( tempDir = dir->mkdir( *it, "dummy title" ) ) ) {
                SError error( SError::SkipInputData );
                error << "Couldn't create directory: " << path

@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.h,v 1.5.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseHist.h,v 1.5.2.2 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -41,7 +41,7 @@ class TList;
  *          It's error prone, but I haven't found any nicer way of
  *          doing it...
  *
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision: 1.5.2.2 $
  */
 class SCycleBaseHist : public virtual ISCycleBaseHist,
                        public virtual SCycleBaseBase {
@@ -76,12 +76,6 @@ private:
    std::map< std::pair< const char*, const char* >, TH1* > m_histoMap;
 
    TList* m_output;
-
-   /*
-#ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBaseHist, 0 );
-#endif // DOXYGEN_IGNORE
-   */
 
 }; // class SCycleBaseHist
 

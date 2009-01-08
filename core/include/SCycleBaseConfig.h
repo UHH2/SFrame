@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseConfig.h,v 1.4.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseConfig.h,v 1.4.2.2 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -38,7 +38,7 @@ class TXMLNode;
  *          all these information for the "higher level" parts
  *          of the SCycleBase code.
  *
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision: 1.4.2.2 $
  */
 class SCycleBaseConfig : public virtual ISCycleBaseConfig,
                          public virtual SCycleBaseBase {
@@ -100,12 +100,6 @@ private:
 
    /// The cycle configuration:
    SCycleConfig m_config;
-
-   /*
-#ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBaseConfig, 0 );
-#endif // DOXYGEN_IGNORE
-   */
 
 }; // class SCycleBaseConfig
 

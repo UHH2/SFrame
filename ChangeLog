@@ -1,3 +1,37 @@
+2008.01.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a *lot* of new code. I'll only try to list all new
+	  features here, I'll probably forget a few...
+	* The weighting should now work correctly even when running
+	  on PROOF.
+	* The meaning of the InputData Type and Version properties
+	  have changed a bit. Now you can set both properties to any
+	  string. (You have to set Type="data" to get 1.0 for weight.)
+	  The InputData-s are only treated to be the same if both their
+	  type and version is the same. This makes it possible to have
+	  different output files like this for instance:
+	  <InputData Type="data" Version="Muon_run8XXXX" ...>
+	  <InputData Type="data" Version="Egamma_run8xxxx" ... >
+	* PROOF now creates temporary output files for the output
+	  ntuples. This is a relatively new feature in PROOF, and
+	  required quite a bit of coding on the SFrame part... :-/
+	  All other output types are still kept in memory until being
+	  written out on the client machine at the end of an InputData.
+	* The behaviour with defining multiple InputData nodes with the
+	  same type and version is now the same as it is in "classic"
+	  SFrame. (The luminosities of the separate IDs are added up,
+	  and their content ends up in the same output file.) However
+	  the implementation is radically different. Instead of keeping
+	  an output file open when switching to a new ID, the old
+	  (previously closed) file is appended with the contents of the
+	  new ID when the processing of that ID finishes on the PROOF
+	  cluster. There's quite a bit of ROOT magic involved...
+	* Output file names should resemble the old type of names a bit
+	  more now.
+	* Only tested the code with GCC 4.3 and ROOT 5.22 on SL5 for
+	  the moment. ROOT 5.22 is a strict requirement for
+	  PROOF-Lite to work.
+	* Tagging as SFrame-PROOF-branch-01
+
 2008.12.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added SFrame-PROOF development code to the
 	  SFrame-PROOF-branch branch.

@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SInputData.h,v 1.4.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SInputData.h,v 1.4.2.2 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -32,7 +32,7 @@
  *          It is used to describe one input or output file (as defined
  *          in the configuration XML file) to the framework.
  *
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision: 1.4.2.2 $
  */
 class SFile : public TObject {
 
@@ -89,7 +89,7 @@ public:
  *          property actually, its name. The name of the tree is taken
  *          from the configuration XML file.
  *
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision: 1.4.2.2 $
  */
 class STree : public TObject {
 
@@ -131,7 +131,7 @@ public:
  *          name, all of which are needed to perform synchronisation
  *          between the trees.
  *
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision: 1.4.2.2 $
  */
 class SEVTree : public TObject {
 
@@ -193,7 +193,7 @@ public:
  *          by the framework from the configuration values put in the
  *          configuration XML file.
  *
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision: 1.4.2.2 $
  */
 class SInputData : public TNamed {
 
@@ -211,6 +211,8 @@ public:
    void SetTotalLumi    ( Double_t lumi )                { m_totalLumiGiven = lumi; }
    /// Set the maximal number of events to process from the input data
    void SetNEventsMax   ( Long64_t nevents )             { m_neventsmax = nevents; }
+   /// Set the number of events to skip at the beginning of the input data
+   void SetNEventsSkip  ( Long64_t nevents )             { m_neventsskip = nevents; }
 
    /// Add a new generator cut to the input data
    void AddGenCut       ( const SGeneratorCut& gencuts ) { m_gencuts.push_back( gencuts ); }
@@ -226,6 +228,8 @@ public:
    void AddEVInputSTree ( const SEVTree& stree )         { m_evInputTrees.push_back( stree ); }
    /// Add some number of events to the input data
    void AddEvents       ( Long64_t events )              { m_eventsTotal += events; }
+
+   void ValidateInput();
 
    /// Get the name of the input data type
    const TString&                       GetType() const           { return m_type; }
@@ -253,6 +257,8 @@ public:
    Long64_t                             GetEventsTotal() const    { return m_eventsTotal; }
    /// Get the maximal number of events to process from the input data
    Long64_t                             GetNEventsMax() const     { return m_neventsmax; }
+   /// Get the number of events to skip at the beginning of the input data
+   Long64_t                             GetNEventsSkip() const    { return m_neventsskip; }
 
    /// Assignment operator
    SInputData& operator=  ( const SInputData& parent );
@@ -277,6 +283,7 @@ private:
    Double_t                        m_totalLumiSum;
    Long64_t                        m_eventsTotal;
    Long64_t                        m_neventsmax ;
+   Long64_t                        m_neventsskip;
 
    mutable SLogger                 m_logger; //!
 

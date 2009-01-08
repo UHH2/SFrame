@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseExec.h,v 1.1.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseExec.h,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -29,6 +29,7 @@
 // Forward declaration(s):
 class TTree;
 class SInputData;
+class TFile;
 
 /**
  *   @short The SCycleBase constituent responsible for running the cycle
@@ -39,7 +40,7 @@ class SInputData;
  *          (like SCycleBaseNTuple for ARA) can be exchanged for another
  *          one.
  *
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 class SCycleBaseExec : public TSelector,
                        public virtual ISCycleBaseConfig,
@@ -52,14 +53,6 @@ public:
    SCycleBaseExec();
    /// Default destructor
    virtual ~SCycleBaseExec();
-
-   /// Number of events processed already
-   /**
-    * The number of processed events is used in a few places,
-    * this function tells the framework how many events have
-    * already been processed by the cycle.
-    */
-   Long64_t NumberOfProcessedEvents() const { return m_nProcessedEvents; }
 
    ///////////////////////////////////////////////////////////////////////////
    //                                                                       //
@@ -90,28 +83,39 @@ public:
     * algorithm based on properties configured in XML should be done here.
     */
    virtual void BeginCycle() throw( SError ) = 0;
-
    /// Finalisation called at the end of a full cycle
    /**
     * This is the last function called after an analysis run, so it
-    * could be a good place to print some statistics about the running,
-    * maybe close helper files (not input or output files!) used in
-    * the analysis.
+    * could be a good place to print some statistics about the running.
     */
    virtual void EndCycle() throw( SError ) = 0;
-   /// Initialisation called for each input data type
+
+   /// Initialisation called on the worker nodes for each input data type
    /**
     * This is the place to declare the output variables for the output
     * TTree(s). This is also the earliest point where histograms can
     * be created.
     */
    virtual void BeginInputData( const SInputData& ) throw( SError ) = 0;
-   /// Finalisation called for each input data type
+   /// Finalisation called on the worker nodes for each input data type
    /**
     * Mainly used for printing input data statistics, or normalising
     * efficiency histograms by hand.
     */
    virtual void EndInputData  ( const SInputData& ) throw( SError ) = 0;
+
+   /// Initialisation called on the client machine for each input data type
+   /**
+    * This function is mostly a placeholder for now. There is not much one
+    * can do here yet...
+    */
+   virtual void BeginMasterInputData( const SInputData& ) throw( SError ) {}
+   /// Finalisation called on the client machine for each input data type
+   /**
+    * This function is mostly a placeholder for now. There is not much one
+    * can do here yet...
+    */
+   virtual void EndMasterInputData( const SInputData& ) throw( SError ) {}
 
    /// Initialisation called for each input file
    /**
@@ -129,17 +133,23 @@ public:
    virtual void ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) = 0;
 
 private:
-   // The number of already processed events
+   /// Function for reading the cycle configuration on the worker nodes
+   void ReadConfig() throw( SError );
+
+   /// The number of already processed events
    Long64_t m_nProcessedEvents;
+   /// The number of already skipped events
+   Long64_t m_nSkippedEvents;
 
    // variable used for the case of multiple InputData objects with
    // the same type, that are written to the same output file
    Bool_t m_keepOutputFile;
    Bool_t m_firstInputDataOfMany;
 
-   TTree*                m_inputTree;
-   SInputData*           m_inputData;
-   std::vector< TTree* > m_outputTrees;
+   TTree*                m_inputTree; ///< TTree used to load all input trees
+   SInputData*           m_inputData; ///< Pointer to the currently active ID
+   std::vector< TTree* > m_outputTrees; ///< List of all the output TTree-s
+   TFile*                m_outputFile; ///< Pointer to the active temporary output file
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseExec, 0 );

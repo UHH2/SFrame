@@ -1,4 +1,4 @@
-// $Id: SCycleBaseHist.cxx,v 1.4.2.2 2008-12-02 18:50:28 krasznaa Exp $
+// $Id: SCycleBaseHist.cxx,v 1.4.2.3 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -86,7 +86,7 @@ void SCycleBaseHist::WriteObj( const TObject& obj,
 
    GetTempDir()->cd();
 
-   TString path = ( directory ? directory : "" ) + TString( "/" ) +
+   TString path = ( directory ? directory + TString( "/" ) : "" ) +
       TString( obj.GetName() );
    SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
    if( ! out ) {

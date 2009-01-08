@@ -1,4 +1,4 @@
-// $Id: SCycleBaseNTuple.cxx,v 1.4.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseNTuple.cxx,v 1.4.2.2 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -42,7 +42,7 @@ ClassImp( SCycleBaseNTuple );
 
 using namespace std;
 
-static Double_t EPSILON = 1e-15;
+static const Double_t EPSILON = 1e-15;
 
 /**
  * The constructor is only initialising the base class.
@@ -87,10 +87,10 @@ TList* SCycleBaseNTuple::GetNTupleOutput() const {
  *
  * @param iD       The input data that we're handling at the moment
  * @param outTrees The collection of output trees that will be created
- * @param fileOut  Pointer to the output file that the function opens
  */
 void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
-                                          std::vector< TTree* >& outTrees ) throw( SError ) {
+                                          std::vector< TTree* >& outTrees,
+                                          TFile* outputFile ) throw( SError ) {
 
    // sanity checks
    if( outTrees.size() )
@@ -123,8 +123,17 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
 
       outTrees.push_back( tree );
       m_outputTrees.push_back( tree );
-      SCycleOutput* out = new SCycleOutput( tree, st->treeName );
-      m_output->Add( out );
+
+      if( outputFile ) {
+         tree->SetDirectory( outputFile );
+         m_logger << VERBOSE << "Attached TTree \"" << st->treeName.Data()
+                  << "\" to file: " << outputFile->GetName() << SLogger::endmsg;
+      } else {
+         SCycleOutput* out = new SCycleOutput( tree, st->treeName );
+         m_output->Add( out );
+         m_logger << VERBOSE << "Keeping TTree \"" << st->treeName.Data()
+                  << "\" in memory" << SLogger::endmsg;
+      }
    }
 
    return;
@@ -255,7 +264,8 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,
                                             Long64_t entry ) {
 
    // the type of this input data
-   TString type = inputData.GetType();
+   const TString& type    = inputData.GetType();
+   const TString& version = inputData.GetVersion();
 
    Double_t weight = 0.;
    Double_t totlum = 0.;
@@ -270,7 +280,7 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,
    for( vector< SInputData >::const_iterator iD = GetConfig().GetInputData().begin();
         iD != GetConfig().GetInputData().end(); ++iD ) {
 
-      if( iD->GetType() == type ) {
+      if( ( iD->GetType() == type ) && ( iD->GetVersion() == version ) ) {
 
          const std::vector< SGeneratorCut >& sgencuts = iD->GetSGeneratorCuts();
          Bool_t inside = kTRUE;
@@ -298,7 +308,7 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,
       }
    }
 
-   if( totlum > EPSILON) 
+   if( totlum > EPSILON ) 
       weight = ( GetConfig().GetTargetLumi() / totlum );
   
    return weight;

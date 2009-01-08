@@ -1,4 +1,4 @@
-// $Id: sframe_main.cxx,v 1.3.2.2 2008-12-02 18:50:28 krasznaa Exp $
+// $Id: sframe_main.cxx,v 1.3.2.3 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -45,7 +45,7 @@ int main( int argc, char** argv ) {
    const char* filename = argv[ 1 ];
 
    gROOT->SetBatch( kTRUE );
-   SetErrorHandler( SErrorHandler );
+   //   SetErrorHandler( SErrorHandler );
 
    try { // This is where I catch anything not handled internally...
 

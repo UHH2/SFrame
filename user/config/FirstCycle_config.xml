@@ -23,21 +23,38 @@
   <Library Name="libSFramePlugIns" />
   <Library Name="libSFrameUser" />
 
-  <Package Name="/afs/cern.ch/user/k/krasznaa/ATLAS/sw/projects/sframe/SFramePROOF/lib/SFrameCore.par" />
-  <Package Name="/afs/cern.ch/user/k/krasznaa/ATLAS/sw/projects/sframe/SFramePROOF/lib/SFramePlugIns.par" />
-  <Package Name="/afs/cern.ch/user/k/krasznaa/ATLAS/sw/projects/sframe/SFramePROOF/lib/SFrameUser.par" />
+  <!-- Packages that have to be uploaded and enabled on the PROOF cluster. -->
+  <!-- The standard SFrame libraries all create such a PAR package under   -->
+  <!-- SFRAME_LIB_DIR. For each custom library that is loaded in the       -->
+  <!-- configuration, a package also has to be defined...                  -->
+  <Package Name="SFrameCore.par" />
+  <Package Name="SFramePlugIns.par" />
+  <Package Name="SFrameUser.par" />
 
   <!-- List of cycles to be executed.                                       -->
   <!-- Name: specifies the class name to be executed in this cycle          -->
   <!-- name of Output-File: automically give by Name+Type+PostFix+".root"   -->
   <!-- OutputDirectory: directory to which output is written                -->
-  <!--                  must finish with an "/"                             --> 
+  <!--                  must finish with a "/"                              -->
+  <!-- PostFix: A string that should be added to the output file name.      -->
+  <!--          Can be useful for differentiating differently configured    -->
+  <!--          instances of the same cycle class.                          -->
+  <!-- RunMode: Can be "LOCAL" or "PROOF", depending on how you want to run -->
+  <!--          your analysis.                                              -->
+  <!-- ProofServer: Name of the PROOF server that you want to connect to.   -->
+  <!--              Set it to "" or "lite" to run PROOF-Lite on your local  -->
+  <!--              machine.                                                -->
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
-  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite" >
+  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite"
+         OutputDirectory="./" PostFix="" >
 
     <!-- list of input data for given data type                                   -->
-    <!-- type: type of events: e.g. "Zee", "ttbar", ...                           -->
-    <!--       names are up to the user; exception: for data use "data"!          -->  
+    <!-- Type, Version: Type of the events. They have pretty free formats.        -->
+    <!--       Exception is only for real data: for that use Type="data"!         -->
+    <!--       If two InputData nodes are declared with the same Type and Version -->
+    <!--       parameters, then their contents will end up in the same output     -->
+    <!--       file. (Care is taken to calculate the event weights correctly in   -->
+    <!--       case...                                                            -->
     <!-- Lumi: either specify it in InputData (ie. the luminosity sum of all <In> -->
     <!--       or specify it in each <In> separately                              -->
     <!--       In case both are filled the sum in <InputData> is used.            -->
@@ -51,8 +68,14 @@
     <!--             the weights of the events are adapted.                       -->
     <!--             For final plots, i.e. maximum statistics, NEventsMax         -->
     <!--             shouldn't be used.                                           -->
+    <!-- NEventsSkip: optional, specifies the number of events that should be     -->
+    <!--              disregarded at the beginning of the InputData.              -->
+    <!--                                                                          -->
+    <!-- Some run-time checking is done on these parameters that they would make  -->
+    <!-- sense, but in general be careful when using them.                        -->
 
-    <InputData Type="Data1" Version="Reco" Lumi="0." NEventsMax="2000">
+
+    <InputData Type="MC" Version="Zee_1" Lumi="0." NEventsMax="2000" NEventsSkip="3000" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting.                                                     -->
@@ -72,8 +95,8 @@
       <InputTree Name="CollectionTree" />
       <OutputTree Name="FirstCycleTree" />
 
-  </InputData>
-  <InputData Type="Data2" Version="Reco" Lumi="0." NEventsMax="-1" >
+    </InputData>
+    <InputData Type="MC" Version="Zee_2" Lumi="0." NEventsMax="-1" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting                                                      -->

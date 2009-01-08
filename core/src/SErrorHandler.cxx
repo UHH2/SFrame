@@ -1,4 +1,4 @@
-// $Id: SErrorHandler.cxx,v 1.1.2.3 2008-12-04 17:02:19 krasznaa Exp $
+// $Id: SErrorHandler.cxx,v 1.1.2.4 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -10,15 +10,13 @@
  *
  ***************************************************************************/
 
-// System include(s):
-#include <string.h>
-
 // STL include(s):
 #include <map>
 #include <cstdlib>
 
 // ROOT include(s):
 #include <TSystem.h>
+#include <TError.h>
 
 // Local include(s):
 #include "core/include/SErrorHandler.h"
@@ -28,7 +26,7 @@
 static std::map< int, SMsgType > msgLevelMap;
 
 /**
- * This function the "SFrame version" of DefaultErrorHandler defined in the
+ * This function is the "SFrame version" of DefaultErrorHandler defined in the
  * TError.h header. By calling
  *
  * <code>
@@ -76,3 +74,27 @@ void SErrorHandler( int level, Bool_t abort, const char* location,
    return;
 
 }
+
+/**
+ * The following code makes sure that <code>SetErrorHandler(SErrorHandler)</code>
+ * is called when loading the SFrameCore library. This way all ROOT messages get
+ * printed using SLogger on the PROOF workers from the moment the SFrame libraries
+ * are loaded. (This is one of the first things that the workers do...)
+ *
+ * I "stole" the idea for this kind of code from RooFit actually...
+ */
+Int_t SetSErrorHandler() {
+
+   // Set up SFrame's error handler:
+   SetErrorHandler( SErrorHandler );
+
+   // Report this feat:
+   SLogger logger( "SetSErrorHandler" );
+   logger << INFO << "Redirected ROOT messages to SFrame's logger" << SLogger::endmsg;
+
+   return 0;
+
+}
+
+// Call the function:
+static Int_t dummy = SetSErrorHandler();

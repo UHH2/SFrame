@@ -38,6 +38,8 @@
 <!ATTLIST Cycle 
         Name                 ID               #REQUIRED
         TargetLumi           CDATA            #REQUIRED
+        OutputDirectory      CDATA            "./"
+        PostFix              CDATA            ""
         RunMode              (LOCAL|PROOF)    "LOCAL"
         ProofServer          CDATA            ""
 >
@@ -45,9 +47,10 @@
 <!ELEMENT InputData (GeneratorCut*,In+,PersTree*,InputTree*,EVInputTree*,OutputTree*)>
 <!ATTLIST InputData
         Type                 CDATA            #REQUIRED
-        Version              (Reco|AtlFast)   "Reco"
+        Version              CDATA            #REQUIRED
         Lumi                 CDATA            "0.0"
         NEventsMax           CDATA            "-1"
+        NEventsSkip          CDATA            "0"
 >
 
 <!ELEMENT GeneratorCut EMPTY>

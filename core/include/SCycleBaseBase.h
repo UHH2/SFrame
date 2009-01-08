@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseBase.h,v 1.3.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseBase.h,v 1.3.2.2 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -27,7 +27,7 @@
  *          of SCycleBase have to inherit from this with "public virtual",
  *          so that it only gets created once in memory for each cycle...
  *
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  */
 class SCycleBaseBase {
 
@@ -49,12 +49,6 @@ protected:
     * directly.
     */
    mutable SLogger m_logger;
-
-   /*
-#ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBaseBase, 0 );
-#endif // DOXYGEN_IGNORE
-   */
 
 }; // class SCycleBaseBase
 

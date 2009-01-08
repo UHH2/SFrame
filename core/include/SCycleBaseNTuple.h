@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.h,v 1.3.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseNTuple.h,v 1.3.2.2 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -42,7 +42,7 @@ class SInputData;
  *          are hidden from the user by that class. (A little
  *          C++ magic...)
  *
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  */
 class SCycleBaseNTuple : public virtual ISCycleBaseConfig,
                          public virtual ISCycleBaseNTuple,
@@ -76,7 +76,8 @@ protected:
 
    /// Create the output trees
    void CreateOutputTrees( const SInputData& id,
-                           std::vector< TTree* >& outTrees ) throw( SError );
+                           std::vector< TTree* >& outTrees,
+                           TFile* outputFile = 0 ) throw( SError );
    /// Load the input trees
    void LoadInputTrees( const SInputData& id, TTree* main_tree ) throw( SError );
    /// Read in the event from the "normal" trees
@@ -107,12 +108,6 @@ private:
    std::list< void* > m_outputVarPointers;
 
    TList* m_output;
-
-   /*
-#ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBaseNTuple, 0 );
-#endif // DOXYGEN_IGNORE
-   */
 
 }; // class SCycleBaseNTuple
 

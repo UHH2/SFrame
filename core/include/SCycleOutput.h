@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleOutput.h,v 1.1.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleOutput.h,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
 
 #ifndef SFRAME_CORE_SCycleOutput_H
 #define SFRAME_CORE_SCycleOutput_H
@@ -29,8 +29,8 @@ class TDirectory;
  *          individual worder nodes.
  *
  *  @author Attila Krasznahoryat Jr.
- * @version $Revision: 1.1.2.1 $
- *    @date $Date: 2008-12-01 14:52:56 $
+ * @version $Revision: 1.1.2.2 $
+ *    @date $Date: 2009-01-08 16:09:32 $
  */
 class SCycleOutput : public TNamed {
 
@@ -59,7 +59,7 @@ public:
 
 private:
    /// Return the requested output directory
-   static TDirectory* MakeDirectory( const TString& path ) throw( SError );
+   TDirectory* MakeDirectory( const TString& path ) const throw( SError );
 
    /// The object that this class wraps
    TObject* m_object;

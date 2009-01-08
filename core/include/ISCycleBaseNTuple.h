@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: ISCycleBaseNTuple.h,v 1.1.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: ISCycleBaseNTuple.h,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
 
 #ifndef SFRAME_CORE_ISCycleBaseNTuple_H
 #define SFRAME_CORE_ISCycleBaseNTuple_H
@@ -16,6 +16,7 @@
 // Forward declaration(s):
 class TTree;
 class TList;
+class TFile;
 class SInputData;
 
 class ISCycleBaseNTuple {
@@ -29,7 +30,8 @@ public:
 protected:
    /// Create the output trees
    virtual void CreateOutputTrees( const SInputData& id,
-                                   std::vector< TTree* >& outTrees ) throw( SError ) = 0;
+                                   std::vector< TTree* >& outTrees,
+                                   TFile* outputFile = 0 ) throw( SError ) = 0;
    /// Load the input trees
    virtual void LoadInputTrees( const SInputData& id, TTree* main_tree ) throw( SError ) = 0;
    /// Read in the event from the "normal" trees

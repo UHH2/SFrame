@@ -1,4 +1,4 @@
-// $Id: SCycleBaseConfig.cxx,v 1.5.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleBaseConfig.cxx,v 1.5.2.2 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -10,6 +10,9 @@
  *
  ***************************************************************************/
 
+// System include(s):
+#include <cstdlib>
+
 // ROOT include(s):
 #include <TString.h>
 #include <TXMLNode.h>
@@ -19,12 +22,6 @@
 // Local include(s):
 #include "../include/SCycleBaseConfig.h"
 #include "../include/SGeneratorCut.h"
-
-/*
-#ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseConfig );
-#endif // DOXYGEN_IGNORE
-*/
 
 using namespace std;
 
@@ -84,6 +81,10 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
          m_config.SetRunMode( mode );
       } else if( curAttr->GetName() == TString( "ProofServer" ) ) {
          m_config.SetProofServer( curAttr->GetValue() );
+      } else if( curAttr->GetName() == TString( "OutputDirectory" ) ) {
+         m_config.SetOutputDirectory( curAttr->GetValue() );
+      } else if( curAttr->GetName() == TString( "PostFix" ) ) {
+         m_config.SetPostFix( curAttr->GetValue() );
       }
    }
 
@@ -316,6 +317,8 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
          inputData.SetTotalLumi( atof( curAttr->GetValue() ) );
       if( curAttr->GetName() == TString( "NEventsMax" ) ) 
          inputData.SetNEventsMax( atoi( curAttr->GetValue() ) );
+      if( curAttr->GetName() == TString( "NEventsSkip" ) ) 
+         inputData.SetNEventsSkip( atoi( curAttr->GetValue() ) );
    }
 
    TXMLNode* child = node->GetChildren();

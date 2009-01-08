@@ -1,4 +1,4 @@
-// $Id: SCycleConfig.cxx,v 1.1.2.1 2008-12-01 14:52:56 krasznaa Exp $
+// $Id: SCycleConfig.cxx,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
 
 // STL include(s):
 #include <map>
@@ -15,10 +15,6 @@ SCycleConfig::SCycleConfig( const char* name )
    : TNamed( name, "SFrame cycle configuration" ), m_mode( LOCAL ),
      m_server( "" ), m_properties(), m_inputData(),
      m_targetLumi( 1. ) {
-
-}
-
-SCycleConfig::~SCycleConfig() {
 
 }
 
@@ -74,6 +70,32 @@ void SCycleConfig::AddInputData( const SInputData& id ) {
 
 }
 
+void SCycleConfig::SetOutputDirectory( const TString& outDir ) {
+
+   m_outputDirectory = outDir;
+   return;
+
+}
+
+const TString& SCycleConfig::GetOutputDirectory() const {
+
+   return m_outputDirectory;
+
+}
+
+void SCycleConfig::SetPostFix( const TString& postFix ) {
+
+   m_postFix = postFix;
+   return;
+
+}
+
+const TString& SCycleConfig::GetPostFix() const {
+
+   return m_postFix;
+
+}
+
 void SCycleConfig::PrintConfig() const {
 
    SLogger logger( "SCycleConfig" );
@@ -86,6 +108,8 @@ void SCycleConfig::PrintConfig() const {
       logger << INFO << "  - PROOF server: " << m_server << SLogger::endmsg;
    }
    logger << INFO << "  - Target luminosity: " << m_targetLumi << SLogger::endmsg;
+   logger << INFO << "  - Output directory: " << m_outputDirectory << SLogger::endmsg;
+   logger << INFO << "  - Post-fix: " << m_postFix << SLogger::endmsg;
 
    for( id_type::const_iterator id = m_inputData.begin(); id != m_inputData.end();
         ++id ) {
@@ -149,11 +173,25 @@ void SCycleConfig::ArrangeInputData() throw ( SError ) {
 
 }
 
+void SCycleConfig::ValidateInput() {
+
+   for( id_type::iterator id = m_inputData.begin(); id != m_inputData.end(); ++id ) {
+      id->ValidateInput();
+   }
+
+   return;
+
+}
+
 void SCycleConfig::ClearConfig() {
 
+   m_mode = LOCAL;
+   m_server = "";
    m_properties.clear();
    m_inputData.clear();
    m_targetLumi = 1.0;
+   m_outputDirectory = "./";
+   m_postFix = "";
    return;
 
 }

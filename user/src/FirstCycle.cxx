@@ -1,4 +1,4 @@
-// $Id: FirstCycle.cxx,v 1.3.2.2 2008-12-02 18:50:28 krasznaa Exp $
+// $Id: FirstCycle.cxx,v 1.3.2.3 2009-01-08 16:09:32 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User
@@ -134,7 +134,7 @@ void FirstCycle::EndInputData( const SInputData& ) throw( SError ) {
    return;
 }
 
-void FirstCycle::ExecuteEvent( const SInputData&, Double_t /*weight*/ ) throw( SError ) {
+void FirstCycle::ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) {
 
    //
    // If you have vectors (or any other type of containers) in the output,
@@ -154,7 +154,7 @@ void FirstCycle::ExecuteEvent( const SInputData&, Double_t /*weight*/ ) throw( S
       m_o_El_p_T.push_back( ( *m_El_p_T )[ i ] );
 
       // Fill the example histogram:
-      Hist( "El_p_T_hist" )->Fill( ( *m_El_p_T )[ i ] );
+      Hist( "El_p_T_hist" )->Fill( ( *m_El_p_T )[ i ], weight );
 
       // Fill a vector of objects:
       m_o_El.push_back( SParticle( ( * m_El_p_T )[ i ],
