@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.6.2.5 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.6.2.6 2009-01-21 14:34:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -363,6 +363,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
    config.SetName( SFrame::CycleConfigName );
    config.ArrangeInputData(); // To handle multiple ID of the same type...
    config.ValidateInput(); // This is needed for the proper weighting...
+   config.SetMsgLevel( SLogWriter::Instance()->GetMinType() ); // For the correct msg level...
    cycle->SetConfig( config );
 
    m_logger << INFO << "Executing Cycle #" << m_curCycle << " ('" << cycleName << "') "
@@ -633,6 +634,7 @@ void SCycleController::InitProof( const TString& server ) {
    // Check if the connection has to be (re)opened:
    //
    if( m_proof ) {
+      // Unfortunately this check can not be true...
       if( m_proof->GetManager()->GetUrl() == server ) return;
       ShutDownProof();
    }
@@ -719,12 +721,14 @@ void SCycleController::WriteCycleOutput( TList* olist,
          SOutputFile* sfile = dynamic_cast< SOutputFile* >( olist->At( i ) );
          filesToMerge.push_back( sfile->GetFileName() );
       } else {
+         /*
          TDirectory* proofdir = outputFile.GetDirectory( "PROOF" );
          if( ! proofdir ) {
             proofdir = outputFile.mkdir( "PROOF", "PROOF related objects" );
          }
          proofdir->cd();
          olist->At( i )->Write();
+         */
       }
       m_logger << DEBUG << "Written object: " << olist->At( i )->GetName()
                << SLogger::endmsg;

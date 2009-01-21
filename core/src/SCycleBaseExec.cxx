@@ -1,4 +1,4 @@
-// $Id: SCycleBaseExec.cxx,v 1.4.2.3 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SCycleBaseExec.cxx,v 1.4.2.4 2009-01-21 14:34:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -23,6 +23,7 @@
 #include "../include/SConstants.h"
 #include "../include/SCycleStatistics.h"
 #include "../include/SOutputFile.h"
+#include "../include/SLogWriter.h"
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseExec );
@@ -53,6 +54,12 @@ void SCycleBaseExec::Begin( TTree* ) {
    m_logger << VERBOSE << "In SCycleBaseExec::Begin()" << SLogger::endmsg;
 
    try {
+
+      //
+      // Configure the base classes to write to the TSelector output object:
+      //
+      this->SetHistOutput( fOutput );
+      this->SetNTupleOutput( fOutput );
 
       this->ReadConfig();
       this->BeginMasterInputData( *m_inputData );
@@ -315,6 +322,7 @@ void SCycleBaseExec::ReadConfig() throw( SError ) {
       return;
    }
    this->SetConfig( *config );
+   SLogWriter::Instance()->SetMinType( config->GetMsgLevel() );
 
    //
    // Read which InputData we're processing at the moment:

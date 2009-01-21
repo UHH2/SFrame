@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: FirstCycle.h,v 1.3 2008-02-11 14:03:48 krasznaa Exp $
+// $Id: FirstCycle.h,v 1.3.2.1 2009-01-21 14:34:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User
@@ -21,6 +21,7 @@
 // Local include(s):
 #include "core/include/SCycleBase.h"
 #include "plug-ins/include/SParticle.h"
+#include "plug-ins/include/SSummedVar.h"
 
 /**
  * Example cycle reading a SusyView ntuple and writing out an
@@ -37,6 +38,9 @@ public:
 
    virtual void BeginInputData( const SInputData& ) throw( SError );
    virtual void EndInputData  ( const SInputData& ) throw( SError );
+
+   virtual void BeginMasterInputData( const SInputData& ) throw( SError );
+   virtual void EndMasterInputData  ( const SInputData& ) throw( SError );
 
    virtual void BeginInputFile( const SInputData& ) throw( SError );
 
@@ -75,6 +79,13 @@ private:
    int                      m_o_example_variable;
    std::vector< double >    m_o_El_p_T;
    std::vector< SParticle > m_o_El;
+
+   //
+   // Some counters:
+   //
+   SSummedVar< Int_t > m_allEvents;
+   SSummedVar< Int_t > m_passedEvents;
+   SSummedVar< std::vector< Int_t > > m_test;
 
    ClassDef( FirstCycle , 0 );
 

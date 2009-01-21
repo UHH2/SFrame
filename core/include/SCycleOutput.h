@@ -1,5 +1,15 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleOutput.h,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SCycleOutput.h,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Core
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
 
 #ifndef SFRAME_CORE_SCycleOutput_H
 #define SFRAME_CORE_SCycleOutput_H
@@ -28,9 +38,7 @@ class TDirectory;
  *          takes care of summing up the results obtained from the
  *          individual worder nodes.
  *
- *  @author Attila Krasznahoryat Jr.
- * @version $Revision: 1.1.2.2 $
- *    @date $Date: 2009-01-08 16:09:32 $
+ * @version $Revision: 1.1.2.3 $
  */
 class SCycleOutput : public TNamed {
 
@@ -66,6 +74,7 @@ private:
    /// Path of the object in the output file
    TString m_path;
 
+   /// Transient logger object
    mutable SLogger m_logger; //!
 
 #ifndef DOXYGEN_IGNORE

@@ -1,4 +1,4 @@
-// $Id: FirstCycle.cxx,v 1.3.2.3 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: FirstCycle.cxx,v 1.3.2.4 2009-01-21 14:34:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User
@@ -20,7 +20,9 @@
 ClassImp( FirstCycle );
 
 FirstCycle::FirstCycle()
-   : m_El_p_T( 0 ), m_El_eta( 0 ), m_El_phi( 0 ), m_El_E( 0 ) {
+   : m_El_p_T( 0 ), m_El_eta( 0 ), m_El_phi( 0 ), m_El_E( 0 ),
+     m_allEvents( "allEvents", this ), m_passedEvents( "passedEvents", this ),
+     m_test( "test", this ) {
 
    // To have the correct name in the log:
    SetLogName( this->GetName() );
@@ -119,6 +121,9 @@ void FirstCycle::BeginInputData( const SInputData& ) throw( SError ) {
    Book( TH1F( "El_p_T_hist", "Electron p_{T}", 100, 0.0,
                150000.0 ) );
 
+   // Reserve two entries in the vector:
+   m_test->resize( 2, 0 );
+
    return;
 }
 
@@ -132,6 +137,23 @@ void FirstCycle::EndInputData( const SInputData& ) throw( SError ) {
    WriteObj( mygraph, "graph_dir" );
 
    return;
+}
+
+void FirstCycle::BeginMasterInputData( const SInputData& ) throw( SError ) {
+
+   return;
+
+}
+
+void FirstCycle::EndMasterInputData( const SInputData& ) throw( SError ) {
+
+   m_logger << INFO << "Number of all processed events: "
+            << *m_allEvents << " " << ( *m_test )[ 0 ] << SLogger::endmsg;
+   m_logger << INFO << "Number of events passing selection: "
+            << *m_passedEvents << " " << ( *m_test )[ 1 ] << SLogger::endmsg;
+
+   return;
+
 }
 
 void FirstCycle::ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) {
@@ -164,10 +186,18 @@ void FirstCycle::ExecuteEvent( const SInputData&, Double_t weight ) throw( SErro
 
    }
 
+   // Count the total number of processed events:
+   ++m_allEvents;
+   ( *m_test )[ 0 ]++;
+
    // Perform event selection. If you don't want to write out
    // an event, you have to throw an exception anywhere in the ExecuteEvent
    // method (or in a method called by ExecuteEvent) like this:
    if( ! m_El_N ) throw SError( SError::SkipEvent );
+
+   // Count the number of events that passed the selection:
+   ++m_passedEvents;
+   ( *m_test )[ 1 ]++;
 
    // Fill validation histograms.
    // For adding more ValHistsTypes, edit the header File for this Cycle.

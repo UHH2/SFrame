@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseExec.h,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SCycleBaseExec.h,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -19,6 +19,7 @@
 
 // ROOT include(s):
 #include <TSelector.h>
+#include <TString.h>
 
 // Local include(s):
 #include "ISCycleBaseConfig.h"
@@ -30,6 +31,7 @@
 class TTree;
 class SInputData;
 class TFile;
+class TList;
 
 /**
  *   @short The SCycleBase constituent responsible for running the cycle
@@ -40,7 +42,7 @@ class TFile;
  *          (like SCycleBaseNTuple for ARA) can be exchanged for another
  *          one.
  *
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 class SCycleBaseExec : public TSelector,
                        public virtual ISCycleBaseConfig,

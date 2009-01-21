@@ -1,5 +1,5 @@
  # Dear emacs, this is a -*- makefile -*-
- # $Id: Makefile.common,v 1.5.2.2 2009-01-08 16:09:31 krasznaa Exp $
+ # $Id: Makefile.common,v 1.5.2.3 2009-01-21 14:34:54 krasznaa Exp $
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  #                                                                         #
@@ -154,6 +154,6 @@ distclean:
 	rm -f $(SHLIBFILE)
 	rm -f $(DLLIBFILE)
 	rm -f $(SFRAME_LIB_PATH)/lib$(LIBRARY).so
-	rm -f $(SFRAME_LIB_PATH)/*.par
+	rm -f $(SFRAME_LIB_PATH)/$(LIBRARY).par
 
 .PHONY : winlib shlib lib default clean

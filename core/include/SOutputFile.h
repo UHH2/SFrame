@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SOutputFile.h,v 1.1.2.1 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SOutputFile.h,v 1.1.2.2 2009-01-21 14:34:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -18,12 +18,26 @@
 #include <TNamed.h>
 #include <TString.h>
 
+/**
+ *   @short Class describing temporary ntuple files in local running mode
+ *
+ *          This class is used similarly to TProofOutputFile when running
+ *          ntuple writing jobs in "LOCAL" mode. In this mode the output
+ *          ntuples are written to a temporary file in the running directory,
+ *          and finally the file's contents are merged into the output file
+ *          also holding all the other outputs of the cycle.
+ *
+ * @version $Revision: 1.1.2.2 $
+ */
 class SOutputFile : public TNamed {
 
 public:
+   /// Constructor with object- and file name
    SOutputFile( const char* name, const TString& fileName );
 
+   /// Set the name of the temporary ntuple file
    void SetFileName( const TString& fileName );
+   /// Get the name of the temporary ntuple file
    const TString& GetFileName() const;
 
 private:

@@ -1,4 +1,11 @@
-2008.01.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+2009.01.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added some more documentation
+	* Fixed some problems which only surfaced when using the code
+	  in a realistic analysis.
+	* Now the worker nodes print messages with the same verbosity
+	  level as the master node.
+
+2009.01.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a *lot* of new code. I'll only try to list all new
 	  features here, I'll probably forget a few...
 	* The weighting should now work correctly even when running

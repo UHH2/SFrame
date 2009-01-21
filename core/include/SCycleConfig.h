@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleConfig.h,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SCycleConfig.h,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -25,6 +25,7 @@
 // Local include(s):
 #include "SInputData.h"
 #include "SError.h"
+#include "SMsgType.h"
 
 /**
  *   @short Class describing the entire configuration of a cycle
@@ -35,7 +36,7 @@
  *          SCycleController makes sure that the configuration is passed
  *          correctly to all cycle instances.
  *
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 class SCycleConfig : public TNamed {
 
@@ -105,6 +106,11 @@ public:
    /// Get the post-fix that should be added to the output file name
    const TString& GetPostFix() const;
 
+   /// Set the minimum printed message level
+   void SetMsgLevel( SMsgType level );
+   /// Get the minimum printed message level
+   SMsgType GetMsgLevel() const;
+
    /// Print the configuration to the screen
    void PrintConfig() const;
    /// Re-arrange the input data objects
@@ -133,6 +139,7 @@ private:
    Double_t      m_targetLumi;
    TString       m_outputDirectory;
    TString       m_postFix;
+   SMsgType      m_msgLevel;
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleConfig, 1 );

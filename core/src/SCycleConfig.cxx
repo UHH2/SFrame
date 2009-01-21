@@ -1,4 +1,4 @@
-// $Id: SCycleConfig.cxx,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SCycleConfig.cxx,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
 
 // STL include(s):
 #include <map>
@@ -93,6 +93,19 @@ void SCycleConfig::SetPostFix( const TString& postFix ) {
 const TString& SCycleConfig::GetPostFix() const {
 
    return m_postFix;
+
+}
+
+void SCycleConfig::SetMsgLevel( SMsgType level ) {
+
+   m_msgLevel = level;
+   return;
+
+}
+
+SMsgType SCycleConfig::GetMsgLevel() const {
+
+   return m_msgLevel;
 
 }
 

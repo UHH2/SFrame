@@ -1,5 +1,15 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: ISCycleBaseNTuple.h,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: ISCycleBaseNTuple.h,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Core
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
 
 #ifndef SFRAME_CORE_ISCycleBaseNTuple_H
 #define SFRAME_CORE_ISCycleBaseNTuple_H
@@ -19,12 +29,23 @@ class TList;
 class TFile;
 class SInputData;
 
+/**
+ *   @short Interface providing ntuple handling capabilities
+ *
+ *          This interface is used by the higher-level classes when setting up
+ *          SCycleBase objects. This way the high-level classes don't directly
+ *          depend on SCycleBaseNTuple.
+ *
+ * @version $Revision: 1.1.2.3 $
+ */
 class ISCycleBaseNTuple {
 
 public:
    virtual ~ISCycleBaseNTuple() {}
 
+   /// Set the PROOF output list
    virtual void SetNTupleOutput( TList* output ) = 0;
+   /// Get the PROOF output list
    virtual TList* GetNTupleOutput() const = 0;
 
 protected:

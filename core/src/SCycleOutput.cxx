@@ -1,4 +1,4 @@
-// $Id: SCycleOutput.cxx,v 1.1.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SCycleOutput.cxx,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -23,6 +23,8 @@
 #include <TDirectory.h>
 #include <TTree.h>
 #include <TKey.h>
+#include <TObjArray.h>
+#include <TObjString.h>
 
 // Local include(s):
 #include "../include/SCycleOutput.h"
@@ -299,30 +301,25 @@ TDirectory* SCycleOutput::MakeDirectory( const TString& path ) const throw( SErr
       //
       // Break up the path name at the slashes:
       //
-      std::vector< TString > directories;
-      Ssiz_t previous_pos = ( path[ 0 ] == '/' ? 1 : 0 );
-      Ssiz_t current_pos = 0;
-      for( ; ; ) {
-         current_pos = path.Index( "/", 1, previous_pos, TString::kExact );
-         directories.push_back( path( previous_pos,
-                                      current_pos - previous_pos ).String() );
-         if( current_pos == kNPOS ) break;
-         previous_pos = current_pos + 1;
-      }
+      TObjArray* directories = path.Tokenize( "/" );
 
       //
       // Create each necessary directory:
       //
       dir = gDirectory;
       TDirectory* tempDir = 0;
-      for( std::vector< TString >::const_iterator it = directories.begin();
-           it != directories.end(); ++it ) {
+      for( Int_t i = 0; i < directories->GetSize(); ++i ) {
 
-         m_logger << VERBOSE << "Accessing directory: " << *it << SLogger::endmsg;
-         if( ! ( tempDir = dir->GetDirectory( *it ) ) ) {
+         TObjString* path_element = dynamic_cast< TObjString* >( directories->At( i ) );
+         if( ! path_element ) continue;
+         if( path_element->GetString() == "" ) continue;
+
+         m_logger << VERBOSE << "Accessing directory: " << path_element->GetString()
+                  << SLogger::endmsg;
+         if( ! ( tempDir = dir->GetDirectory( path_element->GetString() ) ) ) {
             m_logger << VERBOSE << "Directory doesn't exist, creating it..."
                      << SLogger::endmsg;
-            if( ! ( tempDir = dir->mkdir( *it, "dummy title" ) ) ) {
+            if( ! ( tempDir = dir->mkdir( path_element->GetString(), "dummy title" ) ) ) {
                SError error( SError::SkipInputData );
                error << "Couldn't create directory: " << path
                      << " in the output file!";
@@ -332,6 +329,9 @@ TDirectory* SCycleOutput::MakeDirectory( const TString& path ) const throw( SErr
          dir = tempDir;
 
       }
+
+      // Delete the object created by TString::Tokenize(...):
+      delete directories;
 
    }
 
