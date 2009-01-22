@@ -1,3 +1,13 @@
+2009.01.22 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Tested the code on a realistic PROOF setup after a long time
+	  only running the code on PROOF-lite. This required some
+	  changes in the temporary ntuple writing department, but
+	  nothing serious.
+	* Added a new Cycle property (ProofWorkDir) to make the
+	  temporary file handling as flexible as possible.
+	* Updated the FirstCycle example to use this new property.
+	* Tagging as SFrame-PROOF-branch-02
+
 2009.01.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added some more documentation
 	* Fixed some problems which only surfaced when using the code

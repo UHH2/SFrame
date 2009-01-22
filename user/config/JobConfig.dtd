@@ -42,6 +42,7 @@
         PostFix              CDATA            ""
         RunMode              (LOCAL|PROOF)    "LOCAL"
         ProofServer          CDATA            ""
+        ProofWorkDir         CDATA            ""
 >
 
 <!ELEMENT InputData (GeneratorCut*,In+,PersTree*,InputTree*,EVInputTree*,OutputTree*)>

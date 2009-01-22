@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleConfig.h,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
+// $Id: SCycleConfig.h,v 1.1.2.4 2009-01-22 17:07:02 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -36,7 +36,7 @@
  *          SCycleController makes sure that the configuration is passed
  *          correctly to all cycle instances.
  *
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision: 1.1.2.4 $
  */
 class SCycleConfig : public TNamed {
 
@@ -68,6 +68,11 @@ public:
    const TString& GetProofServer() const;
    /// Set the name of the PROOF server
    void SetProofServer( const TString& server );
+
+   /// Get the path to the PROOF working directory
+   const TString& GetProofWorkDir() const;
+   /// Set the path to the PROOF working directory
+   void SetProofWorkDir( const TString& workdir );
 
    /// Get the user defined properties
    const property_type& GetProperties() const;
@@ -134,6 +139,7 @@ public:
 private:
    RunMode       m_mode;
    TString       m_server;
+   TString       m_workdir;
    property_type m_properties;
    id_type       m_inputData;
    Double_t      m_targetLumi;

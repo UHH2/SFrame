@@ -1,4 +1,4 @@
-// $Id: SCycleBaseConfig.cxx,v 1.5.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SCycleBaseConfig.cxx,v 1.5.2.3 2009-01-22 17:07:02 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -81,6 +81,8 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
          m_config.SetRunMode( mode );
       } else if( curAttr->GetName() == TString( "ProofServer" ) ) {
          m_config.SetProofServer( curAttr->GetValue() );
+      } else if( curAttr->GetName() == TString( "ProofWorkDir" ) ) {
+         m_config.SetProofWorkDir( curAttr->GetValue() );
       } else if( curAttr->GetName() == TString( "OutputDirectory" ) ) {
          m_config.SetOutputDirectory( curAttr->GetValue() );
       } else if( curAttr->GetName() == TString( "PostFix" ) ) {

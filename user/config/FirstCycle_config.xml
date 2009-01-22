@@ -45,7 +45,8 @@
   <!--              Set it to "" or "lite" to run PROOF-Lite on your local  -->
   <!--              machine.                                                -->
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
-  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite"
+  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="krasznaa@pcatlas1.atomki.hu"
+         ProofWorkDir="root://pcatlas1.atomki.hu//scratch/xrootd/pool"
          OutputDirectory="./" PostFix="" >
 
     <!-- list of input data for given data type                                   -->

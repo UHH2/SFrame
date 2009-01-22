@@ -1,4 +1,4 @@
-// $Id: SCycleController.cxx,v 1.6.2.6 2009-01-21 14:34:54 krasznaa Exp $
+// $Id: SCycleController.cxx,v 1.6.2.7 2009-01-22 17:07:03 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -523,8 +523,10 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
 
          // This object describes how to create the temporary PROOF output
          // files in the cycles:
-         TNamed proofOutputFile( SFrame::ProofOutputName,
-                                 SFrame::ProofOutputFileName );
+         TNamed proofOutputFile( TString( SFrame::ProofOutputName ),
+                                 ( config.GetProofWorkDir() == "" ? "./" :
+                                   config.GetProofWorkDir() + "/" ) +
+                                 cycle->GetName() + "TempNTuple.root" );
 
          //
          // Give the configuration to PROOF, and tweak it a little:

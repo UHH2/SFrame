@@ -1,4 +1,4 @@
-// $Id: SCycleConfig.cxx,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
+// $Id: SCycleConfig.cxx,v 1.1.2.4 2009-01-22 17:07:02 krasznaa Exp $
 
 // STL include(s):
 #include <map>
@@ -40,6 +40,19 @@ const TString& SCycleConfig::GetProofServer() const {
 void SCycleConfig::SetProofServer( const TString& server ) {
 
    m_server = server;
+   return;
+
+}
+
+const TString& SCycleConfig::GetProofWorkDir() const {
+
+   return m_workdir;
+
+}
+
+void SCycleConfig::SetProofWorkDir( const TString& workdir ) {
+
+   m_workdir = workdir;
    return;
 
 }
