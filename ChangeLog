@@ -1,3 +1,9 @@
+2009.02.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Cleaned up the example cycle configuration a bit.
+	* Fixed a problem in SFileMerger where the code would crash
+	  in case of not writing out any entries to the output TTrees.
+	* Tagging as SFrame-PROOF-branch-04
+
 2009.01.22 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Tested the code on a realistic PROOF setup after a long time
 	  only running the code on PROOF-lite. This required some

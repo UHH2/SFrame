@@ -1,3 +1,6 @@
+2009.02.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed SFileMerger to be able to handle empty TTrees.
+
 2009.01.22 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added new Cycle parameter: ProofWorkDir
 	  It specifies where the temporary ntuple files should be

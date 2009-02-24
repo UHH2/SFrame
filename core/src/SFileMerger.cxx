@@ -1,4 +1,4 @@
-// $Id: SFileMerger.cxx,v 1.1.2.1 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SFileMerger.cxx,v 1.1.2.2 2009-02-24 13:38:27 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -141,21 +141,29 @@ void SFileMerger::Merge() throw( SError ) {
             } else {
 
                //
-               // If it doesn't exist, then use the static TTree::MergeTrees function to
+               // If it doesn't exist, then use the TTree::CloneTree function to
                // create a copy of the TTree in the input file. Then save this copy into
                // the output file.
                //
                m_outputFile->cd();
-               TList itrees;
-               itrees.Add( obj );
-               if( ( otree = TTree::MergeTrees( &itrees ) ) ) {
-                  m_logger << DEBUG << "Coped tree \"" << obj->GetName() << "\" into file: "
-                           << m_outputFile->GetName() << SLogger::endmsg;
+               TTree* itree = 0;
+               if( ! ( itree = dynamic_cast< TTree* >( obj ) ) ) {
+                  m_logger << ERROR << "Coulnd't dynamic cast object to TTree" << SLogger::endmsg;
+                  continue;
+               }
+
+               //
+               // TTree::MergeTrees would crash in case the input TTree is empty,
+               // so instead let's use TTree::CloneTree
+               //
+               if( ( otree = itree->CloneTree( -1, "fast" ) ) ) {
+                  m_logger << DEBUG << "Cloned tree \"" << itree->GetName()
+                           << "\" into file: " << m_outputFile->GetName() << SLogger::endmsg;
                   otree->SetDirectory( m_outputFile );
                   otree->AutoSave();
                } else {
-                  throw SError( TString( "Tree \"" ) + obj->GetName() +
-                                "\" couldn't be coped into the output", SError::SkipCycle );
+                  throw SError( TString( "Tree \"" ) + itree->GetName() +
+                                "\" couldn't be cloned into the output", SError::SkipCycle );
                }
 
             }

@@ -44,6 +44,12 @@
   <!-- ProofServer: Name of the PROOF server that you want to connect to.   -->
   <!--              Set it to "" or "lite" to run PROOF-Lite on your local  -->
   <!--              machine.                                                -->
+  <!-- ProofWorkDir: When working on a "real" PROOF cluster, the worker     -->
+  <!--               nodes write their output ntuple(s) into a local temp.  -->
+  <!--               file. These files are merged into a single file in a   -->
+  <!--               location accessible to all the nodes and the client    -->
+  <!--               machine (running SFrame) as well. Such a location can  -->
+  <!--               be specified here.                                     -->
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
   <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite"
          ProofWorkDir="" OutputDirectory="./" PostFix="" >
@@ -73,7 +79,6 @@
     <!--                                                                          -->
     <!-- Some run-time checking is done on these parameters that they would make  -->
     <!-- sense, but in general be careful when using them.                        -->
-
 
     <InputData Type="MC" Version="Zee_1" Lumi="0." NEventsMax="2000" NEventsSkip="3000" >
 
