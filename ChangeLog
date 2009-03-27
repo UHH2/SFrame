@@ -1,3 +1,8 @@
+2009.03.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Changed the SCycleBaseHist::Hist(...) function to be a bit more
+	  robust.
+	* Tagging as SFrame-PROOF-branch-05
+
 2009.02.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Cleaned up the example cycle configuration a bit.
 	* Fixed a problem in SFileMerger where the code would crash
