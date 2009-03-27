@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.h,v 1.5 2008-01-28 18:40:33 krasznaa Exp $
+// $Id: SCycleBaseHist.h,v 1.6 2009-03-27 13:30:34 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -16,6 +16,7 @@
 
 // STL include(s):
 #include <map>
+#include <string>
 
 // ROOT include(s):
 #include <TString.h>
@@ -39,7 +40,7 @@ class TH1;
  *          It's error prone, but I haven't found any nicer way of
  *          doing it...
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 class SCycleBaseHist : public virtual ISCycleBaseHist,
                        public virtual SCycleBaseBase {
@@ -72,7 +73,7 @@ private:
    TDirectory* m_outputFile;
    TString     m_outputFileName;
    /// Map used by the Hist function
-   std::map< std::pair< const char*, const char* >, TH1* > m_histoMap;
+   std::map< std::pair< std::string, std::string >, TH1* > m_histoMap;
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseHist, 0 );

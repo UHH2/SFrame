@@ -1,4 +1,4 @@
-// $Id: SCycleBaseHist.cxx,v 1.4 2008-01-28 18:40:33 krasznaa Exp $
+// $Id: SCycleBaseHist.cxx,v 1.5 2009-03-27 13:30:34 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -124,8 +124,8 @@ TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) {
 
    TH1* result;
 
-   pair< const char*, const char* > this_pair( name, dir );
-   map< pair< const char*, const char* >, TH1* >::const_iterator it;
+   pair< string, string > this_pair( name, ( dir ? dir : "" ) );
+   map< pair< string, string >, TH1* >::const_iterator it;
    if( ( it = m_histoMap.find( this_pair ) ) != m_histoMap.end() ) {
       result = it->second;
    } else {
