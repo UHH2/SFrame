@@ -1,3 +1,9 @@
+2009.04.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Simplified connecting to input branches which are arrays
+	  of primitives. The standard ConnectVariable(...) function
+	  could not be used easily for this.
+	* Tagging as SFrame-PROOF-branch-06
+
 2009.03.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed the SCycleBaseHist::Hist(...) function to be a bit more
 	  robust.

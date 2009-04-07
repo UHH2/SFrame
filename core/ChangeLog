@@ -1,3 +1,9 @@
+2009.04.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Introduced a new specialisation of
+	  SCycleBaseNTuple::ConnectVariable(...). It allows to
+	  connect to array inputs very easily. Some documentation
+	  about its usage can be found in the source files.
+
 2009.02.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed SFileMerger to be able to handle empty TTrees.
 
