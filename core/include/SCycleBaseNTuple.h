@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.h,v 1.3 2008-01-25 14:33:53 krasznaa Exp $
+// $Id: SCycleBaseNTuple.h,v 1.4 2009-05-06 15:37:42 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -41,7 +41,7 @@ class SInputData;
  *          are hidden from the user by that class. (A little
  *          C++ magic...)
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 class SCycleBaseNTuple : public virtual ISCycleBaseNTuple,
                          public virtual SCycleBaseConfig {
@@ -55,7 +55,7 @@ public:
 protected:
    /// Connect an input variable
    template< typename T >
-   void ConnectVariable( const char* treeName, const char* branchName,
+   bool ConnectVariable( const char* treeName, const char* branchName,
                          T& variable ) throw ( SError );
    /// Connect an input variable that is available in multiple views
    template< typename T >

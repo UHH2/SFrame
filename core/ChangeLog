@@ -1,3 +1,8 @@
+2009.05.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Changed SCycleBaseNTuple::ConnectVariable so that it now
+	  it returns whether it was successful or not. Thanks to
+	  Alexander Mann for the suggestion!
+
 2009.01.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added missing <cstdlib> includes to fix compilation errors
 	  with GCC 4.3. The code is now tested to compile and run
