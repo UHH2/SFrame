@@ -1,4 +1,4 @@
-// $Id: SLogWriter.cxx,v 1.2 2007-11-22 18:19:27 krasznaa Exp $
+// $Id: SLogWriter.cxx,v 1.2.2.1 2009-05-13 09:16:15 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -10,14 +10,16 @@
  *
  ***************************************************************************/
 
+// System include(s):
+extern "C" {
+#   include <unistd.h>
+}
+
 // STL include(s):
 #include <iostream>
 
 // Local include(s):
 #include "../include/SLogWriter.h"
-
-// Uncomment following line for colored output:
-#define USE_COLORED_CONSOLE
 
 using namespace std;
 
@@ -58,12 +60,14 @@ void SLogWriter::Write( SMsgType type, const std::string& line ) const {
    if( type < m_minType ) return;
    map< SMsgType, std::string >::const_iterator stype;
    if( ( stype = m_typeMap.find( type ) ) == m_typeMap.end() ) return;
-#ifdef USE_COLORED_CONSOLE
-   cout << m_colorMap.find( type )->second << " (" << stype->second << ")  "
-        << line << "\033[0m" << endl;
-#else
-   cout << " (" << stype->second << ")  " << line  << endl;
-#endif // USE_COLORED_CONSOLE
+
+   // Only print a coloured output if it's going to the console:
+   if( isatty( STDOUT_FILENO ) ) {
+      cout << m_colorMap.find( type )->second << " (" << stype->second << ")  "
+           << line << "\033[0m" << endl;
+   } else {
+      cout << " (" << stype->second << ")  " << line  << endl;
+   }
 
    return;
 

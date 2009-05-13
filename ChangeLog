@@ -1,3 +1,17 @@
+2009.05.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified SLogWriter such that it now only prints the
+	  output in different colours if it's being printed on
+	  the console. This makes the logfiles easier to read.
+	  Unfortunately it also has the sideeffect that all output
+	  from the worker nodes appears colourless...
+	* Changed SCycleBaseNTuple::ConnectVariable so that it now
+	  returns whether it was successful or not.
+	* Thanks to Alexander Mann for both of these suggestions!
+	* Removed a hard-coded "include/" from Makefile.common
+	  and replaced it with "$(INCDIR)". Thanks to Mark Andrew
+	  for pointing this out!
+	* Tagging as SFrame-PROOF-branch-07
+
 2009.04.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Simplified connecting to input branches which are arrays
 	  of primitives. The standard ConnectVariable(...) function

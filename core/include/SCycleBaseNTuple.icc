@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.icc,v 1.3.2.3 2009-04-07 10:03:21 krasznaa Exp $
+// $Id: SCycleBaseNTuple.icc,v 1.3.2.4 2009-05-13 09:16:13 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -38,14 +38,27 @@
  * initialise the pointer to anything, the function will take care about that.
  *
  * See the example cycles for some details.
+ *
+ * @param treeName Name of the TTree in the input file
+ * @param branchName Name of the branch in the TTree
+ * @param variable The variable that should be connected to the branch
+ * @returns <code>true</code> if the connection was made successfully,
+ *          <code>false</code> otherwise
  */
 template< typename T >
-void SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branchName,
+bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branchName,
                                         T& variable ) throw ( SError ) {
 
    // Access the TTree. The function will throw an exception if unsuccessful
    TTree* tree = GetInputTree( treeName );
    TBranch* br = 0;
+
+   // Check if the branch actually exists:
+   if( ! tree->GetBranch( branchName ) ) {
+      m_logger << ERROR << "Branch \"" << branchName << "\" doesn't exist in TTree \""
+               << treeName << "\"" << SLogger::endmsg;
+      return false;
+   }
 
    //
    // Detect what kind of variable we're dealing with:
@@ -74,7 +87,7 @@ void SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
 
-   return;
+   return true;
 
 }
 
@@ -103,14 +116,27 @@ void SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
  * was specified when the TTree was written.) It's important that the array would
  * have memory allocated for it (as in this example), because ROOT doesn't do this
  * automatically!
+ *
+ * @param treeName Name of the TTree in the input file
+ * @param branchName Name of the branch in the TTree
+ * @param variable The variable that should be connected to the branch
+ * @returns <code>true</code> if the connection was made successfully,
+ *          <code>false</code> otherwise
  */
 template< typename T, size_t size >
-void SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branchName,
+bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branchName,
                                         T ( &variable )[ size ] ) throw( SError ) {
 
    // Access the TTree. The function will throw an exception if unsuccessful
    TTree* tree = GetInputTree( treeName );
    TBranch* br = 0;
+
+   // Check if the branch actually exists:
+   if( ! tree->GetBranch( branchName ) ) {
+      m_logger << ERROR << "Branch \"" << branchName << "\" doesn't exist in TTree \""
+               << treeName << "\"" << SLogger::endmsg;
+      return false;
+   }
 
    //
    // Print what kind of variable we're dealing with:
@@ -126,7 +152,7 @@ void SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
 
-   return;
+   return true;
 
 }
 
