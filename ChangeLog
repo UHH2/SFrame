@@ -1,3 +1,15 @@
+2009.05.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Removed a hard-coded "include/" from Makefile.common
+	  and replaced it with "$(INCDIR)". Thanks to Mark Andrew
+	  for pointing this out.
+	* Modified SLogWriter such that now it only prints the output
+	  in different colours if it's being printed on the console.
+	  If it's redirected to a logfile, then the colours are
+	  not added. This makes the logfiles much easier to read.
+	  Thanks a *lot* ro Alexander Mann for the suggestion and the
+	  implementation!
+	* Tagging as SFrame-02-01-12
+
 2009.05.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed SCycleBaseNTuple::ConnectVariable so that it now
 	  it returns whether it was successful or not. Thanks to
