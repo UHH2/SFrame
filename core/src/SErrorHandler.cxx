@@ -1,4 +1,4 @@
-// $Id: SErrorHandler.cxx,v 1.1.2.4 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SErrorHandler.cxx,v 1.1.2.5 2009-06-07 22:23:08 ashibata Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -90,7 +90,7 @@ Int_t SetSErrorHandler() {
 
    // Report this feat:
    SLogger logger( "SetSErrorHandler" );
-   logger << INFO << "Redirected ROOT messages to SFrame's logger" << SLogger::endmsg;
+   logger << DEBUG << "Redirected ROOT messages to SFrame's logger" << SLogger::endmsg;
 
    return 0;
 
