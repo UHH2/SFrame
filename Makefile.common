@@ -1,5 +1,5 @@
  # Dear emacs, this is a -*- makefile -*-
- # $Id: Makefile.common,v 1.5.2.4 2009-05-13 09:16:09 krasznaa Exp $
+ # $Id: Makefile.common,v 1.5.2.5 2009-06-08 08:53:24 krasznaa Exp $
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  #                                                                         #
@@ -101,8 +101,10 @@ setlinks: $(SHLIBFILE)
 	fi
 
 # Rule that creates a PAR package for this library:
-par:
-	@sframe_parMaker.py -s ./ -o $(SFRAME_LIB_PATH)/$(LIBRARY).par \
+par: $(SFRAME_LIB_PATH)/$(LIBRARY).par
+
+$(SFRAME_LIB_PATH)/$(LIBRARY).par: $(SHLIBFILE)
+	@sframe_parMaker.py -s ./ -o $@ \
 		-i $(INCDIR) -c $(SRCDIR)
 
 ##############################

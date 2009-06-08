@@ -1,3 +1,10 @@
+2009.06.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made the PAR file creation in Makefile.common smarter.
+	  Now the PAR files are only re-made if the respective
+	  shared library has to be re-made. Thanks to Akira for
+	  the suggestion!
+	* Tagging as SFrame-PROOF-branch-08
+
 2009.05.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified SLogWriter such that it now only prints the
 	  output in different colours if it's being printed on
