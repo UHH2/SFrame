@@ -1,4 +1,7 @@
 2009.06.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixing a crash in SCycleBaseExec...
+
+2009.06.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added some modifications to try to make sure that all files
 	  that are opened, are really all closed. Even though the
 	  old code should've done this already...

@@ -1,4 +1,4 @@
-// $Id: SCycleBaseExec.cxx,v 1.4.2.5 2009-06-15 11:10:13 krasznaa Exp $
+// $Id: SCycleBaseExec.cxx,v 1.4.2.6 2009-06-15 17:40:37 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -137,6 +137,8 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
 
          this->CreateOutputTrees( *m_inputData, m_outputTrees, m_outputFile );
 
+      } else {
+         m_outputFile = 0;
       }
 
       this->BeginInputData( *m_inputData );
