@@ -1,4 +1,4 @@
-// $Id: SFileMerger.cxx,v 1.1.2.2 2009-02-24 13:38:27 krasznaa Exp $
+// $Id: SFileMerger.cxx,v 1.1.2.3 2009-06-15 11:10:13 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -188,6 +188,7 @@ void SFileMerger::CloseFiles() {
 
    for( std::vector< TFile* >::iterator ifile = m_inputFiles.begin();
         ifile != m_inputFiles.end(); ++ifile ) {
+      ( *ifile )->Close();
       delete ( *ifile );
    }
    m_inputFiles.clear();

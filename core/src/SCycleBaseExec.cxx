@@ -1,4 +1,4 @@
-// $Id: SCycleBaseExec.cxx,v 1.4.2.4 2009-01-21 14:34:54 krasznaa Exp $
+// $Id: SCycleBaseExec.cxx,v 1.4.2.5 2009-06-15 11:10:13 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -264,7 +264,7 @@ void SCycleBaseExec::SlaveTerminate() {
    //
    // Close the output file:
    //
-   if( m_outputTrees.size() && m_outputFile ) {
+   if( m_outputFile ) {
 
       for( std::vector< TTree* >::iterator tree = m_outputTrees.begin();
            tree != m_outputTrees.end(); ++tree ) {
@@ -281,7 +281,8 @@ void SCycleBaseExec::SlaveTerminate() {
    }
 
    m_logger << INFO << "Terminated InputData \"" << m_inputData->GetType()
-            << "\" on worker node" << SLogger::endmsg;
+            << "\" (Version:" << m_inputData->GetVersion()
+            << ") on worker node" << SLogger::endmsg;
 
    return;
 

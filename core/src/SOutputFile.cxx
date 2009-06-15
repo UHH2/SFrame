@@ -1,4 +1,4 @@
-// $Id: SOutputFile.cxx,v 1.1.2.1 2009-01-08 16:09:32 krasznaa Exp $
+// $Id: SOutputFile.cxx,v 1.1.2.2 2009-06-15 11:10:13 krasznaa Exp $
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -12,6 +12,7 @@
 
 // Local include(s):
 #include "../include/SOutputFile.h"
+#include "../include/SLogger.h"
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SOutputFile );

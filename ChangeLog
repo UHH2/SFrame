@@ -1,3 +1,10 @@
+2009.06.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added some modifications to try to make sure that all files
+	  that are opened, are really all closed. Even though the
+	  old code should've done this already...
+	* Not tagging at the moment, first Akira should test if this
+	  solved his problems...
+
 2009.06.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made the PAR file creation in Makefile.common smarter.
 	  Now the PAR files are only re-made if the respective
