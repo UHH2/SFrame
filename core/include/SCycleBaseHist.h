@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.h,v 1.5.2.3 2009-03-27 13:08:56 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -42,7 +42,7 @@ class TList;
  *          It's error prone, but I haven't found any nicer way of
  *          doing it...
  *
- * @version $Revision: 1.5.2.3 $
+ * @version $Revision$
  */
 class SCycleBaseHist : public virtual ISCycleBaseHist,
                        public virtual SCycleBaseBase {

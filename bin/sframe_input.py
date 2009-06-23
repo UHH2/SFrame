@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# $Id: sframe_input.py,v 1.2 2008-02-08 16:21:10 krasznaa Exp $
+# $Id$
 #***************************************************************************
 #* @Project: SFrame - ROOT-based analysis framework for ATLAS
 #* @Package: Core

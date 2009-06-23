@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SParLocator.h,v 1.1.2.1 2009-01-08 16:09:32 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -38,7 +38,7 @@
  *          package files. Somehow I couldn't find any ROOT functions for listing
  *          all the files in a given directory. Very strange...
  *
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision$
  */
 class SParLocator {
 

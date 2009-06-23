@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleController.h,v 1.3.2.3 2009-01-08 16:09:32 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -41,7 +41,7 @@ class SCycleBase;
  *          <strong>sframe_main</strong> executable, so the user
  *          should probably not care about it too much.
  *
- * @version $Revision: 1.3.2.3 $
+ * @version $Revision$
  */
 class SCycleController : public TObject {
 

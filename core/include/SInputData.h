@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SInputData.h,v 1.4.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -32,7 +32,7 @@
  *          It is used to describe one input or output file (as defined
  *          in the configuration XML file) to the framework.
  *
- * @version $Revision: 1.4.2.2 $
+ * @version $Revision$
  */
 class SFile : public TObject {
 
@@ -89,7 +89,7 @@ public:
  *          property actually, its name. The name of the tree is taken
  *          from the configuration XML file.
  *
- * @version $Revision: 1.4.2.2 $
+ * @version $Revision$
  */
 class STree : public TObject {
 
@@ -131,7 +131,7 @@ public:
  *          name, all of which are needed to perform synchronisation
  *          between the trees.
  *
- * @version $Revision: 1.4.2.2 $
+ * @version $Revision$
  */
 class SEVTree : public TObject {
 
@@ -193,7 +193,7 @@ public:
  *          by the framework from the configuration values put in the
  *          configuration XML file.
  *
- * @version $Revision: 1.4.2.2 $
+ * @version $Revision$
  */
 class SInputData : public TNamed {
 

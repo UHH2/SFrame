@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseBase.h,v 1.3.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -27,7 +27,7 @@
  *          of SCycleBase have to inherit from this with "public virtual",
  *          so that it only gets created once in memory for each cycle...
  *
- * @version $Revision: 1.3.2.2 $
+ * @version $Revision$
  */
 class SCycleBaseBase {
 

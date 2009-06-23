@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseExec.h,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -42,7 +42,7 @@ class TList;
  *          (like SCycleBaseNTuple for ARA) can be exchanged for another
  *          one.
  *
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  */
 class SCycleBaseExec : public TSelector,
                        public virtual ISCycleBaseConfig,

@@ -1,4 +1,4 @@
-// $Id: SError.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core

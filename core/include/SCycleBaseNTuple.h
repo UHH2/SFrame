@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.h,v 1.3.2.4 2009-05-13 09:16:13 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -42,7 +42,7 @@ class SInputData;
  *          are hidden from the user by that class. (A little
  *          C++ magic...)
  *
- * @version $Revision: 1.3.2.4 $
+ * @version $Revision$
  */
 class SCycleBaseNTuple : public virtual ISCycleBaseConfig,
                          public virtual ISCycleBaseNTuple,

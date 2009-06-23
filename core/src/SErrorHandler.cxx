@@ -1,4 +1,4 @@
-// $Id: SErrorHandler.cxx,v 1.1.2.5 2009-06-07 22:23:08 ashibata Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core

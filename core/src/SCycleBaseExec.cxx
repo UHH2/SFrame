@@ -1,4 +1,4 @@
-// $Id: SCycleBaseExec.cxx,v 1.4.2.6 2009-06-15 17:40:37 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core

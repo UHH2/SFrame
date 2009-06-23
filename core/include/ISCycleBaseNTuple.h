@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: ISCycleBaseNTuple.h,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -36,7 +36,7 @@ class SInputData;
  *          SCycleBase objects. This way the high-level classes don't directly
  *          depend on SCycleBaseNTuple.
  *
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  */
 class ISCycleBaseNTuple {
 

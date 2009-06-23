@@ -1,5 +1,5 @@
 #! /bin/csh
-# $Id: setup.csh,v 1.2.2.1 2009-01-08 16:09:31 krasznaa Exp $
+# $Id$
 ###########################################################################
 # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
 #                                                                         #

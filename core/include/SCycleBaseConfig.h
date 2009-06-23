@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseConfig.h,v 1.4.2.2 2009-01-08 16:09:32 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -38,7 +38,7 @@ class TXMLNode;
  *          all these information for the "higher level" parts
  *          of the SCycleBase code.
  *
- * @version $Revision: 1.4.2.2 $
+ * @version $Revision$
  */
 class SCycleBaseConfig : public virtual ISCycleBaseConfig,
                          public virtual SCycleBaseBase {

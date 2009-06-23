@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# $Id: sframe_parMaker.py,v 1.1.2.1 2008-12-01 14:52:55 krasznaa Exp $
+# $Id$
 #
 # Script creating a PAR package from the contents of a directory.
 # (As long as the directory follows the SFrame layout...)

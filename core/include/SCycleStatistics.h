@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleStatistics.h,v 1.1.2.1 2009-01-08 16:09:32 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -34,7 +34,7 @@ class TCollection;
  *          This class is used by the framework internally to send statistics
  *          information from the workers to the master node.
  *
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision$
  */
 class SCycleStatistics : public TNamed {
 

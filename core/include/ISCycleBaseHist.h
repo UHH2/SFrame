@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: ISCycleBaseHist.h,v 1.1.2.2 2009-01-21 14:34:54 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -24,7 +24,7 @@ class TList;
  *          SCycleBase objects. This way the high-level classes don't directly
  *          depend on SCycleBaseHist.
  *
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision$
  */
 class ISCycleBaseHist {
 

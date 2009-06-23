@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleOutput.h,v 1.1.2.3 2009-01-21 14:34:54 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -38,7 +38,7 @@ class TDirectory;
  *          takes care of summing up the results obtained from the
  *          individual worder nodes.
  *
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  */
 class SCycleOutput : public TNamed {
 

@@ -1,4 +1,4 @@
-// $Id: SOutputFile.cxx,v 1.1.2.2 2009-06-15 11:10:13 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core

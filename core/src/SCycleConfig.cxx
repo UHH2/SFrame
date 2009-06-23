@@ -1,4 +1,4 @@
-// $Id: SCycleConfig.cxx,v 1.1.2.4 2009-01-22 17:07:02 krasznaa Exp $
+// $Id$
 
 // STL include(s):
 #include <map>

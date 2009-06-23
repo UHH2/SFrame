@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: setup.sh,v 1.2.2.1 2009-01-08 16:09:32 krasznaa Exp $
+# $Id$
 ###########################################################################
 # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
 #                                                                         #

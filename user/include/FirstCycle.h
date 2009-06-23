@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: FirstCycle.h,v 1.3.2.1 2009-01-21 14:34:54 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User

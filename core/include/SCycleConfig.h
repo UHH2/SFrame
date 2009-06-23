@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleConfig.h,v 1.1.2.4 2009-01-22 17:07:02 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -36,7 +36,7 @@
  *          SCycleController makes sure that the configuration is passed
  *          correctly to all cycle instances.
  *
- * @version $Revision: 1.1.2.4 $
+ * @version $Revision$
  */
 class SCycleConfig : public TNamed {
 

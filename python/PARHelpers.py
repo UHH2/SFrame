@@ -1,4 +1,4 @@
-# $Id: PARHelpers.py,v 1.1.2.1 2008-12-01 14:52:57 krasznaa Exp $
+# $Id$
 
 # Import the needed module(s):
 import os.path

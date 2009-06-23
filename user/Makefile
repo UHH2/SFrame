@@ -1,4 +1,4 @@
- # $Id: Makefile,v 1.1.1.1 2007-11-13 12:41:09 krasznaa Exp $
+ # $Id$
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  # @Package: User                                                          #

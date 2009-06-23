@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SSummedVar.h,v 1.1.2.1 2009-01-21 14:34:54 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Plug-ins
@@ -35,7 +35,7 @@ class ISCycleBaseHist;
  *          for at least this class, which rootcint can't currently do if it's
  *          a private member of SSummedVar.
  *
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision$
  */
 template< class Type >
 class ProofSummedVar : public TNamed {
@@ -64,7 +64,7 @@ public:
  *          to it on the worker nodes are added up and are visible on the
  *          master node.
  *
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision$
  */
 template< class Type >
 class SSummedVar {

@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SError.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -25,7 +25,7 @@
  *          exceptions should provide a description of the occurence
  *          and an "action request" to the framework.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 class SError : public std::exception,
                public std::ostringstream {

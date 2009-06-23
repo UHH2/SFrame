@@ -1,4 +1,4 @@
-// $Id: FirstCycle.cxx,v 1.3.2.4 2009-01-21 14:34:54 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User

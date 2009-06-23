@@ -1,4 +1,4 @@
-# $Id: SFrameHelpers.py,v 1.2.2.1 2009-04-23 15:55:25 ashibata Exp $
+# $Id$
 ###########################################################################
 # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
 #                                                                         #

@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: ISCycleBaseConfig.h,v 1.1.2.2 2009-01-21 14:34:54 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -28,7 +28,7 @@ class SCycleConfig;
  *          SCycleBase objects. This way the high-level classes don't directly
  *          depend on SCycleBaseConfig.
  *
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision$
  */
 class ISCycleBaseConfig {
 

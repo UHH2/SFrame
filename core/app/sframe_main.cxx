@@ -1,4 +1,4 @@
-// $Id: sframe_main.cxx,v 1.3.2.3 2009-01-08 16:09:32 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core

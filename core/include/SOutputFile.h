@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SOutputFile.h,v 1.1.2.2 2009-01-21 14:34:54 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -27,7 +27,7 @@
  *          and finally the file's contents are merged into the output file
  *          also holding all the other outputs of the cycle.
  *
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision$
  */
 class SOutputFile : public TNamed {
 

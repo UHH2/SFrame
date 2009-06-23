@@ -1,5 +1,5 @@
  # Dear emacs, this is a -*- makefile -*-
- # $Id: Makefile.common,v 1.5.2.5 2009-06-08 08:53:24 krasznaa Exp $
+ # $Id$
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  #                                                                         #
