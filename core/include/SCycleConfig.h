@@ -69,6 +69,11 @@ public:
    /// Set the name of the PROOF server
    void SetProofServer( const TString& server );
 
+   /// Get the number of parallel nodes
+   const Int_t& GetProofNodes() const;
+   /// Set the number of parallel nodes
+   void SetProofNodes( const Int_t nodes );
+
    /// Get the path to the PROOF working directory
    const TString& GetProofWorkDir() const;
    /// Set the path to the PROOF working directory
@@ -140,6 +145,7 @@ private:
    RunMode       m_mode;
    TString       m_server;
    TString       m_workdir;
+   Int_t         m_nodes;
    property_type m_properties;
    id_type       m_inputData;
    Double_t      m_targetLumi;

@@ -74,7 +74,7 @@ public:
 private:
    /// Delete all analysis cycle objects from memory
    void DeleteAllAnalysisCycles();
-   void InitProof( const TString& server );
+   void InitProof( const TString& server, const Int_t& nodes);
    void ShutDownProof();
    void WriteCycleOutput( TList* olist, const TString& filename, Bool_t update ) const;
    void PrintWorkerLogs() const;

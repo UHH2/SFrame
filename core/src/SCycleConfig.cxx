@@ -44,6 +44,19 @@ void SCycleConfig::SetProofServer( const TString& server ) {
 
 }
 
+const Int_t& SCycleConfig::GetProofNodes() const {
+
+   return m_nodes;
+
+}
+
+void SCycleConfig::SetProofNodes( const Int_t nodes ) {
+
+   m_nodes = nodes;
+   return;
+
+}
+
 const TString& SCycleConfig::GetProofWorkDir() const {
 
    return m_workdir;

@@ -83,6 +83,8 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
          m_config.SetProofServer( curAttr->GetValue() );
       } else if( curAttr->GetName() == TString( "ProofWorkDir" ) ) {
          m_config.SetProofWorkDir( curAttr->GetValue() );
+      } else if( curAttr->GetName() == TString( "ProofNodes" ) ) {
+         m_config.SetProofNodes( atoi(curAttr->GetValue()) );
       } else if( curAttr->GetName() == TString( "OutputDirectory" ) ) {
          m_config.SetOutputDirectory( curAttr->GetValue() );
       } else if( curAttr->GetName() == TString( "PostFix" ) ) {
