@@ -1,3 +1,10 @@
+2009.06.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* First modifications in the SVN repository...
+	* Fixed multiple memory leaks in SFrameCore
+	* Disabled compilation warnings when running an SFrame job
+	  on a real PROOF cluster.
+	* Tagging as SFrame-PROOF-branch-09
+
 2009.06.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixing a crash in SCycleBaseExec...
 

@@ -71,8 +71,6 @@ void SCycleBaseExec::Begin( TTree* ) {
       throw;
    }
 
-   m_logger << INFO << "Initialised cycle on master node" << SLogger::endmsg;
-
    return;
 
 }
@@ -232,7 +230,10 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
 
    ++m_nProcessedEvents;
    if( ! ( m_nProcessedEvents % 1000 ) ) {
-      m_logger << INFO << "Processing entry: " << entry << " ("
+      // Only print these messages in local mode in INFO level. In PROOF mode they're
+      // only needed for debugging.
+      m_logger << ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ? INFO : DEBUG )
+               << "Processing entry: " << entry << " ("
                << ( m_nProcessedEvents - 1 ) << " / "
                << ( m_inputData->GetNEventsMax() < 0 ? m_inputData->GetEventsTotal() :
                     m_inputData->GetNEventsMax() )

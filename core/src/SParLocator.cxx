@@ -64,6 +64,7 @@ TString SParLocator::Locate( const TString& parName ) {
       while( ( file = ::readdir( d ) ) != NULL ) {
          if( parName == file->d_name ) {
             m_logger << DEBUG << parName << " found in directory: " << *dir << SLogger::endmsg;
+            ::closedir( d );
             return ( *dir + "/" + parName );
          }
       }

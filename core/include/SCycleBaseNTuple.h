@@ -61,11 +61,15 @@ protected:
    /// Connect an input variable
    template< typename T >
    bool ConnectVariable( const char* treeName, const char* branchName,
-                         T& variable ) throw ( SError );
+                         T& variable ) throw( SError );
    /// Specialisation for primitive arrays
    template< typename T, size_t size >
    bool ConnectVariable( const char* treeName, const char* branchName,
                          T ( &variable )[ size ] ) throw( SError );
+   /// Specialisation for object pointers
+   template< typename T >
+   bool ConnectVariable( const char* treeName, const char* branchName,
+                         T*& variable ) throw( SError );
 
    /// Declare an output variable
    template< class T >
@@ -94,6 +98,7 @@ private:
    TTree* GetInputTree( const std::string& treeName ) throw( SError );
    TTree* GetOutputTree( const std::string& treeName ) throw( SError );
    void RegisterInputBranch( TBranch* br ) throw( SError );
+   void DeleteInputVariables();
 
    //
    // These are the objects used to handle the input and output data:
@@ -101,6 +106,9 @@ private:
    std::vector< TTree* >   m_inputTrees; // List of input TTree pointers
    std::vector< TBranch* > m_inputBranches; // vector of input branch pointers
                                             // registered for the current cycle
+   std::list< TObject* >   m_inputVarPointers; // Pointers storing the input objects
+                                               // created by ConnectVariable(...)
+
    // Vector to hold the output trees
    std::vector< TTree* > m_outputTrees;
 

@@ -1,3 +1,14 @@
+2009.06.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Adding first modifications into the SVN repository.
+	* Added a new class: SPointer. It's used to clean up the
+	  objects created by the ConnectVariable(...) calls.
+	  So far there was a memory leak here...
+	* Fixed a memory leak in SParLocator::Locate(...) as well.
+	* Changed the level of the messages reporing about the
+	  event processing status to DEBUG when running in PROOF
+	  mode. (In this mode the progress is shown by PROOF
+	  anyway...)
+
 2009.05.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified SLogWriter such that it now only prints the
 	  output in different colours if it's being printed on

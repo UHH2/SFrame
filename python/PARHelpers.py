@@ -176,7 +176,7 @@ def SourceTransform( file_path ):
     return
 
 ## Contents of the makefile for PROOF compilation
-MakefileProofContent = """MAKEFLAGS = --no-print-directory -r -s -j2
+MakefileProofContent = """MAKEFLAGS = --no-print-directory -r -s
 
 ARCH_LOC_1 := $(wildcard $(shell root-config --prefix)/test/Makefile.arch)
 ARCH_LOC_2 := $(wildcard $(shell root-config --prefix)/share/root/test/Makefile.arch)
@@ -195,7 +195,7 @@ endif
 # Some compilation options
 VPATH    += $(OBJDIR) $(SRCDIR)
 INCLUDES += -I./ -I../
-CXXFLAGS += -Wall -Wno-overloaded-virtual
+CXXFLAGS += -Wall -Wno-overloaded-virtual -Wno-unused
 
 # Set the locations of some files
 DICTHEAD  = $(SRCDIR)/$(LIBRARY)_Dict.h

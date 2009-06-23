@@ -34,12 +34,6 @@
 #include "../include/SCycleConfig.h"
 #include "../include/SCycleOutput.h"
 
-/*
-#ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseNTuple );
-#endif // DOXYGEN_IGNORE
-*/
-
 using namespace std;
 
 static const Double_t EPSILON = 1e-15;
@@ -60,6 +54,7 @@ SCycleBaseNTuple::SCycleBaseNTuple()
  */
 SCycleBaseNTuple::~SCycleBaseNTuple() {
 
+   DeleteInputVariables();
    m_logger << VERBOSE << "SCycleBaseNTuple destructed" << SLogger::endmsg;
 
 }
@@ -158,6 +153,7 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
    Int_t nEvents = 0;
    m_inputTrees.clear();
    m_inputBranches.clear();
+   DeleteInputVariables();
 
    TFile* file = 0;
    if( GetConfig().GetRunMode() == SCycleConfig::LOCAL ) {
@@ -448,6 +444,23 @@ void SCycleBaseNTuple::RegisterInputBranch( TBranch* br ) throw( SError ) {
    } else {
       m_inputBranches.push_back( br );
    }
+
+   return;
+}
+
+/**
+ * This function deletes the contents of the input variable list. Since the
+ * SPointer objects in the list know exactly what kind of object they point to
+ * (templating rules...), they're able to delete them when they get deleted.
+ * (Even though at this point we delete them through their TObject "interface".)
+ */
+void SCycleBaseNTuple::DeleteInputVariables() {
+
+   for( std::list< TObject* >::iterator it = m_inputVarPointers.begin();
+        it != m_inputVarPointers.end(); ++it ) {
+      delete ( *it );
+   }
+   m_inputVarPointers.clear();
 
    return;
 }
