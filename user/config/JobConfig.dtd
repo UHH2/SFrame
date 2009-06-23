@@ -43,6 +43,7 @@
         RunMode              (LOCAL|PROOF)    "LOCAL"
         ProofServer          CDATA            ""
         ProofWorkDir         CDATA            ""
+        ProofNodes           CDATA            "-1"
 >
 
 <!ELEMENT InputData (GeneratorCut*,In+,PersTree*,InputTree*,EVInputTree*,OutputTree*)>
