@@ -22,5 +22,6 @@
 // The example cycles:
 #pragma link C++ class FirstCycle+;
 #pragma link C++ class SecondCycle+;
+#pragma link C++ class LeakCheck+;
 
 #endif // __CINT__
