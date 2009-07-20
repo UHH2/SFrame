@@ -15,7 +15,8 @@
    <Package Name="SFrameUser.par" />
 
 	<Cycle Name="LeakCheck" OutputDirectory="./" PostFix="" TargetLumi="1.0"
-          RunMode="LOCAL" ProofServer="lite" ProofWorkDir="" >
+          RunMode="PROOF" ProofServer="lite"
+          ProofWorkDir="" >
 
 		&test_input;
 

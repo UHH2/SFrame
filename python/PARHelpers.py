@@ -178,18 +178,25 @@ def SourceTransform( file_path ):
 ## Contents of the makefile for PROOF compilation
 MakefileProofContent = """MAKEFLAGS = --no-print-directory -r -s
 
+# Include the architecture definitions from the ROOT source:
 ARCH_LOC_1 := $(wildcard $(shell root-config --prefix)/test/Makefile.arch)
 ARCH_LOC_2 := $(wildcard $(shell root-config --prefix)/share/root/test/Makefile.arch)
-ifeq ($(strip $(ARCH_LOC_1)),)
-ifeq ($(strip $(ARCH_LOC_2)),)
-$(error Could not find Makefile.arch!)
+ARCH_LOC_3 := $(wildcard $(shell root-config --prefix)/share/doc/root/test/Makefile.arch)
+ifneq ($(strip $(ARCH_LOC_1)),)
+  $(info Using $(ARCH_LOC_1))
+  include $(ARCH_LOC_1)
 else
-$(info Using $(ARCH_LOC_2))
-include $(ARCH_LOC_2)
-endif
-else
-$(info Using $(ARCH_LOC_1))
-include $(ARCH_LOC_1)
+  ifneq ($(strip $(ARCH_LOC_2)),)
+    $(info Using $(ARCH_LOC_2))
+    include $(ARCH_LOC_2)
+  else
+    ifneq ($(strip $(ARCH_LOC_3)),)
+      $(info Using $(ARCH_LOC_3))
+      include $(ARCH_LOC_3)
+    else
+      $(error Could not find Makefile.arch!)
+    endif
+  endif
 endif
 
 # Some compilation options

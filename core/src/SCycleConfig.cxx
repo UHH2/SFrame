@@ -13,8 +13,9 @@ ClassImp( SCycleConfig );
 
 SCycleConfig::SCycleConfig( const char* name )
    : TNamed( name, "SFrame cycle configuration" ), m_mode( LOCAL ),
-     m_server( "" ), m_properties(), m_inputData(),
-     m_targetLumi( 1. ) {
+     m_server( "" ), m_workdir( "" ), m_nodes( -1 ), m_properties(),
+     m_inputData(), m_targetLumi( 1. ), m_outputDirectory( "" ),
+     m_postFix( "" ), m_msgLevel( INFO ) {
 
 }
 

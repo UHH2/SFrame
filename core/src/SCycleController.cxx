@@ -647,7 +647,7 @@ void SCycleController::InitProof( const TString& server, const Int_t& nodes ) {
    m_logger << INFO << "Opening PROOF connection to: " << server
             << SLogger::endmsg;
    m_proof = TProof::Open( server );
-   if( nodes > 0 ) m_proof->SetParallel(nodes);
+   if( nodes > 0 ) m_proof->SetParallel( nodes );
 
    return;
 

@@ -1,3 +1,7 @@
+2009.07.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Small changes here and there while looking for more memory
+	  leaks.
+
 2009.06.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* First modifications in the SVN repository...
 	* Fixed multiple memory leaks in SFrameCore
