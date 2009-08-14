@@ -1,3 +1,9 @@
+2009.08.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* I believe I found the main memory leak in
+	  SCycleController::ExecuteNextCycle(...). Thanks a lot
+	  for Gerri Ganis for his help.
+	* Tagging as SFrame-PROOF-branch-10
+
 2009.07.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Small changes here and there while looking for more memory
 	  leaks.

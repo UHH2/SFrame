@@ -12,13 +12,16 @@
 #include <TTree.h>
 #include <TRandom.h>
 
+static const Int_t NUMBER_OF_FILES = 2000;
+static const Int_t EVENTS_IN_FILES = 5000;
+
 /**
  * Simple macro that creates N different small ROOT files to be used
  * in subsequent tests.
  */
 void fileMaker() {
 
-   for( Int_t filenum = 0; filenum < 500; ++filenum ) {
+   for( Int_t filenum = 0; filenum < NUMBER_OF_FILES; ++filenum ) {
 
       std::ostringstream filename;
       filename << "SFrameTest_" << std::setw( 4 ) << std::setfill( '0' )
@@ -45,7 +48,7 @@ void fileMaker() {
       otree->Branch( "TestInt", &oint, "TestInt/I" );
       otree->Bronch( "TestVec", "std::vector<double>", &ovec );
 
-      for( int i = 0; i < 500; ++i ) {
+      for( int i = 0; i < EVENTS_IN_FILES; ++i ) {
 
          ovec->clear();
 
@@ -62,7 +65,8 @@ void fileMaker() {
       ofile->Close();
       delete ofile;
 
-      std::cout << "Written 500 events to " << filename.str() << std::endl;
+      std::cout << "Written " << EVENTS_IN_FILES << " events to "
+                << filename.str() << std::endl;
 
    }
 

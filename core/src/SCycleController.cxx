@@ -521,12 +521,33 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
 
       } else if( config.GetRunMode() == SCycleConfig::PROOF ) {
 
+         //
+         // Check that the PROOF server is available and ready. For instance it's not
+         // a good idea to send a job to a server that crashed on the previous
+         // input data...
+         //
+         if( ( ! m_proof->IsValid() ) || m_proof->IsWaiting() ) {
+            m_logger << ERROR << "PROOF server doesn't seem to be available: "
+                     << m_proof->GetManager()->GetUrl() << SLogger::endmsg;
+            m_logger << ERROR << "Aborting execution of cycle!" << SLogger::endmsg;
+            break;
+         }
+
          // This object describes how to create the temporary PROOF output
          // files in the cycles:
          TNamed proofOutputFile( TString( SFrame::ProofOutputName ),
                                  ( config.GetProofWorkDir() == "" ? "./" :
                                    config.GetProofWorkDir() + "/" ) +
-                                 cycle->GetName() + "TempNTuple.root" );
+                                 cycle->GetName() + "-" + inputData.GetType() +
+                                 "-" + inputData.GetVersion() + "-TempNTuple.root" );
+
+         //
+         // Clear the query results from memory (Thanks to Gerri!):
+         //
+         if( m_proof->GetQueryResults() ) {
+            m_proof->GetQueryResults()->SetOwner( kTRUE );
+            m_proof->GetQueryResults()->Clear();
+         }
 
          //
          // Give the configuration to PROOF, and tweak it a little:
@@ -539,14 +560,36 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          m_proof->AddInput( &proofOutputFile );
 
          //
-         // Run the cycle on PROOF:
+         // Run the cycle on PROOF. Unfortunately the checking of the "successfullness"
+         // of the PROOF job is not working too well... Even after a *lot* of error
+         // messages the TProof::Process(...) command can still return a success code,
+         // which can lead to nasty crashes...
          //
          TDSet set( chain );
-         m_proof->Process( &set, cycle->GetName(), "", evmax, id->GetNEventsSkip() );
+         if( m_proof->Process( &set, cycle->GetName(), "", evmax,
+                               id->GetNEventsSkip() ) == -1 ) {
+            m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
+            m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
+            m_logger << ERROR << "  ID type    = " << inputData.GetType()
+                     << SLogger::endmsg;
+            m_logger << ERROR << "  ID version = " << inputData.GetVersion()
+                     << SLogger::endmsg;
+            m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
+            break;
+         }
          outputs = m_proof->GetOutputList();
 
       } else {
          throw SError( "Running mode not recognised!", SError::SkipCycle );
+      }
+
+      if( ! outputs ) {
+         m_logger << ERROR << "Cycle output could not be retrieved." << SLogger::endmsg;
+         m_logger << ERROR << "NOT writing the output of cycle \""
+                  << cycle->GetName() << "\", ID \"" << inputData.GetType()
+                  << "\", Version \"" << inputData.GetVersion() << "\""
+                  << SLogger::endmsg;
+         continue;
       }
 
       //
@@ -571,6 +614,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          id->GetType() + "." + id->GetVersion() + config.GetPostFix() + ".root";
       outputFileName.ReplaceAll( "::", "." );
       WriteCycleOutput( outputs, outputFileName, updateOutput );
+      outputs->SetOwner( kTRUE );
       outputs->Clear();
 
    }
