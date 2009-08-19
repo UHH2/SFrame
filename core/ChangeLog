@@ -1,3 +1,7 @@
+2009.08.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Changed the way the files for the output ntuples are
+	  closed.
+
 2009.06.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Adding first modifications into the SVN repository.
 	* Added a new class: SPointer. It's used to clean up the

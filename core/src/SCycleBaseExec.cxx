@@ -248,6 +248,9 @@ void SCycleBaseExec::SlaveTerminate() {
 
    m_logger << VERBOSE << "In SCycleBaseExec::SlaveTerminate()" << SLogger::endmsg;
 
+   //
+   // Tell the user cycle that the InputData has ended:
+   //
    try {
       this->EndInputData( *m_inputData );
    } catch( const SError& error ) {
@@ -269,13 +272,25 @@ void SCycleBaseExec::SlaveTerminate() {
    //
    if( m_outputFile ) {
 
+      m_logger << DEBUG << "Closing output file: " << m_outputFile->GetName()
+               << SLogger::endmsg;
+
+      // Remember which directory we were in:
+      TDirectory* savedir = gDirectory;
+      m_outputFile->cd();
+
+      // Save each output tree:
       for( std::vector< TTree* >::iterator tree = m_outputTrees.begin();
            tree != m_outputTrees.end(); ++tree ) {
-         ( *tree )->AutoSave();
+         ( *tree )->Write();
+         ( *tree )->SetDirectory( 0 );
          delete ( *tree );
       }
 
-      m_outputFile->Write();
+      // Go back to the original directory:
+      gDirectory = savedir;
+
+      // Close the output file and reset the variables:
       m_outputFile->Close();
       delete m_outputFile;
       m_outputFile = 0;
