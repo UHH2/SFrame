@@ -1,3 +1,8 @@
+2009.08.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Removed the LeakCheck cycle, and the associated files.
+	  These are now put into a new package called
+	  SFrameStressTest.
+
 2009.02.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Removed my specific configuration from FirstCycle_config.xml
 	* Added some more documentation to the same file
