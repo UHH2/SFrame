@@ -1,4 +1,11 @@
 2009.08.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* "Backported" the code to work with ROOT 5.22d. (Should work
+	  with all 5.22X versions...)
+	* Tested the basic functionality on SLC5 with gcc43.
+	* Tagging as SFrame-PROOF-branch-11, since it should already
+	  be usable with this ROOT version.
+
+2009.08.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Checking in some preliminary python scripts for managing
 	  data sets on a PROOF cluster. The scripts are not at all
 	  production-ready yet...

@@ -526,7 +526,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          // a good idea to send a job to a server that crashed on the previous
          // input data...
          //
-         if( ( ! m_proof->IsValid() ) || m_proof->IsWaiting() ) {
+         if( ! m_proof->IsValid() ) {
             m_logger << ERROR << "PROOF server doesn't seem to be available: "
                      << m_proof->GetManager()->GetUrl() << SLogger::endmsg;
             m_logger << ERROR << "Aborting execution of cycle!" << SLogger::endmsg;
