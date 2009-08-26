@@ -1,3 +1,8 @@
+2009.08.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Checking in some preliminary python scripts for managing
+	  data sets on a PROOF cluster. The scripts are not at all
+	  production-ready yet...
+
 2009.08.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* I believe I found the main memory leak in
 	  SCycleController::ExecuteNextCycle(...). Thanks a lot
