@@ -1,4 +1,4 @@
-// $Id: SCycleBaseNTuple.cxx,v 1.4 2008-02-14 17:55:45 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -20,6 +20,7 @@
 // ROOT include(s):
 #include <TFile.h>
 #include <TTree.h>
+#include <TChain.h>
 #include <TBranch.h>
 #include <TROOT.h>
 #include <TList.h>
@@ -30,20 +31,19 @@
 // Local include(s):
 #include "../include/SCycleBaseNTuple.h"
 #include "../include/SInputData.h"
-
-#ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseNTuple );
-#endif // DOXYGEN_IGNORE
+#include "../include/SCycleConfig.h"
+#include "../include/SCycleOutput.h"
 
 using namespace std;
 
-static Double_t EPSILON = 1e-15;
+static const Double_t EPSILON = 1e-15;
 
 /**
  * The constructor is only initialising the base class.
  */
 SCycleBaseNTuple::SCycleBaseNTuple()
-   : SCycleBaseConfig() {
+   : SCycleBaseBase(), m_inputTrees(), m_inputBranches(),
+     m_outputTrees(), m_outputVarPointers(), m_output( 0 ) {
 
    m_logger << VERBOSE << "SCycleBaseNTuple constructed" << SLogger::endmsg;
 
@@ -54,7 +54,21 @@ SCycleBaseNTuple::SCycleBaseNTuple()
  */
 SCycleBaseNTuple::~SCycleBaseNTuple() {
 
+   DeleteInputVariables();
    m_logger << VERBOSE << "SCycleBaseNTuple destructed" << SLogger::endmsg;
+
+}
+
+void SCycleBaseNTuple::SetNTupleOutput( TList* output ) {
+
+   m_output = output;
+   return;
+
+}
+
+TList* SCycleBaseNTuple::GetNTupleOutput() const {
+
+   return m_output;
 
 }
 
@@ -68,19 +82,15 @@ SCycleBaseNTuple::~SCycleBaseNTuple() {
  *
  * @param iD       The input data that we're handling at the moment
  * @param outTrees The collection of output trees that will be created
- * @param fileOut  Pointer to the output file that the function opens
  */
 void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
                                           std::vector< TTree* >& outTrees,
-                                          TFile*& fileOut ) throw( SError ) {
+                                          TFile* outputFile ) throw( SError ) {
 
    // sanity checks
    if( outTrees.size() )
-      m_logger << WARNING << "Vector of output trees is not empty in \"CreateOutputTrees\"!" 
-               << SLogger::endmsg;
-   if( fileOut )
-      m_logger << WARNING << "Pointer to output file is not 0 in \"CreateOutputTrees\"!" 
-               << SLogger::endmsg;
+      m_logger << WARNING << "Vector of output trees is not empty in "
+               << "\"CreateOutputTrees\"!"  << SLogger::endmsg;
 
    // Clear the vector of output trees:
    m_outputTrees.clear();
@@ -91,22 +101,6 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
    const std::vector< STree >& sOutTree = iD.GetOutputTrees();
    // Open output file / create output trees
    gROOT->cd();
-
-   // Construct output file name
-   m_outputFileName = GetOutputDirectory() + GetName() + "." + iD.GetType() +
-      GetPostFix() + ".root";
-   // Replace "::" by "." to make nice file names for cycles defined
-   // in a namespace:
-   m_outputFileName.ReplaceAll( "::", "." );
-
-   m_logger << INFO << "Opening: "<< m_outputFileName << SLogger::endmsg;
-
-   fileOut = new TFile( m_outputFileName, "RECREATE" );
-   if( ! fileOut || fileOut->IsZombie() ) {
-      SError error( SError::SkipInputData );
-      error << "Cannot open output file " << m_outputFileName;
-      throw error;
-   }
 
    //
    // Create all the output trees, but don't create any branches in them just yet.
@@ -120,11 +114,21 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
                                ", data type: " + iD.GetType() );
 
       tree->SetAutoSave( autoSave );
-      tree->SetDirectory( fileOut );
       TTree::SetBranchStyle( branchStyle );
 
       outTrees.push_back( tree );
       m_outputTrees.push_back( tree );
+
+      if( outputFile ) {
+         tree->SetDirectory( outputFile );
+         m_logger << VERBOSE << "Attached TTree \"" << st->treeName.Data()
+                  << "\" to file: " << outputFile->GetName() << SLogger::endmsg;
+      } else {
+         SCycleOutput* out = new SCycleOutput( tree, st->treeName );
+         m_output->Add( out );
+         m_logger << VERBOSE << "Keeping TTree \"" << st->treeName.Data()
+                  << "\" in memory" << SLogger::endmsg;
+      }
    }
 
    return;
@@ -141,23 +145,36 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
  * @param filename The full name of the input file
  * @param file     Pointer to the input file that the function opens
  */
-void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD, const std::string& filename,
-                                       TFile*& file ) throw( SError ) {
-
-   m_logger << INFO << "Opening: " << filename << SLogger::endmsg;
-   // If you want to read files from castor...
-   // if(filename.find("rfio:") != std::string::npos) file = new TRFIOFile( filename.c_str(), "READ" );
-   // else file = new TFile( filename.c_str(), "READ" );
-
-   file = this->OpenInputFile( filename.c_str() ); // This will throw an exception if unsuccessful...
+void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
+                                       TTree* main_tree ) throw( SError ) {
 
    const std::vector< STree >& sInTree = iD.GetInputTrees();
    Bool_t firstPassed = kFALSE;
-   m_nEvents = 0;
+   Int_t nEvents = 0;
    m_inputTrees.clear();
    m_inputBranches.clear();
+   DeleteInputVariables();
 
-   for( vector< STree >::const_iterator st = sInTree.begin(); st != sInTree.end(); ++st ) {
+   TFile* file = 0;
+   if( GetConfig().GetRunMode() == SCycleConfig::LOCAL ) {
+      TChain* chain = dynamic_cast< TChain* >( main_tree );
+      if( ! chain ) {
+         throw SError( "In LOCAL running the input TTree is not a TChain!",
+                       SError::StopExecution );
+      }
+      file = chain->GetFile();
+   } else if( GetConfig().GetRunMode() == SCycleConfig::PROOF ) {
+      file = main_tree->GetCurrentFile();
+   } else {
+      throw SError( "Running mode not recongnised", SError::SkipCycle );
+   }
+   if( ! file ) {
+      throw SError( "Couldn't get the input file pointer!", SError::SkipFile );
+      return;
+   }
+
+   for( vector< STree >::const_iterator st = sInTree.begin(); st != sInTree.end();
+        ++st ) {
 
       TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
       if( ! tree ) {
@@ -196,55 +213,18 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD, const std::string& 
          }
 
          m_inputTrees.push_back( tree );
-         if( firstPassed && tree->GetEntries() != m_nEvents ) {
+         if( firstPassed && tree->GetEntries() != nEvents ) {
             SError error( SError::SkipFile );
             error << "Conflict in number of entries - Tree " << tree->GetName()
                   << " has " << tree->GetEntries() << ", NOT "
-                  << m_nEvents;
+                  << nEvents;
             throw error;
          } else if( ! firstPassed ) {
             firstPassed = kTRUE;
-            m_nEvents = tree->GetEntries();
+            nEvents = tree->GetEntries();
          }
       }
    }
-
-   //
-   // Now initialise the EV trees, if they're defined
-   //
-   m_EVinputTrees.clear();
-   m_EVInTreeToCounters.clear();
-   m_EVInTreeToCollTreeName.clear();
-   m_EVInTreeToBaseName.clear();
-   m_EVInTreeToViewNumber.clear();
-   m_EVInputBranchesToBaseName.clear();
-   m_EVInputBranchesToViewNumber.clear();
-
-   const std::vector< SEVTree >& sEVInTree = iD.GetEVInputTrees();
-   for( vector< SEVTree >::const_iterator st = sEVInTree.begin();
-        st != sEVInTree.end(); ++st ) {
-      TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
-      if( ! tree ) {
-         SError error( SError::SkipFile );
-         error << "Tree " << st->treeName << " doesn't exist in File "
-               << file->GetName();
-         throw error;
-      } else {
-         // store pointers to EventView input trees, and initialise one
-         // counter for each tree for the bookkeeping
-         m_EVinputTrees.push_back( tree );
-         m_EVInTreeToCounters[ tree ] = 0;
-         m_EVInTreeToCollTreeName[ tree ] = st->collTreeName;
-         m_EVInTreeToBaseName[ tree ] = st->treeBaseName;
-         m_EVInTreeToViewNumber[ tree ] = st->viewNumber;
-      }
-   }
-
-   //
-   // Finally finish the EV tree initialisation by connecting the
-   // synchronisation variables:
-   //
-   this->ConnectEVSyncVariable();
 
    return;
 }
@@ -257,16 +237,13 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD, const std::string& 
  *
  * @param entry The event number to read in
  */
-void SCycleBaseNTuple::GetEntry( Long64_t entry ) throw( SError ) {
+void SCycleBaseNTuple::GetEvent( Long64_t entry ) throw( SError ) {
 
    // Load the current entry for all the regular input variables:
    for( vector< TBranch* >::const_iterator it = m_inputBranches.begin();
         it != m_inputBranches.end(); ++it ) {
       ( *it )->GetEntry( entry );
    }
-
-   // Now synchronise the EV input trees:
-   this->SyncEVTrees();
 
    return;
 }
@@ -279,25 +256,27 @@ void SCycleBaseNTuple::GetEntry( Long64_t entry ) throw( SError ) {
  * @param inputData The input data that we're processing at the moment
  * @param entry     The event number
  */
-Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,  Long64_t entry ) {
+Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,
+                                            Long64_t entry ) {
 
    // the type of this input data
-   TString type = inputData.GetType();
+   const TString& type    = inputData.GetType();
+   const TString& version = inputData.GetVersion();
 
    Double_t weight = 0.;
    Double_t totlum = 0.;
 
    if( inputData.GetType() == "data" ) {
-      m_logger << DEBUG << "Data" << SLogger::endmsg;
+      m_logger << VERBOSE << "Data" << SLogger::endmsg;
       weight = 1.;
       return weight;
    }
 
    //iterate over vector of input data and addup the weight for the type of this input data
-   for( vector< SInputData >::const_iterator iD = m_inputData.begin();
-        iD != m_inputData.end(); ++iD ) {
+   for( vector< SInputData >::const_iterator iD = GetConfig().GetInputData().begin();
+        iD != GetConfig().GetInputData().end(); ++iD ) {
 
-      if( iD->GetType() == type ) {
+      if( ( iD->GetType() == type ) && ( iD->GetVersion() == version ) ) {
 
          const std::vector< SGeneratorCut >& sgencuts = iD->GetSGeneratorCuts();
          Bool_t inside = kTRUE;
@@ -325,31 +304,10 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,  Long64
       }
    }
 
-   if( totlum > EPSILON) 
-      weight = ( GetTargetLumi() / totlum );
+   if( totlum > EPSILON ) 
+      weight = ( GetConfig().GetTargetLumi() / totlum );
   
    return weight;
-}
-
-/**
- * This function is used to open the input files for reading. It has the nice
- * property of automatically checking whether the file has been found and
- * correctly opened.
- *
- * <strong>The function is used internally by the framework!</strong>
- *
- * @param filename Name of the input file to open
- */
-TFile* SCycleBaseNTuple::OpenInputFile( const char* filename ) throw( SError ) {
-
-   TFile* file = TFile::Open( filename );
-   if( ! file || file->IsZombie() ) {
-      SError error( SError::SkipFile );
-      error << "Failed to open input file " << filename;
-      throw error;
-   }
-
-   return file;
 }
 
 /**
@@ -421,7 +379,7 @@ const char* SCycleBaseNTuple::RootType( const char* typeid_type ) {
  * the tree with a given name among the input and output trees (in this
  * order), or throws an exception if such tree doesn't exist.
  */
-TTree* SCycleBaseNTuple::GetTree( const std::string& treeName ) throw( SError ) {
+TTree* SCycleBaseNTuple::GetInputTree( const std::string& treeName ) throw( SError ) {
 
    //
    // Look for such input tree:
@@ -436,6 +394,18 @@ TTree* SCycleBaseNTuple::GetTree( const std::string& treeName ) throw( SError ) 
          }
       }
    }
+
+   //
+   // Throw an exception if the tree hasn't been found:
+   //
+   SError error( SError::SkipFile );
+   error << "Couldn't find input TTree with name: " << treeName;
+   throw error;
+
+   return 0;
+}
+
+TTree* SCycleBaseNTuple::GetOutputTree( const std::string& treeName ) throw( SError ) {
 
    //
    // Look for such output tree:
@@ -455,7 +425,7 @@ TTree* SCycleBaseNTuple::GetTree( const std::string& treeName ) throw( SError ) 
    // Throw an exception if the tree hasn't been found:
    //
    SError error( SError::SkipFile );
-   error << "Couldn't find TTree with name: " << treeName;
+   error << "Couldn't find output TTree with name: " << treeName;
    throw error;
 
    return 0;
@@ -467,7 +437,8 @@ TTree* SCycleBaseNTuple::GetTree( const std::string& treeName ) throw( SError ) 
  */
 void SCycleBaseNTuple::RegisterInputBranch( TBranch* br ) throw( SError ) {
 
-   if( find( m_inputBranches.begin(), m_inputBranches.end(), br ) != m_inputBranches.end() ) {
+   if( find( m_inputBranches.begin(), m_inputBranches.end(), br ) !=
+       m_inputBranches.end() ) {
       m_logger << DEBUG << "Branch '" << br->GetName() << "' already registered!"
                << SLogger::endmsg;
    } else {
@@ -478,213 +449,18 @@ void SCycleBaseNTuple::RegisterInputBranch( TBranch* br ) throw( SError ) {
 }
 
 /**
- * This function is called after SCycleBaseNTuple::LoadInputTrees(...).
- * The EventView trees hold different number of events. These events can
- * be synchronised through additional variables found in separate
- * (collection) trees.
- *
- * For each view, this function tries to find the variable in the collection
- * tree that can be used for the synchronisation.
- *
- * <strong>The function is used internally by the framework!</strong>
+ * This function deletes the contents of the input variable list. Since the
+ * SPointer objects in the list know exactly what kind of object they point to
+ * (templating rules...), they're able to delete them when they get deleted.
+ * (Even though at this point we delete them through their TObject "interface".)
  */
-void SCycleBaseNTuple::ConnectEVSyncVariable() throw( SError ) {
+void SCycleBaseNTuple::DeleteInputVariables() {
 
-   if( ! m_inputTrees.size() ) {
-      m_logger << DEBUG << "ConnectEVSyncVariable> No input trees defined"
-               << SLogger::endmsg;
-      return;
+   for( std::list< TObject* >::iterator it = m_inputVarPointers.begin();
+        it != m_inputVarPointers.end(); ++it ) {
+      delete ( *it );
    }
-   if( ! m_EVinputTrees.size() ) {
-      return;
-   }
-
-   // Clear the map(s) helping in synchronizing the EV trees:
-   m_EVBaseNameToCollVar.clear();
-
-   // now connect EV trees if they're defined
-   for( vector< TTree* >::iterator it = m_EVinputTrees.begin();
-        it != m_EVinputTrees.end(); ++it ) {
-
-      //
-      // Get the info to find the variable to synchronize this tree with:
-      //
-      map< TTree*, string >::const_iterator collTreeName =
-         m_EVInTreeToCollTreeName.find( *it );
-      if( collTreeName == m_EVInTreeToCollTreeName.end() ) {
-         SError error( SError::SkipInputData );
-         error << "Collection tree name for " << ( *it )->GetName() << " not found";
-         throw error;
-      }
-      map< TTree*, string >::const_iterator baseName = m_EVInTreeToBaseName.find( *it );
-      if( baseName == m_EVInTreeToBaseName.end() ) {
-         SError error( SError::SkipInputData );
-         error << "Base name for " << ( *it )->GetName() << " not found";
-         throw error;
-      }
-
-      //
-      // Find the collection tree for this EV tree:
-      //
-      TTree* collTree = 0;
-      for( vector< TTree* >::iterator coll_it = m_inputTrees.begin();
-           coll_it != m_inputTrees.end(); ++coll_it ) {
-         if( ( *coll_it )->GetName() == collTreeName->second ) {
-            collTree = *coll_it;
-            break;
-         }
-      }
-      if( ! collTree ) {
-         SError error( SError::SkipInputData );
-         error << "Couldn't find collection tree ('" << collTreeName->second
-               << "') for EV tree '" << ( *it )->GetName();
-         throw error;
-      }
-
-      //
-      // Connect to the variable allowing the synchronization of this tree:
-      //
-      m_EVBaseNameToCollVar[ baseName->second ] = 0;
-      std::ostringstream varname;
-      varname << baseName->second << "NInstance";
-      collTree->SetBranchAddress( varname.str().c_str(),
-                                  &m_EVBaseNameToCollVar[ baseName->second ] );
-   }
-
-   return;
-}
-
-/**
- * Function synchronising the branches of the EventView trees. It is quite
- * complicated, so optimisation is always welcome. It is called for each event
- * from SCycleBaseNTuple::GetEntry(...).
- *
- * <strong>The function is used internally by the framework!</strong>
- */
-void SCycleBaseNTuple::SyncEVTrees() throw( SError ) {
-
-   m_logger << VERBOSE << "In SyncEVTrees()" << SLogger::endmsg;
-
-   //
-   // Return right away if there are no EV trees defined:
-   //
-   if( ! m_EVInputBranchesToBaseName.size() ) return;
-
-   //
-   // Loop over all the EV Trees, and find the ones for which a new entry should be loaded:
-   //
-   for( vector< TTree* >::const_iterator evtree = m_EVinputTrees.begin();
-        evtree != m_EVinputTrees.end(); ++evtree ) {
-
-      // Find the "view number" of this EV tree:
-      map< TTree*, Int_t >::const_iterator viewNumber = m_EVInTreeToViewNumber.find( *evtree );
-      if( viewNumber == m_EVInTreeToViewNumber.end() ) {
-         SError error( SError::SkipInputData );
-         error << "SyncEVTrees> View number not found for tree '" << ( *evtree )->GetName()
-               << "'";
-         throw error;
-      } else {
-         m_logger << VERBOSE << "SyncEVTrees> ViewNumber for tree '" << ( *evtree )->GetName() << "' is "
-                  << viewNumber->second << SLogger::endmsg;
-      }
-
-      // Find the "base name" of this EV tree:
-      map< TTree*, string >::const_iterator baseName = m_EVInTreeToBaseName.find( *evtree );
-      if( baseName == m_EVInTreeToBaseName.end() ) {
-         SError error( SError::SkipInputData );
-         error << "SyncEVTrees> Base name for '" << ( *evtree )->GetName() << "' not found";
-         throw error;
-      } else {
-         m_logger << VERBOSE << "SyncEVTrees> Base name for '" << ( *evtree )->GetName() << "' is '"
-                  << baseName->second << "'" << SLogger::endmsg;
-      }
-
-      // Find the variable describing how many views of this type are there for this event:
-      map< string, Int_t >::const_iterator viewsInEvent =
-         m_EVBaseNameToCollVar.find( baseName->second );
-      if( viewsInEvent == m_EVBaseNameToCollVar.end() ) {
-         SError error( SError::SkipInputData );
-         error << "SyncEVTrees> Collection tree variable not found for tree '"
-               << ( *evtree )->GetName() << "'";
-         throw error;
-      } else {
-         m_logger << VERBOSE << "SyncEVTrees> Number of views in current event is "
-                  << viewsInEvent->second << SLogger::endmsg;
-      }
-
-      //
-      // Continue only, if the tree has to be updated:
-      //
-      if( viewNumber->second < viewsInEvent->second ) {
-
-         m_logger << VERBOSE << "SyncEVTrees> A new entry is to be loaded for tree '"
-                  << ( *evtree )->GetName() << "'" << SLogger::endmsg;
-
-         // Find the entry number to load:
-         map< TTree*, Int_t >::iterator entryNumber =
-            m_EVInTreeToCounters.find( *evtree );
-         if( entryNumber == m_EVInTreeToCounters.end() ) {
-            SError error( SError::SkipInputData );
-            error << "SyncEVTrees> Entry counter not found for tree '" << ( *evtree )->GetName()
-                  << "'";
-            throw error;
-         } else {
-            m_logger << VERBOSE << "SyncEVTrees> The entry to load for tree '" << ( *evtree )->GetName()
-                     << "' is " << entryNumber->second << SLogger::endmsg;
-         }
-
-         // Check if this is a valid entry number:
-         if( entryNumber->second >= ( *evtree )->GetEntries() ) {
-            SError error( SError::SkipEvent );
-            error << "SyncEVTrees> Entry " << entryNumber->second
-                  << " requested for tree '" << ( *evtree )->GetName()
-                  << "' (" << ( *evtree )->GetEntries() << " entries) in current event";
-            throw error;
-         } else {
-            m_logger << VERBOSE << "SyncEVTrees> This is a valid entry" << SLogger::endmsg;
-         }
-
-         //
-         // Load the correct entry, and increment the counter:
-         //
-         //
-         //  The previous method was actually fine, since the elements in both maps were
-         //  ordered in the same way. But I found it fragile to depend on this. Hence, here
-         //  is a new, (hopefully) more robust implementation.
-         //
-         for( vector< TBranch* >::iterator branch = m_inputBranches.begin();
-              branch != m_inputBranches.end(); ++branch ) {
-
-            map< TBranch*, string >::const_iterator brBaseName =
-               m_EVInputBranchesToBaseName.find( *branch );
-            map< TBranch*, Int_t >::const_iterator viewNumber =
-               m_EVInputBranchesToViewNumber.find( *branch );
-            if( ( brBaseName == m_EVInputBranchesToBaseName.end() ) ||
-                ( viewNumber == m_EVInputBranchesToViewNumber.end() ) ) {
-               // This is not an EV branch...
-               continue;
-            }
-            if( ( brBaseName->second != baseName->second ) ||
-                ( viewNumber->second >= viewsInEvent->second ) ) {
-               // This branch doesn't have to be updated...
-               continue;
-            }
-
-            // Load the correct entry for this branch:
-            m_logger << VERBOSE << "GetEntry(" << entryNumber->second 
-                     << ") for tree '" << ( *evtree )->GetName()
-                     << "' (view " << viewNumber->second 
-                     << "), branch '" << ( *branch )->GetName()
-                     << "'" << SLogger::endmsg;
-            ( *branch )->GetEntry( entryNumber->second );
-
-         }
-
-         // Now that all branches are loaded, increment the counter
-         ++( entryNumber->second );
-      }
-
-   } // End of loop over EV trees
+   m_inputVarPointers.clear();
 
    return;
 }

@@ -1,0 +1,272 @@
+// Dear emacs, this is -*- c++ -*-
+// $Id$
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Plug-ins
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
+
+#ifndef SFRAME_PLUGINS_SSummedVar_ICC
+#define SFRAME_PLUGINS_SSummedVar_ICC
+
+// System include(s):
+#include <cxxabi.h>
+
+// STL include(s):
+#include <vector>
+
+// ROOT include(s):
+#include <TCollection.h>
+#include <TList.h>
+
+// SFrame include(s):
+#include "core/include/ISCycleBaseHist.h"
+#include "core/include/SLogger.h"
+
+/**
+ * @short Summation operator for vectors
+ *
+ * In order to be able to express the summation of primitive types and
+ * vectors in the same way, the easiest was to overload the + operator.
+ */
+template< class Type >
+std::vector< Type > operator+( const std::vector< Type >& left,
+                               const std::vector< Type >& right ) {
+
+   // Create the result vector:
+   std::vector< Type > result;
+
+   // Check that the summation can be performed:
+   if( left.size() != right.size() ) {
+      const char* type_name = typeid( left ).name();
+      int status;
+      char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
+      if( status ) {
+         SError error( SError::StopExecution );
+         error << "Couldn't demangle type name: " << type_name;
+         throw error;
+      }
+      SLogger logger( real_type_name );
+      logger << ERROR << "Couldn't perform summation on type: "
+             << real_type_name << SLogger::endmsg;
+      logger << ERROR << "The results will not be correct!"
+             << SLogger::endmsg;
+      free( real_type_name );
+      return result;
+   }
+
+   // Peform the summation:
+   result.resize( left.size() );
+   for( typename std::vector< Type >::size_type i = 0; i < left.size(); ++i ) {
+      result[ i ] = left[ i ] + right[ i ];
+   }
+
+   return result;
+}
+
+////////////////////////////////////////////////////////////////////
+//                                                                //
+//          Implementation of the ProofSummedVar class            //
+//                                                                //
+////////////////////////////////////////////////////////////////////
+
+template< class Type >
+ProofSummedVar< Type >::ProofSummedVar( const char* name,
+                                        const char* title )
+   : TNamed( name, title ), m_member( 0 ) {
+
+}
+
+/**
+ * This function adds up the values of the variables from the worker nodes.
+ * It doesn't do anything fancy, just makes sure that the summation can be
+ * done, then does it.
+ */
+template< class Type >
+Int_t ProofSummedVar< Type >::Merge( TCollection* coll ) {
+
+   SLogger logger( this->ClassName() );
+
+   //
+   // Return right away if the input is flawed:
+   //
+   if( ! coll ) return 0;
+   if( coll->IsEmpty() ) return 0;
+
+   //
+   // Select the elements from the collection that can actually be merged:
+   //
+   TIter next( coll );
+   TObject* obj = 0;
+   while( ( obj = next() ) ) {
+
+      //
+      // See if it is an SCycleOutput object itself:
+      //
+      ProofSummedVar< Type >* pobj = dynamic_cast< ProofSummedVar< Type >* >( obj );
+      if( ! pobj ) {
+         logger << ERROR << "Trying to merge \"" << obj->ClassName()
+                << "\" object into \"" << this->ClassName() << "\"" << SLogger::endmsg;
+         continue;
+      }
+
+      //
+      // If everything is fine, add its contents to this object.
+      // I perform the summation in this non-optimal way to be able to use
+      // the overloaded operator defined at the top of this file...
+      //
+      m_member = m_member + pobj->m_member;
+
+   }
+
+   logger << DEBUG << "Merged objects with name \"" << GetName()
+          << "\"" << SLogger::endmsg;
+
+   return 1;
+
+}
+
+////////////////////////////////////////////////////////////////////
+//                                                                //
+//            Implementation of the SSummedVar class              //
+//                                                                //
+////////////////////////////////////////////////////////////////////
+
+template< class Type >
+SSummedVar< Type >::SSummedVar( const char* name, ISCycleBaseHist* parent )
+   : m_objName( name ), m_parent( parent ), m_object( 0 ) {
+
+}
+
+template< class Type >
+SSummedVar< Type >::operator Type&() {
+
+   return GetReference();
+
+}
+
+template< class Type >
+SSummedVar< Type >::operator const Type&() const {
+
+   return GetReference();
+
+}
+
+template< class Type >
+Type& SSummedVar< Type >::operator*() {
+
+   return GetReference();
+
+}
+
+template< class Type >
+Type* SSummedVar< Type >::operator->() {
+
+   return GetPointer();
+
+}
+
+template< class Type >
+Type& SSummedVar< Type >::GetReference() {
+
+   return GetObject()->m_member;
+
+}
+
+template< class Type >
+Type* SSummedVar< Type >::GetPointer() {
+
+   return &( GetObject()->m_member );
+
+}
+
+template< class Type >
+const Type& SSummedVar< Type >::operator*() const {
+
+   return GetReference();
+
+}
+
+template< class Type >
+const Type* SSummedVar< Type >::operator->() const {
+
+   return GetPointer();
+
+}
+
+template< class Type >
+const Type& SSummedVar< Type >::GetReference() const {
+
+   return GetObject()->m_member;
+
+}
+
+template< class Type >
+const Type* SSummedVar< Type >::GetPointer() const {
+
+   return &( GetObject()->m_member );
+
+}
+
+/**
+ * Other functions of this class should never try to directly access the m_object
+ * member, but use this function instead. It makes sure that a proper instance of
+ * the underlying helper object is created and registered.
+ */
+template< class Type >
+ProofSummedVar< Type >* SSummedVar< Type >::GetObject() const throw( SError ) {
+
+   //
+   // Try to get an already existing object from the output list:
+   //
+   ProofSummedVar< Type >* pobj =
+      dynamic_cast< ProofSummedVar< Type >* >( m_parent->GetHistOutput()->FindObject( m_objName ) );
+
+   if( pobj ) {
+      //
+      // Check if we have this object cached already. If it's a different object, then
+      // we delete the cached one.
+      //
+      if( m_object ) {
+         if( m_object != pobj ) {
+            delete m_object;
+            m_object = pobj;
+         }
+      } else {
+         m_object = pobj;
+      }
+   } else {
+      //
+      // Construct a logger with a meaningful source. It has to be this compilated
+      // since SSummedVar does not inherit from TObject.
+      //
+      const char* type_name = typeid( *this ).name();
+      int status;
+      char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
+      if( status ) {
+         SError error( SError::StopExecution );
+         error << "Couldn't demangle type name: " << type_name;
+         throw error;
+      }
+      SLogger logger( real_type_name );
+      free( real_type_name );
+
+      //
+      // Create a new object and add it to the output list:
+      //
+      logger << VERBOSE << "Creating new object with name \""
+             << m_objName << "\"" << SLogger::endmsg;
+      m_object = new ProofSummedVar< Type >( m_objName, "Internal SFrame object" );
+      m_parent->GetHistOutput()->Add( m_object );
+   }
+
+   return m_object;
+
+}
+
+#endif // SFRAME_PLUGINS_SSummedVar_ICC

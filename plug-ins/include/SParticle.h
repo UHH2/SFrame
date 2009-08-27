@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SParticle.h,v 1.2 2008-02-01 14:28:45 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Plug-ins
@@ -46,7 +46,7 @@
  *          supports, see:
  *          http://root.cern.ch/root/html518/ROOT__Math__LorentzVector_ROOT__Math__PtEtaPhiE4D_Double32_t___.html
  *
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 class SParticle :
    public ROOT::Math::LorentzVector< ROOT::Math::PtEtaPhiE4D< Double32_t > >,

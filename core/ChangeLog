@@ -1,27 +1,61 @@
-2009.05.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
-	* Modified SLogWriter such that now it only prints the output
-	  in different colours if it's being printed on the console.
-	  If it's redirected to a logfile, then the colours are
-	  not added. This makes the logfiles much easier to read.
-	  Thanks a *lot* ro Alexander Mann for the suggestion and the
-	  implementation!
+2009.08.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Changed the way the files for the output ntuples are
+	  closed.
 
-2009.05.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+2009.06.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Adding first modifications into the SVN repository.
+	* Added a new class: SPointer. It's used to clean up the
+	  objects created by the ConnectVariable(...) calls.
+	  So far there was a memory leak here...
+	* Fixed a memory leak in SParLocator::Locate(...) as well.
+	* Changed the level of the messages reporing about the
+	  event processing status to DEBUG when running in PROOF
+	  mode. (In this mode the progress is shown by PROOF
+	  anyway...)
+
+2009.05.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified SLogWriter such that it now only prints the
+	  output in different colours if it's being printed on
+	  the console. This makes the logfiles easier to read.
+	  Unfortunately it also has the sideeffect that all output
+	  from the worker nodes appears colourless...
 	* Changed SCycleBaseNTuple::ConnectVariable so that it now
-	  it returns whether it was successful or not. Thanks to
-	  Alexander Mann for the suggestion!
+	  returns whether it was successful or not.
+	* Thanks to Alexander Mann for both of these suggestions!
+
+2009.04.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Introduced a new specialisation of
+	  SCycleBaseNTuple::ConnectVariable(...). It allows to
+	  connect to array inputs very easily. Some documentation
+	  about its usage can be found in the source files.
+
+2009.02.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed SFileMerger to be able to handle empty TTrees.
+
+2009.01.22 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added new Cycle parameter: ProofWorkDir
+	  It specifies where the temporary ntuple files should be
+	  put when running on a PROOF cluster. The point is that
+	  this location should be writable by all machines taking
+	  part in the PROOF running.
 
 2009.01.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added missing <cstdlib> includes to fix compilation errors
 	  with GCC 4.3. The code is now tested to compile and run
 	  on SLC5 and GCC 4.3. :-)
 
+2008.12.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Now the job automatically prints the output messages
+	  from the worker nodes once the event processing is done.
+	* Created a new function called SErrorHandler. It can
+	  be used to print the ROOT messages using SLogger.
+
 2008.12.02 David Berge <berge@cern.ch>
 	* Fix small bug in SCycleController, now properly checking the
 	return code of gSystem->Load('libXX'), which is 1 i.e. not zero if
 	the library was already loaded; this last case isn't an error,
 	errors are only negative return codes
-	
+
 2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added the feature to skip events at the beginning of
 	  an InputData. The property to specify in the header of

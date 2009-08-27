@@ -22,20 +22,48 @@
   <!-- for this purpose instead!                                    -->
   <!-- <Library Name="libMathCore" /> -->
   <Library Name="libGenVector" />
+  <Library Name="libGraf" />
   <Library Name="libSFramePlugIns" />
   <Library Name="libSFrameUser" />
+
+  <!-- Packages that have to be uploaded and enabled on the PROOF cluster. -->
+  <!-- The standard SFrame libraries all create such a PAR package under   -->
+  <!-- SFRAME_LIB_DIR. For each custom library that is loaded in the       -->
+  <!-- configuration, a package also has to be defined...                  -->
+  <Package Name="SFrameCore.par" />
+  <Package Name="SFramePlugIns.par" />
+  <Package Name="SFrameUser.par" />
 
   <!-- List of cycles to be executed.                                       -->
   <!-- Name: specifies the class name to be executed in this cycle          -->
   <!-- name of Output-File: automically give by Name+Type+PostFix+".root"   -->
   <!-- OutputDirectory: directory to which output is written                -->
-  <!--                  must finish with an "/"                             --> 
+  <!--                  must finish with a "/"                              -->
+  <!-- PostFix: A string that should be added to the output file name.      -->
+  <!--          Can be useful for differentiating differently configured    -->
+  <!--          instances of the same cycle class.                          -->
+  <!-- RunMode: Can be "LOCAL" or "PROOF", depending on how you want to run -->
+  <!--          your analysis.                                              -->
+  <!-- ProofServer: Name of the PROOF server that you want to connect to.   -->
+  <!--              Set it to "" or "lite" to run PROOF-Lite on your local  -->
+  <!--              machine.                                                -->
+  <!-- ProofWorkDir: When working on a "real" PROOF cluster, the worker     -->
+  <!--               nodes write their output ntuple(s) into a local temp.  -->
+  <!--               file. These files are merged into a single file in a   -->
+  <!--               location accessible to all the nodes and the client    -->
+  <!--               machine (running SFrame) as well. Such a location can  -->
+  <!--               be specified here.                                     -->
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
-  <Cycle Name="FirstCycle" OutputDirectory="" PostFix="" TargetLumi="1." >
+  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite"
+         ProofWorkDir="" OutputDirectory="./" PostFix="" >
 
     <!-- list of input data for given data type                                   -->
-    <!-- type: type of events: e.g. "Zee", "ttbar", ...                           -->
-    <!--       names are up to the user; exception: for data use "data"!          -->  
+    <!-- Type, Version: Type of the events. They have pretty free formats.        -->
+    <!--       Exception is only for real data: for that use Type="data"!         -->
+    <!--       If two InputData nodes are declared with the same Type and Version -->
+    <!--       parameters, then their contents will end up in the same output     -->
+    <!--       file. (Care is taken to calculate the event weights correctly in   -->
+    <!--       case...                                                            -->
     <!-- Lumi: either specify it in InputData (ie. the luminosity sum of all <In> -->
     <!--       or specify it in each <In> separately                              -->
     <!--       In case both are filled the sum in <InputData> is used.            -->
@@ -55,7 +83,7 @@
     <!-- Some run-time checking is done on these parameters that they would make  -->
     <!-- sense, but in general be careful when using them.                        -->
 
-    <InputData Type="Data1" Version="Reco" Lumi="0." NEventsMax="2000" NEventsSkip="2000" >
+    <InputData Type="MC" Version="Zee_1" Lumi="0." NEventsMax="2000" NEventsSkip="3000" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting.                                                     -->
@@ -63,7 +91,7 @@
       <!-- in each event.                                                     -->
       <!-- We assume that it is stored directly in a "Tree"                   -->
       <!-- Formula: String formula of the cut that has been applied           -->
-      <GeneratorCut Tree="FullRec0" Formula="MissingEt>10000" />
+      <!--<GeneratorCut Tree="FullRec0" Formula="MissingEt>10000" />-->
 
       <!-- List of input files                -->
       <!-- Lumi: optional, see comments above -->
@@ -71,24 +99,24 @@
 
       <!-- Specification of the input and output trees. -->
       <!-- Name: Name of the tree in the ROOT file      -->
-      <InputTree Name="CollectionTree" />
       <InputTree Name="FullRec0" />
+      <InputTree Name="CollectionTree" />
       <OutputTree Name="FirstCycleTree" />
 
-  </InputData>
-  <InputData Type="Data2" Version="Reco" Lumi="0." >
+    </InputData>
+    <InputData Type="MC" Version="Zee_2" Lumi="0." NEventsMax="-1" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting                                                      -->
-      <GeneratorCut Tree="FullRec0" Formula="MissingEt>5000" />
-      <GeneratorCut Tree="FullRec0" Formula="SumEt>200000" />
+      <!--<GeneratorCut Tree="FullRec0" Formula="MissingEt>5000" />
+      <GeneratorCut Tree="FullRec0" Formula="SumEt>200000" />-->
 
       <!-- list of input files -->
       <In FileName="/afs/cern.ch/atlas/maxidisk/d181/SFrame/StacoTau1p3p__dcache-pythiazeeSUSYView_1.AAN.root" Lumi="209.8" />
 
       <!-- Specification of the input and output trees. -->
-      <InputTree Name="CollectionTree" />
       <InputTree Name="FullRec0" />
+      <InputTree Name="CollectionTree" />
       <OutputTree Name="FirstCycleTree" />
 
     </InputData>

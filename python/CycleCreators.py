@@ -1,4 +1,4 @@
-# $Id: CycleCreators.py,v 1.1 2008-02-14 17:59:20 krasznaa Exp $
+# $Id$
 ###########################################################################
 # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
 #                                                                         #
@@ -42,7 +42,7 @@ class CycleCreator:
     # This string is used by CreateHeader to create a header file that
     # holds a cycle which is not in a namespace.
     _header = """// Dear emacs, this is -*- c++ -*-
-// $Id: CycleCreators.py,v 1.1 2008-02-14 17:59:20 krasznaa Exp $
+// $Id$
 #ifndef %(class)-s_H
 #define %(class)-s_H
 
@@ -55,7 +55,7 @@ class CycleCreator:
  *          Put a longer description over here...
  *
  *  @author Put your name here
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 class %(class)-s : public SCycleBase {
 
@@ -100,7 +100,7 @@ private:
     # This string is used by CreateHeader to create a header file that
     # holds a cycle which is in a namespace.
     _headerNs = """// Dear emacs, this is -*- c++ -*-
-// $Id: CycleCreators.py,v 1.1 2008-02-14 17:59:20 krasznaa Exp $
+// $Id$
 #ifndef %(ns)-s_%(class)-s_H
 #define %(ns)-s_%(class)-s_H
 
@@ -115,7 +115,7 @@ namespace %(ns)-s {
     *          Put a longer description over here...
     *
     *  @author Put your name here
-    * @version $Revision: 1.1 $
+    * @version $Revision$
     */
    class %(class)-s : public SCycleBase {
 
@@ -211,7 +211,7 @@ namespace %(ns)-s {
     #
     # This string is used by CreateSource to create a source file that
     # holds a cycle which is not in a namespace.
-    _source = """// $Id: CycleCreators.py,v 1.1 2008-02-14 17:59:20 krasznaa Exp $
+    _source = """// $Id$
 
 // Local include(s):
 #include \"%(dir)-s/%(class)-s.h\"
@@ -269,7 +269,7 @@ void %(class)-s::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
     #
     # This string is used by CreateSource to create a source file that
     # holds a cycle which is in a namespace.
-    _sourceNs = """// $Id: CycleCreators.py,v 1.1 2008-02-14 17:59:20 krasznaa Exp $
+    _sourceNs = """// $Id$
 
 // Local include(s):
 #include \"%(dir)-s/%(class)-s.h\"
@@ -447,7 +447,7 @@ namespace %(ns)-s {
             print "AddLinkDef:: Creating new file called \"" + fileName + "\""
             output = open( fileName, "w" )
             output.write( "// Dear emacs, this is -*- c++ -*-\n" )
-            output.write( "// $Id: CycleCreators.py,v 1.1 2008-02-14 17:59:20 krasznaa Exp $\n\n" )
+            output.write( "// $Id$\n\n" )
             output.write( "#ifdef __CINT__\n\n" )
             output.write( "#pragma link off all globals;\n" )
             output.write( "#pragma link off all classes;\n" )

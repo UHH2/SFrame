@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBase.h,v 1.4 2008-02-01 14:22:01 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -15,7 +15,9 @@
 #define SFRAME_CORE_SCycleBase_H
 
 // Local include(s):
-#include "ISCycleBase.h"
+#include "ISCycleBaseNTuple.h"
+#include "ISCycleBaseHist.h"
+#include "ISCycleBaseConfig.h"
 #include "SCycleBaseNTuple.h"
 #include "SCycleBaseHist.h"
 #include "SCycleBaseConfig.h"
@@ -44,19 +46,20 @@
  *          class is instantiated only once inside the SCycleBase
  *          object. (virtual inheritance...)
  *
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
-class SCycleBase : public virtual ISCycleBase,
-                   public virtual SCycleBaseNTuple,
-                   public virtual SCycleBaseHist,
-                   public virtual SCycleBaseConfig,
-                   public virtual SCycleBaseExec {
+class SCycleBase : public SCycleBaseExec,
+                   public SCycleBaseConfig,
+                   public SCycleBaseHist,
+                   public SCycleBaseNTuple {
 
 public:
    /// Default constructor
    SCycleBase();
    /// Default destructor
    virtual ~SCycleBase();
+
+   //   virtual const char* GetName() const { return TSelector::GetName(); }
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBase, 0 );

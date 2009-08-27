@@ -1,4 +1,4 @@
-// $Id: SCycleBaseExec.cxx,v 1.4 2008-10-14 09:45:26 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -10,17 +10,20 @@
  *
  ***************************************************************************/
 
-// STL include(s):
-#include <iomanip>
-
 // ROOT include(s):
-#include <TFile.h>
 #include <TTree.h>
-#include <TStopwatch.h>
+#include <TFile.h>
+#include <TProofOutputFile.h>
 #include <TSystem.h>
 
 // Local include(s):
 #include "../include/SCycleBaseExec.h"
+#include "../include/SInputData.h"
+#include "../include/SCycleConfig.h"
+#include "../include/SConstants.h"
+#include "../include/SCycleStatistics.h"
+#include "../include/SOutputFile.h"
+#include "../include/SLogWriter.h"
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseExec );
@@ -30,8 +33,9 @@ ClassImp( SCycleBaseExec );
  * The constructor just initialises some member variable(s).
  */
 SCycleBaseExec::SCycleBaseExec()
-   : m_nProcessedEvents( 0 ) {
+   : m_nProcessedEvents( 0 ), m_nSkippedEvents( 0 ) {
 
+   SetLogName( this->GetName() );
    m_logger << VERBOSE << "SCycleBaseExec constructed" << SLogger::endmsg;
 
 }
@@ -45,440 +49,312 @@ SCycleBaseExec::~SCycleBaseExec() {
 
 }
 
-/**
- * This is the main "execute" function of the cycle. Once the cycle
- * has been correctly configured, the framework calls this function
- * which loops over all configured inputs and executes the cycle.
- */
-void SCycleBaseExec::ExecuteInputData() throw( SError ) {
+void SCycleBaseExec::Begin( TTree* ) {
 
-   //
-   // "Check" the input files:
-   //
-   for( std::vector< SInputData >::iterator iD = m_inputData.begin();
-        iD != m_inputData.end(); ++iD ) {
-      this->CheckInputFiles( *iD );
+   m_logger << VERBOSE << "In SCycleBaseExec::Begin()" << SLogger::endmsg;
+
+   try {
+
+      //
+      // Configure the base classes to write to the TSelector output object:
+      //
+      this->SetHistOutput( fOutput );
+      this->SetNTupleOutput( fOutput );
+
+      this->ReadConfig();
+      this->BeginMasterInputData( *m_inputData );
+
+   } catch( const SError& error ) {
+      m_logger << FATAL << "Exception caught in Begin( TTree* )"
+               << SLogger::endmsg;
+      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      throw;
    }
 
-   std::vector< TTree* > outputTrees;
-   TFile* outputFile = 0;
+   return;
 
-   // This timer is used to calculate the time spent analysing the
-   // events:
-   TStopwatch timer;
-   timer.ResetCpuTime();
-   timer.ResetRealTime();
+}
 
-   // iterate over SInputData objects
-   for( std::vector< SInputData >::const_iterator iD = m_inputData.begin();
-        iD != m_inputData.end(); ++iD ) {
+void SCycleBaseExec::SlaveBegin( TTree* ) {
 
-      m_logger << DEBUG << "ExecuteInputData: process InputData object of type \""  
-               << iD->GetType() << "\"" << SLogger::endmsg;
+   m_logger << VERBOSE << "In SCycleBaseExec::SlaveBegin()" << SLogger::endmsg;
 
-      // check whether this InputData object is of the same type as
-      // the previous one, in which case output trees and other
-      // objects will be kept and not recreated
-      std::vector< SInputData >::const_iterator previous = iD;
-      if( previous == m_inputData.begin() ) m_firstInputDataOfMany = true;
-      else {
-         --previous;
-         if( previous->GetType() != iD->GetType() ) {
-            m_firstInputDataOfMany = true;
-            //sanity check
-            if( m_keepOutputFile == true ) {
-               SError error( SError::SkipInputData );
-               error << "Previous InputData object kept the output file open" 
-                     << ", but the current InputData object is supposed to be the very first"
-                     << " of its kind !";
-               throw error;
+   try {
+
+      this->ReadConfig();
+
+      //
+      // Configure the base classes to write to the TSelector output object:
+      //
+      this->SetHistOutput( fOutput );
+      this->SetNTupleOutput( fOutput );
+
+      m_outputTrees.clear();
+
+      //
+      // Open a PROOF output file for the ntuple(s):
+      //
+      if( m_inputData->GetOutputTrees().size() ) {
+
+         TProofOutputFile* proofFile = 0;
+
+         TNamed* out =
+            dynamic_cast< TNamed* >( fInput->FindObject( SFrame::ProofOutputName ) );
+         if( out ) {
+            proofFile =
+               new TProofOutputFile( gSystem->BaseName( TUrl( out->GetTitle() ).GetFile() ) );
+            proofFile->SetOutputFileName( out->GetTitle() );
+            fOutput->Add( proofFile );
+         } else {
+            m_logger << DEBUG << "No PROOF output file specified in configuration -> "
+                     << "Running in LOCAL mode" << SLogger::endmsg;
+            proofFile = 0;
+            fOutput->Add( new SOutputFile( "SFrameOutputFile", SFrame::ProofOutputFileName ) );
+         }
+
+         if( proofFile ) {
+            if( ! ( m_outputFile = proofFile->OpenFile( "RECREATE" ) ) ) {
+               m_logger << WARNING << "Couldn't open output file: "
+                        << proofFile->GetDir() << "/" << proofFile->GetFileName()
+                        << SLogger::endmsg;
+               m_logger << WARNING << "Saving the ntuples to memory" << SLogger::endmsg;
+            } else {
+               m_logger << DEBUG << "PROOF temp file opened with name: "
+                        << m_outputFile->GetName() << SLogger::endmsg;
             }
          } else {
-            m_firstInputDataOfMany = false;
-            m_logger << INFO << "This is not the first InputData object of type \"" 
-                     << iD->GetType() 
-                     << "\", output trees and other objects will not be recreated!"
-                     << SLogger::endmsg;
+            if( ! ( m_outputFile = new TFile( SFrame::ProofOutputFileName, "RECREATE" ) ) ) {
+               m_logger << WARNING << "Couldn't open output file: "
+                        << SFrame::ProofOutputFileName << SLogger::endmsg;
+               m_logger << WARNING << "Saving the ntuples to memory" << SLogger::endmsg;
+            } else {
+               m_logger << DEBUG << "LOCAL temp file opened with name: "
+                        << SFrame::ProofOutputFileName << SLogger::endmsg;
+            }
          }
+
+         this->CreateOutputTrees( *m_inputData, m_outputTrees, m_outputFile );
+
+      } else {
+         m_outputFile = 0;
       }
 
-      // check whether output file should be created or not, now that
-      // the inputData objects are ordered according to their type
-      std::vector< SInputData >::const_iterator next = iD;
-      ++next;
-      if( next != m_inputData.end() ) {
-         if( next->GetType() == iD->GetType() ) {
-            m_logger << INFO << "Keep output file "
-                     << "open for next InputData object of type " 
-                     << next->GetType() << SLogger::endmsg;
-            m_keepOutputFile = true;
-         } else m_keepOutputFile = false;
-      } else m_keepOutputFile = false;
+      this->BeginInputData( *m_inputData );
 
-      try { // For catching InputData level problems...
+   } catch( const SError& error ) {
+      m_logger << FATAL << "Exception caught in SlaveBegin( TTree* )"
+               << SLogger::endmsg;
+      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      throw;
+   }
 
-         // count the number of events processed for this SInputData
-         Long64_t nProcessedEventsForThisInputData = 0;
-         Long64_t nProcessedEventsForThisInputFile = 0;
-         Long64_t nSkippedEventsForThisInputData = 0;
+   m_nProcessedEvents = 0;
+   m_nSkippedEvents = 0;
 
-         // get the number of events to be processed for this SInputData
-         Long64_t evToProcess = iD->GetNEventsMax();
-         Long64_t totalEvents = iD->GetEventsTotal();
-         Long64_t skippedEvents = iD->GetNEventsSkip();
-         if( evToProcess < 0 ) {
-            evToProcess = totalEvents;
-            m_logger << INFO << "Events to process : " << evToProcess << SLogger::endmsg;
-         } else {
-            m_logger << INFO << "Events to process : " << evToProcess << " / " << totalEvents
-                     << SLogger::endmsg;
-         }
+   m_logger << INFO << "Initialised InputData \"" << m_inputData->GetType()
+            << "\" (Version:" << m_inputData->GetVersion()
+            << ") on worker node" << SLogger::endmsg;
 
-         Bool_t InputDataIsInitialised = false;
+   return;
 
-         if( m_firstInputDataOfMany ) {
-            // open output file and create output trees therein
-            outputTrees.clear();
-            outputFile = 0;
-            this->CreateOutputTrees( *iD, outputTrees, outputFile );
-            this->InitHistogramming( outputFile, this->GetOutputFileName() );
-         }
+}
 
-         // now loop over input files, for each file get all the input
-         // trees, fill inputTrees with the trees, and then
-         // process the events for one file at a time
-         const std::vector< SFile >& sfile = iD->GetSFileIn();
-         for( std::vector< SFile >::const_iterator sf = sfile.begin();
-              sf != sfile.end(); ++sf ) {
+void SCycleBaseExec::Init( TTree* main_tree ) {
 
-            TFile* file = 0;
-            nProcessedEventsForThisInputFile = 0;
+   m_logger << VERBOSE << "In SCycleBaseExec::Init(...)" << SLogger::endmsg;
 
-            try { // For catching input file level problems...
+   m_inputTree = main_tree;
 
-               // stop the loop if number of processed events exceeds maxevents
-               if( nProcessedEventsForThisInputData >= evToProcess ) break;
+   return;
 
-               this->LoadInputTrees( *iD, sf->file.Data(), file );
-               if( ! InputDataIsInitialised ) {
-                  this->BeginInputData( *iD );
-                  InputDataIsInitialised = true;
-               }
-               this->BeginInputFile( *iD );
+}
 
-               // Measure used memory before the event loop:
-               ProcInfo_t mem_before;
-               gSystem->GetProcInfo( &mem_before );
+Bool_t SCycleBaseExec::Notify() {
 
-               // Start the timer:
-               timer.Start( kFALSE );
+   try {
 
-               // loop over all entries
-               for( Long64_t currentEvent = 0; currentEvent < GetNEvents();
-                    ++currentEvent ) {
+      this->LoadInputTrees( *m_inputData, m_inputTree );
+      this->BeginInputFile( *m_inputData );
 
-                  try { // For catching event level problems...
+   } catch( const SError& error ) {
+      m_logger << FATAL << "Exception caught in Notify()"
+               << SLogger::endmsg;
+      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      throw;
+   }
 
-                     // stop the loop if number of processed events exceeds maxevents
-                     if( nProcessedEventsForThisInputData >= evToProcess ) break;
-                     if( nSkippedEventsForThisInputData < skippedEvents ) {
-                        ++nSkippedEventsForThisInputData;
-                        throw SError( "Skipping event", SError::SkipEvent );
-                     }
+   return kTRUE;
 
-                     // count the number of processed events in this SInputData
-                     ++nProcessedEventsForThisInputData;
+}
 
-                     // count the number of processed events in the input file
-                     ++nProcessedEventsForThisInputFile;
+Bool_t SCycleBaseExec::Process( Long64_t entry ) {
 
-                     // count the number of processed events in this cycle
-                     ++m_nProcessedEvents;
+   Bool_t skipEvent = kFALSE;
+   try {
 
-                     if( ( currentEvent % 1000 ) == 0 ) {
-                        m_logger << INFO << "Processing event: "
-                                 << currentEvent << " / "
-                                 << GetNEvents() << " ("
-                                 << ( nProcessedEventsForThisInputData - 1 )
-                                 << " events processed so far)" << SLogger::endmsg;
-                     }
+      this->GetEvent( entry );
+      this->ExecuteEvent( *m_inputData, this->CalculateWeight( *m_inputData,
+                                                               entry ) );
 
-                     this->GetEntry( currentEvent );
+   } catch( const SError& error ) {
+      if( error.request() <= SError::SkipEvent ) {
+         m_logger << VERBOSE << "Exeption caught while processing event"
+                  << SLogger::endmsg;
+         m_logger << VERBOSE << "Message: " << error.what() << SLogger::endmsg;
+         m_logger << VERBOSE << "--> Skipping event!" << SLogger::endmsg;
+         skipEvent = kTRUE;
+      } else {
+         m_logger << FATAL << "Exception caught while processing event"
+                  << SLogger::endmsg;
+         m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+         throw;
+      }
+   }
 
-                     this->ExecuteEvent( *iD, this->CalculateWeight( *iD, currentEvent ) );
-
-                     // if ExecuteEvent returns gracefully, fill output trees
-                     int nbytes = 0;
-                     for( std::vector< TTree* >::iterator tree = outputTrees.begin();
-                          tree != outputTrees.end(); ++tree ) {
-                        nbytes = ( *tree )->Fill();
-                        if( nbytes < 0 ) {
-                           m_logger << WARNING << "Tree " << ( *tree )->GetName()
-                                    << " write error occurred" << SLogger::endmsg;
-                        } else if( nbytes == 0 ) {
-                           m_logger << WARNING << "Tree " << ( *tree )->GetName()
-                                    << " no data written" << SLogger::endmsg;
-                        }
-                     }
-
-                  } catch( const SError& error ) {
-                     //
-                     // This is where I catch "event level" problems.
-                     //
-                     if( error.request() <= SError::SkipEvent ) {
-                        // If just this event has to be skipped:
-                        m_logger << VERBOSE << "Exeption caught while processing event: "
-                                 << currentEvent << SLogger::endmsg;
-                        m_logger << VERBOSE << "Message: " << error.what() << SLogger::endmsg;
-                        m_logger << VERBOSE << "--> Skipping event!" << SLogger::endmsg;
-                        continue;
-                     } else {
-                        // If this is more serious:
-                        throw;
-                     }
-                  }
-
-               } // end of loop over entries in the input file
-
-               // Stop the timer:
-               timer.Stop();
-
-               // Measure used memory after the event loop:
-               ProcInfo_t mem_after;
-               gSystem->GetProcInfo( &mem_after );
-
-               m_logger << DEBUG << "Memory leaks while processing file:" << SLogger::endmsg;
-               m_logger << DEBUG << "   Resident mem.: " << std::setw( 6 )
-                        << ( mem_after.fMemResident - mem_before.fMemResident )
-                        << " kB; " << std::setw( 7 )
-                        << ( ( mem_after.fMemResident - mem_before.fMemResident ) /
-                             static_cast< double >( nProcessedEventsForThisInputFile ) )
-                        << " kB / event" << SLogger::endmsg;
-               m_logger << DEBUG << "   Virtual mem. : " << std::setw( 6 )
-                        << ( mem_after.fMemVirtual - mem_before.fMemVirtual )
-                        << " kB; " << std::setw( 7 )
-                        << ( ( mem_after.fMemVirtual - mem_before.fMemVirtual ) /
-                             static_cast< double >( nProcessedEventsForThisInputFile ) )
-                        << " kB / event" << SLogger::endmsg;
-
-               // close file
-               file->Close();
-               if( file ) delete file;
-
-            } catch( const SError& error ) {
-               //
-               // This is where I catch "file level" problems:
-               //
-               if( error.request() <= SError::SkipFile ) {
-                  // If just this file has to be skipped:
-                  m_logger << ERROR << "Exception caught while processing file:"
-                           << SLogger::endmsg;
-                  m_logger << ERROR << "  " << sf->file.Data() << SLogger::endmsg;
-                  m_logger << ERROR << "Message: " << error.what() << SLogger::endmsg;
-                  m_logger << ERROR << "--> Skipping file!" << SLogger::endmsg;
-
-                  continue;
-               } else {
-                  // If this is more serious:
-                  throw;
-               }
-            }
-
-         } // end loop over input files
-
-         // finalise this SInputData element
-         this->EndInputData( *iD );
-
-         // save data:
-         outputFile->cd();
-         // save output trees
-         for( std::vector< TTree* >::iterator tree = outputTrees.begin();
-              tree != outputTrees.end(); ++tree ) {
-            ( *tree )->AutoSave();
-            if( ! m_keepOutputFile ) delete ( *tree );
-         }
-         if( ! m_keepOutputFile ) {
-            // write outfile
-            outputFile->Write();
-            // close outfile
-            outputFile->Close();
-            delete outputFile;
-            outputFile = 0;
-            outputTrees.clear();
-         }
-
-      } catch( const SError& error ) {
-         //
-         // This is where I catch "InputData level" problems:
-         //
-         if( error.request() <= SError::SkipInputData ) {
-            // If just this InputData has to be skipped:
-            m_logger << ERROR << "Exception caught while processing InputData type: "
-                     << iD->GetType() << SLogger::endmsg;
-            m_logger << ERROR << "Message: " << error.what() << SLogger::endmsg;
-            m_logger << ERROR << "--> Skipping InputData!" << SLogger::endmsg;
-
-            //
-            // Clean up before continuing:
-            //
-            if( outputFile ) {
-               // save data:
-               outputFile->cd();
-               if( ! m_keepOutputFile ) {
-                  // write outfile
-                  outputFile->Write();
-                  // close outfile
-                  outputFile->Close();
-                  delete outputFile;
-                  outputFile = 0;
-                  outputTrees.clear();
-               }
-            }
-            continue;
-
-         } else {
-            // If this is more serious:
-            throw;
+   if( ! skipEvent ) {
+      int nbytes = 0;
+      for( std::vector< TTree* >::iterator tree = m_outputTrees.begin();
+           tree != m_outputTrees.end(); ++tree ) {
+         nbytes = ( *tree )->Fill();
+         if( nbytes < 0 ) {
+            m_logger << ERROR << "Write error occured in tree \""
+                     << ( *tree )->GetName() << "\"" << SLogger::endmsg;
+         } else if( nbytes == 0 ) {
+            m_logger << WARNING << "No data written to tree \""
+                     << ( *tree )->GetName() << "\"" << SLogger::endmsg;
          }
       }
+   } else {
+      ++m_nSkippedEvents;
+   }
 
-   } // end loop over input data
+   ++m_nProcessedEvents;
+   if( ! ( m_nProcessedEvents % 1000 ) ) {
+      // Only print these messages in local mode in INFO level. In PROOF mode they're
+      // only needed for debugging.
+      m_logger << ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ? INFO : DEBUG )
+               << "Processing entry: " << entry << " ("
+               << ( m_nProcessedEvents - 1 ) << " / "
+               << ( m_inputData->GetNEventsMax() < 0 ? m_inputData->GetEventsTotal() :
+                    m_inputData->GetNEventsMax() )
+               << " events processed so far)" << SLogger::endmsg;
+   }
 
-   m_logger << INFO << "Finished processing all input data" << SLogger::endmsg;
+   return kTRUE;
+
+}
+
+void SCycleBaseExec::SlaveTerminate() {
+
+   m_logger << VERBOSE << "In SCycleBaseExec::SlaveTerminate()" << SLogger::endmsg;
 
    //
-   // Print statistics on the pure event processing speed:
+   // Tell the user cycle that the InputData has ended:
    //
-   m_logger << INFO << "Pure event processing statistics:" << SLogger::endmsg;
-   Double_t nev = static_cast< Double_t >( NumberOfProcessedEvents() );
-   m_logger.setf( std::ios::fixed );
-   m_logger << INFO << std::setw( 10 ) << std::setfill( ' ' ) << std::setprecision( 0 )
-            << nev << " Events - Real time " << std::setw( 6 ) << std::setprecision( 2 )
-            << timer.RealTime() << " s  - " << std::setw( 5 )
-            << std::setprecision( 0 ) << ( nev / timer.RealTime() ) << " Hz | CPU time "
-            << std::setw( 6 ) << std::setprecision( 2 ) << timer.CpuTime() << " s  - "
-            << std::setw( 5 ) << std::setprecision( 0 ) << ( nev / timer.CpuTime() )
-            << " Hz" << SLogger::endmsg;
+   try {
+      this->EndInputData( *m_inputData );
+   } catch( const SError& error ) {
+      m_logger << FATAL << "Exception caught in SlaveTerminate()"
+               << SLogger::endmsg;
+      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      throw;
+   }
+
+   //
+   // Write the node statistics to the output:
+   //
+   SCycleStatistics* stat = new SCycleStatistics( SFrame::RunStatisticsName,
+                                                  m_nProcessedEvents, m_nSkippedEvents );
+   fOutput->Add( stat );
+
+   //
+   // Close the output file:
+   //
+   if( m_outputFile ) {
+
+      m_logger << DEBUG << "Closing output file: " << m_outputFile->GetName()
+               << SLogger::endmsg;
+
+      // Remember which directory we were in:
+      TDirectory* savedir = gDirectory;
+      m_outputFile->cd();
+
+      // Save each output tree:
+      for( std::vector< TTree* >::iterator tree = m_outputTrees.begin();
+           tree != m_outputTrees.end(); ++tree ) {
+         ( *tree )->Write();
+         ( *tree )->SetDirectory( 0 );
+         delete ( *tree );
+      }
+
+      // Go back to the original directory:
+      gDirectory = savedir;
+
+      // Close the output file and reset the variables:
+      m_outputFile->Close();
+      delete m_outputFile;
+      m_outputFile = 0;
+      m_outputTrees.clear();
+
+   }
+
+   m_logger << INFO << "Terminated InputData \"" << m_inputData->GetType()
+            << "\" (Version:" << m_inputData->GetVersion()
+            << ") on worker node" << SLogger::endmsg;
+
+   return;
+
+}
+
+void SCycleBaseExec::Terminate() {
+
+   m_logger << VERBOSE << "In SCycleBaseExec::Terminate()" << SLogger::endmsg;
+
+   try {
+      this->EndMasterInputData( *m_inputData );
+   } catch( const SError& error ) {
+      m_logger << FATAL << "Exception caught in Terminate()"
+               << SLogger::endmsg;
+      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      throw;
+   }
 
    return;
 
 }
 
 /**
- * This function calculates the number of events in the input TTree-s
- * to be able to correctly calculate the event weights if only a subset
- * of all the events are processed.
+ * This function takes care of accessing the cycle configuration objects on the
+ * master and worker nodes.
  */
-void SCycleBaseExec::CheckInputFiles( SInputData& iD ) throw( SError ) {
+void SCycleBaseExec::ReadConfig() throw( SError ) {
 
-   std::vector< SFile >& sfile = iD.GetSFileIn();
-   for( std::vector< SFile >::iterator sf = sfile.begin(); sf != sfile.end(); ++sf ) {
-
-      TFile* file = this->OpenInputFile( sf->file.Data() );
-
-      const std::vector< STree >& sInTree = iD.GetInputTrees();
-      Bool_t firstPassed = kFALSE;
-      Long64_t entries = 0;
-      Int_t numberOfBranches = 0;
-      // try to load all the input trees
-      for( std::vector< STree >::const_iterator st = sInTree.begin();
-           st != sInTree.end(); ++st ) {
-         TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
-         if( ! tree ) {
-            SError error( SError::SkipFile );
-            error << "Tree " << st->treeName << " doesn't exist in File "
-                  << file->GetName();
-            throw error;
-         } else {
-            if( firstPassed && tree->GetEntries() != entries ) {
-               SError error( SError::SkipFile );
-               error << "Conflict in number of entries - Tree " << tree->GetName()
-                     << " has " << tree->GetEntries() << ", NOT "
-                     << entries;
-               throw error;
-            } else if( ! firstPassed ) {
-               firstPassed = kTRUE;
-               entries = tree->GetEntries();
-            }
-            Int_t branchesThisTree = tree->GetNbranches();
-            m_logger << DEBUG << branchesThisTree << " branches in tree " << tree->GetName() 
-                     << SLogger::endmsg;
-            numberOfBranches += branchesThisTree;
-         }
-      }
-
-      // check EV trees
-      const std::vector< SEVTree >& sEVInTree = iD.GetEVInputTrees();
-      for( std::vector< SEVTree >::const_iterator st = sEVInTree.begin();
-           st != sEVInTree.end(); ++st ) {
-         TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
-         if( ! tree ) {
-            SError error( SError::SkipFile );
-            error << "Tree " << st->treeName << " doesn't exist in File "
-                  << file->GetName();
-            throw error;
-         }
-         Int_t branchesThisTree = tree->GetNbranches();
-         m_logger << DEBUG << branchesThisTree << " branches in tree " << tree->GetName() 
-                  << SLogger::endmsg;
-         numberOfBranches += branchesThisTree;
-      }
-
-      // Check the persistent tree(s):
-      const std::vector< STree >& sPersTree = iD.GetPersTrees();
-      for( std::vector< STree >::const_iterator st = sPersTree.begin();
-           st != sPersTree.end(); ++st ) {
-         TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
-         if( ! tree ) {
-            SError error( SError::SkipFile );
-            error << "Tree " << st->treeName << " doesn't exist in File "
-                  << file->GetName();
-            throw error;
-         } else {
-            if( firstPassed && tree->GetEntriesFast() != entries ) {
-               SError error( SError::SkipFile );
-               error << "Conflict in number of entries - Tree " << tree->GetName()
-                     << " has " << tree->GetEntries() << ", NOT "
-                     << entries;
-               throw error;
-            } else if( ! firstPassed ) {
-               firstPassed = kTRUE;
-               entries = tree->GetEntriesFast();
-            }
-         }
-         Int_t branchesThisTree = tree->GetNbranches();
-         m_logger << DEBUG << branchesThisTree << " branches in tree " << tree->GetName() 
-                  << SLogger::endmsg;
-         numberOfBranches += branchesThisTree;
-      }
-
-      sf->events = entries;
-      iD.AddEvents( entries );
-
-      m_logger << DEBUG << numberOfBranches << " branches in total in file "
-               << file->GetName() << SLogger::endmsg;
-      file->Close();
-      if( file ) delete file;
+   //
+   // Read the overall cycle configuration:
+   //
+   SCycleConfig* config =
+      dynamic_cast< SCycleConfig* >( fInput->FindObject( SFrame::CycleConfigName ) );
+   if( ! config ) {
+      m_logger << FATAL << "Couldn't retrieve the cycle configuration"
+               << SLogger::endmsg;
+      throw SError( "Couldn't find cycle configuration object", SError::SkipCycle );
+      return;
    }
+   this->SetConfig( *config );
+   SLogWriter::Instance()->SetMinType( config->GetMsgLevel() );
 
    //
-   // Check that the specified maximum number of events and the number of events to
-   // skip, make sense:
+   // Read which InputData we're processing at the moment:
    //
-   if( iD.GetNEventsSkip() + iD.GetNEventsMax() > iD.GetEventsTotal() ) {
-      if( iD.GetNEventsSkip() >= iD.GetEventsTotal() ) {
-         iD.SetNEventsMax( 0 );
-      } else {
-         iD.SetNEventsMax( iD.GetEventsTotal() - iD.GetNEventsSkip() );
-      }
+   m_inputData =
+      dynamic_cast< SInputData* >( fInput->FindObject( SFrame::CurrentInputDataName ) );
+   if( ! m_inputData ) {
+      m_logger << FATAL << "Couldn't retrieve the input data definition currently "
+               << "being processed" << SLogger::endmsg;
+      throw SError( "Couldn't find current input data configuration object", SError::SkipCycle );
+      return;
    }
-
-   //
-   // Print some status:
-   //
-   m_logger << INFO << "Input type \"" << iD.GetType() << "\" version \"" 
-            << iD.GetVersion() << "\" : " << iD.GetEventsTotal() << " events" 
-            << SLogger::endmsg;
 
    return;
+
 }

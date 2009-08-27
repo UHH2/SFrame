@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# $Id: sframe_create_cycle.py,v 1.1 2008-02-14 17:59:20 krasznaa Exp $
+# $Id$
 #***************************************************************************
 #* @Project: SFrame - ROOT-based analysis framework for ATLAS
 #* @Package: Core

@@ -13,7 +13,7 @@
 <!--                                                                         -->
 <!-- ======================================================================= -->
 
-<!ELEMENT JobConfiguration (PyLibrary*,Library*,Cycle+)>
+<!ELEMENT JobConfiguration (PyLibrary*,Library*,Package*,Cycle+)>
 <!ATTLIST JobConfiguration
         JobName              CDATA            #REQUIRED
         OutputLevel          CDATA            "INFO"
@@ -29,18 +29,27 @@
         Name                 CDATA            #REQUIRED
 >
 
+<!ELEMENT Package EMPTY>
+<!ATTLIST Package
+        Name                 CDATA            #REQUIRED
+>
+
 <!ELEMENT Cycle (InputData+,UserConfig?)>
 <!ATTLIST Cycle 
         Name                 ID               #REQUIRED
-        OutputDirectory      CDATA            #REQUIRED
-        PostFix              CDATA            #REQUIRED
         TargetLumi           CDATA            #REQUIRED
+        OutputDirectory      CDATA            "./"
+        PostFix              CDATA            ""
+        RunMode              (LOCAL|PROOF)    "LOCAL"
+        ProofServer          CDATA            ""
+        ProofWorkDir         CDATA            ""
+        ProofNodes           CDATA            "-1"
 >
 
 <!ELEMENT InputData (GeneratorCut*,In+,PersTree*,InputTree*,EVInputTree*,OutputTree*)>
 <!ATTLIST InputData
         Type                 CDATA            #REQUIRED
-        Version              (Reco|AtlFast)   "Reco"
+        Version              CDATA            #REQUIRED
         Lumi                 CDATA            "0.0"
         NEventsMax           CDATA            "-1"
         NEventsSkip          CDATA            "0"

@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.h,v 1.6 2009-03-27 13:30:34 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -19,6 +19,7 @@
 #include <string>
 
 // ROOT include(s):
+#include <TObject.h>
 #include <TString.h>
 
 // Local include(s):
@@ -29,6 +30,7 @@
 // Forward declaration(s):
 class TDirectory;
 class TH1;
+class TList;
 
 /**
  *   @short Histogramming part of SCycleBase
@@ -40,7 +42,7 @@ class TH1;
  *          It's error prone, but I haven't found any nicer way of
  *          doing it...
  *
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 class SCycleBaseHist : public virtual ISCycleBaseHist,
                        public virtual SCycleBaseBase {
@@ -51,6 +53,9 @@ public:
    /// Default destructor
    virtual ~SCycleBaseHist();
 
+   virtual void SetHistOutput( TList* output );
+   virtual TList* GetHistOutput() const;
+
 protected:
    /// Function placing a ROOT object in the output file
    template< class T > T* Book( const T& histo,
@@ -59,25 +64,19 @@ protected:
    template< class T > T* Retrieve( const char* name,
                                     const char* directory = 0 ) throw( SError );
    /// Function for persistifying a ROOT object to the output
-   void Write( const TObject& obj, const char* directory = 0 ) throw( SError );
+   void WriteObj( const TObject& obj,
+                  const char* directory = 0 ) throw( SError );
 
    /// Function searching for 1-dimensional histograms in the output file
    TH1* Hist( const char* name, const char* dir = 0 );
 
-   /// Function initialising the object
-   void InitHistogramming( TDirectory* outputFile, const TString& outputFileName );
-
 private:
-   TDirectory* CdInOutput( const char* path ) throw( SError );
+   TDirectory* GetTempDir() const;
 
-   TDirectory* m_outputFile;
-   TString     m_outputFileName;
    /// Map used by the Hist function
    std::map< std::pair< std::string, std::string >, TH1* > m_histoMap;
 
-#ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBaseHist, 0 );
-#endif // DOXYGEN_IGNORE
+   TList* m_output;
 
 }; // class SCycleBaseHist
 

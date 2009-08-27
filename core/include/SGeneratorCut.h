@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SGeneratorCut.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -25,13 +25,13 @@
  *          level. Used for normalising MC samples with different
  *          generator cuts to each other.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 class SGeneratorCut : public TObject {
 
 public:
    /// Constructor specifying a tree name and a formula
-   SGeneratorCut( const TString& treename, const TString& formula );
+   SGeneratorCut( const TString& treename = "", const TString& formula = "" );
    /// Default destructor
 	virtual ~SGeneratorCut();
 
@@ -68,6 +68,10 @@ public:
 private:
    TString m_tree;
    TString m_formula;
+
+#ifndef DOXYGEN_IGNORE
+   ClassDef( SGeneratorCut, 1 );
+#endif // DOXYGEN_IGNORE
 
 }; // class SGeneratorCut
 

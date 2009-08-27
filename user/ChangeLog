@@ -1,9 +1,25 @@
+2009.08.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Removed the LeakCheck cycle, and the associated files.
+	  These are now put into a new package called
+	  SFrameStressTest.
+
+2009.02.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Removed my specific configuration from FirstCycle_config.xml
+	* Added some more documentation to the same file
+
+2009.01.22 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Adopted the FirstCycle configuration to the latest core
+	  changes.
+
 2009.01.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified FirstCycle_config.xml and SecondCycle_config.xml to
 	  work with ROOT 5.20 and newer versions by default. If you
 	  use an older version of ROOT, you should modify the configuration
 	  files as instructed in the comments, to run the example
 	  cycles.
+
+2008.12.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Speeded up the examples a little bit
 
 2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added example usage of "NEventsSkip" to FirstCycle_config.xml.

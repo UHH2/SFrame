@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SInputData.h,v 1.4 2008-10-14 09:45:26 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -18,7 +18,9 @@
 #include <vector>
 
 // ROOT include(s):
-#include "TString.h"
+#include <TObject.h>
+#include <TNamed.h>
+#include <TString.h>
 
 // Local include(s):
 #include "SGeneratorCut.h"
@@ -30,9 +32,9 @@
  *          It is used to describe one input or output file (as defined
  *          in the configuration XML file) to the framework.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
-class SFile {
+class SFile : public TObject {
 
 public:
    /// Default constructor
@@ -73,6 +75,10 @@ public:
     */
    Long64_t events;
 
+#ifndef DOXYGEN_IGNORE
+   ClassDef( SFile, 1 );
+#endif // DOXYGEN_IGNORE
+
 }; // class SFile
 
 /**
@@ -83,13 +89,13 @@ public:
  *          property actually, its name. The name of the tree is taken
  *          from the configuration XML file.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
-class STree {
+class STree : public TObject {
 
 public:
    /// Constructor with a tree name
-   STree( const TString& t )
+   STree( const TString& t = "" )
       : treeName( t ) {}
 
    /// Assignment operator
@@ -108,6 +114,10 @@ public:
     */
    TString treeName;
 
+#ifndef DOXYGEN_IGNORE
+   ClassDef( STree, 1 );
+#endif // DOXYGEN_IGNORE
+
 }; // class STree
 
 /**
@@ -121,14 +131,14 @@ public:
  *          name, all of which are needed to perform synchronisation
  *          between the trees.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
-class SEVTree {
+class SEVTree : public TObject {
 
 public:
    /// Constructor with all the EVTree properties
-   SEVTree( const TString& t, const TString& tbasename, Int_t viewnum,
-            const TString& colltname )
+   SEVTree( const TString& t = "", const TString& tbasename = "",
+            Int_t viewnum = 0, const TString& colltname = "" )
       : treeName( t ), treeBaseName( tbasename ),
         viewNumber( viewnum ), collTreeName( colltname ) {}
 
@@ -169,6 +179,10 @@ public:
     */
    TString collTreeName;
 
+#ifndef DOXYGEN_IGNORE
+   ClassDef( SEVTree, 1 );
+#endif // DOXYGEN_IGNORE
+
 }; // class SEVTree
 
 /**
@@ -179,15 +193,15 @@ public:
  *          by the framework from the configuration values put in the
  *          configuration XML file.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
-class SInputData {
+class SInputData : public TNamed {
 
 public:
    /// Default constructor
-   SInputData();
+   SInputData( const char* name = "SInputData" );
    /// Default desctructor
-   ~SInputData();
+   virtual ~SInputData();
 
    /// Set the name of the input data type
    void SetType         ( const TString& type )          { m_type = type; }
@@ -214,6 +228,8 @@ public:
    void AddEVInputSTree ( const SEVTree& stree )         { m_evInputTrees.push_back( stree ); }
    /// Add some number of events to the input data
    void AddEvents       ( Long64_t events )              { m_eventsTotal += events; }
+
+   void ValidateInput();
 
    /// Get the name of the input data type
    const TString&                       GetType() const           { return m_type; }
@@ -266,10 +282,14 @@ private:
    std::vector< STree >            m_outputTrees;
    Double_t                        m_totalLumiSum;
    Long64_t                        m_eventsTotal;
-   Long64_t                        m_neventsmax;
+   Long64_t                        m_neventsmax ;
    Long64_t                        m_neventsskip;
 
-   mutable SLogger                 m_logger;
+   mutable SLogger                 m_logger; //!
+
+#ifndef DOXYGEN_IGNORE
+   ClassDef( SInputData, 1 );
+#endif // DOXYGEN_IGNORE
 
 }; // class SInputData
 

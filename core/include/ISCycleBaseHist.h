@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: ISCycleBaseHist.h,v 1.1 2008-01-25 14:33:53 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -15,40 +15,29 @@
 #define SFRAME_CORE_ISCycleBaseHist_H
 
 // Forward declaration(s):
-class TDirectory;
-class TString;
+class TList;
 
 /**
- *   @short Interface class providing the histogramming setup of the cycle
+ *   @short Interface providing histogramming capabilities
  *
- *          The SCycleBase class is broken into multiple classes. Some of
- *          these constituents can work independently, not knowing what the
- *          other constituents can do. But some parts (like SCycleBaseExec)
- *          rely on other constituents as well. To make those parts as modular
- *          as possible, they don't rely directly on the concrete implementations
- *          of the other constituents, but on interfaces like this.
+ *          This interface is used by the higher-level classes when configuring
+ *          SCycleBase objects. This way the high-level classes don't directly
+ *          depend on SCycleBaseHist.
  *
  *          This interface provides all the functions that the framework needs
  *          to call to make the histogramming in the cycle work.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 class ISCycleBaseHist {
 
 public:
-   /// Default destructor
    virtual ~ISCycleBaseHist() {}
 
-protected:
-   /// Function initialising the histogramming
-   /**
-    * This function is needed because of the implementation. The constituent
-    * that handles the output histograms needs to know the output file name
-    * and have access to the output file directly. This function is called
-    * by the framework every time a new output file is opened.
-    */
-   virtual void InitHistogramming( TDirectory* outputFile,
-                                   const TString& outputFileName ) = 0;
+   /// Set the PROOF output list
+   virtual void SetHistOutput( TList* output ) = 0;
+   /// Get the PROOF output list
+   virtual TList* GetHistOutput() const = 0;
 
 }; // class ISCycleBaseHist
 

@@ -1,5 +1,5 @@
  # Dear emacs, this is a -*- makefile -*-
- # $Id: Makefile.common,v 1.6 2009-05-13 08:48:07 krasznaa Exp $
+ # $Id$
  ###########################################################################
  # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
  #                                                                         #
@@ -52,7 +52,7 @@ endif
 # Some compilation options
 VPATH    += $(OBJDIR) $(SRCDIR)
 INCLUDES += -I$(SFRAME_DIR) -I./
-CXXFLAGS += -Wall -Wno-overloaded-virtual
+CXXFLAGS += -Wall -Wno-overloaded-virtual -Wno-unused
 
 # Set the locations of some files
 DICTHEAD  = $(SRCDIR)/$(LIBRARY)_Dict.h
@@ -66,7 +66,7 @@ SHLIBFILE = $(SFRAME_LIB_PATH)/lib$(LIBRARY).$(DllSuf)
 UNAME = $(shell uname)
 
 # Set up the default targets
-default: shlib setlinks 
+default: shlib setlinks par
 
 # List of all header and source files to build
 HLIST   = $(filter-out $(SKIPHLIST),$(wildcard $(INCDIR)/*.h))
@@ -79,7 +79,7 @@ OLIST = $(patsubst %.$(SrcSuf),%.o,$(notdir $(CPPLIST)))
 %.o : %.$(SrcSuf)
 	@echo "Compiling $<"
 	@mkdir -p $(OBJDIR)
-	@$(CXX) $(CXXFLAGS) -g -O2 -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES)
+	@$(CXX) $(CXXFLAGS) -O2 -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES)
 
 # Rule to create the dictionary
 $(DICTFILE): $(HLIST) $(DICTLDEF)
@@ -90,7 +90,7 @@ $(DICTFILE): $(HLIST) $(DICTLDEF)
 $(DICTOBJ): $(DICTFILE)
 	@echo "Compiling $<"
 	@mkdir -p $(OBJDIR)
-	$(CXX) $(CXXFLAGS) -g -O2 -c $(INCLUDES) -o $@ $<
+	$(CXX) $(CXXFLAGS) -O2 -c $(INCLUDES) -o $@ $<
 
 # Rule that creates various symbolic links
 setlinks: $(SHLIBFILE)
@@ -99,6 +99,13 @@ setlinks: $(SHLIBFILE)
 		echo "Linking $(SHLIBFILE) to $(SFRAME_LIB_PATH)/lib$(LIBRARY).so"; \
 		ln -s $(SHLIBFILE) $(SFRAME_LIB_PATH)/lib$(LIBRARY).so; \
 	fi
+
+# Rule that creates a PAR package for this library:
+par: $(SFRAME_LIB_PATH)/$(LIBRARY).par
+
+$(SFRAME_LIB_PATH)/$(LIBRARY).par: $(SHLIBFILE)
+	@sframe_parMaker.py -s ./ -o $@ \
+		-i $(INCDIR) -c $(SRCDIR)
 
 ##############################
 # The dependencies section   
@@ -116,43 +123,31 @@ $(DEPDIR)/%.d: %.$(SrcSuf)
 		$(SHELL) -ec '$(CPP) -MM $(CXXFLAGS) $(INCLUDES) $< | sed '\''/Cstd\/rw/d'\'' > $@'; \
 	fi
 
-# Rule to combine objects into a library
-$(LIBFILE): $(DICTOBJ) $(OLIST)
-	@echo "Making static library: $(LIBFILE)"
-	@rm -f $(LIBFILE)
-	@ar q $(LIBFILE) $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ)
-	@ranlib $(LIBFILE)
-
 # Rule to combine objects into a unix shared library
 $(SHLIBFILE): $(OLIST) $(DICTOBJ)
 	@echo "Making shared library: $(SHLIBFILE)"
 	@rm -f $(SHLIBFILE)
-	@$(LD) $(LDFLAGS) $(SOFLAGS) -g -O2 $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
+ifeq ($(ARCH),macosx)
+	@$(LD) $(LDFLAGS) -dynamiclib -single_module -undefined dynamic_lookup -O2 $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
+else
+	@$(LD) $(LDFLAGS) $(SOFLAGS) -O2 $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
+endif
 
 # Useful build targets
-lib: $(LIBFILE) 
 shlib: $(SHLIBFILE)
 
 clean:
 	rm -f $(DICTFILE) $(DICTHEAD)
-	rm -f $(SHLIBFILE)
 	rm -f $(OBJDIR)/*.o
-	rm -f $(DEPDIR)/*.d
-	rm -f $(LIBFILE)
 	rm -f $(SHLIBFILE)
-	rm -f $(DLLIBFILE)
 	rm -f $(SFRAME_LIB_PATH)/lib$(LIBRARY).so
 
 distclean:
 	rm -rf $(OBJDIR)
-	rm -f *~
+	rm -rf $(DEPDIR)
 	rm -f $(DICTFILE) $(DICTHEAD)
-	rm -f *_Dict*
-	rm -f $(DEPDIR)/*.d
 	rm -f $(SHLIBFILE)
-	rm -f $(LIBFILE)
-	rm -f $(SHLIBFILE)
-	rm -f $(DLLIBFILE)
 	rm -f $(SFRAME_LIB_PATH)/lib$(LIBRARY).so
+	rm -f $(SFRAME_LIB_PATH)/$(LIBRARY).par
 
-.PHONY : winlib shlib lib default clean
+.PHONY : shlib default clean

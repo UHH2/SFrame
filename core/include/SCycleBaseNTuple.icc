@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseNTuple.icc,v 1.5 2009-05-06 15:37:42 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -27,11 +27,15 @@
 #include <TTree.h>
 #include <TBranch.h>
 
+// Local include(s):
+#include "SPointer.h"
 
 /**
- * This is a tricky function. To connect to "primitive" types in the input TTree
+ * To connect to "primitive" types in the input TTree
  * (ints, doubles, etc.) you have to define the variable itself, then give this
- * variable to the function. (The function takes a reference of the variable.)
+ * variable to this function. So this function is only supposed to handle
+ * primitive types. More complex types are are handled by the specialised
+ * functions.
  *
  * For STL objects (vectors, maps, you name it) you have to define a pointer to
  * such an object, and give this pointer to the function. You don't need to
@@ -53,7 +57,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
             << "\", branchName = \"" << branchName << "\") called" << SLogger::endmsg;
 
    // Access the TTree. The function will throw an exception if unsuccessful
-   TTree* tree = GetTree( treeName );
+   TTree* tree = GetInputTree( treeName );
    TBranch* br = 0;
 
    // Check if the branch actually exists:
@@ -67,6 +71,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    // Detect what kind of variable we're dealing with:
    //
    const char* type_name = typeid( variable ).name();
+   m_logger << VERBOSE << "Type ID: " << type_name << SLogger::endmsg;
    if( strlen( type_name ) == 1 ) {
 
       // For primitive types nothing fancy needs to be done
@@ -76,12 +81,8 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 
    } else {
 
-      // The object pointers have to be initialised to zero before
-      // connecting them to the branches
-      m_logger << VERBOSE << "The supplied variable is an object pointer"
-               << SLogger::endmsg;
-      variable = 0;
-      tree->SetBranchAddress( branchName, &variable, &br );
+      throw SError( "ConnectVariable(...) called with an unknown variable type",
+                    SError::SkipCycle );
 
    }
 
@@ -94,131 +95,139 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 }
 
 /**
- * Function that lets the user define a variable "spreading accross" multiple
- * EventView input trees. The user has to provide the base name of the EV trees,
- * the name of the variable (branch) and a vector that will store the variables
- * from the different EV trees.
+ * This is a tricky specialisation of the base function...
  *
- * The function returns a pointer to the variable in the "collection tree" that
- * says how many views are avaiable for a given event. (The vector will always
- * have the maximal size, but only the first n elements will be valid for the
- * actual event.)
+ * Although it's not too common these days, but older ROOT ntuples often contained
+ * simple C style arrays instead of STL collections. Unfortunately the standard
+ * version of this function can't work if you give it your array variable. Luckily
+ * C++ allows us to use a special function for array type arguments.
  *
- * @warning The function has not been seriously tested yet, so beware when
- *          using it!
+ * If one of the branches that you'd like to read is an array, you should write
+ * something like this in your code:
+ *
+ *   In the header:
+ *   <code>
+ *       Int_t m_my_variable[ MAX_SIZE ];
+ *   </code>
+ *
+ *   In the source file:
+ *   <code>
+ *       ConnectVariable( "MyTree", "MyVariable", m_my_variable );
+ *   </code>
+ *
+ * Note, that the arrays always have to have a fixed size. (This is the size that
+ * was specified when the TTree was written.) It's important that the array would
+ * have memory allocated for it (as in this example), because ROOT doesn't do this
+ * automatically!
+ *
+ * @param treeName Name of the TTree in the input file
+ * @param branchName Name of the branch in the TTree
+ * @param variable The variable that should be connected to the branch
+ * @returns <code>true</code> if the connection was made successfully,
+ *          <code>false</code> otherwise
+ */
+template< typename T, size_t size >
+bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branchName,
+                                        T ( &variable )[ size ] ) throw( SError ) {
+
+   // Access the TTree. The function will throw an exception if unsuccessful
+   TTree* tree = GetInputTree( treeName );
+   TBranch* br = 0;
+
+   // Check if the branch actually exists:
+   if( ! tree->GetBranch( branchName ) ) {
+      m_logger << ERROR << "Branch \"" << branchName << "\" doesn't exist in TTree \""
+               << treeName << "\"" << SLogger::endmsg;
+      return false;
+   }
+
+   //
+   // Print what kind of variable we're dealing with:
+   //
+   const char* type_name = typeid( variable ).name();
+   m_logger << VERBOSE << "Type ID: " << type_name << SLogger::endmsg;
+
+   m_logger << VERBOSE << "The supplied variable is a \"primitive array\""
+            << SLogger::endmsg;
+   tree->SetBranchAddress( branchName, variable, &br );
+
+   this->RegisterInputBranch( br );
+   m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
+            << treeName << "\"" << SLogger::endmsg;
+
+   return true;
+
+}
+
+/**
+ * This is a specialisation of the base function for object pointers.
+ * If the input ntuple contains an object (like an std::vector of something),
+ * then the user should connect an object pointer to this branch. Something
+ * like this:
+ *
+ *   In the header:
+ *   <code>
+ *      std::vector< double >* m_electron_p_T;
+ *   </code>
+ *
+ *   In the source file:
+ *   <code>
+ *      ConnectVariable( "MyTree", "Electron_p_T", m_electron_p_T );
+ *   </code>
+ *
+ * Note that you don't get ownership of the object created by this function! It
+ * will be deleted automatically!
+ *
+ * @param treeName Name of the TTree in the input file
+ * @param branchName Name of the branch in the TTree
+ * @param variable The variable that should be connected to the branch
+ * @returns <code>true</code> if the connection was made successfully,
+ *          <code>false</code> otherwise
  */
 template< typename T >
-const Int_t* SCycleBaseNTuple::ConnectEventViewVariable( const char* baseName,
-                                                         const char* branchName,
-                                                         std::vector< T >& variables ) throw( SError ) {
+bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branchName,
+                                        T*& variable ) throw ( SError ) {
 
-   variables.clear();
+   // Access the TTree. The function will throw an exception if unsuccessful
+   TTree* tree = GetInputTree( treeName );
+   TBranch* br = 0;
 
-   TTree* EVInTree = 0;
-   std::map< TTree*, std::string >::const_iterator it = m_EVInTreeToBaseName.begin();
-   for( ; it != m_EVInTreeToBaseName.end(); ++it ) {
-
-      // Search for the TTrees belonging to this "view":
-      if( it->second != baseName ) continue;
-      EVInTree = it->first;
-
-      //
-      // Find the branch in this tree for the specified variable:
-      //
-      TBranch* br = EVInTree->GetBranch( branchName );
-      if( ! br ) {
-         SError error( SError::SkipFile );
-         error << "Branch \"" << branchName << "\" not found in tree \""
-               << EVInTree->GetName() << "\" !";
-         throw error;
-      }
-
-      m_logger << DEBUG << "Connect branch " << br->GetName() 
-               << " in EV tree " << EVInTree->GetName() <<  std::endl;
-
-      m_EVInputBranchesToBaseName[ br ] = baseName;
-
-      //
-      // Find out which number this view has:
-      //
-      std::map< TTree*, Int_t >::const_iterator viewNumber =
-         m_EVInTreeToViewNumber.find( EVInTree );
-      if( viewNumber == m_EVInTreeToViewNumber.end() ) {
-         SError error( SError::SkipInputData );
-         error << "ConnectEventViewVariable> View number not found for tree '"
-               << EVInTree->GetName() << "'";
-         throw error;
-      } else {
-         m_logger << DEBUG << "ConnectEventViewVariable> ViewNumber for tree '"
-                  << EVInTree->GetName() << "' is " << viewNumber->second
-                  << SLogger::endmsg;
-      }
-      m_EVInputBranchesToViewNumber[ br ] = viewNumber->second;
-
-      // remember position
-      typename std::vector< T >::size_type pos = variables.size();
-      // make entry for the current EV
-      variables.push_back( T() );
-      EVInTree->SetBranchAddress( branchName, &variables[ pos ], &br );
-
-      m_logger << DEBUG << "Insert EV input branch " << br->GetName() 
-               << " view " << viewNumber->second << " baseName " 
-               << baseName << SLogger::endmsg;
-
+   // Check if the branch actually exists:
+   if( ! tree->GetBranch( branchName ) ) {
+      m_logger << ERROR << "Branch \"" << branchName << "\" doesn't exist in TTree \""
+               << treeName << "\"" << SLogger::endmsg;
+      return false;
    }
 
-   std::map< TTree*, std::string >::const_iterator itCollTreeName = 
-      m_EVInTreeToCollTreeName.find( EVInTree );
-   if( itCollTreeName == m_EVInTreeToCollTreeName.end() ) {
-      SError error( SError::SkipInputData );
-      error << "Name of collection tree for EV tree \"" << EVInTree << "\" not found!";
-      throw error;
-   }
+   //
+   // Detect what kind of variable we're dealing with:
+   //
+   const char* type_name = typeid( variable ).name();
+   m_logger << VERBOSE << "Type ID: " << type_name << SLogger::endmsg;
+   if( strlen( type_name ) == 1 ) {
 
-   TTree* collTree = 0;
-   for( std::vector< TTree* >::const_iterator itCollTree = m_inputTrees.begin();
-        itCollTree != m_inputTrees.end(); ++itCollTree ) {
-      if( ( *itCollTree )->GetName() == itCollTreeName->second ) {
-         collTree = ( *itCollTree );
-      }
-   }
-   if( ! collTree ) {
-      SError error( SError::SkipInputData );
-      error << "Couldn't find collection tree ('" << itCollTreeName->second
-            << "') for EV tree '" << EVInTree->GetName() << "'";
-      throw error;
-   }
+      throw SError( "ConnectVariable(...) specialised for object pointers called "
+                    "with a simple variable.", SError::SkipCycle );
 
-   // now make sure that the variable in the CollectionTree that is
-   // used to sync the EV trees is loaded for every event, i.e. make
-   // sure the corresponding branch of the CollectionTree is in the
-   // map of input branches
+   } else {
 
-   std::ostringstream varname;
-   varname << baseName << "NInstance";
-   // now get the branch pointer
-   TBranch* br = collTree->GetBranch( varname.str().c_str() );
-   // throw exception if branch not found
-   if( ! br ) {
-      SError error( SError::SkipFile );
-      error << "Branch \"" << varname.str() << "\" not found in tree \""
-            << collTree->GetName() << "\" !";
-      throw error;
+      // The object pointers have to be initialised to zero before
+      // connecting them to the branches
+      m_logger << VERBOSE << "The supplied variable is an object pointer"
+               << SLogger::endmsg;
+      variable = 0;
+      tree->SetBranchAddress( branchName, &variable, &br );
+      // Take ownership of this new object:
+      m_inputVarPointers.push_back( new SPointer< T >( variable ) );
+
    }
 
    this->RegisterInputBranch( br );
-   std::map< std::string, Int_t >::const_iterator varIt =
-      m_EVBaseNameToCollVar.find( baseName );
-   if( varIt == m_EVBaseNameToCollVar.end() ) {
-      SError error( SError::StopExecution );
-      error << "Collection-tree variable to sync EV trees for baseName \"" << baseName 
-            << "\" not found !";
-      throw error;
-   } else {
-      return &( varIt->second );
-   }
+   m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
+            << treeName << "\"" << SLogger::endmsg;
 
-   return 0;
+   return true;
+
 }
 
 /**
@@ -253,13 +262,7 @@ TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
    //
    if( treeName ) {
 
-      for( std::vector< TTree* >::iterator otree = m_outputTrees.begin();
-           otree != m_outputTrees.end(); ++otree ) {
-         if( ! strcmp( ( *otree )->GetName(), treeName ) ) {
-            tree = *otree;
-            break;
-         }
-      }
+      tree = GetOutputTree( treeName );
 
    } else {
 

@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseHist.icc,v 1.3 2008-01-28 18:40:33 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -17,6 +17,10 @@
 // ROOT include(s):
 #include <TROOT.h>
 #include <TH1.h>
+#include <TList.h>
+
+// Local include(s):
+#include "SCycleOutput.h"
 
 /**
  * Function for creating any kind of object inheriting from TH1 and
@@ -39,35 +43,34 @@ template< class T >
 T* SCycleBaseHist::Book( const T& histo,
                          const char* directory ) throw( SError ) {
 
-   // Find the correct directory in the output file:
-   TDirectory* dir = 0;
-   if( directory ) {
-      dir = this->CdInOutput( directory );
-   } else {
-      dir = m_outputFile;
-   }
-   dir->cd();
+   GetTempDir()->cd();
 
-   // Search for an object with this name in the directory. If there is
-   // none, create one:
-   T* h = dynamic_cast< T* >( dir->FindObject( histo.GetName() ) );
-   if( ! h ) {
-      h = dynamic_cast< T* >( histo.Clone() );
+   TString path = ( directory ? directory + TString( "/" ) : "" ) +
+      TString( histo.GetName() );
+   SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
+   if( ! out ) {
+      out = new SCycleOutput( histo.Clone(), path, directory );
+      m_output->Add( out );
+      m_logger << VERBOSE << "Added new object with name \"" << histo.GetName()
+               << "\" in directory \"" << ( directory ? directory : "" ) << "\""
+               << SLogger::endmsg;
    }
 
-   gROOT->cd(); // So that the temporary objects would not be
-                // created in the file itself...
+   T* ret = dynamic_cast< T* >( out->GetObject() );
+
+   gROOT->cd(); // So that the temporary objects would be
+                // created in a general memory space.
 
    // Calculate the statistical uncertainties correctly for
    // weighted histograms:
-   TH1* hist = dynamic_cast< TH1* >( h );
+   TH1* hist = dynamic_cast< TH1* >( ret );
    if( hist ) {
       if( ( ! TH1::GetDefaultSumw2() ) && ( ! hist->GetSumw2N() ) ) {
          hist->Sumw2();
       }
    }
 
-   return h;
+   return ret;
 }
 
 /**
@@ -88,23 +91,20 @@ template< class T >
 T* SCycleBaseHist::Retrieve( const char* name,
                              const char* directory ) throw( SError ) {
 
-   // Look for an object with this name in the specified directory:
-   TDirectory* dir = 0;
-   if( directory ) {
-      dir = this->CdInOutput( directory );
-   } else {
-      dir = m_outputFile;
-   }
-   T* h = dynamic_cast< T* >( dir->FindObject( name ) );
-   if( ! h ) {
-      m_logger << ERROR << "Couldn't access object with name: " << name
-               << " in directory: " << directory << SLogger::endmsg;
+   TString path = ( directory ? directory + TString( "/" ) : "" ) +
+      TString( name );
+   SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
+   if( ! out ) {
+      SError error( SError::SkipCycle );
+      error << "Couldn't access object with name: " << name
+            << " in directory: " << directory;
+      throw error;
    }
 
    gROOT->cd(); // So that the temporary objects would not be
                 // created in the file itself...
 
-   return h;
+   return dynamic_cast< T* >( out->GetObject() );
 }
 
 #endif // SFRAME_CORE_SCycleBaseHist_ICC

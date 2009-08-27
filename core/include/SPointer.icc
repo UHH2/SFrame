@@ -1,0 +1,40 @@
+// Dear emacs, this is -*- c++ -*-
+// $Id$
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Core
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
+
+#ifndef SFRAME_CORE_SPOINTER_ICC
+#define SFRAME_CORE_SPOINTER_ICC
+
+/**
+ * The constructor stores the pointer given to it, and takes ownership
+ * of it. The user is responsible for not giving ownership of the same
+ * pointer to multiple SPointer objects.
+ *
+ * @param object Pointer to the object that this object will own
+ */
+template< class T >
+SPointer< T >::SPointer( T* object )
+   : TObject(), m_object( object ) {
+
+}
+
+/**
+ * The destructor deletes the object owned by this object.
+ */
+template< class T >
+SPointer< T >::~SPointer() {
+
+   delete m_object;
+
+}
+
+#endif // SFRAME_CORE_SPOINTER_ICC

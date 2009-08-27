@@ -1,14 +1,79 @@
+2009.08.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Merging SFrame-PROOF-branch back into the trunk.
+	* The code now compiles and runs, but I'll only tag it once
+	  I read through the code carefully. Shouldn't trust
+	  "svn merge" too much...
+
+2009.08.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified Makefile.common and PARHelpers.py to work with
+	  MacOS X + ROOT 5.24. Although I consider this modification
+	  a decrease in the flexibility of the compilation system...
+	* Removed "-g" from the compilation options, because debug
+	  information should not be needed all the time.
+	* Tested the code both with 5.24 (where MacOS X shows the same
+	  problems as SLC5 now...) and 5.22. Both with PROOF-lite
+	  and a proper PROOF cluster (which is running the trunk
+	  version of ROOT), in all possible combinations of the above.
+
+2009.08.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* "Backported" the code to work with ROOT 5.22d. (Should work
+	  with all 5.22X versions...)
+	* Tested the basic functionality on SLC5 with gcc43.
+	* Tagging as SFrame-PROOF-branch-11, since it should already
+	  be usable with this ROOT version.
+
+2009.08.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Checking in some preliminary python scripts for managing
+	  data sets on a PROOF cluster. The scripts are not at all
+	  production-ready yet...
+
+2009.08.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* I believe I found the main memory leak in
+	  SCycleController::ExecuteNextCycle(...). Thanks a lot
+	  for Gerri Ganis for his help.
+	* Tagging as SFrame-PROOF-branch-10
+
+2009.07.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Small changes here and there while looking for more memory
+	  leaks.
+
+2009.06.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* First modifications in the SVN repository...
+	* Fixed multiple memory leaks in SFrameCore
+	* Disabled compilation warnings when running an SFrame job
+	  on a real PROOF cluster.
+	* Tagging as SFrame-PROOF-branch-09
+
+2009.06.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixing a crash in SCycleBaseExec...
+
+2009.06.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added some modifications to try to make sure that all files
+	  that are opened, are really all closed. Even though the
+	  old code should've done this already...
+	* Not tagging at the moment, first Akira should test if this
+	  solved his problems...
+
+2009.06.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made the PAR file creation in Makefile.common smarter.
+	  Now the PAR files are only re-made if the respective
+	  shared library has to be re-made. Thanks to Akira for
+	  the suggestion!
+	* Tagging as SFrame-PROOF-branch-08
+
 2009.05.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified SLogWriter such that it now only prints the
+	  output in different colours if it's being printed on
+	  the console. This makes the logfiles easier to read.
+	  Unfortunately it also has the sideeffect that all output
+	  from the worker nodes appears colourless...
+	* Changed SCycleBaseNTuple::ConnectVariable so that it now
+	  returns whether it was successful or not.
+	* Thanks to Alexander Mann for both of these suggestions!
 	* Removed a hard-coded "include/" from Makefile.common
 	  and replaced it with "$(INCDIR)". Thanks to Mark Andrew
-	  for pointing this out.
-	* Modified SLogWriter such that now it only prints the output
-	  in different colours if it's being printed on the console.
-	  If it's redirected to a logfile, then the colours are
-	  not added. This makes the logfiles much easier to read.
-	  Thanks a *lot* ro Alexander Mann for the suggestion and the
-	  implementation!
-	* Tagging as SFrame-02-01-12
+	  for pointing this out!
+	* Tagging as SFrame-PROOF-branch-07
 
 2009.05.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed SCycleBaseNTuple::ConnectVariable so that it now
@@ -16,16 +81,89 @@
 	  Alexander Mann for the suggestion!
 	* Tagging as SFrame-02-01-11
 
+2009.04.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Simplified connecting to input branches which are arrays
+	  of primitives. The standard ConnectVariable(...) function
+	  could not be used easily for this.
+	* Tagging as SFrame-PROOF-branch-06
+
 2009.03.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed the SCycleBaseHist::Hist(...) function to be a bit more
 	  robust.
-	* Tagging as SFrame-02-01-10
+	* Tagging as SFrame-PROOF-branch-05
+
+2009.02.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Cleaned up the example cycle configuration a bit.
+	* Fixed a problem in SFileMerger where the code would crash
+	  in case of not writing out any entries to the output TTrees.
+	* Tagging as SFrame-PROOF-branch-04
+
+2009.01.22 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Tested the code on a realistic PROOF setup after a long time
+	  only running the code on PROOF-lite. This required some
+	  changes in the temporary ntuple writing department, but
+	  nothing serious.
+	* Added a new Cycle property (ProofWorkDir) to make the
+	  temporary file handling as flexible as possible.
+	* Updated the FirstCycle example to use this new property.
+	* Tagging as SFrame-PROOF-branch-02
+
+2009.01.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added some more documentation
+	* Fixed some problems which only surfaced when using the code
+	  in a realistic analysis.
+	* Now the worker nodes print messages with the same verbosity
+	  level as the master node.
+
+2009.01.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a *lot* of new code. I'll only try to list all new
+	  features here, I'll probably forget a few...
+	* The weighting should now work correctly even when running
+	  on PROOF.
+	* The meaning of the InputData Type and Version properties
+	  have changed a bit. Now you can set both properties to any
+	  string. (You have to set Type="data" to get 1.0 for weight.)
+	  The InputData-s are only treated to be the same if both their
+	  type and version is the same. This makes it possible to have
+	  different output files like this for instance:
+	  <InputData Type="data" Version="Muon_run8XXXX" ...>
+	  <InputData Type="data" Version="Egamma_run8xxxx" ... >
+	* PROOF now creates temporary output files for the output
+	  ntuples. This is a relatively new feature in PROOF, and
+	  required quite a bit of coding on the SFrame part... :-/
+	  All other output types are still kept in memory until being
+	  written out on the client machine at the end of an InputData.
+	* The behaviour with defining multiple InputData nodes with the
+	  same type and version is now the same as it is in "classic"
+	  SFrame. (The luminosities of the separate IDs are added up,
+	  and their content ends up in the same output file.) However
+	  the implementation is radically different. Instead of keeping
+	  an output file open when switching to a new ID, the old
+	  (previously closed) file is appended with the contents of the
+	  new ID when the processing of that ID finishes on the PROOF
+	  cluster. There's quite a bit of ROOT magic involved...
+	* Output file names should resemble the old type of names a bit
+	  more now.
+	* Only tested the code with GCC 4.3 and ROOT 5.22 on SL5 for
+	  the moment. ROOT 5.22 is a strict requirement for
+	  PROOF-Lite to work.
+	* Tagging as SFrame-PROOF-branch-01
 
 2009.01.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added GCC 4.3 related fixes.
 	* Updated example configuration files to work with
 	  ROOT 5.20 and 5.22 by default.
 	* Tagging as SFrame-02-01-09
+
+2008.12.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added SFrame-PROOF development code to the
+	  SFrame-PROOF-branch branch.
+	* The code is *very* experimental at this point.
+	* The NEventsSkip functionality will have to be added later
+	  on to the branch.
+	* SFrameARA will not work with the branch at this point
+	* PROOF-Lite does work when compiled against
+	  ROOT >= 5.21/06
 
 2008.10.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added new XML property for <InputData>, "NEventsSkip".

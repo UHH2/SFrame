@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: ISCycleBaseConfig.h,v 1.1 2008-01-25 14:33:53 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -14,31 +14,24 @@
 #ifndef SFRAME_CORE_ISCycleBaseConfig_H
 #define SFRAME_CORE_ISCycleBaseConfig_H
 
-// STL include(s):
-#include <vector>
-
 // Local include(s):
 #include "SError.h"
-#include "SInputData.h"
 
 // Forward declaration(s):
 class TXMLNode;
-class TString;
+class SCycleConfig;
 
 /**
- *   @short Interface class providing the XML configurability of the cycle
+ *   @short Interface providing configuration capabilities
  *
- *          The SCycleBase class is broken into multiple classes. Some of
- *          these constituents can work independently, not knowing what the
- *          other constituents can do. But some parts (like SCycleBaseExec)
- *          rely on other constituents as well. To make those parts as modular
- *          as possible, they don't rely directly on the concrete implementations
- *          of the other constituents, but on interfaces like this.
+ *          This interface is used by the higher-level classes when configuring
+ *          SCycleBase objects. This way the high-level classes don't directly
+ *          depend on SCycleBaseConfig.
  *
  *          This interface provides all the configuration functions that the
  *          framework needs from an analysis cycle.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 class ISCycleBaseConfig {
 
@@ -46,69 +39,12 @@ public:
    virtual ~ISCycleBaseConfig() {}
 
    /// Function initialising the cycle
-   /**
-    * This function is called by the framework to set up the user
-    * cycle based on the contents of the XML file.
-    */
    virtual void Initialize( TXMLNode* ) throw( SError ) = 0;
 
-   /// Set the output directory
-   /**
-    * It is specified in the XML file where the output ROOT
-    * files should be placed. But since this configuration is
-    * not accessible to the Initialize method directly, it
-    * has to be set by SCycleController using this function.
-    *
-    * @see SCycleBaseConfig::GetOutputDirectory
-    */
-   virtual void SetOutputDirectory( const TString& outputdirectory ) = 0;
-   /// Set the output file post-fix
-   /**
-    * The post-fix that should be appended to the output ROOT
-    * files is specified in the XML config file. But since this
-    * configuration is not accessible to the Initialize method
-    * directly, it has to be set by SCycleController using
-    * this function.
-    *
-    * @see SCycleBaseConfig::GetPostFix
-    */
-   virtual void SetPostFix( const TString& postfix ) = 0;
-   /// Set the target normalisation luminosity
-   /**
-    * The total integrated luminosity to which all plots should
-    * be normalised is specified in the XML config file. But
-    * since this configuration is not accessible to the Initialize
-    * method directly, it has to be set by SCycleController using
-    * this function.
-    *
-    * @see SCycleBaseConfig::GetTargetLumi
-    */
-   virtual void SetTargetLumi( Double_t targetlumi ) = 0;
-
-   /// Get the name of the output directory
-   /**
-    * @see SCycleBaseConfig::SetOutputDirectory
-    */
-   virtual const TString& GetOutputDirectory() const  = 0;
-   /// Get the output file post-fix
-   /**
-    * @see SCycleBaseConfig::SetPostFix
-    */
-   virtual const TString& GetPostFix() const = 0;
-   /// Get the target normalisation luminosity
-   /**
-    * @see SCycleBaseConfig::SetTargetLumi
-    */
-   virtual Double_t GetTargetLumi() const = 0;
-
-protected:
-   /// List of input data to run over
-   /**
-    * Much of the configuration from the XML is put into this member
-    * variable. It needs to be available to basically all parts of the
-    * cycle, so it ended up in the interface class.
-    */
-   std::vector< SInputData > m_inputData;
+   /// Get the full configuration of the cycle
+   virtual const SCycleConfig& GetConfig() const = 0;
+   /// Set the full configuration of the cycle
+   virtual void SetConfig( const SCycleConfig& config ) = 0;
 
 }; // class ISCycleBaseConfig
 

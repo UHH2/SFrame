@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SLogger.h,v 1.2 2007-11-22 18:19:25 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -40,7 +40,7 @@ class SLogWriter;
  *
  *     @see SLogWriter
  *     @see SMsgType
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 class SLogger : public std::ostringstream {
 
@@ -53,6 +53,9 @@ public:
    SLogger( const SLogger& parent );
    /// Default destructor
    virtual ~SLogger();
+
+   void SetSource( const TObject* source );
+   void SetSource( const std::string& source );
 
    /// Copy operator
    SLogger& operator= ( const SLogger& parent );

@@ -1,4 +1,4 @@
-// $Id: SCycleBaseConfig.cxx,v 1.6 2009-01-05 10:14:09 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -23,17 +23,12 @@
 #include "../include/SCycleBaseConfig.h"
 #include "../include/SGeneratorCut.h"
 
-#ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseConfig );
-#endif // DOXYGEN_IGNORE
-
 using namespace std;
 
 /**
  * The constructor only initialises the base class.
  */
-SCycleBaseConfig::SCycleBaseConfig()
-   : SCycleBaseBase() {
+SCycleBaseConfig::SCycleBaseConfig() {
 
    m_logger << VERBOSE << "SCycleBaseConfig constructed" << SLogger::endmsg;
 
@@ -62,37 +57,96 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
 
    m_logger << INFO << "Initializing..." << SLogger::endmsg;
 
-   // ------------- parse xml element -------------------------------------------------------
+   // Clear the current cycle configuration:
+   m_config.ClearConfig();
 
-   while( node != 0 ) {
-      if( ! node->HasChildren() ) {
-         node = node->GetNextNode();
+   //
+   // Get the properties of the Cycle node:
+   //
+   TListIter attribIt = node->GetAttributes();
+   TXMLAttr* curAttr = 0;
+   while( ( curAttr = dynamic_cast< TXMLAttr* >( attribIt() ) ) != 0 ) {
+      if( curAttr->GetName() == TString( "TargetLumi" ) ) {
+         m_config.SetTargetLumi( atof( curAttr->GetValue() ) );
+      } else if( curAttr->GetName() == TString( "RunMode" ) ) {
+         SCycleConfig::RunMode mode = SCycleConfig::LOCAL;
+         if( curAttr->GetValue() == TString( "LOCAL" ) )
+            mode = SCycleConfig::LOCAL;
+         else if( curAttr->GetValue() == TString( "PROOF" ) )
+            mode = SCycleConfig::PROOF;
+         else {
+            m_logger << WARNING << "Running mode (\"" << curAttr->GetValue()
+                     << "\") not recognised. Running locally!" << SLogger::endmsg;
+         }
+         m_config.SetRunMode( mode );
+      } else if( curAttr->GetName() == TString( "ProofServer" ) ) {
+         m_config.SetProofServer( curAttr->GetValue() );
+      } else if( curAttr->GetName() == TString( "ProofWorkDir" ) ) {
+         m_config.SetProofWorkDir( curAttr->GetValue() );
+      } else if( curAttr->GetName() == TString( "ProofNodes" ) ) {
+         m_config.SetProofNodes( atoi(curAttr->GetValue()) );
+      } else if( curAttr->GetName() == TString( "OutputDirectory" ) ) {
+         m_config.SetOutputDirectory( curAttr->GetValue() );
+      } else if( curAttr->GetName() == TString( "PostFix" ) ) {
+         m_config.SetPostFix( curAttr->GetValue() );
+      }
+   }
+
+   // ------------- parse xml element ------------------------------------
+
+   TXMLNode* nodes = node->GetChildren();
+   while( nodes != 0 ) {
+      if( ! nodes->HasChildren() ) {
+         nodes = nodes->GetNextNode();
          continue;
       }
 
-      if( node->GetNodeName() == TString( "InputData" ) ) {
+      if( nodes->GetNodeName() == TString( "InputData" ) ) {
 
-         this->InitializeInputData( node );
+         this->InitializeInputData( nodes );
    
-      } else if( node->GetNodeName() == TString( "UserConfig" ) ) {
+      } else if( nodes->GetNodeName() == TString( "UserConfig" ) ) {
 
-         this->InitializeUserConfig( node );
+         this->InitializeUserConfig( nodes );
 
       }
-      node = node->GetNextNode();
+      nodes = nodes->GetNextNode();
    }
 
    // now check if input data type appears multiple times
-   this->CheckForMultipleInputData();
+   m_config.ArrangeInputData();
 
-   // print input data classes
-   for( vector< SInputData >::const_iterator iD = m_inputData.begin(); iD != m_inputData.end();
-        ++iD ) {
-      iD->print();
-      m_logger << INFO << SLogger::endmsg;
+   // print configuration
+   m_config.PrintConfig();
+
+   // ------------- xml parsing terminated -------------------------------
+
+   return;
+
+}
+
+const SCycleConfig& SCycleBaseConfig::GetConfig() const {
+
+   return m_config;
+
+}
+
+void SCycleBaseConfig::SetConfig( const SCycleConfig& config ) {
+
+   //
+   // Save the new configuration:
+   //
+   m_config = config;
+
+   //
+   // Set the user properties according to the new configuration:
+   //
+   for( SCycleConfig::property_type::const_iterator it =
+           m_config.GetProperties().begin();
+        it != m_config.GetProperties().end(); ++it ) {
+      SetProperty( it->first, it->second );
    }
 
-   // ------------- xml parsing terminated --------------------------------------------------
    return;
 
 }
@@ -377,7 +431,7 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
    }
 
    // Add this input data to the list:
-   m_inputData.push_back( inputData );
+   m_config.AddInputData( inputData );
 
    return;
 }
@@ -387,7 +441,8 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
    TXMLNode* userNode = node->GetChildren();
    while( userNode != 0 ) {
 
-      if( ! userNode->HasAttributes() || ( userNode->GetNodeName() != TString( "Item" ) ) ) {
+      if( ! userNode->HasAttributes() ||
+          ( userNode->GetNodeName() != TString( "Item" ) ) ) {
          userNode = userNode->GetNextNode();
          continue;
       }
@@ -396,76 +451,16 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
       TListIter userAttributes( userNode->GetAttributes() );
       TXMLAttr* attribute = 0;
       while( ( attribute = dynamic_cast< TXMLAttr* >( userAttributes() ) ) != 0 ) {
-         if( attribute->GetName() == TString( "Name" ) ) name = attribute->GetValue();
-         if( attribute->GetName() == TString( "Value" ) ) stringValue = attribute->GetValue();
+         if( attribute->GetName() == TString( "Name" ) )
+            name = attribute->GetValue();
+         if( attribute->GetName() == TString( "Value" ) )
+            stringValue = attribute->GetValue();
       }
-      m_logger << DEBUG << "Found user property with name \"" << name << "\" and value \""
-               << stringValue << "\"" << SLogger::endmsg;
+      m_logger << DEBUG << "Found user property with name \"" << name
+               << "\" and value \"" << stringValue << "\"" << SLogger::endmsg;
 
-      // If it's a string property:
-      if( m_stringPrefs.find( name ) != m_stringPrefs.end() ) {
-         ( *m_stringPrefs[ name ] ) = stringValue;
-      }
-      // If it's an integer property:
-      else if( m_intPrefs.find( name ) != m_intPrefs.end() ) {
-         int value = atoi( stringValue.c_str() );
-         ( *m_intPrefs[ name ] ) = value;
-      }
-      // If it's a double property:
-      else if( m_doublePrefs.find( name ) != m_doublePrefs.end() ) {
-         double value = atof( stringValue.c_str() );
-         ( *m_doublePrefs[ name ] ) = value;
-      }
-      // If it's a boolean property:
-      else if( m_boolPrefs.find( name ) != m_boolPrefs.end() ) {
-         ( *m_boolPrefs[ name ] ) = ToBool( stringValue );
-      }
-      // If it's a string list property:
-      else if( m_stringListPrefs.find( name ) != m_stringListPrefs.end() ) {
-         m_stringListPrefs[ name ]->clear();
-         istringstream stream( stringValue );
-         while( ! stream.eof() ) {
-            std::string value;
-            stream >> value;
-            m_stringListPrefs[ name ]->push_back( value );
-         }
-      }
-      // If it's an integer list property:
-      else if( m_intListPrefs.find( name ) != m_intListPrefs.end() ) {
-         m_intListPrefs[ name ]->clear();
-         istringstream stream( stringValue );
-         while( ! stream.eof() ) {
-            int value;
-            stream >> value;
-            m_intListPrefs[ name ]->push_back( value );
-         }
-      }
-      // If it's a double list property:
-      else if( m_doubleListPrefs.find( name ) != m_doubleListPrefs.end() ) {
-         m_doubleListPrefs[ name ]->clear();
-         istringstream stream( stringValue );
-         while( ! stream.eof() ) {
-            double value;
-            stream >> value;
-            m_doubleListPrefs[ name ]->push_back( value );
-         }
-      }
-      // If it's a boolean list property:
-      else if( m_boolListPrefs.find( name ) != m_boolListPrefs.end() ) {
-         m_boolListPrefs[ name ]->clear();
-         istringstream stream( stringValue );
-         while( ! stream.eof() ) {
-            std::string value;
-            stream >> value;
-            m_boolListPrefs[ name ]->push_back( ToBool( value ) );
-         }
-      }
-      // If it hasn't been requested by the analysis cycle, issue a warning.
-      // It might mean a typo somewhere...
-      else {
-         m_logger << WARNING << "User property not found: " << name << endl
-                  << "Value not set!" << SLogger::endmsg;
-      }
+      m_config.SetProperty( name, stringValue );
+      this->SetProperty( name, stringValue );
 
       userNode = userNode->GetNextNode();
    }
@@ -473,54 +468,76 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
    return;
 }
 
-void SCycleBaseConfig::CheckForMultipleInputData() throw ( SError ) {
+void SCycleBaseConfig::SetProperty( const std::string& name,
+                                    const std::string& stringValue ) throw( SError ) {
 
-   // multimap to hold all type strings of InputData objects; will be
-   // used to search InputData objects with the same name, to make
-   // sure these will be processed directly consecutively so that they
-   // end up in the same output file
-   multimap< string, int > inputDataHelper;
-   vector< SInputData >::iterator be = m_inputData.begin();
-   vector< SInputData >::iterator en = m_inputData.end();
-   int index = 0;
-
-   // loop over InputData vector and copy the type names into the
-   // multimap, remembering the position in the vector
-   for( ; be != en; ++be,++index ) {
-      inputDataHelper.insert( make_pair( be->GetType(), index ) );
+   // If it's a string property:
+   if( m_stringPrefs.find( name ) != m_stringPrefs.end() ) {
+      ( *m_stringPrefs[ name ] ) = stringValue;
    }
-
-   multimap< string, int >::iterator help1 = inputDataHelper.begin();
-   multimap< string, int >::iterator help2 = inputDataHelper.end();
-   index = 0;
-   std::vector< SInputData > tmpInput;
-
-   // Now copy the InputData objects to a temporary vector in the
-   // order we want them to be processed
-   for( ; help1 != help2; ++help1,++index ) {
-      if( help1->second != index ) {
-         m_logger << WARNING << "InputData of type \"" << help1->first
-                  << "\" was given as input number " << ( help1->second + 1 )
-                  << " but will be repositioned and instead processed as number "
-                  << ( index + 1 ) << SLogger::endmsg;         
+   // If it's an integer property:
+   else if( m_intPrefs.find( name ) != m_intPrefs.end() ) {
+      int value = atoi( stringValue.c_str() );
+      ( *m_intPrefs[ name ] ) = value;
+   }
+   // If it's a double property:
+   else if( m_doublePrefs.find( name ) != m_doublePrefs.end() ) {
+      double value = atof( stringValue.c_str() );
+      ( *m_doublePrefs[ name ] ) = value;
+   }
+   // If it's a boolean property:
+   else if( m_boolPrefs.find( name ) != m_boolPrefs.end() ) {
+      ( *m_boolPrefs[ name ] ) = ToBool( stringValue );
+   }
+   // If it's a string list property:
+   else if( m_stringListPrefs.find( name ) != m_stringListPrefs.end() ) {
+      m_stringListPrefs[ name ]->clear();
+      istringstream stream( stringValue );
+      while( ! stream.eof() ) {
+         std::string value;
+         stream >> value;
+         m_stringListPrefs[ name ]->push_back( value );
       }
-      tmpInput.push_back( m_inputData[ help1->second ] );
    }
-
-   // Sanity check
-   if( m_inputData.size() != tmpInput.size() ) {
-      SError error( SError::StopExecution );
-      error << "Inconsistent InputData vectors: size " << m_inputData.size()
-            << " and " << tmpInput.size();
-      throw error;
+   // If it's an integer list property:
+   else if( m_intListPrefs.find( name ) != m_intListPrefs.end() ) {
+      m_intListPrefs[ name ]->clear();
+      istringstream stream( stringValue );
+      while( ! stream.eof() ) {
+         int value;
+         stream >> value;
+         m_intListPrefs[ name ]->push_back( value );
+      }
    }
-
-   // Now copy the objects back into the vector we use for processing
-   for( size_t i = 0; i < tmpInput.size(); ++i ) {
-      m_inputData[ i ] = tmpInput[ i ];
+   // If it's a double list property:
+   else if( m_doubleListPrefs.find( name ) != m_doubleListPrefs.end() ) {
+      m_doubleListPrefs[ name ]->clear();
+      istringstream stream( stringValue );
+      while( ! stream.eof() ) {
+         double value;
+         stream >> value;
+         m_doubleListPrefs[ name ]->push_back( value );
+      }
+   }
+   // If it's a boolean list property:
+   else if( m_boolListPrefs.find( name ) != m_boolListPrefs.end() ) {
+      m_boolListPrefs[ name ]->clear();
+      istringstream stream( stringValue );
+      while( ! stream.eof() ) {
+         std::string value;
+         stream >> value;
+         m_boolListPrefs[ name ]->push_back( ToBool( value ) );
+      }
+   }
+   // If it hasn't been requested by the analysis cycle, issue a warning.
+   // It might mean a typo somewhere...
+   else {
+      m_logger << WARNING << "User property not found: " << name << endl
+               << "Value not set!" << SLogger::endmsg;
    }
 
    return;
+
 }
 
 /**

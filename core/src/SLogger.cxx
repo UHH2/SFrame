@@ -1,4 +1,4 @@
-// $Id: SLogger.cxx,v 1.2 2007-11-22 18:19:27 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -76,6 +76,22 @@ SLogger::SLogger( const SLogger& parent )
  * The destructor is literally not doing anything...
  */
 SLogger::~SLogger() {
+
+}
+
+void SLogger::SetSource( const TObject* source ) {
+
+   m_objSource = source;
+   m_strSource = "";
+   return;
+
+}
+
+void SLogger::SetSource( const std::string& source ) {
+
+   m_objSource = 0;
+   m_strSource = source;
+   return;
 
 }
 

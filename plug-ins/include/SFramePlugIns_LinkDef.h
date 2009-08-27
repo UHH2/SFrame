@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SFramePlugIns_LinkDef.h,v 1.2 2008-02-01 14:28:44 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Plug-ins
@@ -22,5 +22,23 @@
 // The plug-in classes:
 #pragma link C++ class SParticle+;
 #pragma link C++ class std::vector<SParticle>+;
+
+#pragma link C++ class ProofSummedVar< Short_t >+;
+#pragma link C++ class ProofSummedVar< UShort_t >+;
+#pragma link C++ class ProofSummedVar< Int_t >+;
+#pragma link C++ class ProofSummedVar< UInt_t >+;
+#pragma link C++ class ProofSummedVar< Long_t >+;
+#pragma link C++ class ProofSummedVar< ULong_t >+;
+#pragma link C++ class ProofSummedVar< Long64_t >+;
+#pragma link C++ class ProofSummedVar< ULong64_t >+;
+
+#pragma link C++ class ProofSummedVar< std::vector< Short_t > >+;
+#pragma link C++ class ProofSummedVar< std::vector< UShort_t > >+;
+#pragma link C++ class ProofSummedVar< std::vector< Int_t > >+;
+#pragma link C++ class ProofSummedVar< std::vector< UInt_t > >+;
+#pragma link C++ class ProofSummedVar< std::vector< Long_t > >+;
+#pragma link C++ class ProofSummedVar< std::vector< ULong_t > >+;
+#pragma link C++ class ProofSummedVar< std::vector< Long64_t > >+;
+#pragma link C++ class ProofSummedVar< std::vector< ULong64_t > >+;
 
 #endif // __CINT__

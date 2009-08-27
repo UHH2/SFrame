@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: ISCycleBaseNTuple.h,v 1.1 2008-01-25 14:33:53 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -14,52 +14,54 @@
 #ifndef SFRAME_CORE_ISCycleBaseNTuple_H
 #define SFRAME_CORE_ISCycleBaseNTuple_H
 
+// STL include(s):
+#include <vector>
+
+// ROOT include(s):
+#include <Rtypes.h>
+
 // Local include(s):
 #include "SError.h"
 
 // Forward declaration(s):
 class TTree;
+class TList;
 class TFile;
 class SInputData;
 
 /**
- *   @short Interface class providing the ntuple access to the cycle
+ *   @short Interface providing ntuple handling capabilities
  *
- *          The SCycleBase class is broken into multiple classes. Some of
- *          these constituents can work independently, not knowing what the
- *          other constituents can do. But some parts (like SCycleBaseExec)
- *          rely on other constituents as well. To make those parts as modular
- *          as possible, they don't rely directly on the concrete implementations
- *          of the other constituents, but on interfaces like this.
+ *          This interface is used by the higher-level classes when setting up
+ *          SCycleBase objects. This way the high-level classes don't directly
+ *          depend on SCycleBaseNTuple.
  *
  *          This interface provides all the functions that the framework uses
- *          to set up reading/writing ntuples.
+ *          to set up reading/writing of ntuples.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 class ISCycleBaseNTuple {
 
 public:
-   /// Default destructor
    virtual ~ISCycleBaseNTuple() {}
 
+   /// Set the PROOF output list
+   virtual void SetNTupleOutput( TList* output ) = 0;
+   /// Get the PROOF output list
+   virtual TList* GetNTupleOutput() const = 0;
+
 protected:
-   /// Open the output file and create the output trees
-   virtual void CreateOutputTrees( const SInputData&,
-                                   std::vector< TTree* >&, TFile*& ) throw( SError ) = 0;
-   /// Open the input file and load the input trees
-   virtual void LoadInputTrees( const SInputData&,
-                                const std::string&, TFile*& ) throw( SError ) = 0;
+   /// Create the output trees
+   virtual void CreateOutputTrees( const SInputData& id,
+                                   std::vector< TTree* >& outTrees,
+                                   TFile* outputFile = 0 ) throw( SError ) = 0;
+   /// Load the input trees
+   virtual void LoadInputTrees( const SInputData& id, TTree* main_tree ) throw( SError ) = 0;
    /// Read in the event from the "normal" trees
-   virtual void GetEntry( Long64_t entry ) throw( SError ) = 0;
-   /// Return the number of events (???)
-   virtual Long64_t GetNEvents() const = 0;
+   virtual void GetEvent( Long64_t entry ) throw( SError ) = 0;
    /// Calculate the weight of the current event
    virtual Double_t CalculateWeight( const SInputData& inputData, Long64_t entry ) = 0;
-   /// Open an input file
-   virtual TFile* OpenInputFile( const char* filename ) throw( SError ) = 0;
-   /// Return the name of the active output file
-   virtual const char* GetOutputFileName() const = 0;
 
 }; // class ISCycleBaseNTuple
 

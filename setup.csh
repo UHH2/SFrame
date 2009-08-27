@@ -1,5 +1,5 @@
 #! /bin/csh
-# $Id: setup.csh,v 1.2 2008-02-01 14:38:55 krasznaa Exp $
+# $Id$
 ###########################################################################
 # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
 #                                                                         #
@@ -57,3 +57,5 @@ endif
 
 setenv PATH ${SFRAME_BIN_PATH}:${PATH}
 setenv PYTHONPATH ${SFRAME_DIR}/python:${PYTHONPATH}
+
+setenv PAR_PATH ./:${SFRAME_LIB_PATH}

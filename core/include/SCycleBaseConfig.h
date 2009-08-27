@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseConfig.h,v 1.4 2008-02-11 14:03:47 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -17,15 +17,13 @@
 // STL include(s):
 #include <vector>
 #include <map>
-
-// ROOT include(s):
-#include <TString.h>
+#include <string>
 
 // Local include(s):
 #include "ISCycleBaseConfig.h"
 #include "SCycleBaseBase.h"
 #include "SError.h"
-#include "SInputData.h"
+#include "SCycleConfig.h"
 
 // Forward declaration(s):
 class TXMLNode;
@@ -40,7 +38,7 @@ class TXMLNode;
  *          all these information for the "higher level" parts
  *          of the SCycleBase code.
  *
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 class SCycleBaseConfig : public virtual ISCycleBaseConfig,
                          public virtual SCycleBaseBase {
@@ -54,56 +52,8 @@ public:
    /// Function initialising the cycle
    void Initialize( TXMLNode* ) throw( SError );
 
-   /// Set the output directory
-   /**
-    * It is specified in the XML file where the output ROOT
-    * files should be placed. But since this configuration is
-    * not accessible to the Initialize method directly, it
-    * has to be set by SCycleController using this function.
-    *
-    * @see SCycleBaseConfig::GetOutputDirectory
-    */
-   void SetOutputDirectory( const TString& outputdirectory ) {
-      m_outputDirectory = outputdirectory;
-   }
-   /// Set the output file post-fix
-   /**
-    * The post-fix that should be appended to the output ROOT
-    * files is specified in the XML config file. But since this
-    * configuration is not accessible to the Initialize method
-    * directly, it has to be set by SCycleController using
-    * this function.
-    *
-    * @see SCycleBaseConfig::GetPostFix
-    */
-   void SetPostFix( const TString& postfix ) { m_postfix = postfix; }
-   /// Set the target normalisation luminosity
-   /**
-    * The total integrated luminosity to which all plots should
-    * be normalised is specified in the XML config file. But
-    * since this configuration is not accessible to the Initialize
-    * method directly, it has to be set by SCycleController using
-    * this function.
-    *
-    * @see SCycleBaseConfig::GetTargetLumi
-    */
-   void SetTargetLumi( Double_t targetlumi ) { m_targetlumi = targetlumi; }
-
-   /// Get the name of the output directory
-   /**
-    * @see SCycleBaseConfig::SetOutputDirectory
-    */
-   const TString& GetOutputDirectory() const { return m_outputDirectory; }
-   /// Get the output file post-fix
-   /**
-    * @see SCycleBaseConfig::SetPostFix
-    */
-   const TString& GetPostFix() const { return m_postfix; }
-   /// Get the target normalisation luminosity
-   /**
-    * @see SCycleBaseConfig::SetTargetLumi
-    */
-   Double_t GetTargetLumi() const { return m_targetlumi; }
+   const SCycleConfig& GetConfig() const;
+   void SetConfig( const SCycleConfig& config );
 
 protected:
    /// Declare a <strong>std::string</strong> property
@@ -129,17 +79,11 @@ private:
    //
    void InitializeInputData( TXMLNode* ) throw( SError );
    void InitializeUserConfig( TXMLNode* ) throw( SError );
-   void CheckForMultipleInputData() throw ( SError );
+   void SetProperty( const std::string& name,
+                     const std::string& value ) throw( SError );
 
    /// Function for decoding a string to bool:
    bool ToBool( const std::string& value ) throw( SError );
-
-   //
-   // Properties set on the cycle level:
-   //
-   TString m_outputDirectory;
-   TString m_postfix;
-   Double_t m_targetlumi;
 
    //
    // These are the object used to handle the preferences of the
@@ -154,9 +98,8 @@ private:
    std::map< const std::string, std::vector< double >* >      m_doubleListPrefs;
    std::map< const std::string, std::vector< bool >* >        m_boolListPrefs;
 
-#ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBaseConfig, 0 );
-#endif // DOXYGEN_IGNORE
+   /// The cycle configuration:
+   SCycleConfig m_config;
 
 }; // class SCycleBaseConfig
 

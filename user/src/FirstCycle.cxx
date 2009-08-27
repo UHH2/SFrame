@@ -1,4 +1,4 @@
-// $Id: FirstCycle.cxx,v 1.3 2008-02-11 14:03:48 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User
@@ -20,7 +20,12 @@
 ClassImp( FirstCycle );
 
 FirstCycle::FirstCycle()
-   : m_El_p_T( 0 ), m_El_eta( 0 ), m_El_phi( 0 ), m_El_E( 0 ) {
+   : m_El_p_T( 0 ), m_El_eta( 0 ), m_El_phi( 0 ), m_El_E( 0 ),
+     m_allEvents( "allEvents", this ), m_passedEvents( "passedEvents", this ),
+     m_test( "test", this ) {
+
+   // To have the correct name in the log:
+   SetLogName( this->GetName() );
 
    //
    // Declare the properties of the cycle:
@@ -87,7 +92,7 @@ void FirstCycle::EndCycle() throw( SError ) {
    return;
 }
 
-void FirstCycle::BeginInputFile( const SInputData& inputData )  throw( SError ) {
+void FirstCycle::BeginInputFile( const SInputData& )  throw( SError ) {
 
    //
    // Connect the input variables:
@@ -110,6 +115,15 @@ void FirstCycle::BeginInputData( const SInputData& ) throw( SError ) {
    DeclareVariable( m_o_El_p_T, "El_p_T" );
    DeclareVariable( m_o_El, "El" );
 
+   //
+   // Declare the output histograms:
+   //
+   Book( TH1F( "El_p_T_hist", "Electron p_{T}", 100, 0.0,
+               150000.0 ) );
+
+   // Reserve two entries in the vector:
+   m_test->resize( 2, 0 );
+
    return;
 }
 
@@ -120,12 +134,29 @@ void FirstCycle::EndInputData( const SInputData& ) throw( SError ) {
    Float_t y_array[ n ] = { 0.0, 2.0, 4.0, 6.0, 8.0 };
    TGraph mygraph( n, x_array, y_array );
    mygraph.SetName( "MyGraph" );
-   Write( mygraph, "graph_dir" );
+   WriteObj( mygraph, "graph_dir" );
 
    return;
 }
 
-void FirstCycle::ExecuteEvent( const SInputData&, Double_t /*weight*/ ) throw( SError ) {
+void FirstCycle::BeginMasterInputData( const SInputData& ) throw( SError ) {
+
+   return;
+
+}
+
+void FirstCycle::EndMasterInputData( const SInputData& ) throw( SError ) {
+
+   m_logger << INFO << "Number of all processed events: "
+            << *m_allEvents << " " << ( *m_test )[ 0 ] << SLogger::endmsg;
+   m_logger << INFO << "Number of events passing selection: "
+            << *m_passedEvents << " " << ( *m_test )[ 1 ] << SLogger::endmsg;
+
+   return;
+
+}
+
+void FirstCycle::ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) {
 
    //
    // If you have vectors (or any other type of containers) in the output,
@@ -142,7 +173,10 @@ void FirstCycle::ExecuteEvent( const SInputData&, Double_t /*weight*/ ) throw( S
    for( Int_t i = 0; i < m_El_N; ++i ) {
 
       // Fill a simple vector:
-      m_o_El_p_T.push_back( (*m_El_p_T) [i] );
+      m_o_El_p_T.push_back( ( *m_El_p_T )[ i ] );
+
+      // Fill the example histogram:
+      Hist( "El_p_T_hist" )->Fill( ( *m_El_p_T )[ i ], weight );
 
       // Fill a vector of objects:
       m_o_El.push_back( SParticle( ( * m_El_p_T )[ i ],
@@ -152,10 +186,18 @@ void FirstCycle::ExecuteEvent( const SInputData&, Double_t /*weight*/ ) throw( S
 
    }
 
+   // Count the total number of processed events:
+   ++m_allEvents;
+   ( *m_test )[ 0 ]++;
+
    // Perform event selection. If you don't want to write out
    // an event, you have to throw an exception anywhere in the ExecuteEvent
    // method (or in a method called by ExecuteEvent) like this:
    if( ! m_El_N ) throw SError( SError::SkipEvent );
+
+   // Count the number of events that passed the selection:
+   ++m_passedEvents;
+   ( *m_test )[ 1 ]++;
 
    // Fill validation histograms.
    // For adding more ValHistsTypes, edit the header File for this Cycle.
@@ -178,8 +220,8 @@ void FirstCycle::FillValidationHists( ValHistsType ht, const TString& status ) {
       TString suffix = status + "General_";
       // The formalism for adding a new histogram to the output is the
       // following:
-      Book( TH1F( suffix + "example_variable", "example_variable",
-                  10, 0.0, 10.0 ) )->Fill( m_o_example_variable );
+      //      Book( TH1F( suffix + "example_variable", "example_variable",
+      //                  10, 0.0, 10.0 ) )->Fill( m_o_example_variable );
 
    } else if( ht == ELECTRON ){
 

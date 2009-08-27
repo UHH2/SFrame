@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// $Id: SCycleBaseExec.h,v 1.1 2008-01-25 14:33:53 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -14,12 +14,24 @@
 #ifndef SFRAME_CORE_SCycleBaseExec_H
 #define SFRAME_CORE_SCycleBaseExec_H
 
+// STL include(s):
+#include <vector>
+
+// ROOT include(s):
+#include <TSelector.h>
+#include <TString.h>
+
 // Local include(s):
 #include "ISCycleBaseConfig.h"
-#include "ISCycleBaseNTuple.h"
 #include "ISCycleBaseHist.h"
-#include "ISCycleBaseExec.h"
+#include "ISCycleBaseNTuple.h"
 #include "SCycleBaseBase.h"
+
+// Forward declaration(s):
+class TTree;
+class SInputData;
+class TFile;
+class TList;
 
 /**
  *   @short The SCycleBase constituent responsible for running the cycle
@@ -30,12 +42,12 @@
  *          (like SCycleBaseNTuple for ARA) can be exchanged for another
  *          one.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
-class SCycleBaseExec : public virtual ISCycleBaseConfig,
-                       public virtual ISCycleBaseNTuple,
+class SCycleBaseExec : public TSelector,
+                       public virtual ISCycleBaseConfig,
                        public virtual ISCycleBaseHist,
-                       public virtual ISCycleBaseExec,
+                       public virtual ISCycleBaseNTuple,
                        public virtual SCycleBaseBase {
 
 public:
@@ -44,16 +56,21 @@ public:
    /// Default destructor
    virtual ~SCycleBaseExec();
 
-   /// Loop over all SInputData
-   void ExecuteInputData() throw( SError );
+   ///////////////////////////////////////////////////////////////////////////
+   //                                                                       //
+   //   The following are the functions inherited from TSelector.           //
+   //                                                                       //
+   ///////////////////////////////////////////////////////////////////////////
 
-   /// Number of events processed already
-   /**
-    * The number of processed events is used in a few places,
-    * this function tells the framework how many events have
-    * already been processed by the cycle.
-    */
-   Long64_t NumberOfProcessedEvents() const { return m_nProcessedEvents; }
+   virtual void   Begin( TTree* );
+   virtual void   SlaveBegin( TTree* );
+   virtual void   Init( TTree* main_tree );
+   virtual Bool_t Notify();
+   virtual Bool_t Process( Long64_t entry );
+   virtual void   SlaveTerminate();
+   virtual void   Terminate();
+   /// Function declaring the version of the selector
+   virtual Int_t  Version() const { return 2; }
 
    ///////////////////////////////////////////////////////////////////////////
    //                                                                       //
@@ -62,19 +79,45 @@ public:
    //                                                                       //
    ///////////////////////////////////////////////////////////////////////////
 
-   /// Initialisation called for each input data type
+   /// Initialisation called at the beginning of a full cycle
+   /**
+    * Analysis-wide configurations, like the setup of some reconstruction
+    * algorithm based on properties configured in XML should be done here.
+    */
+   virtual void BeginCycle() throw( SError ) = 0;
+   /// Finalisation called at the end of a full cycle
+   /**
+    * This is the last function called after an analysis run, so it
+    * could be a good place to print some statistics about the running.
+    */
+   virtual void EndCycle() throw( SError ) = 0;
+
+   /// Initialisation called on the worker nodes for each input data type
    /**
     * This is the place to declare the output variables for the output
     * TTree(s). This is also the earliest point where histograms can
     * be created.
     */
    virtual void BeginInputData( const SInputData& ) throw( SError ) = 0;
-   /// Finalisation called for each input data type
+   /// Finalisation called on the worker nodes for each input data type
    /**
     * Mainly used for printing input data statistics, or normalising
     * efficiency histograms by hand.
     */
    virtual void EndInputData  ( const SInputData& ) throw( SError ) = 0;
+
+   /// Initialisation called on the client machine for each input data type
+   /**
+    * This function is mostly a placeholder for now. There is not much one
+    * can do here yet...
+    */
+   virtual void BeginMasterInputData( const SInputData& ) throw( SError ) {}
+   /// Finalisation called on the client machine for each input data type
+   /**
+    * This function is mostly a placeholder for now. There is not much one
+    * can do here yet...
+    */
+   virtual void EndMasterInputData( const SInputData& ) throw( SError ) {}
 
    /// Initialisation called for each input file
    /**
@@ -92,15 +135,23 @@ public:
    virtual void ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) = 0;
 
 private:
-   void CheckInputFiles( SInputData& ) throw( SError );
+   /// Function for reading the cycle configuration on the worker nodes
+   void ReadConfig() throw( SError );
 
-   // The number of already processed events
+   /// The number of already processed events
    Long64_t m_nProcessedEvents;
+   /// The number of already skipped events
+   Long64_t m_nSkippedEvents;
 
    // variable used for the case of multiple InputData objects with
    // the same type, that are written to the same output file
    Bool_t m_keepOutputFile;
    Bool_t m_firstInputDataOfMany;
+
+   TTree*                m_inputTree; ///< TTree used to load all input trees
+   SInputData*           m_inputData; ///< Pointer to the currently active ID
+   std::vector< TTree* > m_outputTrees; ///< List of all the output TTree-s
+   TFile*                m_outputFile; ///< Pointer to the active temporary output file
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseExec, 0 );

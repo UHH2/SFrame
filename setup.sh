@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: setup.sh,v 1.2 2008-02-01 14:39:25 krasznaa Exp $
+# $Id$
 ###########################################################################
 # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
 #                                                                         #
@@ -57,3 +57,5 @@ fi
 
 export PATH=${SFRAME_BIN_PATH}:${PATH}
 export PYTHONPATH=${SFRAME_DIR}/python:${PYTHONPATH}
+
+export PAR_PATH=./:${SFRAME_LIB_PATH}

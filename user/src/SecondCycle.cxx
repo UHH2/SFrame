@@ -1,4 +1,4 @@
-// $Id: SecondCycle.cxx,v 1.2 2008-02-01 14:31:13 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: User

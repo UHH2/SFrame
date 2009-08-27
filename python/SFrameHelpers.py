@@ -1,4 +1,4 @@
-# $Id: SFrameHelpers.py,v 1.2 2008-02-08 16:21:10 krasznaa Exp $
+# $Id$
 ###########################################################################
 # @Project: SFrame - ROOT-based analysis framework for ATLAS              #
 #                                                                         #
@@ -39,7 +39,7 @@ import ROOT
 # @param crossSection Cross section of the Monte Carlo
 # @param files        List of input files
 # @param output       Name of the output file
-def CreateInput( crossSection, files, output ):
+def CreateInput( crossSection, files, output, tree="CollectionTree" ):
 
   # Turn off ROOT error messages:
   oldErrorIgnoreLevel = ROOT.gErrorIgnoreLevel
@@ -70,9 +70,9 @@ def CreateInput( crossSection, files, output ):
       continue
 
     # Access a tree in the ntuple:
-    collTree = tfile.Get( "CollectionTree" )
+    collTree = tfile.Get( tree  )
     if( str( collTree ) == 'None' ):
-      print "*ERROR* CollectionTree not found in file: \"" + file + "\" *ERROR*"
+      print "*ERROR* " + tree + "  not found in file: \"" + file + "\" *ERROR*"
       continue
 
     # Read the number of events in the file:
@@ -116,7 +116,7 @@ def CreateInput( crossSection, files, output ):
 #
 # @param files        List of input files
 # @param output       Name of the output file
-def CreateDataInput( files, output ):
+def CreateDataInput( files, output, tree="CollectionTree" ):
   
   # Turn off ROOT error messages:
   oldErrorIgnoreLevel = ROOT.gErrorIgnoreLevel
@@ -145,9 +145,9 @@ def CreateDataInput( files, output ):
       continue
 
     # Access a tree in the ntuple:
-    collTree = tfile.Get( "CollectionTree" )
+    collTree = tfile.Get( tree )
     if( str( collTree ) == 'None' ):
-      print "*ERROR* CollectionTree not found in file: \"" + file + "\" *ERROR*"
+      print "*ERROR* " + tree + " not found in file: \"" + file + "\" *ERROR*"
       continue
 
     # Read the number of events in the file:

@@ -1,4 +1,4 @@
-// $Id: SCycleBaseBase.cxx,v 1.2 2007-11-22 18:19:26 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
@@ -13,16 +13,18 @@
 // Local include(s):
 #include "../include/SCycleBaseBase.h"
 
+/*
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseBase );
 #endif // DOXYGEN_IGNORE
+*/
 
 /**
  * The constructor is not doing much. It just initialises the m_logger
  * member.
  */
 SCycleBaseBase::SCycleBaseBase()
-   : m_logger( this ) {
+   : m_logger( "NameNotSet" ) {
 
    m_logger << VERBOSE << "SCycleBaseBase constructed" << SLogger::endmsg;
 
@@ -34,5 +36,12 @@ SCycleBaseBase::SCycleBaseBase()
 SCycleBaseBase::~SCycleBaseBase() {
 
    m_logger << VERBOSE << "SCycleBaseBase destructed" << SLogger::endmsg;
+
+}
+
+void SCycleBaseBase::SetLogName( const char* name ) {
+
+   m_logger.SetSource( name );
+   return;
 
 }

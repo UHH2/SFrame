@@ -1,4 +1,4 @@
-// $Id: SLogWriter.cxx,v 1.3 2009-05-13 08:48:08 krasznaa Exp $
+// $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
  * @Package: Core
