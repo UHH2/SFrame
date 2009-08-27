@@ -21,13 +21,11 @@
 
 // ROOT include(s):
 #include <TROOT.h>
-#include <TError.h>
 
 // SFrame include(s):
 #include "../include/SCycleController.h"
 #include "../include/SError.h"
 #include "../include/SLogger.h"
-#include "../include/SErrorHandler.h"
 
 // Global logging object
 static SLogger g_logger( "sframe_main" );
@@ -44,8 +42,9 @@ int main( int argc, char** argv ) {
 
    const char* filename = argv[ 1 ];
 
+   // Set ROOT into batch mode. This is how PROOF knows not to create
+   // graphical windows showing the progress of the event processing.
    gROOT->SetBatch( kTRUE );
-   //   SetErrorHandler( SErrorHandler );
 
    try { // This is where I catch anything not handled internally...
 

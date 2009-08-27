@@ -554,7 +554,12 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          // Give the configuration to PROOF, and tweak it a little:
          //
          m_proof->ClearInput();
-         m_proof->SetParameter( "PROOF_MemLogFreq", ( Long64_t ) 1000 );
+         // Only output a maximum of 10 messages per node about memory usage per query:
+         Long64_t eventsPerNode = inputData.GetEventsTotal() / m_proof->GetParallel();
+         m_proof->SetParameter( "PROOF_MemLogFreq",
+                                ( Long64_t ) ( eventsPerNode > 10000 ?
+                                               ( eventsPerNode / 10 ) :
+                                               1000 ) );
          gEnv->SetValue( "Proof.StatsHist", 1 );
          m_proof->AddInput( &config );
          m_proof->AddInput( &inputData );

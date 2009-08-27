@@ -1,4 +1,12 @@
 2009.08.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Validated the code a bit more, and maximised the number of
+	  messages that the worker nodes print about their memory
+	  consumption. (A maximum of approximately 10 messages per
+	  query now.)
+	* Cleaned out the unnecessary things from sframe_main.cxx
+	* Tagging this version as SFrame-03-00-00
+
+2009.08.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Merging SFrame-PROOF-branch back into the trunk.
 	* The code now compiles and runs, but I'll only tag it once
 	  I read through the code carefully. Shouldn't trust
