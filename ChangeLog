@@ -1,3 +1,8 @@
+2009.09.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified Makefile.common to correctly link the libraries on
+	  64-bit Mac OS X as well.
+	* Tagging as SFrame-03-00-01
+
 2009.08.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Validated the code a bit more, and maximised the number of
 	  messages that the worker nodes print about their memory
