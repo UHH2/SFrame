@@ -548,6 +548,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          if( m_proof->GetQueryResults() ) {
             m_proof->GetQueryResults()->SetOwner( kTRUE );
             m_proof->GetQueryResults()->Clear();
+            m_proof->GetQueryResults()->SetOwner( kFALSE );
          }
 
          //

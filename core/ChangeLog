@@ -1,3 +1,7 @@
+2009.09.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed a crash that happened on SLC4 when shutting down
+	  a PROOF connection.
+
 2009.08.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed the way the files for the output ntuples are
 	  closed.

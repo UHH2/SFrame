@@ -1,3 +1,9 @@
+2009.09.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed a crash on SLC4 when shutting down a PROOF connection.
+	* Removed the debug symbols from the sframe_main executable
+	  compilation
+	* Taggins as SFrame-03-00-02
+
 2009.09.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified Makefile.common to correctly link the libraries on
 	  64-bit Mac OS X as well.
