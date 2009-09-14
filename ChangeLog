@@ -1,3 +1,14 @@
+2009.09.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added Ryan's suggestions to sframe_input.py and SFrameHelpers.py.
+	  This includes the ability to specify the name of the main TTree
+	  in the input files, and a nicer printout of the luminosity
+	  if the input files.
+	* Also added a prefix options to sframe_input.py. This can be used
+	  to create file names such as "root://mymachine.cern.ch//data/file1.root",
+	  where "/data/file1.root" is the absolute path name of the file
+	  on mymachine.cern.ch.
+	* Tagging as SFrame-03-00-03
+
 2009.09.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed a crash on SLC4 when shutting down a PROOF connection.
 	* Removed the debug symbols from the sframe_main executable

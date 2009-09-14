@@ -49,6 +49,12 @@ def main():
   parser.add_option( "-o", "--output",  dest="output",
                      action="store", type="string", default="data.xml",
                      help="Output XML file" )
+  parser.add_option( "-t", "--tree", dest="tree",
+                     action="store", type="string", default="CollectionTree",
+                     help="TTree name in the files" )
+  parser.add_option( "-p", "--prefix", dest="prefix",
+                     action="store", type="string", default="",
+                     help="Prefix to be put before the absolute path" )
 
   ( options, files ) = parser.parse_args()
 
@@ -58,16 +64,21 @@ def main():
     parser.print_help()
     return
 
+  # Switch ROOT to batch mode:
+  import ROOT
+  ROOT.gROOT.SetBatch()
+
   # Call the actual function:
   import SFrameHelpers
   if options.data:
     print "The input files are DATA files"
     print ""
-    SFrameHelpers.CreateDataInput( files, options.output )
+    SFrameHelpers.CreateDataInput( files, options.output, options.tree, options.prefix )
   else:
     print "The input files are Monte Carlo files"
     print ""
-    SFrameHelpers.CreateInput( options.xsection, files, options.output )
+    SFrameHelpers.CreateInput( options.xsection, files, options.output, options.tree,
+                               options.prefix )
 
 # Call the main function:
 if __name__ == "__main__":

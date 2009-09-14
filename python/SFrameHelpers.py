@@ -39,7 +39,9 @@ import ROOT
 # @param crossSection Cross section of the Monte Carlo
 # @param files        List of input files
 # @param output       Name of the output file
-def CreateInput( crossSection, files, output, tree="CollectionTree" ):
+# @param tree         Name of the main TTree in the files
+# @param prefix       Prefix to be put before the file paths. E.g. root://mymachine/
+def CreateInput( crossSection, files, output, tree, prefix ):
 
   # Turn off ROOT error messages:
   oldErrorIgnoreLevel = ROOT.gErrorIgnoreLevel
@@ -86,19 +88,19 @@ def CreateInput( crossSection, files, output, tree="CollectionTree" ):
     # Compose the XML node. Make sure that the file name has an absolute path
     # (no symbolic link, or relative path) and that the luminosity is printed with
     # a meaningful precision.
-    outfile.write( "<In FileName=\"" + os.path.abspath( os.path.realpath( file ) ) \
-                   + ( "\" Lumi=\"%.3f" % luminosity ) + "\" />\n" )
+    outfile.write( "<In FileName=\"" + prefix + os.path.abspath( os.path.realpath( file ) ) \
+                   + ( "\" Lumi=\"%.3g" % luminosity ) + "\" />\n" )
 
   # Save some summary information:
   outfile.write( "\n<!-- Total number of events processed: %s -->\n" % totEvents )
-  outfile.write( "<!-- Representing a total luminosity : %.3f -->" % totLuminosity )
+  outfile.write( "<!-- Representing a total luminosity : %.3g -->" % totLuminosity )
 
   # Close the output file:
   outfile.close()
 
   # Print some summary information:
   print "\nTotal number of events processed: %s" % totEvents
-  print "Representing a total luminosity : %.3f\n" % totLuminosity
+  print "Representing a total luminosity : %.3g\n" % totLuminosity
 
   # Turn back ROOT error messages:
   ROOT.gErrorIgnoreLevel = oldErrorIgnoreLevel
@@ -116,7 +118,9 @@ def CreateInput( crossSection, files, output, tree="CollectionTree" ):
 #
 # @param files        List of input files
 # @param output       Name of the output file
-def CreateDataInput( files, output, tree="CollectionTree" ):
+# @param tree         Name of the main TTree in the files
+# @param prefix       Prefix to be put before the file paths. E.g. root://mymachine/
+def CreateDataInput( files, output, tree, prefix ):
   
   # Turn off ROOT error messages:
   oldErrorIgnoreLevel = ROOT.gErrorIgnoreLevel
@@ -159,7 +163,7 @@ def CreateDataInput( files, output, tree="CollectionTree" ):
     # Compose the XML node. Make sure that the file name has an absolute path
     # (no symbolic link, or relative path) and that the luminosity is printed with
     # a meaningful precision.
-    outfile.write( "<In FileName=\"" + os.path.abspath( os.path.realpath( file ) ) \
+    outfile.write( "<In FileName=\"" + prefix + os.path.abspath( os.path.realpath( file ) ) \
                    + "\" Lumi=\"1.0\" />\n" )
 
   # Save some summary information:
