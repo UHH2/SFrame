@@ -32,6 +32,9 @@
 #pragma link C++ class ProofSummedVar< Long64_t >+;
 #pragma link C++ class ProofSummedVar< ULong64_t >+;
 
+#pragma link C++ class ProofSummedVar< Float_t >+;
+#pragma link C++ class ProofSummedVar< Double_t >+;
+
 #pragma link C++ class ProofSummedVar< std::vector< Short_t > >+;
 #pragma link C++ class ProofSummedVar< std::vector< UShort_t > >+;
 #pragma link C++ class ProofSummedVar< std::vector< Int_t > >+;
@@ -40,5 +43,12 @@
 #pragma link C++ class ProofSummedVar< std::vector< ULong_t > >+;
 #pragma link C++ class ProofSummedVar< std::vector< Long64_t > >+;
 #pragma link C++ class ProofSummedVar< std::vector< ULong64_t > >+;
+
+#pragma link C++ class ProofSummedVar< std::vector< Float_t > >+;
+#pragma link C++ class ProofSummedVar< std::vector< Double_t > >+;
+
+#pragma link C++ class SH1F+;
+#pragma link C++ class SH1D+;
+#pragma link C++ class SH1I+;
 
 #endif // __CINT__

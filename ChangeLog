@@ -1,3 +1,7 @@
+2009.09.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added the SH1 class to the plug-ins library.
+	* Not tagging at the moment.
+
 2009.09.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added Ryan's suggestions to sframe_input.py and SFrameHelpers.py.
 	  This includes the ability to specify the name of the main TTree

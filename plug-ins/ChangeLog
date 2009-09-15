@@ -1,3 +1,8 @@
+2009.09.15. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a new class: SH1
+	  It's a light-weight 1-dimensional histogram class. It
+	  can be used to speed up analysis cycles a little.
+
 2009.01.21. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a new class: SSummedVar
 	  It can be used to wrap different kinds of integer numbers,

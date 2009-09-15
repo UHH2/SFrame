@@ -1,0 +1,337 @@
+// Dear emacs, this is -*- c++ -*-
+// $Id$
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Plug-ins
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
+
+#ifndef SFRAME_PLUGINS_SH1_ICC
+#define SFRAME_PLUGINS_SH1_ICC
+
+// System include(s):
+#include <string.h>
+#include <cmath>
+
+// ROOT include(s):
+#include <TCollection.h>
+#include <TH1.h>
+
+// SFrame include(s):
+#include "core/include/SLogger.h"
+
+/**
+ * This constructor is needed for the dictionary generation. There has to be a constructor
+ * that expects no parameters.
+ */
+template< typename Type >
+SH1< Type >::SH1()
+   : TNamed(), m_arraySize( 0 ), m_content( 0 ), m_errors( 0 ), m_entries( 0 ),
+     m_bins( 0 ), m_low( 0.0 ), m_high( 0.0 ), m_computeErrors( kFALSE ) {
+
+}
+
+/**
+ * It's kind of a fancy copy constructor. The idea here is that one should be able to
+ * initialise let's say an SH1<double> object from an SH1<int> object. This is also
+ * why I can't use memcpy to copy the contents of the arrays. (The sizes of the arrays
+ * could be different in memory...)
+ *
+ * @param parent The parent that should be copied
+ */
+template< typename Type >
+template< typename T >
+SH1< Type >::SH1( const SH1< T >& parent )
+   : TNamed( parent ), m_arraySize( parent.m_arraySize ), m_content( 0 ), m_errors( 0 ),
+     m_entries( parent.m_entries ), m_bins( parent.m_bins ), m_low( parent.m_low ),
+     m_high( parent.m_high ), m_computeErrors( parent.m_computeErrors ) {
+
+   m_content = new Type[ m_arraySize ];
+   if( m_computeErrors ) m_errors = new Type[ m_arraySize ];
+   for( Int_t i = 0; i < m_arraySize; ++i ) {
+      m_content[ i ] = static_cast< Type >( parent.m_content[ i ] );
+      if( m_computeErrors ) m_errors[ i ] = static_cast< Type >( parent.m_errors[ i ] );
+   }
+
+}
+
+/**
+ * This is the standard TH1-like constructor. It defines all basic properties of the
+ * histogram. It has one extra parameter compared to TH1, "computeErrors". When set to
+ * false (the default is true), the histogram doesn't calculate the statistical
+ * uncertainties for the bins. This can result in serious speed improvements.
+ *
+ * @param name The name of the histogram
+ * @param title The title of the histogram
+ * @param bins The number of bins that the histogram should have
+ * @param low The lower edge of the X axis
+ * @param high The higher edge of the X axis
+ * @param computeErrors Flag for turning on/off the statistical uncertainty calculation
+ */
+template< typename Type >
+SH1< Type >::SH1( const char* name, const char* title, Int_t bins,
+                  Double_t low, Double_t high, Bool_t computeErrors )
+   : TNamed( name, title ), m_arraySize( bins + 2 ), m_content( 0 ), m_errors( 0 ),
+     m_entries( 0 ), m_bins( bins ), m_low( low ), m_high( high ),
+     m_computeErrors( computeErrors ) {
+
+   m_content = new Type[ m_arraySize ];
+   memset( m_content, 0, m_arraySize * sizeof( Type ) );
+   if( m_computeErrors ) {
+      m_errors = new Type[ m_arraySize ];
+      memset( m_errors, 0, m_arraySize * sizeof( Type ) );
+   }
+
+}
+
+template< typename Type >
+SH1< Type >::~SH1() {
+
+   delete[] m_content; m_content = 0;
+   if( m_errors ) {
+      delete[] m_errors; m_errors = 0;
+   }
+
+}
+
+/**
+ * This is the main function for filling the histogram with entries. It fills the
+ * appropriate bin with the specified weight, and if error calculation was requested,
+ * it calculates the new uncertainty of the bin.
+ *
+ * @param pos The position at which a bin should be filled
+ * @param weight The amount with which the bin should be filled
+ */
+template< typename Type >
+void SH1< Type >::Fill( Double_t pos, Type weight ) {
+
+   Int_t bin;
+   m_content[ bin = FindBin( pos ) ] += weight;
+   if( m_computeErrors ) m_errors[ bin ] += weight * weight;
+   ++m_entries;
+   return;
+
+}
+
+/**
+ * @returns The number of bins of the histogram
+ */
+template< typename Type >
+Int_t SH1< Type >::GetNBins() const {
+
+   return m_bins;
+
+}
+
+/**
+ * This function can be used to find which bin corresponds to a certain position
+ * on the axis. It follows the ROOT histograms' internal binning, so the arrays have
+ * a size of "GetNBins()+2", the regular bin numbers go from 1 to GetNBins(), the
+ * underflow bin is 0, and the overflow bin is "GetNBins()+1".
+ *
+ * @param pos The position on the X axis that should be associated to a bin
+ * @returns The bin number corresponding to the specified axis position
+ */
+template< typename Type >
+Int_t SH1< Type >::FindBin( Double_t pos ) const {
+
+   if( pos < m_low ) return 0;
+   if( pos > m_high ) return ( m_bins + 1 );
+
+   return static_cast< Int_t >( ( pos - m_low ) / ( ( m_high - m_low ) / m_bins ) + 1 );
+
+}
+
+/**
+ * This function gets the contents of a given bin directly. It's not checked if the
+ * specified bin is in the correct range!
+ *
+ * @param bin The bin that should be investigated
+ * @returns The content of the specified bin
+ */
+template< typename Type >
+Type SH1< Type >::GetBinContent( Int_t bin ) const {
+
+   return m_content[ bin ];
+
+}
+
+/**
+ * This function sets the contents of a given bin directly. It's not checked if the
+ * specified bin is in the correct range! Also note, that when using this function,
+ * you're on your own with calculating the uncertainties of the bin.
+ *
+ * @param bin The bin that should be accessed
+ * @param content The new content of the bin
+ */
+template< typename Type >
+void SH1< Type >::SetBinContent( Int_t bin, Type content ) {
+
+   m_content[ bin ] = content;
+   return;
+
+}
+
+/**
+ * This function gets the uncertainty of a given bin directly. It's not
+ * checked if the specified bin is in the correct range!
+ *
+ * @param bin The bin that should be investigated
+ * @returns The uncertinty of the bin
+ */
+template< typename Type >
+Type SH1< Type >::GetBinError( Int_t bin ) const {
+
+   if( ! m_computeErrors ) return 0;
+   else return static_cast< Type >( std::sqrt( m_errors[ bin ] ) );
+
+}
+
+/**
+ * This function sets the uncertainty of a given bin directly. It's not
+ * checked if the specified bin is in the correct range!
+ *
+ * @param bin The bin that should be accessed
+ * @param error The new uncertainty of the bin
+ */
+template< typename Type >
+void SH1< Type >::SetBinError( Int_t bin, Type error ) {
+
+   if( ! m_computeErrors ) return;
+   else m_errors[ bin ] = error * error;
+
+   return;
+
+}
+
+/**
+ * @returns The number of entries in the histogram
+ */
+template< typename Type >
+Int_t SH1< Type >::GetEntries() const {
+
+   return m_entries;
+
+}
+
+/**
+ * @param entries The new number of entries in the histogram
+ */
+template< typename Type >
+void SH1< Type >::SetEntries( Int_t entries ) {
+
+   m_entries = entries;
+   return;
+
+}
+
+/**
+ * This function could be used to create a TH1-type histogram from the current
+ * object. This is useful when you have to use some functionality of TH1 that's
+ * not available in SH1. (Like fitting, division, etc.)
+ *
+ * Note that the caller is responsible for deleting the created histogram later on.
+ *
+ * @returns A pointer to the newly created TH1 histogram object
+ */
+template< typename Type >
+TH1* SH1< Type >::ToHist() const {
+
+   TH1* hist = 0;
+   if( ! strcmp( typeid( Type ).name(), "f" ) ) {
+      hist = new TH1F( GetName(), GetTitle(), GetNBins(), m_low, m_high );
+   } else if( ! strcmp( typeid( Type ).name(), "d" ) ) {
+      hist = new TH1D( GetName(), GetTitle(), GetNBins(), m_low, m_high );
+   } else if( ! strcmp( typeid( Type ).name(), "i" ) ) {
+      hist = new TH1I( GetName(), GetTitle(), GetNBins(), m_low, m_high );
+   } else {
+      SLogger logger( this->ClassName() );
+      logger << ERROR << "ToHist(): Can't find appropriate TH1 histogram type!"
+             << SLogger::endmsg;
+      return 0;
+   }
+
+   for( Int_t i = 0; i < m_arraySize; ++i ) {
+      hist->SetBinContent( i, GetBinContent( i ) );
+      hist->SetBinError( i, GetBinError( i ) );
+   }
+   hist->SetEntries( GetEntries() );
+
+   return hist;
+
+}
+
+/**
+ * This function takes care of correctly merging the separate histogram objects
+ * created on the PROOF worker nodes.
+ */
+template< typename Type >
+Int_t SH1< Type >::Merge( TCollection* coll ) {
+
+   SLogger logger( this->ClassName() );
+
+   //
+   // Return right away if the input is flawed:
+   //
+   if( ! coll ) return 0;
+   if( coll->IsEmpty() ) return 0;
+
+   //
+   // Select the elements from the collection that can actually be merged:
+   //
+   TIter next( coll );
+   TObject* obj = 0;
+   while( ( obj = next() ) ) {
+
+      SH1< Type >* hist = dynamic_cast< SH1< Type >* >( obj );
+      if( ! hist ) {
+         logger << ERROR << "Trying to merge \"" << obj->ClassName()
+                << "\" object into \"" << this->ClassName() << "\"" << SLogger::endmsg;
+         continue;
+      }
+
+      if( ( std::abs( hist->m_low - m_low ) > 0.001 ) ||
+          ( std::abs( hist->m_high - m_high ) > 0.001 ) ||
+          ( m_bins != hist->m_bins ) ||
+          ( m_computeErrors != hist->m_computeErrors ) ) {
+         logger << ERROR << "Trying to merge histograms with different settings"
+                << SLogger::endmsg;
+         continue;
+      }
+
+      for( Int_t i = 0; i < m_arraySize; ++i ) {
+         m_content[ i ] += hist->m_content[ i ];
+         if( m_computeErrors ) m_errors[ i ] += hist->m_errors[ i ];
+      }
+      m_entries += hist->m_entries;
+
+   }
+
+   return 1;
+
+}
+
+/**
+ * The default TObject::Write(...) function is overwritten here in order to
+ * not write an instance of this object to the output file, but instead a
+ * TH1 object.
+ */
+template< typename Type >
+Int_t SH1< Type >::Write( const char* name, Int_t option, Int_t bufsize ) const {
+
+   TH1* hist = ToHist();
+   if( ! hist ) return 0;
+
+   hist->Write( name, option, bufsize );
+   delete hist;
+
+   return 1;
+
+}
+
+#endif // SFRAME_PLUGINS_SH1_ICC
