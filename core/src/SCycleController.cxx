@@ -561,6 +561,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
                                 ( Long64_t ) ( eventsPerNode > 10000 ?
                                                ( eventsPerNode / 10 ) :
                                                1000 ) );
+         m_proof->SetParameter( "PROOF_MaxSlavesPerNode", ( Long_t ) 9999999 );
          gEnv->SetValue( "Proof.StatsHist", 1 );
          m_proof->AddInput( &config );
          m_proof->AddInput( &inputData );
