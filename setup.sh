@@ -15,6 +15,11 @@
 # Greet the user
 echo "Setting up environment for compiling/running SFrame"
 
+if [ $SFRAME_DIR ]; then
+    echo SFRAME_DIR is already defined, use a clean shell
+    return 1
+fi
+
 # speficy the SFRAME base directory, i.e. the directory in which this file lives
 export SFRAME_DIR=${PWD}
 
