@@ -11,13 +11,10 @@
  #                                                                         #
  ###########################################################################
 
-all: core plug-ins user tools
+all: core plug-ins user
 
 core::
 	(cd core; make)
-
-tools::
-	(cd tools; make)
 
 plug-ins::
 	(cd plug-ins; make)
