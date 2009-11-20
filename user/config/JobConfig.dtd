@@ -46,13 +46,14 @@
         ProofNodes           CDATA            "-1"
 >
 
-<!ELEMENT InputData (GeneratorCut*,In+,PersTree*,InputTree*,EVInputTree*,OutputTree*)>
+<!ELEMENT InputData (GeneratorCut*,In*,PersTree*,InputTree*,OutputTree*)>
 <!ATTLIST InputData
         Type                 CDATA            #REQUIRED
         Version              CDATA            #REQUIRED
         Lumi                 CDATA            "0.0"
         NEventsMax           CDATA            "-1"
         NEventsSkip          CDATA            "0"
+        Cacheable            (True|False)     "False"
 >
 
 <!ELEMENT GeneratorCut EMPTY>
@@ -64,6 +65,12 @@
 <!ELEMENT In EMPTY>
 <!ATTLIST In
         FileName              CDATA            #REQUIRED
+        Lumi                  CDATA            #REQUIRED
+>
+
+<!ELEMENT DataSet EMPTY>
+<!ATTLIST DataSet
+        Name                  CDATA            #REQUIRED
         Lumi                  CDATA            #REQUIRED
 >
 
@@ -93,6 +100,6 @@
 
 <!ELEMENT Item EMPTY>
 <!ATTLIST Item
-        Name                 CDATA            #REQUIRED
-        Value                CDATA            #REQUIRED
+        Name                  CDATA            #REQUIRED
+        Value                 CDATA            #REQUIRED
 >

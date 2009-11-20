@@ -26,7 +26,7 @@ def main():
                        help="The PROOF server to investigate" )
     parser.add_option( "-d", "--dset", dest="dset",
                        action="store", type="string", default="",
-                       help="The name of the dataset to create" )
+                       help="The name of the dataset to look at" )
 
     ( options, unrec ) = parser.parse_args()
 
@@ -36,7 +36,7 @@ def main():
         print "WARNING:"
 
     print "Opening connection to PROOF server: " + options.server
-    proof = ROOT.TProof.Open( options.server )
+    proof = ROOT.TProof.Open( options.server, "masteronly" )
 
     if options.dset == "":
         # We just give a list of all the data sets:

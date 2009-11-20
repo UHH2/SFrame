@@ -14,6 +14,9 @@
 #ifndef SFRAME_PLUGINS_SSummedVar_H
 #define SFRAME_PLUGINS_SSummedVar_H
 
+// STL include(s):
+#include <map>
+
 // ROOT include(s):
 #include <TNamed.h>
 #include <TString.h>
@@ -70,6 +73,9 @@ template< class Type >
 class SSummedVar {
 
 public:
+   /// Declaration of the used type
+   typedef Type ValueType;
+
    /// Constructor
    SSummedVar( const char* name, ISCycleBaseHist* parent );
 

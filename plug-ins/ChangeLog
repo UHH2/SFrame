@@ -1,3 +1,8 @@
+2009.11.20. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added the possibility to use various std::map types with
+	  SSummedVar. These can be very handy when calculating
+	  event selection efficiencies for instance.
+
 2009.09.15. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a new class: SH1
 	  It's a light-weight 1-dimensional histogram class. It

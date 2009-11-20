@@ -1,3 +1,29 @@
+2009.11.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added the capability to "cache" the information about the
+	  InputData configuration locally. This means that the input
+	  files don't have to be validated at the beginning of each
+	  job, which can save many-many minutes in larger jobs.
+	* The feature is turned off by default, it can be enabled
+	  by adding Cacheable="True" to the InputData definition in
+	  the configuration XML. See the example configurations
+	  for more details.
+	* The cached information is stored in the same way that
+	  PROOF stores information about datasets. But by using our
+	  own solution, the jobs can still be run without requiring
+	  a PROOF server.
+	* Removed the possibility of defining EV input trees for a cycle.
+	  The framework didn't support such trees ever sice moving to
+	  using PROOF anyway.
+	* Added the possibility to use various std::map types with
+	  SSummedVar. These can be very handy when calculating
+	  event selection efficiencies for instance.
+	* Updated the DTD and example configuration files to account
+	  for the updates made to SInputData. A short description is
+	  available for the "Cacheable" property in FirstCycle_config.py.
+	* Added some small changes to the sframe_dset_*.py scripts,
+	  mostly inspired by the PQ2 tools.
+	* Tagging as SFrame-03-00-05
+
 2009.09.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed a problem with using PROOF machines/clusters with
 	  a large number of worker nodes.

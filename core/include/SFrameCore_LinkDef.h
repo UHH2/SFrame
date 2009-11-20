@@ -25,8 +25,6 @@
 #pragma link C++ class std::vector<SFile>+;
 #pragma link C++ class STree+;
 #pragma link C++ class std::vector<STree>+;
-#pragma link C++ class SEVTree+;
-#pragma link C++ class std::vector<SEVTree>+;
 #pragma link C++ class SInputData+;
 #pragma link C++ class std::vector<SInputData>+;
 #pragma link C++ class std::pair<std::string,std::string>+;

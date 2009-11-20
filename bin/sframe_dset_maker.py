@@ -28,6 +28,9 @@ def main():
     parser.add_option( "-d", "--dset", dest="dset",
                        action="store", type="string", default="",
                        help="The name of the dataset to create" )
+    parser.add_option( "-p", "--prefix", dest="prefix",
+                       action="store", type="string", default="",
+                       help="Prefix to be put before the file names" )
 
     ( options, files ) = parser.parse_args()
 
@@ -44,11 +47,11 @@ def main():
         return
 
     print "Opening connection to PROOF server: " + options.server
-    proof = ROOT.TProof.Open( options.server )
+    proof = ROOT.TProof.Open( options.server, "masteronly" )
 
     filecoll = ROOT.TFileCollection( "dsetcoll", "File collection for making a data set" )
     for file in files:
-        filename = os.path.abspath( os.path.realpath( file ) )
+        filename = options.prefix + os.path.abspath( os.path.realpath( file ) )
         filecoll.Add( filename )
 
     if not proof.RegisterDataSet( options.dset, filecoll ):

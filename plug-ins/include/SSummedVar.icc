@@ -16,6 +16,7 @@
 
 // System include(s):
 #include <cxxabi.h>
+#include <cstdlib>
 
 // STL include(s):
 #include <vector>
@@ -56,7 +57,7 @@ std::vector< Type > operator+( const std::vector< Type >& left,
              << real_type_name << SLogger::endmsg;
       logger << ERROR << "The results will not be correct!"
              << SLogger::endmsg;
-      free( real_type_name );
+      ::free( real_type_name );
       return result;
    }
 
@@ -64,6 +65,69 @@ std::vector< Type > operator+( const std::vector< Type >& left,
    result.resize( left.size() );
    for( typename std::vector< Type >::size_type i = 0; i < left.size(); ++i ) {
       result[ i ] = left[ i ] + right[ i ];
+   }
+
+   return result;
+}
+
+/**
+ * @short Summation operator for maps
+ *
+ * In order to be able to use std::maps in the SSummedVar class, a summation for
+ * map types has to exist as well.
+ */
+template< class KeyType, class ValueType >
+std::map< KeyType, ValueType > operator+( const std::map< KeyType, ValueType >& left,
+                                          const std::map< KeyType, ValueType >& right ) {
+
+   // Create the result map:
+   std::map< KeyType, ValueType > result;
+
+   // Check that the summation can be performed:
+   if( left.size() != right.size() ) {
+      const char* type_name = typeid( left ).name();
+      int status;
+      char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
+      if( status ) {
+         SError error( SError::StopExecution );
+         error << "Couldn't demangle type name: " << type_name;
+         throw error;
+      }
+      SLogger logger( real_type_name );
+      logger << ERROR << "Couldn't perform summation on type: "
+             << real_type_name << SLogger::endmsg;
+      logger << ERROR << "The results will not be correct!"
+             << SLogger::endmsg;
+      ::free( real_type_name );
+      return result;
+   }
+
+   // Perform the summation:
+   typename std::map< KeyType, ValueType >::const_iterator left_itr = left.begin();
+   typename std::map< KeyType, ValueType >::const_iterator left_end = left.end();
+   typename std::map< KeyType, ValueType >::const_iterator right_itr = right.begin();
+   typename std::map< KeyType, ValueType >::const_iterator right_end = right.end();
+   for( ; left_itr != left_end && right_itr != right_end; ++left_itr, ++right_itr ) {
+      // Check that we have the corresponding elements selected:
+      if( left_itr->first != right_itr->first ) {
+         const char* type_name = typeid( left ).name();
+         int status;
+         char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
+         if( status ) {
+            SError error( SError::StopExecution );
+            error << "Couldn't demangle type name: " << type_name;
+            throw error;
+         }
+         SLogger logger( real_type_name );
+         logger << ERROR << "Couldn't perform summation on type: "
+                << real_type_name << SLogger::endmsg;
+         logger << ERROR << "The results will not be correct!"
+                << SLogger::endmsg;
+         ::free( real_type_name );
+         return result;
+      }
+      // Add the two values:
+      result[ left_itr->first ] = left_itr->second + right_itr->second;
    }
 
    return result;
@@ -78,7 +142,7 @@ std::vector< Type > operator+( const std::vector< Type >& left,
 template< class Type >
 ProofSummedVar< Type >::ProofSummedVar( const char* name,
                                         const char* title )
-   : TNamed( name, title ), m_member( 0 ) {
+   : TNamed( name, title ), m_member() {
 
 }
 

@@ -310,11 +310,8 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
    TXMLAttr* curAttr( 0 );
    while( ( curAttr = dynamic_cast< TXMLAttr* >( attribIt() ) ) != 0 ) {
 
-      if( curAttr->GetName() == TString( "Type" ) ) {
+      if( curAttr->GetName() == TString( "Type" ) )
          inputData.SetType( curAttr->GetValue() );
-         m_logger << INFO << "Reading SInputData: " << inputData.GetType()
-                  << SLogger::endmsg;
-      }
       if( curAttr->GetName() == TString( "Version" ) )
          inputData.SetVersion( curAttr->GetValue() );
       if( curAttr->GetName() == TString( "Lumi" ) )
@@ -323,7 +320,12 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
          inputData.SetNEventsMax( atoi( curAttr->GetValue() ) );
       if( curAttr->GetName() == TString( "NEventsSkip" ) ) 
          inputData.SetNEventsSkip( atoi( curAttr->GetValue() ) );
+      if( curAttr->GetName() == TString( "Cacheable" ) )
+         inputData.SetCacheable( ToBool( curAttr->GetValue() ) );
    }
+
+   m_logger << INFO << "Reading SInputData: " << inputData.GetType()
+            << " - " << inputData.GetVersion() << SLogger::endmsg;
 
    TXMLNode* child = node->GetChildren();
    while( child != 0 ) {
@@ -351,7 +353,6 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
       // get the input files
       else if( child->GetNodeName() == TString( "In" ) ) {
          std::string fileName = "";
-         std::string treeName = "";
          Double_t lumi = 0.;
 
          attribute = 0;
@@ -386,29 +387,6 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
                treeName = attribute->GetValue();
          }
          inputData.AddPersSTree( STree( treeName ) );
-
-      }
-      // get an EventView input tree
-      else if( child->GetNodeName() == TString( "EVInputTree" ) ) {
-         std::string baseName = "";
-         Int_t number = 0;
-         std::string collTreeName = "";
-
-         attribute = 0;
-         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
-            if( attribute->GetName() == TString( "BaseName" ) )
-               baseName = attribute->GetValue();
-            if( attribute->GetName() == TString( "Number" ) )
-               number = atoi( attribute->GetValue() );
-            if( attribute->GetName() == TString( "CollTreeName" ) )
-               collTreeName = attribute->GetValue();
-         }
-         for( int i = 0; i < number; ++i ) {
-            std::stringstream trName;
-            trName << baseName << i;
-            inputData.AddEVInputSTree( SEVTree( trName.str(), baseName,
-                                                i, collTreeName ) );
-         }
 
       }
       // get an output tree

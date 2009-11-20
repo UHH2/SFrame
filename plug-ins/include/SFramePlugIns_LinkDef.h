@@ -47,6 +47,15 @@
 #pragma link C++ class ProofSummedVar< std::vector< Float_t > >+;
 #pragma link C++ class ProofSummedVar< std::vector< Double_t > >+;
 
+// These dictionaries are not created by ROOT automatically:
+#pragma link C++ class std::pair< std::string, UInt_t >+;
+#pragma link C++ class std::map< std::string, UInt_t >+;
+
+#pragma link C++ class ProofSummedVar< std::map< std::string, Int_t > >+;
+#pragma link C++ class ProofSummedVar< std::map< std::string, UInt_t > >+;
+#pragma link C++ class ProofSummedVar< std::map< std::string, Float_t > >+;
+#pragma link C++ class ProofSummedVar< std::map< std::string, Double_t > >+;
+
 #pragma link C++ class SH1F+;
 #pragma link C++ class SH1D+;
 #pragma link C++ class SH1I+;

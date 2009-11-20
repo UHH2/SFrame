@@ -17,7 +17,7 @@ import ROOT
 
 def main():
 
-    descr = "This script can list the available data sets on a specific PROOF cluster"
+    descr = "This script can remove a specified dataset from a PROOF cluster"
     vers  = "$Revision$"
     parser = optparse.OptionParser( description = descr, version = vers,
                                     usage = "%prog [options]" )
@@ -36,7 +36,7 @@ def main():
         print "WARNING:"
 
     print "Opening connection to PROOF server: " + options.server
-    proof = ROOT.TProof.Open( options.server )
+    proof = ROOT.TProof.Open( options.server, "masteronly" )
 
     if options.dset == "":
         print "ERROR:"

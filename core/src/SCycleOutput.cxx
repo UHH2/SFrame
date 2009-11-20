@@ -188,7 +188,7 @@ Int_t SCycleOutput::Merge( TCollection* coll ) {
  *     object that we want to save, then instead of overwriting it, it merges
  *     the new object into the old one.
  *   - If there is no pre-existing object in the file, then it just "simply"
- *     created the specified output directory in the file, and saves the
+ *     creates the specified output directory in the file, and saves the
  *     object in it.
  */
 Int_t SCycleOutput::Write( const char* name, Int_t option,

@@ -39,13 +39,13 @@ class SFile : public TObject {
 public:
    /// Default constructor
    SFile()
-      : file( "" ), lumi( -1 ) , events( 0 ){}
+      : file( "" ), lumi( -1 ), events( 0 ){}
    /// Constructor with a file name
    SFile( const TString& f )
-      : file( f ), lumi( -1 ) , events( 0 ){}
+      : file( f ), lumi( -1 ), events( 0 ){}
    /// Constructor with a file name and a luminosity
    SFile( const TString& f, Double_t l )
-      : file( f ), lumi( l ) , events( 0 ){}
+      : file( f ), lumi( l ), events( 0 ){}
 
    /// Assignment operator
    SFile& operator=  ( const SFile& parent );
@@ -121,71 +121,6 @@ public:
 }; // class STree
 
 /**
- *   @short Class describing an EventView input tree in the input file(s).
- *
- *          This class describes an input EventView tree. (It is not
- *          possible to output such trees with SFrame.) It is only used
- *          when multiple views have been created for the same event.
- *          (For instance by the top reconstruction code in TopView.)
- *          EventView trees have a number of properties besides their
- *          name, all of which are needed to perform synchronisation
- *          between the trees.
- *
- * @version $Revision$
- */
-class SEVTree : public TObject {
-
-public:
-   /// Constructor with all the EVTree properties
-   SEVTree( const TString& t = "", const TString& tbasename = "",
-            Int_t viewnum = 0, const TString& colltname = "" )
-      : treeName( t ), treeBaseName( tbasename ),
-        viewNumber( viewnum ), collTreeName( colltname ) {}
-
-   /// Assignment operator
-   SEVTree& operator=  ( const SEVTree& parent );
-   /// Equality operator
-   Bool_t   operator== ( const SEVTree& rh ) const;
-   /// Non-equality operator
-   Bool_t   operator!= ( const SEVTree& rh ) const;
-
-   /// Name of the tree
-   /**
-    * This is the full name of the EventView tree. (For instance "FullRecoAna2",
-    * "MyAna3", etc.)
-    */
-   TString treeName;
-   /// "Base name" of the tree
-   /**
-    * Every view of a given type has the same "base name". This is the name
-    * after which a number is put to show the view number. It can be something
-    * like: "FullRecoAna", "EV", etc.
-    */
-   TString treeBaseName;
-   /// Number of the view
-   /**
-    * Every view is assigned a "view number". This number is put after the
-    * base name to form the full tree name. It's useful to store this
-    * as a separate variable for the tree synchronisation.
-    */
-   Int_t   viewNumber;
-   /// Name of the "collection tree"
-   /**
-    * The EventView trees are synchronised using variables from a so called
-    * collection tree. This tree holds the variable(s) showing how many views
-    * were created for a given event. The name is practically always
-    * "CollectionTree", but it was better to keep it as a variable for
-    * bigger flexibility.
-    */
-   TString collTreeName;
-
-#ifndef DOXYGEN_IGNORE
-   ClassDef( SEVTree, 1 );
-#endif // DOXYGEN_IGNORE
-
-}; // class SEVTree
-
-/**
  *   @short Class describing one kind of input data.
  *
  *          This class is used to describe all the properties (files, trees
@@ -214,6 +149,11 @@ public:
    /// Set the number of events to skip at the beginning of the input data
    void SetNEventsSkip  ( Long64_t nevents )             { m_neventsskip = nevents; }
 
+   /// Get whether the file properties can be cached
+   void SetCacheable( Bool_t flag = kTRUE )              { m_cacheable = flag; }
+   /// Set whether the file properties can be caches
+   Bool_t GetCacheable() const                           { return m_cacheable; }
+
    /// Add a new generator cut to the input data
    void AddGenCut       ( const SGeneratorCut& gencuts ) { m_gencuts.push_back( gencuts ); }
    /// Add a new input file to the input data
@@ -224,11 +164,11 @@ public:
    void AddPersSTree    ( const STree& ptree )           { m_persTrees.push_back( ptree ); }
    /// Add a new output tree to the input data
    void AddOutputSTree  ( const STree& stree )           { m_outputTrees.push_back( stree ); }
-   /// Add a new input EventView tree to the input data
-   void AddEVInputSTree ( const SEVTree& stree )         { m_evInputTrees.push_back( stree ); }
+
    /// Add some number of events to the input data
    void AddEvents       ( Long64_t events )              { m_eventsTotal += events; }
 
+   /// Collect information about the input files (needed before running)
    void ValidateInput();
 
    /// Get the name of the input data type
@@ -247,8 +187,7 @@ public:
    const std::vector< STree >&          GetPersTrees() const      { return m_persTrees; }
    /// Get all the defined output trees
    const std::vector< STree >&          GetOutputTrees() const    { return m_outputTrees; }
-   /// Get all the defined input EventView trees
-   const std::vector< SEVTree >&        GetEVInputTrees() const   { return m_evInputTrees; }
+
    /// Get the total luminosity of the input data
    Double_t                             GetTotalLumi() const;
    /// Get the total luminosity scaled to the number of events to process
@@ -277,13 +216,13 @@ private:
    std::vector< SGeneratorCut >    m_gencuts;
    std::vector< SFile >            m_sfileIn;
    std::vector< STree >            m_inputTrees;
-   std::vector< SEVTree >          m_evInputTrees;
    std::vector< STree >            m_persTrees;
    std::vector< STree >            m_outputTrees;
    Double_t                        m_totalLumiSum;
    Long64_t                        m_eventsTotal;
    Long64_t                        m_neventsmax ;
    Long64_t                        m_neventsskip;
+   Bool_t                          m_cacheable;
 
    mutable SLogger                 m_logger; //!
 

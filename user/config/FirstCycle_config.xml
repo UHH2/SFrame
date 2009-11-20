@@ -79,11 +79,18 @@
     <!--             shouldn't be used.                                           -->
     <!-- NEventsSkip: optional, specifies the number of events that should be     -->
     <!--              disregarded at the beginning of the InputData.              -->
+    <!-- Cacheable: When set to "True" (the default value is "False"), SFrame     -->
+    <!--            creates a small "cache file" describing the files in the      -->
+    <!--            InputData. This cache is then used in consecutive runs to     -->
+    <!--            "validate" the files before starting the execution. It can    -->
+    <!--            speed up the startup of a job considerably when processing    -->
+    <!--            a large number of files.                                      -->
     <!--                                                                          -->
     <!-- Some run-time checking is done on these parameters that they would make  -->
     <!-- sense, but in general be careful when using them.                        -->
 
-    <InputData Type="MC" Version="Zee_1" Lumi="0." NEventsMax="2000" NEventsSkip="3000" >
+    <InputData Type="MC" Version="Zee_1" Lumi="0." NEventsMax="2000" NEventsSkip="3000"
+               Cacheable="True" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting.                                                     -->
