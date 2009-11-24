@@ -43,6 +43,7 @@
 #pragma link C++ class SCycleBaseHist+;
 #pragma link C++ class SCycleBaseNTuple+;
 #pragma link C++ class SCycleBaseExec+;
+#pragma link C++ class ISCycleBase+;
 #pragma link C++ class SCycleBase+;
 #pragma link C++ class SCycleController+;
 

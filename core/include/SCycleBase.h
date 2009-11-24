@@ -15,13 +15,10 @@
 #define SFRAME_CORE_SCycleBase_H
 
 // Local include(s):
-#include "ISCycleBaseNTuple.h"
-#include "ISCycleBaseHist.h"
-#include "ISCycleBaseConfig.h"
+#include "ISCycleBase.h"
 #include "SCycleBaseNTuple.h"
 #include "SCycleBaseHist.h"
 #include "SCycleBaseConfig.h"
-#include "SCycleBaseExec.h"
 
 /**
  *   @short Base class for the user analysis cycles
@@ -48,7 +45,7 @@
  *
  * @version $Revision$
  */
-class SCycleBase : public SCycleBaseExec,
+class SCycleBase : public ISCycleBase,
                    public SCycleBaseConfig,
                    public SCycleBaseHist,
                    public SCycleBaseNTuple {

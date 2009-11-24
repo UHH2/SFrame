@@ -39,13 +39,15 @@
 
 // Local include(s):
 #include "../include/SCycleController.h"
-#include "../include/SCycleBase.h"
+#include "../include/ISCycleBase.h"
 #include "../include/SLogWriter.h"
 #include "../include/SConstants.h"
 #include "../include/SParLocator.h"
 #include "../include/SCycleStatistics.h"
 #include "../include/SFileMerger.h"
 #include "../include/SOutputFile.h"
+#include "../include/SCycleConfig.h"
+#include "../include/SCycleOutput.h"
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleController );
@@ -73,7 +75,7 @@ SCycleController::SCycleController( const TString& xmlConfigFile )
  */
 SCycleController::~SCycleController() {
 
-   std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
+   std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it) {
       delete ( *it );
    }
@@ -177,13 +179,13 @@ void SCycleController::Initialize() throw( SError ) {
                }
 
                TClass* cycleClass = gROOT->GetClass( cycleName.c_str(), true );
-               if( ! cycleClass || ! cycleClass->InheritsFrom( "SCycleBase" ) ) {
+               if( ! cycleClass || ! cycleClass->InheritsFrom( "ISCycleBase" ) ) {
                   SError error( SError::SkipCycle );
                   error << "Loading of class \"" << cycleName << "\" failed";
                   throw error;
                }
 
-               SCycleBase* cycle = reinterpret_cast< SCycleBase* >( cycleClass->New() );
+               ISCycleBase* cycle = reinterpret_cast< ISCycleBase* >( cycleClass->New() );
 
                m_logger << INFO << "Created cycle '" << cycleName << "'"
                         << SLogger::endmsg;
@@ -322,7 +324,7 @@ void SCycleController::ExecuteAllCycles() throw( SError ) {
 
    m_logger << INFO << "entering ExecuteAllCycles()" << SLogger::endmsg;
 
-   std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
+   std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it ) {
       this->ExecuteNextCycle();
    }
@@ -354,8 +356,8 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
    //
    // Access the current cycle:
    //
-   SCycleBase* cycle     = m_analysisCycles.at( m_curCycle );
-   TString     cycleName = cycle->GetName();
+   ISCycleBase* cycle     = m_analysisCycles.at( m_curCycle );
+   TString      cycleName = cycle->GetName();
 
    //
    // Create a copy of the cycle configuration, so that it can be given to PROOF:
@@ -656,7 +658,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
  *
  * @param cycleAlg The cycle that should be added
  */
-void SCycleController::AddAnalysisCycle( SCycleBase* cycleAlg ) {
+void SCycleController::AddAnalysisCycle( ISCycleBase* cycleAlg ) {
 
    m_analysisCycles.push_back( cycleAlg );
    return;
@@ -671,7 +673,7 @@ void SCycleController::DeleteAllAnalysisCycles() {
    m_logger << INFO << "Deleting all analysis cycle algorithms from memory"
             << SLogger::endmsg;
 
-   std::vector< SCycleBase* >::const_iterator it = m_analysisCycles.begin();
+   std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it ) {
       delete ( *it );
    }

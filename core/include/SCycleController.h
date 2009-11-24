@@ -27,7 +27,7 @@
 
 // Forward declaration(s):
 class TProof;
-class SCycleBase;
+class ISCycleBase;
 
 /**
  *   @short Class controlling SFrame analyses
@@ -66,7 +66,7 @@ public:
    virtual void SetConfig( const TString& xmlConfigFile ) { m_xmlConfigFile = xmlConfigFile; }
 
    /// Add one analysis cycle to the end of all existing cycles
-   void AddAnalysisCycle( SCycleBase* cycleAlg );
+   void AddAnalysisCycle( ISCycleBase* cycleAlg );
 
    /// Get the index of the current cycle
    UInt_t GetCurCycle() { return m_curCycle; }
@@ -80,7 +80,7 @@ private:
    void PrintWorkerLogs() const;
 
    /// vector holding all analysis cycles to be executed
-   std::vector< SCycleBase* > m_analysisCycles;
+   std::vector< ISCycleBase* > m_analysisCycles;
    /// Packages that have to be loaded on the PROOF cluster
    std::vector< TString > m_parPackages;
 

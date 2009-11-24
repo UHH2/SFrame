@@ -1,4 +1,10 @@
 2009.11.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Revived the ISCycleBase class. Now it should be possible once
+	  again to write custom cycle base classes in external packages.
+	  (Like how the Manchester group does it...)
+	* Tagging as SFrame-03-01-00
+
+2009.11.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Updated the file information caching in SInputData to
 	  save TDSet objects as well. This means that when running
 	  with PROOF, neither SFrame nor PROOF will check the files
