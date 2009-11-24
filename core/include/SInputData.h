@@ -20,11 +20,16 @@
 // ROOT include(s):
 #include <TObject.h>
 #include <TNamed.h>
-#include <TString.h>
 
 // Local include(s):
 #include "SGeneratorCut.h"
 #include "SLogger.h"
+
+// Forward declaration(s):
+class TFileCollection;
+class TFileInfo;
+class TDirectory;
+class TDSet;
 
 /**
  *   @short Class describing an input file to the analysis.
@@ -188,6 +193,8 @@ public:
    /// Get all the defined output trees
    const std::vector< STree >&          GetOutputTrees() const    { return m_outputTrees; }
 
+   TDSet* GetDSet() const;
+
    /// Get the total luminosity of the input data
    Double_t                             GetTotalLumi() const;
    /// Get the total luminosity scaled to the number of events to process
@@ -210,21 +217,30 @@ public:
    void print() const;
 
 private:
-   TString                         m_type;
-   TString                         m_version;
-   Double_t                        m_totalLumiGiven;
-   std::vector< SGeneratorCut >    m_gencuts;
-   std::vector< SFile >            m_sfileIn;
-   std::vector< STree >            m_inputTrees;
-   std::vector< STree >            m_persTrees;
-   std::vector< STree >            m_outputTrees;
-   Double_t                        m_totalLumiSum;
-   Long64_t                        m_eventsTotal;
-   Long64_t                        m_neventsmax ;
-   Long64_t                        m_neventsskip;
-   Bool_t                          m_cacheable;
+   Bool_t LoadInfoOnFile( std::vector< SFile >::iterator& file_itr,
+                          TFileCollection* filecoll );
+   TFileInfo* AccessFileInfo( std::vector< SFile >::iterator& file_itr,
+                              TFileCollection* filecoll );
+   TDSet* MakeDataSet();
+   TDSet* AccessDataSet( TDirectory* dir );
 
-   mutable SLogger                 m_logger; //!
+   TString                      m_type;
+   TString                      m_version;
+   Double_t                     m_totalLumiGiven;
+   std::vector< SGeneratorCut > m_gencuts;
+   std::vector< SFile >         m_sfileIn;
+   std::vector< STree >         m_inputTrees;
+   std::vector< STree >         m_persTrees;
+   std::vector< STree >         m_outputTrees;
+   Double_t                     m_totalLumiSum;
+   Long64_t                     m_eventsTotal;
+   Long64_t                     m_neventsmax;
+   Long64_t                     m_neventsskip;
+   Bool_t                       m_cacheable;
+
+   TDSet*                       m_dset; //!
+
+   mutable SLogger              m_logger; //!
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SInputData, 1 );

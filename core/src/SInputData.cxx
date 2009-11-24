@@ -13,9 +13,11 @@
 // ROOT include(s):
 #include <TFile.h>
 #include <TTree.h>
+#include <TChain.h>
 #include <TFileCollection.h>
 #include <TFileInfo.h>
 #include <THashList.h>
+#include <TDSet.h>
 
 // Local include(s):
 #include "../include/SInputData.h"
@@ -129,13 +131,22 @@ SInputData::SInputData( const char* name )
    : TNamed( name, "SFrame input data object" ), m_type( "unknown" ),
      m_version( 0 ), m_totalLumiGiven( 0 ), m_totalLumiSum( 0 ),
      m_eventsTotal( 0 ), m_neventsmax( -1 ), m_neventsskip( 0 ),
-     m_cacheable( kFALSE ), m_logger( "SInputData" ) {
+     m_cacheable( kFALSE ), m_dset( 0 ), m_logger( "SInputData" ) {
 
    m_logger << VERBOSE << "In constructor" << SLogger::endmsg;
 }
 
 /**
- * Another one of the "I don't do anything" destructors.
+ * Another one of the "I don't do anything" destructors. Notice that I'm not
+ * deleting the TDSet object. This is basically because TDSet's copy-constructor
+ * is private... Since the whole point in storing a TDSet object is to have a
+ * *validated* TDSet object, I can't create new objects every time I copy the
+ * SInputData object. So I just copy the pointer to the TDSet object, and let
+ * all the SInputData instances use the same TDSet.
+ *
+ * Unfortunately this results in a small memory leak. But since the only solution
+ * I see right now is to use Boost (which is not available on all supported platforms
+ * by default), I chose to accept this leak for now...
  */
 SInputData::~SInputData() {
 
@@ -194,6 +205,7 @@ void SInputData::ValidateInput() {
 
    // Flag showing if the cache will have to be saved at the end of the function:
    Bool_t cacheUpdated = kFALSE;
+   Int_t  fileInfoInDataset = 0;
 
    //
    // Loop over all the specified input files:
@@ -204,87 +216,9 @@ void SInputData::ValidateInput() {
       // Try to load the file's information from the cache. This is *much* faster than
       // querying the file itself...
       //
-      if( m_cacheable ) {
-         Bool_t allOK = kTRUE; // Flag showing if the query went okay
-         Long64_t entries = 0; // Number of entries in the file
-
-         // Retrieve the information about this specific file:
-         TFileInfo* fileinfo = ( TFileInfo* ) filecoll->GetList()->FindObject( sf->file.Data() );
-         if( fileinfo ) {
-            m_logger << DEBUG << "Information found for: " << sf->file << SLogger::endmsg;
-
-            Bool_t firstTree = kTRUE; // Flag showing if this is the first tree investigated
-
-            //
-            // Check that information is available on all the "regular" trees in the cache:
-            //
-            for( std::vector< STree >::const_iterator st = m_inputTrees.begin();
-                 st != m_inputTrees.end(); ++st ) {
-               TFileInfoMeta* tree_info = fileinfo->GetMetaData( st->treeName );
-               if( tree_info ) {
-                  // If the information is available, check that the tree contains the same
-                  // number of entries as all the other trees:
-                  if( firstTree ) {
-                     entries = tree_info->GetEntries();
-                     firstTree = kFALSE;
-                  } else if( entries != tree_info->GetEntries() ) {
-                     m_logger << WARNING << "Inconsistent cached data for: "
-                              << sf->file << " -> Checking the file again..." << SLogger::endmsg;
-                     allOK = kFALSE;
-                     break;
-                  }
-               } else {
-                  // If we don't have the information about this tree (because it wasn't
-                  // needed by the job before for instance), then the information about
-                  // this file has to be updated...
-                  m_logger << DEBUG << "No description found for: " << st->treeName
-                           << SLogger::endmsg;
-                  allOK = kFALSE;
-                  break;
-               }
-            }
-
-            //
-            // Check that information is available on all the persistent trees in the cache:
-            //
-            for( std::vector< STree >::const_iterator st = m_persTrees.begin();
-                 st != m_persTrees.end(); ++st ) {
-               TFileInfoMeta* tree_info = fileinfo->GetMetaData( st->treeName );
-               if( tree_info ) {
-                  // If the information is available, check that the tree contains the same
-                  // number of entries as all the other trees:
-                  if( firstTree ) {
-                     entries = tree_info->GetEntries();
-                     firstTree = kFALSE;
-                  } else if( entries != tree_info->GetEntries() ) {
-                     m_logger << WARNING << "Inconsistent cached data for: "
-                              << sf->file << " -> Checking the file again..." << SLogger::endmsg;
-                     allOK = kFALSE;
-                     break;
-                  }
-               } else {
-                  // If we don't have the information about this tree (because it wasn't
-                  // needed by the job before for instance), then the information about
-                  // this file has to be updated...
-                  m_logger << DEBUG << "No description found for: " << st->treeName
-                           << SLogger::endmsg;
-                  allOK = kFALSE;
-                  break;
-               }
-            }
-         } else {
-            // If we didn't find any information about the file, then it has to be
-            // created in the usual way...
-            m_logger << DEBUG << "No information found for: " << sf->file << SLogger::endmsg;
-            allOK = kFALSE;
-         }
-         // If the query was entirely successful, then forget about looking at the file
-         // physically, just use the cached information, and jump to the next file.
-         if( allOK ) {
-            sf->events = entries;
-            AddEvents( entries );
-            continue;
-         }
+      if( m_cacheable && LoadInfoOnFile( sf, filecoll ) ) {
+         ++fileInfoInDataset;
+         continue;
       }
 
       //
@@ -311,18 +245,7 @@ void SInputData::ValidateInput() {
          //
          TFileInfo* fileinfo = 0;
          if( m_cacheable ) {
-            // Check if we know anything about this file already:
-            if( ( fileinfo = ( TFileInfo* ) filecoll->GetList()->FindObject( sf->file.Data() ) ) ) {
-               m_logger << DEBUG << "Updating information for " << sf->file << SLogger::endmsg;
-            } else {
-               // One has to be very verbose in naming the object, otherwise the stupid
-               // ROOT container will not be able to find it afterwards...
-               m_logger << DEBUG << "Creating information for " << sf->file << SLogger::endmsg;
-               fileinfo = new TFileInfo( sf->file );
-               fileinfo->SetName( sf->file );
-               fileinfo->SetTitle( "Cached file description" );
-               filecoll->Add( fileinfo );
-            }
+            fileinfo = AccessFileInfo( sf, filecoll );
          }
 
          //
@@ -444,7 +367,12 @@ void SInputData::ValidateInput() {
    //
    // Save/close the cache file if it needs to be saved/closed:
    //
+   if( m_dset ) delete m_dset;
    if( m_cacheable ) {
+
+      //
+      // Take care of the TFileCollection object:
+      //
       if( cacheUpdated ) {
          m_logger << VERBOSE << "Writing file collection object to cache" << SLogger::endmsg;
          cachefile->cd();
@@ -452,9 +380,41 @@ void SInputData::ValidateInput() {
             m_logger << ERROR << "Failed to update the cached information" << SLogger::endmsg;
          }
          filecoll->Write();
+
+         //
+         // Create a new dataset and write it to the cache file:
+         //
+         m_dset = MakeDataSet();
+         cachefile->cd();
+         m_dset->Write();
+      } else {
+         // Load the cached dataset:
+         m_dset = AccessDataSet( cachefile );
+         if( ! m_dset ) {
+            throw SError( "There was a logical error in the cache handling\n."
+                          " Id Type: " + GetType() + ", Version: " + GetVersion(),
+                          SError::StopExecution );
+         }
+
+         // Check if the current configuration is likely to be described by this dataset:
+         if( fileInfoInDataset == m_dset->GetListOfElements()->GetSize() ) {
+            m_logger << DEBUG << "The loaded dataset is up to date" << SLogger::endmsg;
+         } else {
+            m_logger << DEBUG << "The dataset has to be updated" << SLogger::endmsg;
+            delete m_dset;
+            m_dset = MakeDataSet();
+            cachefile->cd();
+            m_dset->Write();
+         }
       }
+
       cachefile->Close();
       delete cachefile;
+
+   } else {
+
+      m_dset = MakeDataSet();
+
    }
 
    //
@@ -479,6 +439,11 @@ void SInputData::ValidateInput() {
 
    return;
 
+}
+
+TDSet* SInputData::GetDSet() const {
+
+   return m_dset;
 }
 
 Double_t SInputData::GetTotalLumi() const { 
@@ -526,6 +491,7 @@ SInputData& SInputData::operator= ( const SInputData& parent ) {
    this->m_eventsTotal = parent.m_eventsTotal;
    this->m_neventsmax = parent.m_neventsmax;
    this->m_neventsskip = parent.m_neventsskip;
+   this->m_dset = parent.m_dset;
 
    return *this;
 
@@ -551,7 +517,8 @@ Bool_t SInputData::operator== ( const SInputData& rh ) const {
        ( this->m_totalLumiSum == rh.m_totalLumiSum ) &&
        ( this->m_eventsTotal == rh.m_eventsTotal ) &&
        ( this->m_neventsmax == rh.m_neventsmax ) &&
-       ( this->m_neventsskip == rh.m_neventsskip ) ) {
+       ( this->m_neventsskip == rh.m_neventsskip ) &&
+       ( this->m_dset->IsEqual( rh.m_dset ) ) ) {
       return kTRUE;
    } else {
       return kFALSE;
@@ -612,4 +579,119 @@ void SInputData::print() const {
 
    return;
 
+}
+
+Bool_t SInputData::LoadInfoOnFile( std::vector< SFile >::iterator& file_itr,
+                                   TFileCollection* filecoll ) {
+
+   // Retrieve the information about this specific file:
+   TFileInfo* fileinfo = ( TFileInfo* ) filecoll->GetList()->FindObject( file_itr->file );
+   if( ! fileinfo ) {
+      m_logger << VERBOSE << "File unknown: " << file_itr->file << SLogger::endmsg;
+      return kFALSE;
+   }
+
+   m_logger << DEBUG << "Information found for: " << file_itr->file << SLogger::endmsg;
+
+   Bool_t firstTree = kTRUE; // Flag showing if this is the first tree investigated
+   Long64_t entries = 0; // Number of entries in the file
+
+   //
+   // Check that information is available on all the "regular" trees in the cache:
+   //
+   for( std::vector< STree >::const_iterator st = m_inputTrees.begin();
+        st != m_inputTrees.end(); ++st ) {
+      TFileInfoMeta* tree_info = fileinfo->GetMetaData( st->treeName );
+      if( ! tree_info ) {
+         m_logger << DEBUG << "No description found for: " << st->treeName
+                  << SLogger::endmsg;
+         return kFALSE;
+      }
+
+      // If the information is available, check that the tree contains the same
+      // number of entries as all the other trees:
+      if( firstTree ) {
+         entries = tree_info->GetEntries();
+         firstTree = kFALSE;
+      } else if( entries != tree_info->GetEntries() ) {
+         m_logger << WARNING << "Inconsistent cached data for: "
+                  << file_itr->file << " -> Checking the file again..." << SLogger::endmsg;
+         return kFALSE;
+      }
+   }
+
+   //
+   // Check that information is available on all the persistent trees in the cache:
+   //
+   for( std::vector< STree >::const_iterator st = m_persTrees.begin();
+        st != m_persTrees.end(); ++st ) {
+      TFileInfoMeta* tree_info = fileinfo->GetMetaData( st->treeName );
+      if( ! tree_info ) {
+         m_logger << DEBUG << "No description found for: " << st->treeName
+                  << SLogger::endmsg;
+         return kFALSE;
+      }
+
+      // If the information is available, check that the tree contains the same
+      // number of entries as all the other trees:
+      if( firstTree ) {
+         entries = tree_info->GetEntries();
+         firstTree = kFALSE;
+      } else if( entries != tree_info->GetEntries() ) {
+         m_logger << WARNING << "Inconsistent cached data for: "
+                  << file_itr->file << " -> Checking the file again..." << SLogger::endmsg;
+         return kFALSE;
+      }
+   }
+
+   //
+   // Update the ID with this information:
+   //
+   file_itr->events = entries;
+   AddEvents( entries );
+
+   return kTRUE;
+}
+
+TFileInfo* SInputData::AccessFileInfo( std::vector< SFile >::iterator& file_itr,
+                                       TFileCollection* filecoll ) {
+
+   TFileInfo* result = 0;
+
+   // Check if we know anything about this file already:
+   if( ( result = ( TFileInfo* ) filecoll->GetList()->FindObject( file_itr->file ) ) ) {
+      m_logger << DEBUG << "Updating information for " << file_itr->file << SLogger::endmsg;
+   } else {
+      // One has to be very verbose in naming the object, otherwise the stupid
+      // ROOT container will not be able to find it afterwards...
+      m_logger << DEBUG << "Creating information for " << file_itr->file << SLogger::endmsg;
+      result = new TFileInfo( file_itr->file );
+      result->SetName( file_itr->file );
+      result->SetTitle( "Description for: " + file_itr->file );
+      filecoll->Add( result );
+   }
+
+   return result;
+}
+
+TDSet* SInputData::MakeDataSet() {
+
+   TChain chain( GetInputTrees().front().treeName );
+   for( std::vector< SFile >::const_iterator file = GetSFileIn().begin();
+        file != GetSFileIn().end(); ++file ) {
+      chain.Add( file->file );
+   }
+
+   TDSet* result = new TDSet( chain );
+   result->SetName( "DSetCache" );
+   result->SetTitle( "Cached dataset for ID Type: " + GetType() + ", Version: " +
+                     GetVersion() );
+   result->Validate();
+
+   return result;
+}
+
+TDSet* SInputData::AccessDataSet( TDirectory* dir ) {
+
+   return dynamic_cast< TDSet* >( dir->Get( "DSetCache" ) );
 }

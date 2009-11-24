@@ -484,15 +484,6 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       inputData.SetName( SFrame::CurrentInputDataName );
 
       //
-      // Create a chain with all the specified input files:
-      //
-      TChain chain( id->GetInputTrees().at( 0 ).treeName );
-      for( std::vector< SFile >::const_iterator file = id->GetSFileIn().begin();
-           file != id->GetSFileIn().end(); ++file ) {
-         chain.Add( file->file );
-      }
-
-      //
       // Calculate how many events to process:
       //
       Long64_t evmax = ( id->GetNEventsMax() == -1 ? 100000000 :
@@ -505,6 +496,15 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       // The cycle can be run in two modes:
       //
       if( config.GetRunMode() == SCycleConfig::LOCAL ) {
+
+         //
+         // Create a chain with all the specified input files:
+         //
+         TChain chain( id->GetInputTrees().at( 0 ).treeName );
+         for( std::vector< SFile >::const_iterator file = id->GetSFileIn().begin();
+              file != id->GetSFileIn().end(); ++file ) {
+            chain.Add( file->file );
+         }
 
          //
          // Give the configuration to the cycle by hand:
@@ -573,8 +573,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          // messages the TProof::Process(...) command can still return a success code,
          // which can lead to nasty crashes...
          //
-         TDSet set( chain );
-         if( m_proof->Process( &set, cycle->GetName(), "", evmax,
+         if( m_proof->Process( id->GetDSet(), cycle->GetName(), "", evmax,
                                id->GetNEventsSkip() ) == -1 ) {
             m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
             m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
