@@ -177,7 +177,7 @@ void SInputData::AddSFileIn( const SFile& sfile ) {
  * if it exists. The feature has to be enabled by setting Cacheable="1" in the declaration
  * of the InputData block in the configuration XML.
  */
-void SInputData::ValidateInput() {
+void SInputData::ValidateInput() throw( SError ) {
 
    //
    // Set up the connection to the InputData cache if it's asked for:
@@ -674,9 +674,20 @@ TFileInfo* SInputData::AccessFileInfo( std::vector< SFile >::iterator& file_itr,
    return result;
 }
 
-TDSet* SInputData::MakeDataSet() {
+TDSet* SInputData::MakeDataSet() throw( SError ) {
 
-   TChain chain( GetInputTrees().front().treeName );
+   // Find the name of the "main" TTree in the files:
+   const char* treeName = 0;
+   if( GetInputTrees().size() ) {
+      treeName = GetInputTrees().front().treeName.Data();
+   } else if( GetPersTrees().size() ) {
+      treeName = GetPersTrees().front().treeName.Data();
+   }
+   if( ! treeName ) {
+      throw SError( "Can't determine input TTree name!", SError::SkipInputData );
+   }
+
+   TChain chain( treeName );
    for( std::vector< SFile >::const_iterator file = GetSFileIn().begin();
         file != GetSFileIn().end(); ++file ) {
       chain.Add( file->file );

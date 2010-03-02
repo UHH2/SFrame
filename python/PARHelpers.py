@@ -75,7 +75,8 @@ def PARMaker( srcdir, makefile, include, src, proofdir, output, verbose ):
     # Copy the package makefile to the correct directory:
     shutil.copy( srcdir + "/" + makefile,
                  "/tmp/" + outputbase )
-    MakefileTransform( "/tmp/" + outputbase + "/" + makefile, verbose )
+    ( makefiledir, makefilename ) = os.path.split( makefile )
+    MakefileTransform( "/tmp/" + outputbase + "/" + makefilename, verbose )
 
     # Create the Makefile.proof makefile fragment:
     MakefileProof( "/tmp/" + outputbase + "/Makefile.proof", verbose )

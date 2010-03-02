@@ -24,6 +24,7 @@
 // Local include(s):
 #include "SGeneratorCut.h"
 #include "SLogger.h"
+#include "SError.h"
 
 // Forward declaration(s):
 class TFileCollection;
@@ -174,7 +175,7 @@ public:
    void AddEvents       ( Long64_t events )              { m_eventsTotal += events; }
 
    /// Collect information about the input files (needed before running)
-   void ValidateInput();
+   void ValidateInput() throw( SError );
 
    /// Get the name of the input data type
    const TString&                       GetType() const           { return m_type; }
@@ -221,7 +222,7 @@ private:
                           TFileCollection* filecoll );
    TFileInfo* AccessFileInfo( std::vector< SFile >::iterator& file_itr,
                               TFileCollection* filecoll );
-   TDSet* MakeDataSet();
+   TDSet* MakeDataSet() throw( SError );
    TDSet* AccessDataSet( TDirectory* dir );
 
    TString                      m_type;

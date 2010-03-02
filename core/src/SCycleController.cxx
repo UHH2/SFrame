@@ -468,8 +468,21 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       //
       // Each input data has to have at least one input tree:
       //
-      if( ! id->GetInputTrees().size() ) {
+      if( ! ( id->GetInputTrees().size() || id->GetPersTrees().size() ) ) {
          m_logger << ERROR << "No input trees defined in input data " << id->GetType()
+                  << SLogger::endmsg;
+         m_logger << ERROR << "Skipping it from processing" << SLogger::endmsg;
+         continue;
+      }
+
+      const char* treeName = 0;
+      if( id->GetInputTrees().size() ) {
+         treeName = id->GetInputTrees().front().treeName.Data();
+      } else if( id->GetPersTrees().size() ) {
+         treeName = id->GetPersTrees().front().treeName.Data();
+      }
+      if( ! treeName ) {
+         m_logger << ERROR << "Can't determine input TTree name for input data " << id->GetType()
                   << SLogger::endmsg;
          m_logger << ERROR << "Skipping it from processing" << SLogger::endmsg;
          continue;
@@ -502,7 +515,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          //
          // Create a chain with all the specified input files:
          //
-         TChain chain( id->GetInputTrees().at( 0 ).treeName );
+         TChain chain( treeName );
          for( std::vector< SFile >::const_iterator file = id->GetSFileIn().begin();
               file != id->GetSFileIn().end(); ++file ) {
             chain.Add( file->file );

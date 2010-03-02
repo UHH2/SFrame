@@ -16,7 +16,8 @@
 
 // STL include(s):
 #include <vector>
-#include <bits/stl_pair.h>
+//#include <bits/stl_pair.h> // I have to include <map> here, because rootcint can't
+#include <map>               // understand <bits/stl_pair.h> in Athena for some reason...
 
 // ROOT include(s):
 #include <TNamed.h>

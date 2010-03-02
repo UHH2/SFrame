@@ -1,3 +1,13 @@
+2010.03.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made a few smaller changes to revive the SFrameARA packages.
+	* SInputData::ValidateInput() is now aware of the persistent
+	  trees. The same holds for the TTree information caching.
+	* Made SCycleController play nicely with persistent
+	  trees.
+	* Made the PARHelers.py code a bit more flexible to be able
+	  to create PAR packages from CMT packages.
+	* Tagging as SFrame-03-02-00
+
 2009.11.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Revived the ISCycleBase class. Now it should be possible once
 	  again to write custom cycle base classes in external packages.

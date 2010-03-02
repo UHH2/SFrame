@@ -54,7 +54,9 @@ public:
    /// Default destructor
    virtual ~SCycleBaseNTuple();
 
+   /// Set the object list used for NTuple output
    virtual void SetNTupleOutput( TList* output );
+   /// Get the object list used for NTuple output
    virtual TList* GetNTupleOutput() const;
 
 protected:
