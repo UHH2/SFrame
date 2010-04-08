@@ -28,7 +28,8 @@ using namespace std;
 /**
  * The constructor only initialises the base class.
  */
-SCycleBaseConfig::SCycleBaseConfig() {
+SCycleBaseConfig::SCycleBaseConfig()
+   : m_input( 0 ) {
 
    m_logger << VERBOSE << "SCycleBaseConfig constructed" << SLogger::endmsg;
 
@@ -131,6 +132,12 @@ const SCycleConfig& SCycleBaseConfig::GetConfig() const {
 
 }
 
+SCycleConfig& SCycleBaseConfig::GetConfig() {
+
+   return m_config;
+
+}
+
 void SCycleBaseConfig::SetConfig( const SCycleConfig& config ) {
 
    //
@@ -149,6 +156,22 @@ void SCycleBaseConfig::SetConfig( const SCycleConfig& config ) {
 
    return;
 
+}
+
+const TList& SCycleBaseConfig::GetConfigurationObjects() const {
+
+   return m_configList;
+}
+
+void SCycleBaseConfig::SetConfInput( TList* input ) {
+
+   m_input = input;
+   return;
+}
+
+TList* SCycleBaseConfig::GetConfInput() const {
+
+   return m_input;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -292,6 +315,19 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name,
    m_boolListPrefs[ name ] = &value;
    return;
 
+}
+
+void SCycleBaseConfig::AddConfigObject( TObject* object ) {
+
+   m_configList.Add( object );
+   return;
+}
+
+TObject* SCycleBaseConfig::GetConfigObject( const char* name ) const {
+
+   if( ! m_input ) return 0;
+
+   return m_input->FindObject( name );
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,38 @@
+// Dear emacs, this is -*- c++ -*-
+// $Id$
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Plug-ins
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
+
+#ifndef SFRAME_PLUGINS_SInputVariables_ICC
+#define SFRAME_PLUGINS_SInputVariables_ICC
+
+template< class ParentType >
+SInputVariables< ParentType >::SInputVariables( ParentType* parent )
+   : m_parent( parent ) {
+
+}
+
+/**
+ * Only one such function is needed, even though there are 3 different specializations
+ * of this function in SCycleBaseNTuple. But the specialization step only happens at
+ * SCycleBaseNTuple, GCC would actually just get confused (rightfully so) if we defined
+ * multiple specializations for <strong>this</strong> particular function.
+ */
+template< class ParentType >
+template< typename T >
+bool SInputVariables< ParentType >::ConnectVariable( const char* treeName,
+                                                     const char* branchName,
+                                                     T& variable ) throw ( SError ) {
+
+   return m_parent->template ConnectVariable( treeName, branchName, variable );
+}
+
+#endif // SFRAME_PLUGINS_SInputVariables_ICC

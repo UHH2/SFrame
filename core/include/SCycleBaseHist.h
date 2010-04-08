@@ -47,13 +47,18 @@ class TList;
 class SCycleBaseHist : public virtual ISCycleBaseHist,
                        public virtual SCycleBaseBase {
 
+   /// To enable the usage of the protected functions for SToolBase
+   friend class SToolBase;
+
 public:
    /// Default constructor
    SCycleBaseHist();
    /// Default destructor
    virtual ~SCycleBaseHist();
 
+   /// Set which list should be used for the histogramming output
    virtual void SetHistOutput( TList* output );
+   /// Check which list should be used for the histogramming output
    virtual TList* GetHistOutput() const;
 
 protected:

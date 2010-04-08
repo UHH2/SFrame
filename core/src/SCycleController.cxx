@@ -499,6 +499,11 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       inputData.SetName( SFrame::CurrentInputDataName );
 
       //
+      // Retrieve the configuration object list from the cycle:
+      //
+      const TList& configList = cycle->GetConfigurationObjects();
+
+      //
       // Calculate how many events to process:
       //
       Long64_t evmax = ( id->GetNEventsMax() == -1 ? 100000000 :
@@ -527,6 +532,9 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          TList list;
          list.Add( &config );
          list.Add( &inputData );
+         for( Int_t i = 0; i < configList.GetSize(); ++i ) {
+            list.Add( configList.At( i ) );
+         }
          cycle->SetInputList( &list );
 
          //
@@ -581,6 +589,9 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          m_proof->AddInput( &config );
          m_proof->AddInput( &inputData );
          m_proof->AddInput( &proofOutputFile );
+         for( Int_t i = 0; i < configList.GetSize(); ++i ) {
+            m_proof->AddInput( configList.At( i ) );
+         }
 
          //
          // Run the cycle on PROOF. Unfortunately the checking of the "successfullness"

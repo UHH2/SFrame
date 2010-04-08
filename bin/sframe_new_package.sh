@@ -1,20 +1,28 @@
 
+#
+# Pick up the command line parameter for the package name:
+#
 if (( $# != 1 )); then 
   echo "Provide the name of the package"
   exit; 
 fi
 
 NAME=$1
-LIBNAME=SFrame$NAME
+LIBNAME=$NAME
 
+#
+# Create the directory structure:
+#
 directories="config include proof src"
 files="ChangeLog Makefile include/${LIBNAME}_LinkDef.h proof/BUILD.sh proof/SETUP.C"
 
 mkdir $NAME
-
 for d in $directories; do mkdir $NAME/$d; done
 for f in $files; do touch $NAME/$f; done
 
+#
+# Create the Makefile:
+#
 cat << EOT > $NAME/Makefile
 # Package information
 LIBRARY = $LIBNAME
@@ -27,7 +35,12 @@ INCDIR  = include
 include \$(SFRAME_DIR)/Makefile.common
 EOT
 
+#
+# Create the LinkDef header file:
+#
 cat << EOT > $NAME/include/${LIBNAME}_LinkDef.h
+// Dear emacs, this is -*- c++ -*-
+// \$Id\$
 #ifdef __CINT__
 
 #pragma link off all globals;
@@ -36,18 +49,24 @@ cat << EOT > $NAME/include/${LIBNAME}_LinkDef.h
 
 #pragma link C++ nestedclass;
 
-// The example cycles:
-//#pragma link C++ class FirstCycle+;
+// Add the declarations of your cycles, and any other classes for which you
+// want to generate a dictionary, here. The usual format is:
+//
+// #pragma link C++ class MySuperClass+;
 
 #endif // __CINT__
 EOT
 
+#
+# Create the "PAR files":
+#
 cat << EOT > $NAME/proof/SETUP.C
+// \$Id\$
+
 int SETUP() {
 
-   if( gSystem->Load( "libTree" ) == -1 ) return -1;
-   if( gSystem->Load( "libHist" ) == -1 ) return -1;
-   if( gSystem->Load( "libGraf" ) == -1 ) return -1;
+   /// Add all the additional libraries here that this package
+   /// depends on. (With the same command that loads this package's library...)
    if( gSystem->Load( "lib$LIBNAME" ) == -1 ) return -1;
 
    return 0;
@@ -55,14 +74,18 @@ int SETUP() {
 EOT
 
 cat << EOT > $NAME/proof/BUILD.sh
-if [ "$1" = "clean" ]; then
+# \$Id\$
+
+if [ "\$1" = "clean" ]; then
     make distclean
     exit 0
 fi
 
 make default
 EOT
+chmod 755 $NAME/proof/BUILD.sh
 
-echo Edit the Makefile if you want to add your package when make
-
-
+#
+# End with some printout:
+#
+echo "Created package: $NAME"

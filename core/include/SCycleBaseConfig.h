@@ -19,6 +19,9 @@
 #include <map>
 #include <string>
 
+// ROOT include(s):
+#include "TList.h"
+
 // Local include(s):
 #include "ISCycleBaseConfig.h"
 #include "SCycleBaseBase.h"
@@ -43,6 +46,9 @@ class TXMLNode;
 class SCycleBaseConfig : public virtual ISCycleBaseConfig,
                          public virtual SCycleBaseBase {
 
+   /// To enable the usage of the protected functions for SToolBase
+   friend class SToolBase;
+
 public:
    /// Default constructor
    SCycleBaseConfig();
@@ -52,8 +58,20 @@ public:
    /// Function initialising the cycle
    void Initialize( TXMLNode* ) throw( SError );
 
+   /// Get the overall cycle configuration object
    const SCycleConfig& GetConfig() const;
+   /// Get the overall cycle configuration object
+   SCycleConfig& GetConfig();
+   /// Set the overall cycle configuration
    void SetConfig( const SCycleConfig& config );
+
+   /// Get the list of all declared configuration objects
+   virtual const TList& GetConfigurationObjects() const;
+
+   /// Set which list should be used for the configuration input
+   virtual void SetConfInput( TList* input );
+   /// Check which list should be used for the configuration input
+   virtual TList* GetConfInput() const;
 
 protected:
    /// Declare a <strong>std::string</strong> property
@@ -72,6 +90,11 @@ protected:
    void DeclareProperty( const std::string& name, std::vector< double >& value );
    /// Declare a <strong>std::vector<bool></strong> property
    void DeclareProperty( const std::string& name, std::vector< bool >& value );
+
+   /// Add a configuration object that should be available on the PROOF nodes
+   void AddConfigObject( TObject* object );
+   /// Get a configuration object on the PROOF nodes
+   TObject* GetConfigObject( const char* name ) const;
 
 private:
    //
@@ -100,6 +123,11 @@ private:
 
    /// The cycle configuration:
    SCycleConfig m_config;
+
+   /// A list of all the configuration objects
+   TList m_configList;
+   /// List with the PROOF input objects
+   TList* m_input;
 
 }; // class SCycleBaseConfig
 

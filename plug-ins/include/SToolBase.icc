@@ -1,0 +1,53 @@
+// Dear emacs, this is -*- c++ -*-
+// $Id$
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Plug-ins
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
+
+#ifndef SFRAME_PLUGINS_SToolBase_ICC
+#define SFRAME_PLUGINS_SToolBase_ICC
+
+// SFrame include(s):
+#include "core/include/SCycleBase.h"
+
+template< class T >
+T* SToolBase::Book( const T& histo, const char* directory ) throw( SError ) {
+
+   return GetParent()->template Book( histo, directory );
+}
+
+template< class T >
+T* SToolBase::Retrieve( const char* name, const char* directory ) throw( SError ) {
+
+   return GetParent()->template Retrieve< T >( name, directory );
+}
+
+template< typename T >
+bool SToolBase::ConnectVariable( const char* treeName, const char* branchName,
+                                 T& variable ) throw ( SError ) {
+
+   return GetParent()->template ConnectVariable( treeName, branchName, variable );
+}
+
+template< typename T >
+TBranch* SToolBase::DeclareVariable( T& obj, const char* name,
+                                     const char* treeName ) throw( SError ) {
+
+   return GetParent()->template DeclareVariable( obj, name, treeName );
+}
+
+template< typename T >
+void SToolBase::DeclareProperty( const std::string& name, T& value ) {
+
+   GetParent()->DeclareProperty( name, value );
+   return;
+}
+
+#endif // SFRAME_PLUGINS_SToolBase_ICC

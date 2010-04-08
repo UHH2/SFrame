@@ -1,3 +1,16 @@
+2010.04.08. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Created the SToolBase class: This class could be used to
+	  create "smart classes" easily. These tool classes can use
+	  much of the same convenience functionality as their parent
+	  cycles can. But of course they have to be attached to a
+	  parent cycle, to make it possible to run them.
+	* Created the SInputVariables class: This base class should make
+	  it simpler to create classes that serve the only purpose to
+	  collect input data variables. This design makes it simple
+	  to pass around input variables between different parts of the
+	  analysis code. (After a long circle we came back to the
+	  original design of SFrame...)
+
 2009.11.20. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added the possibility to use various std::map types with
 	  SSummedVar. These can be very handy when calculating

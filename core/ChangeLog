@@ -1,3 +1,24 @@
+2010.04.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Created a non-const accessor to the SCycleConfig object
+	  of the cycle. This can apparently be used to modify the total
+	  luminosity of the cycle for the re-weighting in a nicer fasion,
+	  but that doesn't work with PROOF yet...
+	* Added a new feature to SCycleBaseConfig: It is now possible to
+	  add and retrieve TObject based "configuration objects" to/from
+	  the cycle. The model is that the user creates/initializes a
+	  configuration object in BeginCycle(), and adds it as a configuration
+	  object with AddConfigObject(...). Then the user can retrieve
+	  this same object inside the function which are executed
+	  on the worker nodes, with GetConfigObject(...). The first example
+	  is sending a TGoodRunsList object to the workers, to select
+	  the good luminosity blocks out of ATLAS data.
+	* This feature needed some modification in SCycleBaseExec, and
+	  SCycleController as well.
+	* Added some "friend ..." lines to the cycle base classes to make
+	  it possible for the new classes in plug-ins to function.
+	  I might get rid of these "friend ..." declarations and make all the
+	  used functions public in a later release...
+
 2010.03.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made a few smaller changes to revive the SFrameARA packages.
 	* SInputData::ValidateInput() is now aware of the persistent

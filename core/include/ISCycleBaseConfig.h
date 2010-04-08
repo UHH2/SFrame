@@ -20,6 +20,7 @@
 // Forward declaration(s):
 class TXMLNode;
 class SCycleConfig;
+class TList;
 
 /**
  *   @short Interface providing configuration capabilities
@@ -43,8 +44,18 @@ public:
 
    /// Get the full configuration of the cycle
    virtual const SCycleConfig& GetConfig() const = 0;
+   /// Get the full configuration of the cycle
+   virtual SCycleConfig& GetConfig() = 0;
    /// Set the full configuration of the cycle
    virtual void SetConfig( const SCycleConfig& config ) = 0;
+
+   /// Get the list of all declared configuration objects
+   virtual const TList& GetConfigurationObjects() const = 0;
+
+   /// Set which list should be used for the configuration input
+   virtual void SetConfInput( TList* input ) = 0;
+   /// Check which list should be used for the configuration input
+   virtual TList* GetConfInput() const = 0;
 
 }; // class ISCycleBaseConfig
 

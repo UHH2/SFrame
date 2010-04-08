@@ -60,6 +60,7 @@ void SCycleBaseExec::Begin( TTree* ) {
       //
       this->SetHistOutput( fOutput );
       this->SetNTupleOutput( fOutput );
+      this->SetConfInput( fInput );
 
       this->ReadConfig();
       this->BeginMasterInputData( *m_inputData );
@@ -88,6 +89,7 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
       //
       this->SetHistOutput( fOutput );
       this->SetNTupleOutput( fOutput );
+      this->SetConfInput( fInput );
 
       m_outputTrees.clear();
 
