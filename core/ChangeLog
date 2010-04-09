@@ -1,3 +1,8 @@
+2010.04.09 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed the way SCycleBaseConfig handles the case when it receives
+	  an empty string as a vector property. (Now the std::vector remains
+	  empty.)
+
 2010.04.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Created a non-const accessor to the SCycleConfig object
 	  of the cycle. This can apparently be used to modify the total

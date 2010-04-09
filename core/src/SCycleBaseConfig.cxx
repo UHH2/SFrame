@@ -507,7 +507,7 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    else if( m_stringListPrefs.find( name ) != m_stringListPrefs.end() ) {
       m_stringListPrefs[ name ]->clear();
       istringstream stream( stringValue );
-      while( ! stream.eof() ) {
+      while( ! stream.eof() && ( stringValue != "" ) ) {
          std::string value;
          stream >> value;
          m_stringListPrefs[ name ]->push_back( value );
@@ -517,7 +517,7 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    else if( m_intListPrefs.find( name ) != m_intListPrefs.end() ) {
       m_intListPrefs[ name ]->clear();
       istringstream stream( stringValue );
-      while( ! stream.eof() ) {
+      while( ! stream.eof() && ( stringValue != "" ) ) {
          int value;
          stream >> value;
          m_intListPrefs[ name ]->push_back( value );
@@ -527,7 +527,7 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    else if( m_doubleListPrefs.find( name ) != m_doubleListPrefs.end() ) {
       m_doubleListPrefs[ name ]->clear();
       istringstream stream( stringValue );
-      while( ! stream.eof() ) {
+      while( ! stream.eof() && ( stringValue != "" ) ) {
          double value;
          stream >> value;
          m_doubleListPrefs[ name ]->push_back( value );
@@ -537,7 +537,7 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    else if( m_boolListPrefs.find( name ) != m_boolListPrefs.end() ) {
       m_boolListPrefs[ name ]->clear();
       istringstream stream( stringValue );
-      while( ! stream.eof() ) {
+      while( ! stream.eof() && ( stringValue != "" ) ) {
          std::string value;
          stream >> value;
          m_boolListPrefs[ name ]->push_back( ToBool( value ) );
