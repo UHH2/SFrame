@@ -72,6 +72,46 @@ TList* SCycleBaseNTuple::GetNTupleOutput() const {
 
 }
 
+TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const {
+
+   //
+   // Strip off the directory name from the given tree name:
+   //
+   TString tname( name );
+   if( tname.Contains( "/" ) ) {
+      m_logger << DEBUG << "Tokenizing the metadata tree name: " << tname << SLogger::endmsg;
+      TObjArray* array = tname.Tokenize( "/" );
+      TObjString* real_name = dynamic_cast< TObjString* >( array->Last() );
+      tname = real_name->GetString();
+      delete array;
+   }
+
+   m_logger << DEBUG << "Looking for metadata tree with name: " << tname << SLogger::endmsg;
+
+   //
+   // Look for such a metadata tree:
+   //
+   for( std::vector< TTree* >::const_iterator it = m_metaTrees.begin();
+        it != m_metaTrees.end(); ++it ) {
+      if( *it ) {
+         if( tname == ( *it )->GetName() ) {
+            m_logger << VERBOSE << "Found input tree with name " << tname 
+                     << " at " << ( *it ) << SLogger::endmsg;
+            return *it;
+         }
+      }
+   }
+
+   //
+   // Throw an exception if the tree hasn't been found:
+   //
+   SError error( SError::SkipFile );
+   error << "Couldn't find input TTree with name: " << tname;
+   throw error;
+
+   return 0;
+}
+
 /**
  * Function called first when starting to process an InputData object.
  * It opens the output file and creates the output trees defined in the
@@ -149,11 +189,13 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
                                        TTree* main_tree ) throw( SError ) {
 
    const std::vector< STree >& sInTree = iD.GetInputTrees();
+   const std::vector< STree >& sMetaTree = iD.GetMetaTrees();
    Bool_t firstPassed = kFALSE;
    Int_t nEvents = 0;
    m_inputTrees.clear();
    m_inputBranches.clear();
    DeleteInputVariables();
+   m_metaTrees.clear();
 
    TFile* file = 0;
    if( GetConfig().GetRunMode() == SCycleConfig::LOCAL ) {
@@ -173,6 +215,9 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
       return;
    }
 
+   //
+   // Handle the regular input trees:
+   //
    for( vector< STree >::const_iterator st = sInTree.begin(); st != sInTree.end();
         ++st ) {
 
@@ -223,6 +268,23 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
             firstPassed = kTRUE;
             nEvents = tree->GetEntries();
          }
+      }
+   }
+
+   //
+   // Handle the metadata trees:
+   //
+   for( vector< STree >::const_iterator mt = sMetaTree.begin(); mt != sMetaTree.end();
+        ++mt ) {
+
+      TTree* tree = dynamic_cast< TTree* >( file->Get( mt->treeName ) );
+      if( ! tree ) {
+         SError error( SError::SkipFile );
+         error << "Tree " << mt->treeName << " doesn't exist in File "
+               << file->GetName();
+         throw error;
+      } else {
+         m_metaTrees.push_back( tree );
       }
    }
 

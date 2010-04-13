@@ -105,7 +105,7 @@ private:
 #define %(ns)-s_%(class)-s_H
 
 // SFrame include(s):
-#import \"core/include/SCycleBase.h\"
+#include \"core/include/SCycleBase.h\"
 
 namespace %(ns)-s {
 
@@ -221,6 +221,7 @@ ClassImp( %(class)-s );
 %(class)-s::%(class)-s()
    : SCycleBase() {
 
+   SetLogName( GetName() );
 }
 
 %(class)-s::~%(class)-s() {
@@ -281,6 +282,7 @@ namespace %(ns)-s {
    %(class)-s::%(class)-s()
       : SCycleBase() {
 
+      SetLogName( GetName() );
    }
 
    %(class)-s::~%(class)-s() {

@@ -170,6 +170,8 @@ public:
    void AddPersSTree    ( const STree& ptree )           { m_persTrees.push_back( ptree ); }
    /// Add a new output tree to the input data
    void AddOutputSTree  ( const STree& stree )           { m_outputTrees.push_back( stree ); }
+   /// Add a new "meta tree" to the input data
+   void AddMetaSTree    ( const STree& stree )           { m_metaTrees.push_back( stree ); }
 
    /// Add some number of events to the input data
    void AddEvents       ( Long64_t events )              { m_eventsTotal += events; }
@@ -193,7 +195,10 @@ public:
    const std::vector< STree >&          GetPersTrees() const      { return m_persTrees; }
    /// Get all the defined output trees
    const std::vector< STree >&          GetOutputTrees() const    { return m_outputTrees; }
+   /// Get all the defined meta trees
+   const std::vector< STree >&          GetMetaTrees() const      { return m_metaTrees; }
 
+   /// Get the dataset representing all the input files
    TDSet* GetDSet() const;
 
    /// Get the total luminosity of the input data
@@ -233,6 +238,7 @@ private:
    std::vector< STree >         m_inputTrees;
    std::vector< STree >         m_persTrees;
    std::vector< STree >         m_outputTrees;
+   std::vector< STree >         m_metaTrees;
    Double_t                     m_totalLumiSum;
    Long64_t                     m_eventsTotal;
    Long64_t                     m_neventsmax;

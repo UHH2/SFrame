@@ -388,7 +388,7 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
       }
       // get the input files
       else if( child->GetNodeName() == TString( "In" ) ) {
-         std::string fileName = "";
+         TString fileName = "";
          Double_t lumi = 0.;
 
          attribute = 0;
@@ -403,7 +403,7 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
       }
       // get a "regular" input tree
       else if( child->GetNodeName() == TString( "InputTree" ) ) {
-         std::string treeName = "";
+         TString treeName = "";
 
          attribute = 0;
          while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
@@ -415,7 +415,7 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
       }
       // get a "persistent" input tree (aka. DPD)
       else if( child->GetNodeName() == TString( "PersTree" ) ) {
-         std::string treeName = "";
+         TString treeName = "";
 
          attribute = 0;
          while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
@@ -427,7 +427,7 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
       }
       // get an output tree
       else if( child->GetNodeName() == TString( "OutputTree" ) ) {
-         std::string treeName = "";
+         TString treeName = "";
 
          attribute = 0;
          while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
@@ -435,6 +435,18 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
                treeName = attribute->GetValue();
          }
          inputData.AddOutputSTree( STree( treeName ) );
+
+      }
+      // get a metadata tree
+      else if( child->GetNodeName() == TString( "MetadataTree" ) ) {
+         TString treeName = "";
+
+         attribute = 0;
+         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
+            if( attribute->GetName() == TString( "Name" ) )
+               treeName = attribute->GetValue();
+         }
+         inputData.AddMetaSTree( STree( treeName ) );
 
       } else {
          // unknown field error

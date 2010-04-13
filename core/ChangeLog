@@ -1,3 +1,15 @@
+2010.04.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a new configuration option to the XML files: <MetadataTree>
+	  Using this the user can access additional TTree-s in the input
+	  files which don't hold event-level data. The used case for this
+	  right now is to be able to read the trigger configuration
+	  metadata from the D3PD ntuples.
+	* Added a new function in SCycleBaseNTuple to give access to the
+	  metadata trees.
+	* The metadata trees can also be in subdirectories inside the file,
+	  just like it is done with the trigger configuration metadata
+	  right now.
+
 2010.04.09 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed the way SCycleBaseConfig handles the case when it receives
 	  an empty string as a vector property. (Now the std::vector remains

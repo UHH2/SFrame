@@ -46,7 +46,7 @@
         ProofNodes           CDATA            "-1"
 >
 
-<!ELEMENT InputData (GeneratorCut*,In*,PersTree*,InputTree*,OutputTree*)>
+<!ELEMENT InputData (GeneratorCut*,In*,PersTree*,InputTree*,OutputTree*,MetadataTree*)>
 <!ATTLIST InputData
         Type                 CDATA            #REQUIRED
         Version              CDATA            #REQUIRED
@@ -89,11 +89,9 @@
         Name                  CDATA            #REQUIRED
 >
 
-<!ELEMENT EVInputTree EMPTY>
-<!ATTLIST EVInputTree
-        BaseName              CDATA            #REQUIRED
-        Number                CDATA            #REQUIRED
-        CollTreeName          CDATA            #REQUIRED
+<!ELEMENT MetadataTree EMPTY>
+<!ATTLIST MetadataTree
+        Name                  CDATA            #REQUIRED
 >
 
 <!ELEMENT UserConfig (Item*)>

@@ -1,3 +1,8 @@
+2010.04.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated the DTD to know about the new <MetadataTree> input
+	  type. Removed the EVInputTree parameter from the DTD, which
+	  is not supported by the code since a while.
+
 2009.11.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Updated the DTD and configuration files to account for the
 	  updates made to SInputData. A short description is available

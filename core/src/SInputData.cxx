@@ -260,7 +260,7 @@ void SInputData::ValidateInput() throw( SError ) {
             TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
             if( ! tree ) {
                m_logger << WARNING << "Couldn't find tree " << st->treeName
-                        << "in file " << sf->file.Data() << SLogger::endmsg;
+                        << "in file " << sf->file << SLogger::endmsg;
                m_logger << WARNING << "Removing file from the input file list"
                         << SLogger::endmsg;
                throw SError( SError::SkipFile );
@@ -269,7 +269,7 @@ void SInputData::ValidateInput() throw( SError ) {
                   m_logger << WARNING << "Conflict in number of entries - Tree "
                            << tree->GetName() << " has " << tree->GetEntries()
                            << ", NOT " << entries << SLogger::endmsg;
-                  m_logger << WARNING << "Removing " << sf->file.Data()
+                  m_logger << WARNING << "Removing " << sf->file
                            << " from the input file list" << SLogger::endmsg;
                   throw SError( SError::SkipFile );
                } else if( ! firstPassed ) {
@@ -307,7 +307,7 @@ void SInputData::ValidateInput() throw( SError ) {
             TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
             if( ! tree ) {
                m_logger << WARNING << "Couldn't find tree " << st->treeName
-                        << "in file " << sf->file.Data() << SLogger::endmsg;
+                        << " in file " << sf->file << SLogger::endmsg;
                m_logger << WARNING << "Removing file from the input file list"
                         << SLogger::endmsg;
                throw SError( SError::SkipFile );
@@ -316,7 +316,7 @@ void SInputData::ValidateInput() throw( SError ) {
                   m_logger << WARNING << "Conflict in number of entries - Tree "
                            << tree->GetName() << " has " << tree->GetEntries()
                            << ", NOT " << entries << SLogger::endmsg;
-                  m_logger << WARNING << "Removing " << sf->file.Data()
+                  m_logger << WARNING << "Removing " << sf->file
                            << " from the input file list" << SLogger::endmsg;
                   throw SError( SError::SkipFile );
                } else if( ! firstPassed ) {
@@ -349,6 +349,40 @@ void SInputData::ValidateInput() throw( SError ) {
          // Update the ID information:
          sf->events = entries;
          AddEvents( entries );
+
+         //
+         // Check the metadata tree(s):
+         //
+         for( std::vector< STree >::const_iterator mt = m_metaTrees.begin();
+              mt != m_metaTrees.end(); ++mt ) {
+            TTree* tree = dynamic_cast< TTree* >( file->Get( mt->treeName ) );
+            if( ! tree ) {
+               m_logger << WARNING << "Couldn't find metadata tree \"" << mt->treeName
+                        << " in file " << sf->file << SLogger::endmsg;
+               m_logger << WARNING << "Removing file from the input file list"
+                        << SLogger::endmsg;
+               throw SError( SError::SkipFile );
+            }
+            Int_t branchesThisTree = tree->GetNbranches();
+            m_logger << DEBUG << branchesThisTree << " branches in tree " << mt->treeName
+                     << SLogger::endmsg;
+            //
+            // Save the information about this tree into the cache:
+            //
+            if( m_cacheable ) {
+               TFileInfoMeta* tree_info = new TFileInfoMeta( mt->treeName, "TTree",
+                                                             tree->GetEntriesFast() );
+               tree_info->SetName( mt->treeName );
+               tree_info->SetTitle( "Meta data info for a TTree" );
+               if( ! fileinfo->AddMetaData( tree_info ) ) {
+                  m_logger << ERROR << "There was a problem caching meta-data for TTree: "
+                           << mt->treeName << SLogger::endmsg;
+               } else {
+                  m_logger << VERBOSE << "Meta-data cached for TTree: " << mt->treeName
+                           << SLogger::endmsg;
+               }
+            }
+         }
 
          m_logger << DEBUG << numberOfBranches << " branches in total in file "
                   << file->GetName() << SLogger::endmsg;
@@ -574,6 +608,9 @@ void SInputData::print() const {
    for( std::vector< STree >::const_iterator t = m_outputTrees.begin();
         t != m_outputTrees.end(); ++t )
       m_logger << " Output tree        : " << "'" << t->treeName << "'" << endl;
+   for( std::vector< STree >::const_iterator t = m_metaTrees.begin();
+        t != m_metaTrees.end(); ++t )
+      m_logger << " Metadata tree      : " << "'" << t->treeName << "'" << endl;
 
    m_logger << " ---------------------------------------------------------" << SLogger::endmsg;
 
@@ -640,6 +677,19 @@ Bool_t SInputData::LoadInfoOnFile( std::vector< SFile >::iterator& file_itr,
       } else if( entries != tree_info->GetEntries() ) {
          m_logger << WARNING << "Inconsistent cached data for: "
                   << file_itr->file << " -> Checking the file again..." << SLogger::endmsg;
+         return kFALSE;
+      }
+   }
+
+   //
+   // Check that information is available on all the metadata trees in the cache:
+   //
+   for( std::vector< STree >::const_iterator mt = m_metaTrees.begin();
+        mt != m_metaTrees.end(); ++mt ) {
+      TFileInfoMeta* tree_info = fileinfo->GetMetaData( mt->treeName );
+      if( ! tree_info ) {
+         m_logger << DEBUG << "No description found for: " << mt->treeName
+                  << SLogger::endmsg;
          return kFALSE;
       }
    }

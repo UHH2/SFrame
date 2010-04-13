@@ -86,6 +86,9 @@ protected:
    TBranch* DeclareVariable( T& obj, const char* name,
                              const char* treeName = 0 ) throw( SError );
 
+   /// Access one of the metadata trees
+   TTree* GetMetadataTree( const char* name ) const;
+
    //////////////////////////////////////////////////////////
    //                                                      //
    //          Functions called by the framework:          //
@@ -119,8 +122,10 @@ private:
    std::list< TObject* >   m_inputVarPointers; // Pointers storing the input objects
                                                // created by ConnectVariable(...)
 
-   // Vector to hold the output trees
+   /// Vector to hold the output trees
    std::vector< TTree* > m_outputTrees;
+   /// Vector to hold the metadata trees
+   std::vector< TTree* > m_metaTrees;
 
    // We have to keep the pointers to the output variables defined by the user.
    // ROOT keeps track of the objects by storing pointers to pointers to the
