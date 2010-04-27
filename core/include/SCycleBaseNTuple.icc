@@ -26,6 +26,7 @@
 // ROOT include(s):
 #include <TTree.h>
 #include <TBranch.h>
+#include <TString.h>
 
 // Local include(s):
 #include "SPointer.h"
@@ -41,6 +42,9 @@
  * such an object, and give this pointer to the function. You don't need to
  * initialise the pointer to anything, the function will take care about that.
  *
+ * The function checks if the variable given to the function is of the right type.
+ * Unfortunately ROOT is not able to do this itself.
+ *
  * See the example cycles for some details.
  *
  * @param treeName Name of the TTree in the input file
@@ -54,14 +58,15 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
                                         T& variable ) throw ( SError ) {
 
    m_logger << VERBOSE << "ConnectVariable( treeName = \"" << treeName
-            << "\", branchName = \"" << branchName << "\") called" << SLogger::endmsg;
+            << "\", branchName = \"" << branchName << "\" ) called" << SLogger::endmsg;
 
    // Access the TTree. The function will throw an exception if unsuccessful
    TTree* tree = GetInputTree( treeName );
    TBranch* br = 0;
 
    // Check if the branch actually exists:
-   if( ! tree->GetBranch( branchName ) ) {
+   TBranch* branch_info;
+   if( ! ( branch_info = tree->GetBranch( branchName ) ) ) {
       m_logger << ERROR << "Branch \"" << branchName << "\" doesn't exist in TTree \""
                << treeName << "\"" << SLogger::endmsg;
       return false;
@@ -73,6 +78,30 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    const char* type_name = typeid( variable ).name();
    m_logger << VERBOSE << "Type ID: " << type_name << SLogger::endmsg;
    if( strlen( type_name ) == 1 ) {
+
+      // Check whether the branch matches the type of the variable given to this
+      // function:
+      m_logger << VERBOSE << "Type of the variable held by the branch: "
+               << branch_info->GetTitle() << SLogger::endmsg;
+      TString title( branch_info->GetTitle() );
+      if( ! title.Contains( "/" ) ) {
+         m_logger << ERROR << "Trying to connect a primitive variable to the branch: "
+                  << branchName << SLogger::endmsg;
+         m_logger << ERROR << "  which has the type: " << branch_info->GetClassName()
+                  << SLogger::endmsg;
+         throw SError( "Wrong variable type given for branch: " + TString( branchName ),
+                       SError::SkipCycle );
+      }
+      if( ! title.EndsWith( RootType( type_name ) ) ) {
+         m_logger << ERROR << "Trying to connect a wrong type of primitive to the branch: "
+                  << branchName << SLogger::endmsg;
+         m_logger << ERROR << "  Use variable of type: " << title << SLogger::endmsg;
+         throw SError( "Wrong variable type given for branch: " + TString( branchName ),
+                       SError::SkipCycle );
+      } else {
+         m_logger << VERBOSE << "The branch and variable types seem to match"
+                  << SLogger::endmsg;
+      }
 
       // For primitive types nothing fancy needs to be done
       m_logger << VERBOSE << "The supplied variable is a \"primitive\""
@@ -178,6 +207,9 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
  * Note that you don't get ownership of the object created by this function! It
  * will be deleted automatically!
  *
+ * Note also that the code doesn't need to check the type of the pointer given
+ * to the function. ROOT does this for us.
+ *
  * @param treeName Name of the TTree in the input file
  * @param branchName Name of the branch in the TTree
  * @param variable The variable that should be connected to the branch
@@ -202,7 +234,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    //
    // Detect what kind of variable we're dealing with:
    //
-   const char* type_name = typeid( variable ).name();
+   const char* type_name = typeid( *variable ).name();
    m_logger << VERBOSE << "Type ID: " << type_name << SLogger::endmsg;
    if( strlen( type_name ) == 1 ) {
 

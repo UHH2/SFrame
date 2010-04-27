@@ -1,3 +1,14 @@
+2010.04.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a check in SCycleBaseNTuple::ConnectVariable(...) that makes
+	  sure that the user tries to connect the correct type of variable
+	  to a branch. Previously it was possible to try to connect a
+	  primitive variable (bool, int, etc.) to a branch holding let's
+	  say a vector<double> variable. In this case ROOT crashed in a
+	  quite undecipherable way in the ConnectVariable(...) function.
+	  This should not happen anymore, the code will exit with an error
+	  message if the user makes this mistake.
+	* Tagging as SFrame-03-03-03
+
 2010.04.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a new configuration option to the XML files: <MetadataTree>
 	  Using this the user can access additional TTree-s in the input
