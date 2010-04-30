@@ -18,7 +18,6 @@
 #include <vector>
 
 // ROOT include(s):
-#include "TObject.h"
 #include "TString.h"
 
 // Local include(s):
@@ -43,7 +42,7 @@ class ISCycleBase;
  *
  * @version $Revision$
  */
-class SCycleController : public TObject {
+class SCycleController {
 
 public:
    /// Constructor specifying the configuration file
@@ -77,7 +76,6 @@ private:
    void InitProof( const TString& server, const Int_t& nodes);
    void ShutDownProof();
    void WriteCycleOutput( TList* olist, const TString& filename, Bool_t update ) const;
-   void PrintWorkerLogs() const;
 
    /// vector holding all analysis cycles to be executed
    std::vector< ISCycleBase* > m_analysisCycles;
@@ -91,10 +89,6 @@ private:
    TProof* m_proof;
 
    mutable SLogger m_logger;
-
-#ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleController, 0 );
-#endif // DOXYGEN_IGNORE
 
 }; // class SCycleController
 

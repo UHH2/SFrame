@@ -21,6 +21,8 @@
 // The objects sent over the network when running on PROOF:
 #pragma link C++ class SGeneratorCut+;
 #pragma link C++ class std::vector<SGeneratorCut>+;
+#pragma link C++ class SDataSet+;
+#pragma link C++ class std::vector<SDataSet>+;
 #pragma link C++ class SFile+;
 #pragma link C++ class std::vector<SFile>+;
 #pragma link C++ class STree+;
@@ -45,6 +47,5 @@
 #pragma link C++ class SCycleBaseExec+;
 #pragma link C++ class ISCycleBase+;
 #pragma link C++ class SCycleBase+;
-#pragma link C++ class SCycleController+;
 
 #endif // __CINT__

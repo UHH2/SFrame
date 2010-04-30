@@ -33,6 +33,56 @@ class TDirectory;
 class TDSet;
 
 /**
+ *   @short Class describing one input PROOF dataset for a cycle
+ *
+ *          This class is used internally to handle datasets as inputs to the
+ *          analysis cycles. Use the "sframe_dset_*" functions to find out the
+ *          exact names of the datasets.
+ *
+ * @version $Revision$
+ */
+class SDataSet : public TObject {
+
+public:
+   /// Default constructor
+   SDataSet( const TString& n = "", Double_t l = 1.0 )
+      : name( n ), lumi( l ), events( 0 ) {}
+
+   /// Assignment operator
+   SDataSet& operator= ( const SDataSet& parent );
+   /// Equality operator
+   Bool_t operator== ( const SDataSet& rh ) const;
+   /// Non-equality operator
+   Bool_t operator!= ( const SDataSet& rh ) const;
+
+   /// Dataset name
+   /**
+    * This should be the fully qualified name of the dataset.
+    */
+   TString name;
+   /// Luminosity of the dataset
+   /**
+    * Every dataset is assigned a luminosity. This is used to calculate
+    * the correct event weights for SCycleBase::ExecuteEvent to normalise
+    * the different Monte Carlos correctly to each other.
+    */
+   Double_t lumi;
+   /// Number of events in the dataset
+   /**
+    * This property is calculated by the framework in
+    * SCycleBase::CheckInputFiles. It is used for calculating the correct
+    * weights when only a specified number of events should be processed
+    * from a dataset. (So the luminosity of the dataset has to be weighted.)
+    */
+   Long64_t events;
+
+#ifndef DOXYGEN_IGNORE
+   ClassDef( SDataSet, 1 );
+#endif // DOXYGEN_IGNORE
+
+}; // class SDataSet
+
+/**
  *   @short Class describing an input file to the analysis.
  *
  *          It is used to describe one input or output file (as defined
@@ -172,12 +222,14 @@ public:
    void AddOutputSTree  ( const STree& stree )           { m_outputTrees.push_back( stree ); }
    /// Add a new "meta tree" to the input data
    void AddMetaSTree    ( const STree& stree )           { m_metaTrees.push_back( stree ); }
+   /// Add a new dataset to the input data
+   void AddDataSet      ( const SDataSet& dset );
 
    /// Add some number of events to the input data
    void AddEvents       ( Long64_t events )              { m_eventsTotal += events; }
 
    /// Collect information about the input files (needed before running)
-   void ValidateInput() throw( SError );
+   void ValidateInput( const char* pserver = 0 ) throw( SError );
 
    /// Get the name of the input data type
    const TString&                       GetType() const           { return m_type; }
@@ -197,6 +249,8 @@ public:
    const std::vector< STree >&          GetOutputTrees() const    { return m_outputTrees; }
    /// Get all the defined meta trees
    const std::vector< STree >&          GetMetaTrees() const      { return m_metaTrees; }
+   /// Get all the defined input datasets
+   const std::vector< SDataSet >&       GetDataSets() const       { return m_dataSets; }
 
    /// Get the dataset representing all the input files
    TDSet* GetDSet() const;
@@ -223,6 +277,8 @@ public:
    void print() const;
 
 private:
+   void ValidateInputFiles() throw( SError );
+   void ValidateInputDataSets( const char* pserver ) throw( SError );
    Bool_t LoadInfoOnFile( std::vector< SFile >::iterator& file_itr,
                           TFileCollection* filecoll );
    TFileInfo* AccessFileInfo( std::vector< SFile >::iterator& file_itr,
@@ -239,6 +295,7 @@ private:
    std::vector< STree >         m_persTrees;
    std::vector< STree >         m_outputTrees;
    std::vector< STree >         m_metaTrees;
+   std::vector< SDataSet >      m_dataSets;
    Double_t                     m_totalLumiSum;
    Long64_t                     m_eventsTotal;
    Long64_t                     m_neventsmax;

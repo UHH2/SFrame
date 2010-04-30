@@ -386,6 +386,21 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
          inputData.AddGenCut( SGeneratorCut( treeName, formula ) );
 
       }
+      // get the input datasets
+      else if( child->GetNodeName() == TString( "DataSet" ) ) {
+         TString name = "";
+         Double_t lumi = 0.;
+
+         attribute = 0;
+         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0) {
+            if( attribute->GetName() == TString( "Name" ) )
+               name = attribute->GetValue();
+            if( attribute->GetName() == TString( "Lumi" ) )
+               lumi = atof( attribute->GetValue() );
+         }
+         inputData.AddDataSet( SDataSet( name, lumi ) );
+
+      }
       // get the input files
       else if( child->GetNodeName() == TString( "In" ) ) {
          TString fileName = "";

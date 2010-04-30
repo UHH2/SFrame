@@ -52,7 +52,9 @@ def main():
     filecoll = ROOT.TFileCollection( "dsetcoll", "File collection for making a data set" )
     for file in files:
         filename = options.prefix + os.path.abspath( os.path.realpath( file ) )
-        filecoll.Add( filename )
+        print "Adding to the dataset: " + filename
+        fileinfo = ROOT.TFileInfo( filename )
+        filecoll.Add( fileinfo )
 
     if not proof.RegisterDataSet( options.dset, filecoll ):
         print "ERROR:"

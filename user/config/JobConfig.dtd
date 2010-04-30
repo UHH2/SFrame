@@ -46,7 +46,7 @@
         ProofNodes           CDATA            "-1"
 >
 
-<!ELEMENT InputData (GeneratorCut*,In*,PersTree*,InputTree*,OutputTree*,MetadataTree*)>
+<!ELEMENT InputData (GeneratorCut*,DataSet*,In*,PersTree*,InputTree*,OutputTree*,MetadataTree*)>
 <!ATTLIST InputData
         Type                 CDATA            #REQUIRED
         Version              CDATA            #REQUIRED
@@ -62,15 +62,15 @@
         Formula              CDATA            #REQUIRED
 >
 
-<!ELEMENT In EMPTY>
-<!ATTLIST In
-        FileName              CDATA            #REQUIRED
-        Lumi                  CDATA            #REQUIRED
->
-
 <!ELEMENT DataSet EMPTY>
 <!ATTLIST DataSet
         Name                  CDATA            #REQUIRED
+        Lumi                  CDATA            #REQUIRED
+>
+
+<!ELEMENT In EMPTY>
+<!ATTLIST In
+        FileName              CDATA            #REQUIRED
         Lumi                  CDATA            #REQUIRED
 >
 

@@ -1,3 +1,10 @@
+2010.04.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added first implementation to support PROOF (PQ2) datasets in
+	  the InputData.
+	* Created a new singleton class (SProofManager) to handle the
+	  PROOF connections. Moved some of the functionality that was
+	  previously in SCycleController, to this new class.
+
 2010.04.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a check in SCycleBaseNTuple::ConnectVariable(...) that makes
 	  sure that the user tries to connect the correct type of variable

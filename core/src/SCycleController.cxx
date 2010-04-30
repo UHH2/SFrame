@@ -48,10 +48,7 @@
 #include "../include/SOutputFile.h"
 #include "../include/SCycleConfig.h"
 #include "../include/SCycleOutput.h"
-
-#ifndef DOXYGEN_IGNORE
-ClassImp( SCycleController );
-#endif // DOXYGEN_IGNORE
+#include "../include/SProofManager.h"
 
 /**
  * The user has to specify a configuration file already at the construction
@@ -63,7 +60,7 @@ ClassImp( SCycleController );
  */
 SCycleController::SCycleController( const TString& xmlConfigFile )
    : m_curCycle( 0 ), m_isInitialized( kFALSE ), m_xmlConfigFile( xmlConfigFile ),
-     m_proof( 0 ), m_logger( this ) {
+     m_proof( 0 ), m_logger( "SCycleController" ) {
 
 }
 
@@ -81,7 +78,6 @@ SCycleController::~SCycleController() {
    }
 
    ShutDownProof();
-
 }
 
 /**
@@ -408,7 +404,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
             pkg.Remove( pkg.Length() - 4, 4 );
          }
 
-         m_logger << DEBUG << "Enabling package: " << pkg << SLogger::endmsg;
+         m_logger << INFO << "Enabling package: " << pkg << SLogger::endmsg;
          if( m_proof->EnablePackage( pkg, kTRUE ) ) {
             m_logger << ERROR << "There was a problem with enabling "
                      << *package << SLogger::endmsg;
@@ -418,11 +414,6 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
 
       }
 
-   } else {
-      //
-      // Shut down a possibly open connection:
-      //
-      ShutDownProof();
    }
 
    // Number of processed events:
@@ -517,6 +508,13 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       //
       if( config.GetRunMode() == SCycleConfig::LOCAL ) {
 
+         if( id->GetDataSets().size() ) {
+            m_logger << ERROR << "Can't use DataSet-s as input in LOCAL mode!" << SLogger::endmsg;
+            m_logger << ERROR << "Skipping InputData type: " << id->GetType()
+                     << " version: " << id->GetVersion() << SLogger::endmsg;
+            continue;
+         }
+
          //
          // Create a chain with all the specified input files:
          //
@@ -593,23 +591,59 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
             m_proof->AddInput( configList.At( i ) );
          }
 
-         //
-         // Run the cycle on PROOF. Unfortunately the checking of the "successfullness"
-         // of the PROOF job is not working too well... Even after a *lot* of error
-         // messages the TProof::Process(...) command can still return a success code,
-         // which can lead to nasty crashes...
-         //
-         if( m_proof->Process( id->GetDSet(), cycle->GetName(), "", evmax,
-                               id->GetNEventsSkip() ) == -1 ) {
-            m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
-            m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
-            m_logger << ERROR << "  ID type    = " << inputData.GetType()
-                     << SLogger::endmsg;
-            m_logger << ERROR << "  ID version = " << inputData.GetVersion()
-                     << SLogger::endmsg;
-            m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
-            break;
+         if( id->GetDataSets().size() ) {
+
+            // Merge the dataset names in the way that PROOF expects them. This is
+            // "<dataset 1>|<dataset 2>|...". Note that this only works in ROOT
+            // versions newer than 5.27/02, but SInputData should take care about
+            // removing multiple datasets when using an "old" ROOT release.
+            TString dsets = "";
+            for( std::vector< SDataSet >::const_iterator ds = id->GetDataSets().begin();
+                 ds != id->GetDataSets().end(); ++ds ) {
+               if( ds == id->GetDataSets().begin() ) {
+                  dsets += ds->name;
+               } else {
+                  dsets += "|" + ds->name;
+               }
+            }
+
+            // Process the events:
+            if( m_proof->Process( dsets, cycle->GetName(), "", evmax,
+                                  id->GetNEventsSkip() ) == -1 ) {
+               m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
+               m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
+               m_logger << ERROR << "  ID type    = " << inputData.GetType()
+                        << SLogger::endmsg;
+               m_logger << ERROR << "  ID version = " << inputData.GetVersion()
+                        << SLogger::endmsg;
+               m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
+               break;
+            }
+
+         } else if( id->GetSFileIn().size() ) {
+
+            //
+            // Run the cycle on PROOF. Unfortunately the checking of the "successfullness"
+            // of the PROOF job is not working too well... Even after a *lot* of error
+            // messages the TProof::Process(...) command can still return a success code,
+            // which can lead to nasty crashes...
+            //
+            if( m_proof->Process( id->GetDSet(), cycle->GetName(), "", evmax,
+                                  id->GetNEventsSkip() ) == -1 ) {
+               m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
+               m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
+               m_logger << ERROR << "  ID type    = " << inputData.GetType()
+                        << SLogger::endmsg;
+               m_logger << ERROR << "  ID version = " << inputData.GetVersion()
+                        << SLogger::endmsg;
+               m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
+               break;
+            }
+
+         } else {
+            m_logger << ERROR << "Nothing was executed using PROOF!" << SLogger::endmsg;
          }
+
          outputs = m_proof->GetOutputList();
 
       } else {
@@ -710,20 +744,11 @@ void SCycleController::DeleteAllAnalysisCycles() {
 void SCycleController::InitProof( const TString& server, const Int_t& nodes ) {
 
    //
-   // Check if the connection has to be (re)opened:
-   //
-   if( m_proof ) {
-      // Unfortunately this check can not be true...
-      if( m_proof->GetManager()->GetUrl() == server ) return;
-      ShutDownProof();
-   }
-
-   //
    // Open the connection:
    //
    m_logger << INFO << "Opening PROOF connection to: " << server
             << SLogger::endmsg;
-   m_proof = TProof::Open( server );
+   m_proof = SProofManager::Instance()->Open( server );
    if( nodes > 0 ) m_proof->SetParallel( nodes );
 
    return;
@@ -733,35 +758,9 @@ void SCycleController::InitProof( const TString& server, const Int_t& nodes ) {
 void SCycleController::ShutDownProof() {
 
    //
-   // Check if there is a connection:
+   // Clean up the PROOF connection(s):
    //
-   if( ! m_proof ) return;
-
-   //
-   // Print the worker logs only in DEBUG or VERBOSE mode. Normally we're not interested
-   // in the event processing messages...
-   //
-   m_logger << INFO << "***************************************************************"
-            << SLogger::endmsg;
-   m_logger << INFO << "*                                                             *"
-            << SLogger::endmsg;
-   m_logger << INFO << "* Printing all worker logs before closing PROOF connection... *"
-            << SLogger::endmsg;
-   m_logger << INFO << "*                                                             *"
-            << SLogger::endmsg;
-   m_logger << INFO << "***************************************************************"
-            << SLogger::endmsg;
-   PrintWorkerLogs();
-
-   //
-   // Close the connection by deleting the objects in a specific order:
-   //
-   m_logger << DEBUG << "Closing PROOF connection to: "
-            << m_proof->GetManager()->GetUrl() << SLogger::endmsg;
-   TProofMgr* mgr = m_proof->GetManager();
-   delete m_proof;
-   delete mgr;
-
+   SProofManager::Instance()->Cleanup();
    m_proof = 0;
 
    return;
@@ -845,88 +844,6 @@ void SCycleController::WriteCycleOutput( TList* olist,
       }
 
    }
-
-   return;
-
-}
-
-/**
- * This internal function collects the log files from all the nodes (the master
- * and the slaves) and prints them to the screen. Currently the nodes print waaay
- * too much information. Hopefully 5.22 will remove most of these...
- */
-void SCycleController::PrintWorkerLogs() const {
-
-   //
-   // Make sure that a connection is open:
-   //
-   if( ! m_proof ) {
-      m_logger << ERROR << "Not in PROOF mode --> Can't call PrintWorkerLogs()!"
-               << SLogger::endmsg;
-      return;
-   }
-
-   //
-   // Get info about the slaves:
-   //
-   TList* slaveInfos = m_proof->GetListOfSlaveInfos();
-
-   //
-   // Retrieve all logs:
-   //
-   TProofLog* log = m_proof->GetManager()->GetSessionLogs();
-   TList* logList = log->GetListOfLogs();
-   for( Int_t i = 0; i < logList->GetSize(); ++i ) {
-
-      //
-      // Access the log of a single node:
-      //
-      TProofLogElem* element = dynamic_cast< TProofLogElem* >( logList->At( i ) );
-      if( ! element ) {
-         m_logger << ERROR << "Log element not recognised!" << SLogger::endmsg;
-         continue;
-      }
-
-      //
-      // Find "the name" of the node. TProofLogElem objects only know that they
-      // came from node "0.2" for instance. This small loop matches these
-      // identifiers to the proper node names in the slaveInfos list.
-      //
-      // If the identifier is not found in the list, then it has to be the master:
-      TString nodeName = m_proof->GetMaster();
-      for( Int_t i = 0; i < slaveInfos->GetSize(); ++i ) {
-
-         // Access the TSlaveInfo object:
-         TSlaveInfo* info = dynamic_cast< TSlaveInfo* >( slaveInfos->At( i ) );
-         if( ! info ) {
-            m_logger << ERROR << "Couldn't use a TSlaveInfo object!" << SLogger::endmsg;
-            continue;
-         }
-         // Check if this TSlaveInfo describes the source of the log:
-         if( ! strcmp( element->GetName(), info->GetOrdinal() ) ) {
-            nodeName = info->GetName();
-            break;
-         }
-      }
-
-      //
-      // Print the log. Note that we don't need to redirect the log lines
-      // to m_logger. The log lines of the nodes will already be formatted, so
-      // printing them through SLogger would just look ugly.
-      //
-      m_logger << INFO << "=================================================="
-               << SLogger::endmsg;
-      m_logger << INFO << "Output from node: " << nodeName << " ("
-               << element->GetName() << ")" << SLogger::endmsg;
-
-      element->GetMacro()->Print();
-
-      m_logger << INFO << "=================================================="
-               << SLogger::endmsg;
-
-   }
-
-   delete log;
 
    return;
 

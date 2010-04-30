@@ -18,18 +18,64 @@
 #include <TFileInfo.h>
 #include <THashList.h>
 #include <TDSet.h>
+#include <TProof.h>
+#include <TROOT.h>
 
 // Local include(s):
 #include "../include/SInputData.h"
 #include "../include/SError.h"
+#include "../include/SProofManager.h"
 
 #ifndef DOXYGEN_IGNORE
+ClassImp( SDataSet );
 ClassImp( SFile );
 ClassImp( STree );
 ClassImp( SInputData );
 #endif // DOXYGEN_IGNORE
 
 using namespace std;
+
+/**
+ * It is only necessary for some technical affairs.
+ */
+SDataSet& SDataSet::operator= ( const SDataSet& parent ) {
+
+   this->name = parent.name;
+
+   return *this;
+}
+
+/**
+ * The equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 == inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
+Bool_t SDataSet::operator== ( const SDataSet& rh ) const {
+
+   if( this->name == rh.name ) {
+      return kTRUE;
+   } else {
+      return kFALSE;
+   }
+}
+
+/**
+ * The non-equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 != inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
+Bool_t SDataSet::operator!= ( const SDataSet& rh ) const {
+
+   return ( ! ( *this == rh ) );
+}
 
 /**
  * It is only necessary for some technical affairs.
@@ -41,7 +87,6 @@ SFile& SFile::operator= ( const SFile& parent ) {
    this->events = parent.events;
 
    return *this;
-
 }
 
 /**
@@ -61,7 +106,6 @@ Bool_t SFile::operator== ( const SFile& rh ) const {
    } else {
       return kFALSE;
    }
-
 }
 
 /**
@@ -76,7 +120,6 @@ Bool_t SFile::operator== ( const SFile& rh ) const {
 Bool_t SFile::operator!= ( const SFile& rh ) const {
 
    return ( ! ( *this == rh ) );
-
 }
 
 /**
@@ -87,7 +130,6 @@ STree& STree::operator= ( const STree& parent ) {
    this->treeName = parent.treeName;
 
    return *this;
-
 }
 
 /**
@@ -106,7 +148,6 @@ Bool_t STree::operator== ( const STree& rh ) const {
    } else {
       return kFALSE;
    }
-
 }
 
 /**
@@ -121,7 +162,6 @@ Bool_t STree::operator== ( const STree& rh ) const {
 Bool_t STree::operator!= ( const STree& rh ) const {
 
    return ( ! ( *this == rh ) );
-
 }
 
 /**
@@ -169,6 +209,19 @@ void SInputData::AddSFileIn( const SFile& sfile ) {
 }
 
 /**
+ * This adds a new dataset to the input data, taking care of adding the luminosity
+ * of the dataset to the total.
+ *
+ * @param dset The dataset to be added to the input data
+ */
+void SInputData::AddDataSet( const SDataSet& dset ) {
+
+   m_dataSets.push_back( dset );
+   m_totalLumiSum += dset.lumi;
+   return;
+}
+
+/**
  * This function takes care of investigating all the input files defined in the
  * configuration, and checking how many events they each contain. This information
  * is used at run time to calculate the correct weights of the events.
@@ -177,7 +230,190 @@ void SInputData::AddSFileIn( const SFile& sfile ) {
  * if it exists. The feature has to be enabled by setting Cacheable="1" in the declaration
  * of the InputData block in the configuration XML.
  */
-void SInputData::ValidateInput() throw( SError ) {
+void SInputData::ValidateInput( const char* pserver ) throw( SError ) {
+
+   // Check that the user only specified one type of input:
+   if( m_sfileIn.size() && m_dataSets.size() ) {
+      m_logger << ERROR << "You cannot use PROOF datasets AND regular input files in the"
+               << SLogger::endmsg;
+      m_logger << ERROR << "same InputData at the moment. Please only use one type!"
+               << SLogger::endmsg;
+      throw SError( "Trying to use datasets and files in the same ID",
+                    SError::SkipInputData );
+   }
+
+   // Check that the user did specify some kind of input:
+   if( ( ! m_sfileIn.size() ) && ( ! m_dataSets.size() ) ) {
+      m_logger << ERROR << "You need to define at least one file or one dataset as input"
+               << SLogger::endmsg;
+      throw SError( "Missing input specification", SError::SkipInputData );
+   }
+
+   // Now do the actual validation:
+   if( m_sfileIn.size() ) {
+      ValidateInputFiles();
+   } else if( m_dataSets.size() ) {
+      if( ! pserver ) {
+         m_logger << ERROR << "PROOF server not specified. Can't validate datasets!"
+                  << SLogger::endmsg;
+         throw SError( "Can't validate PROOF datasets without server name",
+                       SError::SkipInputData );
+      }
+      ValidateInputDataSets( pserver );
+   }
+
+   return;
+
+}
+
+TDSet* SInputData::GetDSet() const {
+
+   return m_dset;
+}
+
+Double_t SInputData::GetTotalLumi() const { 
+  
+   Double_t return_lumi = 0.;
+   // use the given luminosity for this InputData in case it is specified
+   if( m_totalLumiGiven ) return_lumi = m_totalLumiGiven;
+   // otherwise use the sum of all files
+   else return_lumi = m_totalLumiSum;
+  
+   // make sure that the lumi is not zero
+   if( ! return_lumi ) 
+      m_logger << FATAL << "total luminosity for "<< GetType() << " is ZERO!"
+               << SLogger::endmsg;
+
+   return return_lumi;
+}
+
+Double_t SInputData::GetScaledLumi() const { 
+  
+   Double_t scaled_lumi = 0.;
+
+   if( m_neventsmax > -1. ) {
+      scaled_lumi = GetTotalLumi() * m_neventsmax / m_eventsTotal;
+   } else
+      scaled_lumi=GetTotalLumi();
+
+   return scaled_lumi;
+}
+
+/**
+ * It is only necessary for some technical affairs.
+ */
+SInputData& SInputData::operator= ( const SInputData& parent ) {
+
+   this->m_type = parent.m_type;
+   this->m_version = parent.m_version;
+   this->m_totalLumiGiven = parent.m_totalLumiGiven;
+   this->m_gencuts = parent.m_gencuts;
+   this->m_sfileIn = parent.m_sfileIn;
+   this->m_inputTrees = parent.m_inputTrees;
+   this->m_persTrees = parent.m_persTrees;
+   this->m_outputTrees = parent.m_outputTrees;
+   this->m_totalLumiSum = parent.m_totalLumiSum;
+   this->m_eventsTotal = parent.m_eventsTotal;
+   this->m_neventsmax = parent.m_neventsmax;
+   this->m_neventsskip = parent.m_neventsskip;
+   this->m_dset = parent.m_dset;
+
+   return *this;
+
+}
+
+/**
+ * The equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 == inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
+Bool_t SInputData::operator== ( const SInputData& rh ) const {
+
+   if( ( this->m_type == rh.m_type ) && ( this->m_version == rh.m_version ) &&
+       ( this->m_totalLumiGiven == rh.m_totalLumiGiven ) &&
+       ( this->m_gencuts == rh.m_gencuts ) && ( this->m_sfileIn == rh.m_sfileIn ) &&
+       ( this->m_inputTrees == rh.m_inputTrees ) &&
+       ( this->m_persTrees == rh.m_persTrees ) &&
+       ( this->m_outputTrees == rh.m_outputTrees ) &&
+       ( this->m_totalLumiSum == rh.m_totalLumiSum ) &&
+       ( this->m_eventsTotal == rh.m_eventsTotal ) &&
+       ( this->m_neventsmax == rh.m_neventsmax ) &&
+       ( this->m_neventsskip == rh.m_neventsskip ) &&
+       ( this->m_dset->IsEqual( rh.m_dset ) ) ) {
+      return kTRUE;
+   } else {
+      return kFALSE;
+   }
+
+}
+
+/**
+ * The non-equality operator is put in to make code such as
+ *
+ * <code>
+ *    if( inputData1 != inputData2 ) ...
+ * </code>
+ *
+ * possible.
+ */
+Bool_t SInputData::operator!= ( const SInputData& rh ) const {
+
+   return ( ! ( *this == rh ) );
+
+}
+
+/**
+ * At initialisation the cycles print the configuration of the input data
+ * which was configured in the XML file. This function is used to print
+ * the configuration of a given input data object.
+ */
+void SInputData::print() const {
+
+   m_logger << INFO << " ---------------------------------------------------------" << endl;
+   m_logger << " Type               : " << GetType() << endl;
+   m_logger << " Version            : " << GetVersion() << endl;
+   m_logger << " Total luminosity   : " << GetTotalLumi() << "pb-1" << endl;
+   m_logger << " NEventsMax         : " << GetNEventsMax() << endl;
+   m_logger << " NEventsSkip        : " << GetNEventsSkip() << endl;
+   m_logger << " Cacheable          : " << ( GetCacheable() ? "Yes" : "No" ) << endl;
+
+   for( vector< SGeneratorCut >::const_iterator gc = m_gencuts.begin();
+        gc != m_gencuts.end(); ++gc )
+      m_logger << " Generator cut      : Tree:" << gc->GetTreeName() << " Formula: "
+               << gc->GetFormula() << endl;
+
+   for( vector< SDataSet >::const_iterator ds = m_dataSets.begin();
+        ds != m_dataSets.end(); ++ds )
+      m_logger << " Data Set           : '" << ds->name << "' (name) | '" << ds->lumi
+               << "' (lumi)" << endl;
+   for( vector< SFile >::const_iterator f = m_sfileIn.begin(); f != m_sfileIn.end();
+        ++f )
+      m_logger << " Input SFile        : " << "'" << f->file << "' (file) | '" << f->lumi
+               << "' (lumi)" << endl;
+   for( std::vector< STree >::const_iterator t = m_inputTrees.begin();
+        t != m_inputTrees.end(); ++t )
+      m_logger << " Input tree         : " << "'" << t->treeName << "'" << endl;
+   for( std::vector< STree >::const_iterator t = m_persTrees.begin();
+        t != m_persTrees.end(); ++t )
+      m_logger << " Persistent tree    : " << "'" << t->treeName << "'" << endl;
+   for( std::vector< STree >::const_iterator t = m_outputTrees.begin();
+        t != m_outputTrees.end(); ++t )
+      m_logger << " Output tree        : " << "'" << t->treeName << "'" << endl;
+   for( std::vector< STree >::const_iterator t = m_metaTrees.begin();
+        t != m_metaTrees.end(); ++t )
+      m_logger << " Metadata tree      : " << "'" << t->treeName << "'" << endl;
+
+   m_logger << " ---------------------------------------------------------" << SLogger::endmsg;
+
+   return;
+
+}
+
+void SInputData::ValidateInputFiles() throw( SError ) {
 
    //
    // Set up the connection to the InputData cache if it's asked for:
@@ -260,7 +496,7 @@ void SInputData::ValidateInput() throw( SError ) {
             TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
             if( ! tree ) {
                m_logger << WARNING << "Couldn't find tree " << st->treeName
-                        << "in file " << sf->file << SLogger::endmsg;
+                        << " in file " << sf->file << SLogger::endmsg;
                m_logger << WARNING << "Removing file from the input file list"
                         << SLogger::endmsg;
                throw SError( SError::SkipFile );
@@ -388,9 +624,9 @@ void SInputData::ValidateInput() throw( SError ) {
                   << file->GetName() << SLogger::endmsg;
 
       } catch( const SError& ) {
+         m_totalLumiSum -= sf->lumi;
          sf = m_sfileIn.erase( sf );
          --sf;
-         continue;
       }
 
       // Close the input file:
@@ -472,150 +708,134 @@ void SInputData::ValidateInput() throw( SError ) {
             << SLogger::endmsg;
 
    return;
-
 }
 
-TDSet* SInputData::GetDSet() const {
+void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
 
-   return m_dset;
-}
+   // Connect to the PROOF server:
+   TProof* server = SProofManager::Instance()->Open( pserver );
 
-Double_t SInputData::GetTotalLumi() const { 
-  
-   Double_t return_lumi = 0.;
-   // use the given luminosity for this InputData in case it is specified
-   if( m_totalLumiGiven ) return_lumi = m_totalLumiGiven;
-   // otherwise use the sum of all files
-   else return_lumi = m_totalLumiSum;
-  
-   // make sure that the lumi is not zero
-   if( ! return_lumi ) 
-      m_logger << FATAL << "total luminosity for "<< GetType() << "is ZERO!"
+   // Check the number of defined datasets. It's only possible to use multiple datasets
+   // in a single InputData starting from ROOT 5.27/02. In previous releases only the
+   // first one can be used.
+   if( ( ROOT_VERSION_CODE < ROOT_VERSION( 5, 27, 02 ) ) &&
+       ( m_dataSets.size() > 1 ) ) {
+
+      m_logger << WARNING << "You're currently using ROOT version: "
+               << gROOT->GetVersion() << "\n"
+               << "This version doesn't yet support defining multiple\n"
+               << "datasets per InputData. Only the first one is going to be used!"
                << SLogger::endmsg;
-
-   return return_lumi;
-}
-
-Double_t SInputData::GetScaledLumi() const { 
-  
-   Double_t scaled_lumi = 0.;
-
-   if( m_neventsmax > -1. ) {
-      scaled_lumi = GetTotalLumi() * m_neventsmax / m_eventsTotal;
-   } else
-      scaled_lumi=GetTotalLumi();
-
-   return scaled_lumi;
-}
-
-/**
- * It is only necessary for some technical affairs.
- */
-SInputData& SInputData::operator= ( const SInputData& parent ) {
-
-   this->m_type = parent.m_type;
-   this->m_version = parent.m_version;
-   this->m_totalLumiGiven = parent.m_totalLumiGiven;
-   this->m_gencuts = parent.m_gencuts;
-   this->m_sfileIn = parent.m_sfileIn;
-   this->m_inputTrees = parent.m_inputTrees;
-   this->m_persTrees = parent.m_persTrees;
-   this->m_outputTrees = parent.m_outputTrees;
-   this->m_totalLumiSum = parent.m_totalLumiSum;
-   this->m_eventsTotal = parent.m_eventsTotal;
-   this->m_neventsmax = parent.m_neventsmax;
-   this->m_neventsskip = parent.m_neventsskip;
-   this->m_dset = parent.m_dset;
-
-   return *this;
-
-}
-
-/**
- * The equality operator is put in to make code such as
- *
- * <code>
- *    if( inputData1 == inputData2 ) ...
- * </code>
- *
- * possible.
- */
-Bool_t SInputData::operator== ( const SInputData& rh ) const {
-
-   if( ( this->m_type == rh.m_type ) && ( this->m_version == rh.m_version ) &&
-       ( this->m_totalLumiGiven == rh.m_totalLumiGiven ) &&
-       ( this->m_gencuts == rh.m_gencuts ) && ( this->m_sfileIn == rh.m_sfileIn ) &&
-       ( this->m_inputTrees == rh.m_inputTrees ) &&
-       ( this->m_persTrees == rh.m_persTrees ) &&
-       ( this->m_outputTrees == rh.m_outputTrees ) &&
-       ( this->m_totalLumiSum == rh.m_totalLumiSum ) &&
-       ( this->m_eventsTotal == rh.m_eventsTotal ) &&
-       ( this->m_neventsmax == rh.m_neventsmax ) &&
-       ( this->m_neventsskip == rh.m_neventsskip ) &&
-       ( this->m_dset->IsEqual( rh.m_dset ) ) ) {
-      return kTRUE;
-   } else {
-      return kFALSE;
+      m_logger << WARNING << "To use multiple datasets, upgrate to at least ROOT 5.27/02"
+               << SLogger::endmsg;
+      m_dataSets.resize( 1 );
+      m_totalLumiSum = m_dataSets.front().lumi;
    }
 
-}
+   //
+   // Loop over the specified datasets:
+   //
+   for( std::vector< SDataSet >::iterator ds = m_dataSets.begin();
+        ds != m_dataSets.end(); ++ds ) {
 
-/**
- * The non-equality operator is put in to make code such as
- *
- * <code>
- *    if( inputData1 != inputData2 ) ...
- * </code>
- *
- * possible.
- */
-Bool_t SInputData::operator!= ( const SInputData& rh ) const {
+      try {
 
-   return ( ! ( *this == rh ) );
+         //
+         // Check if the dataset exists on the server:
+         //
+         TFileCollection* filecoll = server->GetDataSet( ds->name );
+         if( ! filecoll ) {
+            m_logger << ERROR << "Dataset \"" << ds->name << "\" doesn't exist on server: "
+                     << pserver << SLogger::endmsg;
+            throw SError( SError::SkipFile );
+         }
 
-}
+         //
+         // Investigate the "regular" trees:
+         //
+         Bool_t firstPassed = kFALSE;
+         Long64_t entries = 0;
+         for( std::vector< STree >::const_iterator st = m_inputTrees.begin();
+              st != m_inputTrees.end(); ++st ) {
+            Long64_t tree_entries = filecoll->GetTotalEntries( "/" + st->treeName );
+            if( tree_entries == -1 ) {
+               m_logger << ERROR << "Couldn't find tree " << st->treeName << " in dataset "
+                        << ds->name << SLogger::endmsg;
+               m_logger << ERROR << "Removing dataset from the input list" << SLogger::endmsg;
+               throw SError( SError::SkipFile );
+            }
+            if( firstPassed && ( tree_entries != entries ) ) {
+               m_logger << WARNING << "Conflict in number of entries - Tree "
+                        << st->treeName << " has " << tree_entries
+                        << " entries, NOT " << entries << SLogger::endmsg;
+               m_logger << WARNING << "Removing " << ds->name
+                        << " from the input dataset list" << SLogger::endmsg;
+               throw SError( SError::SkipFile );
+            } else if( ! firstPassed ) {
+               firstPassed = kTRUE;
+               entries = tree_entries;
+            }
+         }
 
-/**
- * At initialisation the cycles print the configuration of the input data
- * which was configured in the XML file. This function is used to print
- * the configuration of a given input data object.
- */
-void SInputData::print() const {
+         //
+         // Check the persistent tree(s):
+         //
+         for( std::vector< STree >::const_iterator st = m_persTrees.begin();
+              st != m_persTrees.end(); ++st ) {
+            Long64_t tree_entries = filecoll->GetTotalEntries( "/" + st->treeName );
+            if( tree_entries == -1 ) {
+               m_logger << ERROR << "Couldn't find tree " << st->treeName << " in dataset "
+                        << ds->name << SLogger::endmsg;
+               m_logger << ERROR << "Removing dataset from the input list" << SLogger::endmsg;
+               throw SError( SError::SkipFile );
+            }
+            if( firstPassed && ( tree_entries != entries ) ) {
+               m_logger << WARNING << "Conflict in number of entries - Tree "
+                        << st->treeName << " has " << tree_entries
+                        << " entries, NOT " << entries << SLogger::endmsg;
+               m_logger << WARNING << "Removing " << ds->name
+                        << " from the input dataset list" << SLogger::endmsg;
+               throw SError( SError::SkipFile );
+            } else if( ! firstPassed ) {
+               firstPassed = kTRUE;
+               entries = tree_entries;
+            }
+         }
 
-   m_logger << INFO << " ---------------------------------------------------------" << endl;
-   m_logger << " Type               : " << GetType() << endl;
-   m_logger << " Version            : " << GetVersion() << endl;
-   m_logger << " Total luminosity   : " << GetTotalLumi() << "pb-1" << endl;
-   m_logger << " NEventsMax         : " << GetNEventsMax() << endl;
-   m_logger << " NEventsSkip        : " << GetNEventsSkip() << endl;
-   m_logger << " Cacheable          : " << ( GetCacheable() ? "Yes" : "No" ) << endl;
+         // Update the ID information:
+         ds->events = entries;
+         AddEvents( entries );
 
-   for( vector< SGeneratorCut >::const_iterator gc = m_gencuts.begin();
-        gc != m_gencuts.end(); ++gc )
-      m_logger << " Generator cut      : Tree:" << gc->GetTreeName() << " Formula: "
-               << gc->GetFormula() << endl;
+         //
+         // Check the metadata tree(s):
+         //
+         for( std::vector< STree >::const_iterator mt = m_metaTrees.begin();
+              mt != m_metaTrees.end(); ++mt ) {
+            Long64_t tree_entries = filecoll->GetTotalEntries( "/" + mt->treeName );
+            if( tree_entries == -1 ) {
+               m_logger << ERROR << "Couldn't find tree " << mt->treeName << " in dataset "
+                        << ds->name << SLogger::endmsg;
+               m_logger << ERROR << "Removing dataset from the input list" << SLogger::endmsg;
+               throw SError( SError::SkipFile );
+            }
+         }
 
-   for( vector< SFile >::const_iterator f = m_sfileIn.begin(); f != m_sfileIn.end();
-        ++f )
-      m_logger << " Input SFiles       : " << "'" << f->file << "' (file) | '" << f->lumi
-               << "' (lumi)" << endl;
-   for( std::vector< STree >::const_iterator t = m_inputTrees.begin();
-        t != m_inputTrees.end(); ++t )
-      m_logger << " Input tree         : " << "'" << t->treeName << "'" << endl;
-   for( std::vector< STree >::const_iterator t = m_persTrees.begin();
-        t != m_persTrees.end(); ++t )
-      m_logger << " Persistent tree    : " << "'" << t->treeName << "'" << endl;
-   for( std::vector< STree >::const_iterator t = m_outputTrees.begin();
-        t != m_outputTrees.end(); ++t )
-      m_logger << " Output tree        : " << "'" << t->treeName << "'" << endl;
-   for( std::vector< STree >::const_iterator t = m_metaTrees.begin();
-        t != m_metaTrees.end(); ++t )
-      m_logger << " Metadata tree      : " << "'" << t->treeName << "'" << endl;
+      } catch( const SError& ) {
+         m_totalLumiSum -= ds->lumi;
+         ds = m_dataSets.erase( ds );
+         --ds;
+      }
 
-   m_logger << " ---------------------------------------------------------" << SLogger::endmsg;
+   }
+
+   //
+   // Print some status:
+   //
+   m_logger << INFO << "Input type \"" << GetType() << "\" version \"" 
+            << GetVersion() << "\" : " << GetEventsTotal() << " events" 
+            << SLogger::endmsg;
 
    return;
-
 }
 
 Bool_t SInputData::LoadInfoOnFile( std::vector< SFile >::iterator& file_itr,

@@ -1,4 +1,29 @@
 2010.04.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added first implementation to support PROOF (PQ2) datasets in
+	  the InputData.
+	* Created a new singleton class (SProofManager) to handle the
+	  PROOF connections. Moved some of the functionality that was
+	  previously in SCycleController, to this new class.
+	* Added a new class to SInputData (SDataSet), and updated all the
+	  classes to know about this new member of the input data.
+	* Removed the dictionary generation for SCycleController. This
+	  was left in the code by mistake, there is no need to have such
+	  a dictionary.
+	* Revived the <DataSet> node in the DTD which I actually left in
+	  it the last time I tried to implement the support for
+	  PROOF (PQ2) datasets.
+	* Created a small script (sframe_clear_server.py) that can be used
+	  to clear a PROOF server of all the uploaded PAR packages (of the
+	  given user). By default packages are only updated on the server
+	  if they change locally. But this mechanism doesn't like it when the
+	  user removes a source file locally from a package. That source
+	  file will remain on the server after the next update. If this happens,
+	  this new script can be used in an easy way to "reset" the server.
+	* Made sframe_dset_maker.py more usable, by making sure that files
+	  hosted on an xrootd server can indeed be added to datasets.
+	* Tagging as SFrame-03-03-04
+
+2010.04.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Updated the Doxygen documentation a bit.
 	* Not tagging for the moment...
 

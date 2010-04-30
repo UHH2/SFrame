@@ -216,7 +216,7 @@ void SCycleConfig::ArrangeInputData() throw ( SError ) {
 void SCycleConfig::ValidateInput() {
 
    for( id_type::iterator id = m_inputData.begin(); id != m_inputData.end(); ++id ) {
-      id->ValidateInput();
+      id->ValidateInput( m_server );
    }
 
    return;
