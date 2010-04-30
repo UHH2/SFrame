@@ -1,3 +1,7 @@
+2010.04.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated the Doxygen documentation a bit.
+	* Not tagging for the moment...
+
 2010.04.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a check in SCycleBaseNTuple::ConnectVariable(...) that makes
 	  sure that the user tries to connect the correct type of variable

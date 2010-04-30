@@ -30,7 +30,7 @@ import time
 import ROOT
 
 ##
-# @short Function creating <code><In ... /></code> configuration nodes
+# @short Function creating <In ... /> configuration nodes
 #
 # The function checks the specified input files and writes the XML nodes
 # with their information to the specified output file. Their luminosity
@@ -108,7 +108,7 @@ def CreateInput( crossSection, files, output, tree, prefix ):
   return
 
 ##
-# @short Function creating <code><In ... /></code> configuration nodes
+# @short Function creating <In ... /> configuration nodes
 #
 # The function checks the specified input files and writes the XML nodes
 # with their information to the specified output file. It assumes that the

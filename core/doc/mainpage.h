@@ -18,7 +18,7 @@
    output.
 
    Further information about SFrame is available under:
-   https://twiki.cern.ch/twiki/bin/view/Main/SFramePage
+   http://sourceforge.net/apps/mediawiki/sframe/
 
    @section SFrameCoreOverview Class overview
 
@@ -39,9 +39,7 @@
    this documentation are (in BASH on lxplus):
 
    <code>
-     > export CVSROOT = :kserver:atlas-sw.cern.ch:/atlascvs
-
-     > cvs co -d SFrame groups/sframe/SFrame
+     > svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame
 
      > cd SFrame
 
