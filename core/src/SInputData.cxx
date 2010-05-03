@@ -809,6 +809,10 @@ void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
          //
          // Check the metadata tree(s):
          //
+         /*
+           Skip this check for now, as PROOF doesn't catalog the TTree-s inside
+           subdirectories at the moment. But it should be added in the near future.
+
          for( std::vector< STree >::const_iterator mt = m_metaTrees.begin();
               mt != m_metaTrees.end(); ++mt ) {
             Long64_t tree_entries = filecoll->GetTotalEntries( "/" + mt->treeName );
@@ -819,6 +823,7 @@ void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
                throw SError( SError::SkipFile );
             }
          }
+         */
 
       } catch( const SError& ) {
          m_totalLumiSum -= ds->lumi;

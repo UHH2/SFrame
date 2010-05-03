@@ -600,11 +600,11 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
             TString dsets = "";
             for( std::vector< SDataSet >::const_iterator ds = id->GetDataSets().begin();
                  ds != id->GetDataSets().end(); ++ds ) {
-               if( ds == id->GetDataSets().begin() ) {
-                  dsets += ds->name;
-               } else {
-                  dsets += "|" + ds->name;
+
+               if( ds != id->GetDataSets().begin() ) {
+                  dsets += "|";
                }
+               dsets += ds->name + "#" + id->GetInputTrees().front().treeName;
             }
 
             // Process the events:

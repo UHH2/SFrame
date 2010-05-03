@@ -1,3 +1,18 @@
+2010.05.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added some fixes after trying to run some "real" jobs on
+	  PROOF (PQ2) datasets.
+	* SCycleController now automatically specifies to PROOF which
+	  TTree the cycle should run on. If it's not specified for a
+	  D3PD file for which an event selection was applied in Athena
+	  (CollectionTree has more entries than the D3PD tree), then the
+	  job crashes.
+	* Disabled the checking of the metadata trees when running on a
+	  dataset. The current implementation of PROOF doesn't catalog
+	  the TTree-s inside subdirectories of a file, so the PROOF
+	  dataset doesn't know about these metadata trees. This cataloging
+	  should be added in a future version of PROOF.
+	* Tagging as SFrame-03-03-05
+
 2010.04.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added first implementation to support PROOF (PQ2) datasets in
 	  the InputData.
