@@ -17,6 +17,9 @@
 // ROOT include(s):
 #include <TNamed.h>
 
+// SFrame include(s):
+#include "core/include/SError.h"
+
 // Forward declaration(s):
 class TCollection;
 class TH1;
@@ -59,7 +62,7 @@ public:
    virtual ~SH1();
 
    /// Increase the contents of the bin at a specific position
-   void Fill( Double_t pos, Type weight = 1 );
+   void Fill( Double_t pos, Type weight = 1 ) throw( SError );
 
    /// Get the number of bins
    Int_t GetNBins() const;

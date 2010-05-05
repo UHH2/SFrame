@@ -57,7 +57,6 @@ SH1< Type >::SH1( const SH1< T >& parent )
       m_content[ i ] = static_cast< Type >( parent.m_content[ i ] );
       if( m_computeErrors ) m_errors[ i ] = static_cast< Type >( parent.m_errors[ i ] );
    }
-
 }
 
 /**
@@ -86,9 +85,12 @@ SH1< Type >::SH1( const char* name, const char* title, Int_t bins,
       m_errors = new Type[ m_arraySize ];
       memset( m_errors, 0, m_arraySize * sizeof( Type ) );
    }
-
 }
 
+/**
+ * The destructor has to delete all the internal buffers that were created on the
+ * heap.
+ */
 template< typename Type >
 SH1< Type >::~SH1() {
 
@@ -96,7 +98,6 @@ SH1< Type >::~SH1() {
    if( m_errors ) {
       delete[] m_errors; m_errors = 0;
    }
-
 }
 
 /**
@@ -104,18 +105,32 @@ SH1< Type >::~SH1() {
  * appropriate bin with the specified weight, and if error calculation was requested,
  * it calculates the new uncertainty of the bin.
  *
+ * Unlike TH1, this class doesn't handle it silently when it receives a NaN value
+ * as input. In this case it throws an exception to stop the execution. User code
+ * should really just not pass NaN values to histograms...
+ *
  * @param pos The position at which a bin should be filled
  * @param weight The amount with which the bin should be filled
  */
 template< typename Type >
-void SH1< Type >::Fill( Double_t pos, Type weight ) {
+void SH1< Type >::Fill( Double_t pos, Type weight ) throw( SError ) {
+
+   // Check if the given parameters make sense:
+   if( std::isnan( pos ) || std::isnan( weight ) ) {
+      SLogger logger( this );
+      logger << FATAL << "Fill( pos = " << pos << ", weight = " << weight
+             << " ): NaN received. Aborting..." << SLogger::endmsg;
+      SError error( SError::StopExecution );
+      error << "NaN received by Fill(...) function of histogram: " << GetName();
+      throw error;
+   }
 
    Int_t bin;
    m_content[ bin = FindBin( pos ) ] += weight;
    if( m_computeErrors ) m_errors[ bin ] += weight * weight;
    ++m_entries;
-   return;
 
+   return;
 }
 
 /**
@@ -125,7 +140,6 @@ template< typename Type >
 Int_t SH1< Type >::GetNBins() const {
 
    return m_bins;
-
 }
 
 /**
@@ -144,7 +158,6 @@ Int_t SH1< Type >::FindBin( Double_t pos ) const {
    if( pos > m_high ) return ( m_bins + 1 );
 
    return static_cast< Int_t >( ( pos - m_low ) / ( ( m_high - m_low ) / m_bins ) + 1 );
-
 }
 
 /**
@@ -158,7 +171,6 @@ template< typename Type >
 Type SH1< Type >::GetBinContent( Int_t bin ) const {
 
    return m_content[ bin ];
-
 }
 
 /**
@@ -174,7 +186,6 @@ void SH1< Type >::SetBinContent( Int_t bin, Type content ) {
 
    m_content[ bin ] = content;
    return;
-
 }
 
 /**
@@ -189,7 +200,6 @@ Type SH1< Type >::GetBinError( Int_t bin ) const {
 
    if( ! m_computeErrors ) return 0;
    else return static_cast< Type >( std::sqrt( m_errors[ bin ] ) );
-
 }
 
 /**
@@ -206,7 +216,6 @@ void SH1< Type >::SetBinError( Int_t bin, Type error ) {
    else m_errors[ bin ] = error * error;
 
    return;
-
 }
 
 /**
@@ -216,7 +225,6 @@ template< typename Type >
 Int_t SH1< Type >::GetEntries() const {
 
    return m_entries;
-
 }
 
 /**
@@ -227,7 +235,6 @@ void SH1< Type >::SetEntries( Int_t entries ) {
 
    m_entries = entries;
    return;
-
 }
 
 /**
@@ -263,7 +270,6 @@ TH1* SH1< Type >::ToHist() const {
    hist->SetEntries( GetEntries() );
 
    return hist;
-
 }
 
 /**
@@ -313,7 +319,6 @@ Int_t SH1< Type >::Merge( TCollection* coll ) {
    }
 
    return 1;
-
 }
 
 /**
@@ -331,7 +336,6 @@ Int_t SH1< Type >::Write( const char* name, Int_t option, Int_t bufsize ) const 
    delete hist;
 
    return 1;
-
 }
 
 #endif // SFRAME_PLUGINS_SH1_ICC
