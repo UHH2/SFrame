@@ -1,3 +1,7 @@
+2010.05.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made the code aware that ROOT version "5.26/00-proof" can also
+	  handle multiple datasets per query (per InputData).
+
 2010.05.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added some fixes after trying to run some "real" jobs on
 	  PROOF (PQ2) datasets.

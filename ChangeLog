@@ -1,3 +1,8 @@
+2010.05.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made the code aware that ROOT version "5.26/00-proof" can also
+	  handle multiple datasets per query (per InputData).
+	* Tagging as SFrame-03-03-07
+
 2010.05.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed the SH1::Fill(...) function to throw an exception
 	  when it receives a NaN value. (Instead of plainly crashing.)

@@ -10,6 +10,9 @@
  *
  ***************************************************************************/
 
+// System include(s):
+#include <string.h>
+
 // ROOT include(s):
 #include <TFile.h>
 #include <TTree.h>
@@ -719,6 +722,8 @@ void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
    // in a single InputData starting from ROOT 5.27/02. In previous releases only the
    // first one can be used.
    if( ( ROOT_VERSION_CODE < ROOT_VERSION( 5, 27, 02 ) ) &&
+       // The special PROOF branch of the ROOT development code can also be used:
+       ( strcmp( gROOT->GetVersion(), "5.26/00-proof" ) ) &&
        ( m_dataSets.size() > 1 ) ) {
 
       m_logger << WARNING << "You're currently using ROOT version: "
