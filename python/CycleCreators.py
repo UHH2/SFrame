@@ -47,7 +47,7 @@ class CycleCreator:
 #define %(class)-s_H
 
 // SFrame include(s):
-#iclude \"core/include/SCycleBase.h\"
+#include \"core/include/SCycleBase.h\"
 
 /**
  *   @short Put short description of class here

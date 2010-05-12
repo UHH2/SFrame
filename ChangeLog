@@ -1,4 +1,9 @@
 2010.05.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed yet another typo in CycleCreators.py. Thanks to
+	  Clemens Lange for spotting it.
+	* Tagging as SFrame-03-03-08
+
+2010.05.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made the code aware that ROOT version "5.26/00-proof" can also
 	  handle multiple datasets per query (per InputData).
 	* Tagging as SFrame-03-03-07
