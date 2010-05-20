@@ -205,10 +205,15 @@ public:
    /// Set the number of events to skip at the beginning of the input data
    void SetNEventsSkip  ( Long64_t nevents )             { m_neventsskip = nevents; }
 
-   /// Get whether the file properties can be cached
+   /// Set whether the file properties can be cached
    void SetCacheable( Bool_t flag = kTRUE )              { m_cacheable = flag; }
-   /// Set whether the file properties can be caches
+   /// Get whether the file properties can be caches
    Bool_t GetCacheable() const                           { return m_cacheable; }
+
+   /// Set whether the file/dataset validation can be skipped
+   void SetSkipValid( Bool_t flag = kTRUE )              { m_skipValid = flag; }
+   /// Get whether the file/dataset validation can be skipped
+   Bool_t GetSkipValid() const                           { return m_skipValid; }
 
    /// Add a new generator cut to the input data
    void AddGenCut       ( const SGeneratorCut& gencuts ) { m_gencuts.push_back( gencuts ); }
@@ -301,6 +306,7 @@ private:
    Long64_t                     m_neventsmax;
    Long64_t                     m_neventsskip;
    Bool_t                       m_cacheable;
+   Bool_t                       m_skipValid;
 
    TDSet*                       m_dset; //!
 

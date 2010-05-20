@@ -17,24 +17,21 @@
 #include <cstdlib>
 
 // ROOT include(s):
-#include "TDOMParser.h"
-#include "TXMLNode.h"
-#include "TXMLDocument.h"
-#include "TXMLAttr.h"
-#include "TStopwatch.h"
-#include "TSystem.h"
-#include "TClass.h"
-#include "TROOT.h"
-#include "TPython.h"
+#include <TDOMParser.h>
+#include <TXMLNode.h>
+#include <TXMLDocument.h>
+#include <TXMLAttr.h>
+#include <TStopwatch.h>
+#include <TSystem.h>
+#include <TClass.h>
+#include <TROOT.h>
+#include <TPython.h>
 #include <TChain.h>
 #include <TList.h>
 #include <TFile.h>
 #include <TProof.h>
-#include <TProofLog.h>
 #include <TProofOutputFile.h>
 #include <TDSet.h>
-#include <TMacro.h>
-#include <TQueryResult.h>
 #include <TEnv.h>
 
 // Local include(s):
@@ -623,21 +620,52 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          } else if( id->GetSFileIn().size() ) {
 
             //
-            // Run the cycle on PROOF. Unfortunately the checking of the "successfullness"
-            // of the PROOF job is not working too well... Even after a *lot* of error
-            // messages the TProof::Process(...) command can still return a success code,
-            // which can lead to nasty crashes...
+            // Check if the validation was skipped. If it was, then the SInputData objects
+            // didn't create a TDSet object of its own. So we have to create a simple one
+            // here. Otherwise just use the TDSet created by SInputData.
             //
-            if( m_proof->Process( id->GetDSet(), cycle->GetName(), "", evmax,
-                                  id->GetNEventsSkip() ) == -1 ) {
-               m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
-               m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
-               m_logger << ERROR << "  ID type    = " << inputData.GetType()
-                        << SLogger::endmsg;
-               m_logger << ERROR << "  ID version = " << inputData.GetVersion()
-                        << SLogger::endmsg;
-               m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
-               break;
+            if( id->GetSkipValid() ) {
+
+               // Create the dataset object first:
+               TChain chain( treeName );
+               for( std::vector< SFile >::const_iterator file = id->GetSFileIn().begin();
+                    file != id->GetSFileIn().end(); ++file ) {
+                  chain.Add( file->file );
+               }
+               TDSet set( chain );
+
+               // Process the events:
+               if( m_proof->Process( &set, cycle->GetName(), "", evmax,
+                                     id->GetNEventsSkip() ) == -1 ) {
+                  m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
+                  m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
+                  m_logger << ERROR << "  ID type    = " << inputData.GetType()
+                           << SLogger::endmsg;
+                  m_logger << ERROR << "  ID version = " << inputData.GetVersion()
+                           << SLogger::endmsg;
+                  m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
+                  break;
+               }
+
+            } else {
+
+               //
+               // Run the cycle on PROOF. Unfortunately the checking of the "successfullness"
+               // of the PROOF job is not working too well... Even after a *lot* of error
+               // messages the TProof::Process(...) command can still return a success code,
+               // which can lead to nasty crashes...
+               //
+               if( m_proof->Process( id->GetDSet(), cycle->GetName(), "", evmax,
+                                     id->GetNEventsSkip() ) == -1 ) {
+                  m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
+                  m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
+                  m_logger << ERROR << "  ID type    = " << inputData.GetType()
+                           << SLogger::endmsg;
+                  m_logger << ERROR << "  ID version = " << inputData.GetVersion()
+                           << SLogger::endmsg;
+                  m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
+                  break;
+               }
             }
 
          } else {

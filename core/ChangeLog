@@ -1,3 +1,16 @@
+2010.05.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a new property to SInputData: SkipValid
+	  When this property is set to kTRUE, the validation of the files
+	  (datasets) in that SInputData is skipped. This can be very
+	  useful when running on a lot of individually declared files
+	  on a remote PROOF farm. (Since the input files are remote,
+	  reading from all of them can take a *long* time.)
+	* The property can only be used when all the events from the
+	  InputData are to be processed. If the configuration specifies
+	  that only a subset of events should be processed, the
+	  validation is forced. (So that the event weigthing can be
+	  correct.)
+
 2010.05.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made the code aware that ROOT version "5.26/00-proof" can also
 	  handle multiple datasets per query (per InputData).

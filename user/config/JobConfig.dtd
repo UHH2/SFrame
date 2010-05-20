@@ -54,6 +54,7 @@
         NEventsMax           CDATA            "-1"
         NEventsSkip          CDATA            "0"
         Cacheable            (True|False)     "False"
+        SkipValid            (True|False)     "False"
 >
 
 <!ELEMENT GeneratorCut EMPTY>

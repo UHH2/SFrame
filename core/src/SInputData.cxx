@@ -174,7 +174,8 @@ SInputData::SInputData( const char* name )
    : TNamed( name, "SFrame input data object" ), m_type( "unknown" ),
      m_version( 0 ), m_totalLumiGiven( 0 ), m_totalLumiSum( 0 ),
      m_eventsTotal( 0 ), m_neventsmax( -1 ), m_neventsskip( 0 ),
-     m_cacheable( kFALSE ), m_dset( 0 ), m_logger( "SInputData" ) {
+     m_cacheable( kFALSE ), m_skipValid( kFALSE ), m_dset( 0 ),
+     m_logger( "SInputData" ) {
 
    m_logger << VERBOSE << "In constructor" << SLogger::endmsg;
 }
@@ -194,7 +195,6 @@ SInputData::SInputData( const char* name )
 SInputData::~SInputData() {
 
    m_logger << VERBOSE << "In destructor" << SLogger::endmsg;
-
 }
 
 /**
@@ -236,7 +236,7 @@ void SInputData::AddDataSet( const SDataSet& dset ) {
 void SInputData::ValidateInput( const char* pserver ) throw( SError ) {
 
    // Check that the user only specified one type of input:
-   if( m_sfileIn.size() && m_dataSets.size() ) {
+   if( GetSFileIn().size() && GetDataSets().size() ) {
       m_logger << ERROR << "You cannot use PROOF datasets AND regular input files in the"
                << SLogger::endmsg;
       m_logger << ERROR << "same InputData at the moment. Please only use one type!"
@@ -246,16 +246,32 @@ void SInputData::ValidateInput( const char* pserver ) throw( SError ) {
    }
 
    // Check that the user did specify some kind of input:
-   if( ( ! m_sfileIn.size() ) && ( ! m_dataSets.size() ) ) {
+   if( ( ! GetSFileIn().size() ) && ( ! GetDataSets().size() ) ) {
       m_logger << ERROR << "You need to define at least one file or one dataset as input"
                << SLogger::endmsg;
       throw SError( "Missing input specification", SError::SkipInputData );
    }
 
+   // Check that the configuration makes sense:
+   if( GetSkipValid() && ( ( GetNEventsMax() > 0 ) || ( GetNEventsSkip() > 0 ) ) ) {
+      m_logger << WARNING << "The input file validation can not be skipped when running on "
+               << "a subset of events\n"
+               << "Turning on the InputData validation for InputData\n"
+               << "   Type: " << GetType() << ", Version: " << GetVersion() << SLogger::endmsg;
+      SetSkipValid( kFALSE );
+   }
+
+   // Return at this point if the validation can be skipped:
+   if( GetSkipValid() ) {
+      m_logger << INFO << "Input type \"" << GetType() << "\" version \"" 
+               << GetVersion() << "\" : Validation skipped" << SLogger::endmsg;
+      return;
+   }
+
    // Now do the actual validation:
-   if( m_sfileIn.size() ) {
+   if( GetSFileIn().size() ) {
       ValidateInputFiles();
-   } else if( m_dataSets.size() ) {
+   } else if( GetDataSets().size() ) {
       if( ! pserver ) {
          m_logger << ERROR << "PROOF server not specified. Can't validate datasets!"
                   << SLogger::endmsg;
@@ -296,8 +312,9 @@ Double_t SInputData::GetScaledLumi() const {
 
    if( m_neventsmax > -1. ) {
       scaled_lumi = GetTotalLumi() * m_neventsmax / m_eventsTotal;
-   } else
-      scaled_lumi=GetTotalLumi();
+   } else {
+      scaled_lumi = GetTotalLumi();
+   }
 
    return scaled_lumi;
 }
@@ -423,7 +440,7 @@ void SInputData::ValidateInputFiles() throw( SError ) {
    //
    TFile* cachefile = 0;
    TFileCollection* filecoll = 0;
-   if( m_cacheable ) {
+   if( m_cacheable && ( ! m_skipValid ) ) {
       // The filename is hardcoded, since this is the only place where it's needed:
       cachefile = TFile::Open( ".sframe." + GetType() + "." + GetVersion() + ".idcache.root",
                                "UPDATE" );

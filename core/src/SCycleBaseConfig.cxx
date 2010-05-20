@@ -346,18 +346,21 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
    TXMLAttr* curAttr( 0 );
    while( ( curAttr = dynamic_cast< TXMLAttr* >( attribIt() ) ) != 0 ) {
 
-      if( curAttr->GetName() == TString( "Type" ) )
+      if( curAttr->GetName() == TString( "Type" ) ) {
          inputData.SetType( curAttr->GetValue() );
-      if( curAttr->GetName() == TString( "Version" ) )
+      } else if( curAttr->GetName() == TString( "Version" ) ) {
          inputData.SetVersion( curAttr->GetValue() );
-      if( curAttr->GetName() == TString( "Lumi" ) )
+      } else if( curAttr->GetName() == TString( "Lumi" ) ) {
          inputData.SetTotalLumi( atof( curAttr->GetValue() ) );
-      if( curAttr->GetName() == TString( "NEventsMax" ) ) 
+      } else if( curAttr->GetName() == TString( "NEventsMax" ) ) {
          inputData.SetNEventsMax( atoi( curAttr->GetValue() ) );
-      if( curAttr->GetName() == TString( "NEventsSkip" ) ) 
+      } else if( curAttr->GetName() == TString( "NEventsSkip" ) ) {
          inputData.SetNEventsSkip( atoi( curAttr->GetValue() ) );
-      if( curAttr->GetName() == TString( "Cacheable" ) )
+      } else if( curAttr->GetName() == TString( "Cacheable" ) ) {
          inputData.SetCacheable( ToBool( curAttr->GetValue() ) );
+      } else if( curAttr->GetName() == TString( "SkipValid" ) ) {
+         inputData.SetSkipValid( ToBool( curAttr->GetValue() ) );
+      }
    }
 
    m_logger << INFO << "Reading SInputData: " << inputData.GetType()

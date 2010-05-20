@@ -1,3 +1,9 @@
+2010.05.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added the SkipValid property to the InputData definitions
+	  in the DTD
+	* Added some explanation about this property to
+	  FirstCycle_config.xml
+
 2010.04.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Revived the <DataSet> node in the DTD which I actually left in
 	  it the last time I tried to implement the support for

@@ -1,3 +1,21 @@
+2010.05.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a new property to SInputData: SkipValid
+	  When this property is set to kTRUE, the validation of the files
+	  (datasets) in that SInputData is skipped. This can be very
+	  useful when running on a lot of individually declared files
+	  on a remote PROOF farm. (Since the input files are remote,
+	  reading from all of them can take a *long* time.)
+	* The property can only be used when all the events from the
+	  InputData are to be processed. If the configuration specifies
+	  that only a subset of events should be processed, the
+	  validation is forced. (So that the event weigthing can be
+	  correct.)
+	* Added the SkipValid property to the InputData definitions
+	  in the DTD
+	* Added some explanation about this property to
+	  FirstCycle_config.xml
+	* Tagging as SFrame-03-03-09
+
 2010.05.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed yet another typo in CycleCreators.py. Thanks to
 	  Clemens Lange for spotting it.

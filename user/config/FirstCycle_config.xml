@@ -53,9 +53,13 @@
   <!--               location accessible to all the nodes and the client    -->
   <!--               machine (running SFrame) as well. Such a location can  -->
   <!--               be specified here.                                     -->
+  <!-- ProofNodes: Maximum number of nodes to use from the PROOF farm. (Or  -->
+  <!--             the maximum number of cores to use in PROOF-Lite mode.)  -->
+  <!--             When set to "-1" (default setting) all available workers -->
+  <!--             are used.                                                -->
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
   <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite"
-         ProofWorkDir="" OutputDirectory="./" PostFix="" >
+         ProofWorkDir="" ProofNodes="-1" OutputDirectory="./" PostFix="" >
 
     <!-- list of input data for given data type                                   -->
     <!-- Type, Version: Type of the events. They have pretty free formats.        -->
@@ -85,12 +89,17 @@
     <!--            "validate" the files before starting the execution. It can    -->
     <!--            speed up the startup of a job considerably when processing    -->
     <!--            a large number of files.                                      -->
+    <!-- SkipValid: When set to "True" (default being "False"), the code doesn't  -->
+    <!--            execute the regular validation of the input files at the job  -->
+    <!--            start. It just assumes that all the specified files are there,-->
+    <!--            and they all contain all the necessary input trees. Can only  -->
+    <!--            be used when NEventsMax="-1" and NEventsSkip="0".             -->
     <!--                                                                          -->
     <!-- Some run-time checking is done on these parameters that they would make  -->
     <!-- sense, but in general be careful when using them.                        -->
 
     <InputData Type="MC" Version="Zee_1" Lumi="0." NEventsMax="2000" NEventsSkip="3000"
-               Cacheable="True" >
+               Cacheable="True" SkipValid="False" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting.                                                     -->
@@ -111,7 +120,7 @@
       <OutputTree Name="FirstCycleTree" />
 
     </InputData>
-    <InputData Type="MC" Version="Zee_2" Lumi="0." NEventsMax="-1" >
+    <InputData Type="MC" Version="Zee_2" Lumi="0." NEventsMax="-1" SkipValid="True" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting                                                      -->
