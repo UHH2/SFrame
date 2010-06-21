@@ -1,3 +1,16 @@
+2010.06.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed the long-standing double-event-issue in the output
+	  TTree-s...
+	* SFileMerger was modified to take it into account that a single
+	  object might be present in the input files with multiple
+	  versions/cycles. In this case, since the code always asks for
+	  the latest version of the object for the merging, it has to
+	  process that object only once. Previously it processed every
+	  object (TTree) as many times as they appeared in the list of
+	  keys in the input file. (Most of the time twice in some older
+	  versions of ROOT.)
+	* Tagging as SFrame-03-03-10
+
 2010.05.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a new property to SInputData: SkipValid
 	  When this property is set to kTRUE, the validation of the files

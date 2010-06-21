@@ -10,6 +10,10 @@
  *
  ***************************************************************************/
 
+// STL include(s):
+#include <set>
+#include <string>
+
 // ROOT include(s):
 #include <TObject.h>
 #include <TFile.h>
@@ -29,7 +33,6 @@ SFileMerger::~SFileMerger() {
 
    // Close all files before deleting the object
    CloseFiles();
-
 }
 
 void SFileMerger::AddInput( const TString& fileName ) throw( SError ) {
@@ -48,7 +51,6 @@ void SFileMerger::AddInput( const TString& fileName ) throw( SError ) {
    m_logger << VERBOSE << fileName << " opened for reading" << SLogger::endmsg;
 
    return;
-
 }
 
 void SFileMerger::SetOutput( const TString& fileName ) throw( SError ) {
@@ -67,7 +69,6 @@ void SFileMerger::SetOutput( const TString& fileName ) throw( SError ) {
    m_logger << VERBOSE << fileName << " opened for writing" << SLogger::endmsg;
 
    return;
-
 }
 
 /**
@@ -90,11 +91,16 @@ void SFileMerger::Merge() throw( SError ) {
       return;
    }
 
+   m_logger << DEBUG << "Running file merging..." << SLogger::endmsg;
+
    //
    // Loop over all input files:
    //
    for( std::vector< TFile* >::const_iterator ifile = m_inputFiles.begin();
         ifile != m_inputFiles.end(); ++ifile ) {
+
+      m_logger << VERBOSE << "Now processing file: " << ( *ifile )->GetName()
+               << SLogger::endmsg;
 
       //
       // I don't go into any sub-directories. SFrame only puts TTree-s in the root
@@ -104,13 +110,27 @@ void SFileMerger::Merge() throw( SError ) {
 
       //
       // Loop over all keys in the root directory, and select the ones describing
-      // a TTree:
+      // a TTree. Since one single TTree can appear multiple times in this list
+      // (with different "cycles"), keep track of which TTree-s have already been
+      // merged into the output.
       //
+      std::set< std::string > processedTrees;
       for( Int_t i = 0; i < keyList->GetSize(); ++i ) {
          TKey* key = dynamic_cast< TKey* >( keyList->At( i ) );
          if( ! key ) {
             throw SError( "Couldn't cast to TKey. There is some problem in the code",
                           SError::StopExecution );
+         }
+
+         //
+         // Check whether we already processed an object with this name:
+         //
+         m_logger << VERBOSE << "Processing key with name: " << key->GetName()
+                  << ";" << key->GetCycle() << SLogger::endmsg;
+         if( processedTrees.find( key->GetName() ) != processedTrees.end() ) {
+            m_logger << DEBUG << "Object \"" << key->GetName() << "\" has already been processed"
+                     << SLogger::endmsg;
+            continue;
          }
 
          TObject* obj = ( *ifile )->Get( key->GetName() );
@@ -168,6 +188,8 @@ void SFileMerger::Merge() throw( SError ) {
 
             }
 
+            // Remember that this TTree has already been processed:
+            processedTrees.insert( obj->GetName() );
          }
 
       }
@@ -181,7 +203,6 @@ void SFileMerger::Merge() throw( SError ) {
    CloseFiles();
 
    return;
-
 }
 
 void SFileMerger::CloseFiles() {
@@ -196,5 +217,4 @@ void SFileMerger::CloseFiles() {
    m_outputFile = 0;
 
    return;
-
 }
