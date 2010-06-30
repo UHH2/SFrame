@@ -118,6 +118,7 @@
       <InputTree Name="FullRec0" />
       <InputTree Name="CollectionTree" />
       <OutputTree Name="FirstCycleTree" />
+      <MetadataOutputTree Name="Electrons" />
 
     </InputData>
     <InputData Type="MC" Version="Zee_2" Lumi="0." NEventsMax="-1" SkipValid="True" >
@@ -134,6 +135,7 @@
       <InputTree Name="FullRec0" />
       <InputTree Name="CollectionTree" />
       <OutputTree Name="FirstCycleTree" />
+      <MetadataOutputTree Name="Electrons" />
 
     </InputData>
 
@@ -154,6 +156,7 @@
       <Item Name="TestStringVector" Value="one two three" />
       <Item Name="TestBoolVector" Value="True False 1 0" />
       <Item Name="RecoTreeString" Value="FullRec0" />
+      <Item Name="MetaTreeName" Value="Electrons" />
     </UserConfig>
 
   </Cycle>

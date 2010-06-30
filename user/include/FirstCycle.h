@@ -31,7 +31,6 @@ class FirstCycle : public SCycleBase {
 
 public:
    FirstCycle();
-   ~FirstCycle();
 
    virtual void BeginCycle() throw( SError );
    virtual void EndCycle() throw( SError );
@@ -47,7 +46,11 @@ public:
    virtual void ExecuteEvent( const SInputData&, Double_t weight ) throw( SError );
 
 private:
-   std::string m_RecoTreeName;
+   //
+   // Names of the input/output trees:
+   //
+   std::string m_recoTreeName;
+   std::string m_metaTreeName;
 
    enum ValHistsType { GENERAL, ELECTRON, MUON, JETS };
    void FillValidationHists( ValHistsType, const TString& status );
@@ -67,11 +70,11 @@ private:
    //
    // The input variables
    //
-   Int_t                m_El_N;
-   std::vector<double>* m_El_p_T;
-   std::vector<double>* m_El_eta;
-   std::vector<double>* m_El_phi;
-   std::vector<double>* m_El_E;
+   Int_t                  m_El_N;
+   std::vector< double >* m_El_p_T;
+   std::vector< double >* m_El_eta;
+   std::vector< double >* m_El_phi;
+   std::vector< double >* m_El_E;
 
    //
    // The output variables
@@ -79,6 +82,15 @@ private:
    int                      m_o_example_variable;
    std::vector< double >    m_o_El_p_T;
    std::vector< SParticle > m_o_El;
+
+   //
+   // Metadata tree with separate entries for each electron:
+   //
+   TTree* m_electronTree;
+   Double_t m_meta_El_p_T;
+   Double_t m_meta_El_eta;
+   Double_t m_meta_El_phi;
+   Double_t m_meta_El_E;
 
    //
    // Some counters:

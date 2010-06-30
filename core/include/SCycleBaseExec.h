@@ -53,8 +53,6 @@ class SCycleBaseExec : public TSelector,
 public:
    /// Default constructor
    SCycleBaseExec();
-   /// Default destructor
-   virtual ~SCycleBaseExec();
 
    ///////////////////////////////////////////////////////////////////////////
    //                                                                       //
@@ -150,7 +148,7 @@ private:
 
    TTree*                m_inputTree; ///< TTree used to load all input trees
    SInputData*           m_inputData; ///< Pointer to the currently active ID
-   std::vector< TTree* > m_outputTrees; ///< List of all the output TTree-s
+   std::vector< TTree* > m_outputTrees; ///< List of all the event-level output TTree-s
    TFile*                m_outputFile; ///< Pointer to the active temporary output file
 
 #ifndef DOXYGEN_IGNORE

@@ -1,3 +1,9 @@
+2010.06.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated FirstCycle to show off some of the new features of
+	  the framework.
+	* Modified JobConfig.dtd to adhere to the new design of
+	  SInputData.
+
 2010.05.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added the SkipValid property to the InputData definitions
 	  in the DTD

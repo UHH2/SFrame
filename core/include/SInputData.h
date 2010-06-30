@@ -16,6 +16,7 @@
 
 // STL include(s):
 #include <vector>
+#include <map>
 
 // ROOT include(s):
 #include <TObject.h>
@@ -151,8 +152,8 @@ class STree : public TObject {
 
 public:
    /// Constructor with a tree name
-   STree( const TString& t = "" )
-      : treeName( t ) {}
+   STree( const TString& name = "", Int_t typ = 0 )
+      : treeName( name ), type( typ ) {}
 
    /// Assignment operator
    STree& operator=  ( const STree& parent );
@@ -169,6 +170,18 @@ public:
     * be created.
     */
    TString treeName;
+
+   static const Int_t INPUT_TREE; ///< This is an input tree
+   static const Int_t OUTPUT_TREE; ///< This is an output tree
+   static const Int_t EVENT_TREE; ///< This tree has one entry per event
+
+   /// Type of this tree
+   /**
+    * This bitmask is used internally to descibe all the trees that SFrame
+    * can handle. All SFrame needs to know at this point is if a tree is
+    * input or output, and whether it descibes event lever data or not.
+    */
+   Int_t type;
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( STree, 1 );
@@ -216,19 +229,13 @@ public:
    Bool_t GetSkipValid() const                           { return m_skipValid; }
 
    /// Add a new generator cut to the input data
-   void AddGenCut       ( const SGeneratorCut& gencuts ) { m_gencuts.push_back( gencuts ); }
+   void AddGenCut ( const SGeneratorCut& gencuts ) { m_gencuts.push_back( gencuts ); }
    /// Add a new input file to the input data
-   void AddSFileIn      ( const SFile& sfile );
-   /// Add a new input tree to the input data
-   void AddInputSTree   ( const STree& stree )           { m_inputTrees.push_back( stree ); }
-   /// Add a new persistent tree to the input data
-   void AddPersSTree    ( const STree& ptree )           { m_persTrees.push_back( ptree ); }
-   /// Add a new output tree to the input data
-   void AddOutputSTree  ( const STree& stree )           { m_outputTrees.push_back( stree ); }
-   /// Add a new "meta tree" to the input data
-   void AddMetaSTree    ( const STree& stree )           { m_metaTrees.push_back( stree ); }
+   void AddSFileIn( const SFile& sfile );
+   /// Add a new tree to the input data
+   void AddTree   ( Int_t type, const STree& stree );
    /// Add a new dataset to the input data
-   void AddDataSet      ( const SDataSet& dset );
+   void AddDataSet( const SDataSet& dset );
 
    /// Add some number of events to the input data
    void AddEvents       ( Long64_t events )              { m_eventsTotal += events; }
@@ -246,16 +253,15 @@ public:
    const std::vector< SFile >&          GetSFileIn() const        { return m_sfileIn; }
    /// Get all the defined input files
    std::vector< SFile >&                GetSFileIn()              { return m_sfileIn; }
-   /// Get all the defined input trees
-   const std::vector< STree >&          GetInputTrees() const     { return m_inputTrees; }
-   /// Get all the defined "persistent" trees
-   const std::vector< STree >&          GetPersTrees() const      { return m_persTrees; }
-   /// Get all the defined output trees
-   const std::vector< STree >&          GetOutputTrees() const    { return m_outputTrees; }
-   /// Get all the defined meta trees
-   const std::vector< STree >&          GetMetaTrees() const      { return m_metaTrees; }
+   /// Get all the defined trees of a given type
+   const std::vector< STree >*          GetTrees( Int_t type ) const;
+   /// Get all the defined trees
+   const std::map< Int_t, std::vector< STree > >& GetTrees() const { return m_trees; }
    /// Get all the defined input datasets
    const std::vector< SDataSet >&       GetDataSets() const       { return m_dataSets; }
+
+   /// Simple function answering whether there are any input trees in the configuration
+   Bool_t HasInputTrees() const;
 
    /// Get the dataset representing all the input files
    TDSet* GetDSet() const;
@@ -279,7 +285,7 @@ public:
    Bool_t      operator!= ( const SInputData& rh ) const;
 
    /// Function printing the contents of the object
-   void print() const;
+   void Print() const;
 
 private:
    void ValidateInputFiles() throw( SError );
@@ -291,26 +297,23 @@ private:
    TDSet* MakeDataSet() throw( SError );
    TDSet* AccessDataSet( TDirectory* dir );
 
-   TString                      m_type;
-   TString                      m_version;
-   Double_t                     m_totalLumiGiven;
-   std::vector< SGeneratorCut > m_gencuts;
-   std::vector< SFile >         m_sfileIn;
-   std::vector< STree >         m_inputTrees;
-   std::vector< STree >         m_persTrees;
-   std::vector< STree >         m_outputTrees;
-   std::vector< STree >         m_metaTrees;
-   std::vector< SDataSet >      m_dataSets;
-   Double_t                     m_totalLumiSum;
-   Long64_t                     m_eventsTotal;
-   Long64_t                     m_neventsmax;
-   Long64_t                     m_neventsskip;
-   Bool_t                       m_cacheable;
-   Bool_t                       m_skipValid;
+   TString                      m_type; ///< Type of the input data
+   TString                      m_version; ///< Version of the input data
+   Double_t                     m_totalLumiGiven; ///< The total specified luminosity
+   std::vector< SGeneratorCut > m_gencuts; ///< The specified generator cuts
+   std::vector< SFile >         m_sfileIn; ///< The specified input files
+   std::map< Int_t, std::vector< STree > > m_trees; ///< The specified TTree-s to handle
+   std::vector< SDataSet >      m_dataSets; ///< The specified input PROOF datasets
+   Double_t                     m_totalLumiSum; ///< The total luminosity from files/datasets
+   Long64_t                     m_eventsTotal; ///< The total number of events in the input
+   Long64_t                     m_neventsmax; ///< The maximum number of events to process
+   Long64_t                     m_neventsskip; ///< The number of events to skip
+   Bool_t                       m_cacheable; ///< Flag showing whether to cache the ID info
+   Bool_t                       m_skipValid; ///< Flag showing whether to skip the ID validation
 
-   TDSet*                       m_dset; //!
+   TDSet*                       m_dset; //! Transient dataset representation of input files
 
-   mutable SLogger              m_logger; //!
+   mutable SLogger              m_logger; //! Transient logger object
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SInputData, 1 );

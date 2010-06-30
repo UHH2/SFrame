@@ -195,8 +195,7 @@ void SCycleController::Initialize() throw( SError ) {
                   if( curAttr->GetName() == TString( "Name" ) )
                      libraryName = curAttr->GetValue();
                }
-               m_logger << VERBOSE << "Trying to load library \"" << libraryName << "\""
-                        << SLogger::endmsg;
+               REPORT_VERBOSE( "Trying to load library \"" << libraryName << "\"" );
 
                int ret = 0;
                if( ( ret = gSystem->Load( libraryName.c_str() ) ) >= 0 ) {
@@ -218,8 +217,8 @@ void SCycleController::Initialize() throw( SError ) {
                   if( curAttr->GetName() == TString( "Name" ) )
                      libraryName = curAttr->GetValue();
                }
-               m_logger << DEBUG << "Trying to load python library \"" << libraryName
-                        << "\"" << SLogger::endmsg;
+               REPORT_VERBOSE( "Trying to load python library \"" << libraryName
+                               << "\"" );
 
                std::ostringstream command;
                command << "import " << libraryName;
@@ -248,10 +247,10 @@ void SCycleController::Initialize() throw( SError ) {
             //
             if( error.request() <= SError::SkipCycle ) {
                // If just this cycle has to be skipped:
-               m_logger << ERROR << "Exception caught while processing node: "
-                        << nodes->GetNodeName() << SLogger::endmsg;
-               m_logger << ERROR << "Message: " << error.what() << SLogger::endmsg;
-               m_logger << ERROR << "--> Skipping cycle!" << SLogger::endmsg;
+               REPORT_ERROR( "Exception caught while processing node: "
+                             << nodes->GetNodeName() );
+               REPORT_ERROR( "Message: " << error.what() );
+               REPORT_ERROR( "--> Skipping cycle!" );
 
                nodes = nodes->GetNextNode();
                continue;
@@ -315,7 +314,7 @@ void SCycleController::ExecuteAllCycles() throw( SError ) {
                     SError::StopExecution );
    }
 
-   m_logger << INFO << "entering ExecuteAllCycles()" << SLogger::endmsg;
+   m_logger << INFO << "Entering ExecuteAllCycles()" << SLogger::endmsg;
 
    std::vector< ISCycleBase* >::const_iterator it = m_analysisCycles.begin();
    for( ; it != m_analysisCycles.end(); ++it ) {
@@ -387,10 +386,10 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          TString pkg = SParLocator::Locate( *package );
          if( pkg == "" ) continue;
 
-         m_logger << VERBOSE << "Uploading package: " << pkg << SLogger::endmsg;
+         REPORT_VERBOSE( "Uploading package: " << pkg );
          if( m_proof->UploadPackage( pkg ) ) {
-            m_logger << ERROR << "There was a problem with uploading "
-                     << *package << SLogger::endmsg;
+            REPORT_ERROR( "There was a problem with uploading "
+                          << *package );
             throw SError( *package + " could not be uploaded to PROOF",
                           SError::SkipCycle );
          }
@@ -403,8 +402,8 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
 
          m_logger << INFO << "Enabling package: " << pkg << SLogger::endmsg;
          if( m_proof->EnablePackage( pkg, kTRUE ) ) {
-            m_logger << ERROR << "There was a problem with enabling "
-                     << *package << SLogger::endmsg;
+            REPORT_ERROR( "There was a problem with enabling "
+                          << *package );
             throw SError( *package + " could not be enabled on PROOF",
                           SError::SkipCycle );
          }
@@ -437,43 +436,52 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       SCycleConfig::id_type::const_iterator previous_id = id;
       if( previous_id == config.GetInputData().begin() ) {
          updateOutput = kFALSE;
-         m_logger << VERBOSE << "New output file will be opened for ID type: "
-                  << id->GetType() << SLogger::endmsg;
+         REPORT_VERBOSE( "New output file will be opened for ID type: "
+                         << id->GetType() );
       } else {
          --previous_id;
          if( ( previous_id->GetType() == id->GetType() ) &&
              ( previous_id->GetVersion() == id->GetVersion() ) ) {
             updateOutput = kTRUE;
-            m_logger << VERBOSE << "Output file will be updated for ID type: "
-                     << id->GetType() << SLogger::endmsg;
+            REPORT_VERBOSE( "Output file will be updated for ID type: "
+                            << id->GetType() );
          } else {
             updateOutput = kFALSE;
-            m_logger << VERBOSE << "New output file will be opened for ID type: "
-                     << id->GetType() << SLogger::endmsg;
+            REPORT_VERBOSE( "New output file will be opened for ID type: "
+                            << id->GetType() );
          }
       }
 
       //
       // Each input data has to have at least one input tree:
       //
-      if( ! ( id->GetInputTrees().size() || id->GetPersTrees().size() ) ) {
-         m_logger << ERROR << "No input trees defined in input data " << id->GetType()
-                  << SLogger::endmsg;
-         m_logger << ERROR << "Skipping it from processing" << SLogger::endmsg;
+      if( ! id->HasInputTrees() ) {
+         REPORT_ERROR( "No input trees defined in input data " << id->GetType() );
+         REPORT_ERROR( "Skipping it from processing" );
          continue;
       }
 
+      // Find the first event-level input tree in the configuration:
+      REPORT_VERBOSE( "Finding the name of the main event-level input TTree..." );
       const char* treeName = 0;
-      if( id->GetInputTrees().size() ) {
-         treeName = id->GetInputTrees().front().treeName.Data();
-      } else if( id->GetPersTrees().size() ) {
-         treeName = id->GetPersTrees().front().treeName.Data();
+      for( std::map< Int_t, std::vector< STree > >::const_iterator trees =
+              id->GetTrees().begin(); trees != id->GetTrees().end(); ++trees ) {
+         for( std::vector< STree >::const_iterator st = trees->second.begin();
+              st != trees->second.end(); ++st ) {
+            if( ( st->type & STree::INPUT_TREE ) && ( st->type & STree::EVENT_TREE ) ) {
+               treeName = st->treeName.Data();
+               break;
+            }
+         }
       }
       if( ! treeName ) {
-         m_logger << ERROR << "Can't determine input TTree name for input data " << id->GetType()
-                  << SLogger::endmsg;
-         m_logger << ERROR << "Skipping it from processing" << SLogger::endmsg;
+         REPORT_ERROR( "Can't determine input TTree name for input data "
+                       << id->GetType() );
+         REPORT_ERROR( "Skipping it from processing" );
          continue;
+      } else {
+         REPORT_VERBOSE( "The name of the main event-level input TTree is: "
+                         << treeName );
       }
 
       m_logger << INFO << "Processing input data type: " << id->GetType()
@@ -506,19 +514,21 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       if( config.GetRunMode() == SCycleConfig::LOCAL ) {
 
          if( id->GetDataSets().size() ) {
-            m_logger << ERROR << "Can't use DataSet-s as input in LOCAL mode!" << SLogger::endmsg;
-            m_logger << ERROR << "Skipping InputData type: " << id->GetType()
-                     << " version: " << id->GetVersion() << SLogger::endmsg;
+            REPORT_ERROR( "Can't use DataSet-s as input in LOCAL mode!" );
+            REPORT_ERROR( "Skipping InputData type: " << id->GetType()
+                          << " version: " << id->GetVersion() );
             continue;
          }
 
          //
          // Create a chain with all the specified input files:
          //
+         REPORT_VERBOSE( "Creating TChain to run the cycle on..." );
          TChain chain( treeName );
          for( std::vector< SFile >::const_iterator file = id->GetSFileIn().begin();
               file != id->GetSFileIn().end(); ++file ) {
-            chain.Add( file->file );
+            REPORT_VERBOSE( "Adding file: " << file->file );
+            chain.AddFile( file->file );
          }
 
          //
@@ -546,9 +556,9 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          // input data...
          //
          if( ! m_proof->IsValid() ) {
-            m_logger << ERROR << "PROOF server doesn't seem to be available: "
-                     << m_proof->GetManager()->GetUrl() << SLogger::endmsg;
-            m_logger << ERROR << "Aborting execution of cycle!" << SLogger::endmsg;
+            REPORT_ERROR( "PROOF server doesn't seem to be available: "
+                          << m_proof->GetManager()->GetUrl() );
+            REPORT_ERROR( "Aborting execution of cycle!" );
             break;
          }
 
@@ -601,19 +611,17 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
                if( ds != id->GetDataSets().begin() ) {
                   dsets += "|";
                }
-               dsets += ds->name + "#" + id->GetInputTrees().front().treeName;
+               dsets += ds->name + "#" + treeName;
             }
 
             // Process the events:
             if( m_proof->Process( dsets, cycle->GetName(), "", evmax,
                                   id->GetNEventsSkip() ) == -1 ) {
-               m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
-               m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
-               m_logger << ERROR << "  ID type    = " << inputData.GetType()
-                        << SLogger::endmsg;
-               m_logger << ERROR << "  ID version = " << inputData.GetVersion()
-                        << SLogger::endmsg;
-               m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
+               REPORT_ERROR( "There was an error processing:" );
+               REPORT_ERROR( "  Cycle      = " << cycle->GetName() );
+               REPORT_ERROR( "  ID type    = " << inputData.GetType() );
+               REPORT_ERROR( "  ID version = " << inputData.GetVersion() );
+               REPORT_ERROR( "Stopping the execution of this cycle!" );
                break;
             }
 
@@ -637,13 +645,11 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
                // Process the events:
                if( m_proof->Process( &set, cycle->GetName(), "", evmax,
                                      id->GetNEventsSkip() ) == -1 ) {
-                  m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
-                  m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
-                  m_logger << ERROR << "  ID type    = " << inputData.GetType()
-                           << SLogger::endmsg;
-                  m_logger << ERROR << "  ID version = " << inputData.GetVersion()
-                           << SLogger::endmsg;
-                  m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
+                  REPORT_ERROR( "There was an error processing:" );
+                  REPORT_ERROR( "  Cycle      = " << cycle->GetName() );
+                  REPORT_ERROR( "  ID type    = " << inputData.GetType() );
+                  REPORT_ERROR( "  ID version = " << inputData.GetVersion() );
+                  REPORT_ERROR( "Stopping the execution of this cycle!" );
                   break;
                }
 
@@ -657,19 +663,17 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
                //
                if( m_proof->Process( id->GetDSet(), cycle->GetName(), "", evmax,
                                      id->GetNEventsSkip() ) == -1 ) {
-                  m_logger << ERROR << "There was an error processing:" << SLogger::endmsg;
-                  m_logger << ERROR << "  Cycle      = " << cycle->GetName() << SLogger::endmsg;
-                  m_logger << ERROR << "  ID type    = " << inputData.GetType()
-                           << SLogger::endmsg;
-                  m_logger << ERROR << "  ID version = " << inputData.GetVersion()
-                           << SLogger::endmsg;
-                  m_logger << ERROR << "Stopping the execution of this cycle!" << SLogger::endmsg;
+                  REPORT_ERROR( "There was an error processing:" );
+                  REPORT_ERROR( "  Cycle      = " << cycle->GetName() );
+                  REPORT_ERROR( "  ID type    = " << inputData.GetType() );
+                  REPORT_ERROR( "  ID version = " << inputData.GetVersion() );
+                  REPORT_ERROR( "Stopping the execution of this cycle!" );
                   break;
                }
             }
 
          } else {
-            m_logger << ERROR << "Nothing was executed using PROOF!" << SLogger::endmsg;
+            REPORT_ERROR( "Nothing was executed using PROOF!" );
          }
 
          outputs = m_proof->GetOutputList();
@@ -679,11 +683,10 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       }
 
       if( ! outputs ) {
-         m_logger << ERROR << "Cycle output could not be retrieved." << SLogger::endmsg;
-         m_logger << ERROR << "NOT writing the output of cycle \""
-                  << cycle->GetName() << "\", ID \"" << inputData.GetType()
-                  << "\", Version \"" << inputData.GetVersion() << "\""
-                  << SLogger::endmsg;
+         REPORT_ERROR( "Cycle output could not be retrieved." );
+         REPORT_ERROR( "NOT writing the output of cycle \""
+                       << cycle->GetName() << "\", ID \"" << inputData.GetType()
+                       << "\", Version \"" << inputData.GetVersion() << "\"" );
          continue;
       }
 
@@ -748,7 +751,6 @@ void SCycleController::AddAnalysisCycle( ISCycleBase* cycleAlg ) {
 
    m_analysisCycles.push_back( cycleAlg );
    return;
-
 }
 
 /**
@@ -780,7 +782,6 @@ void SCycleController::InitProof( const TString& server, const Int_t& nodes ) {
    if( nodes > 0 ) m_proof->SetParallel( nodes );
 
    return;
-
 }
 
 void SCycleController::ShutDownProof() {
@@ -792,7 +793,6 @@ void SCycleController::ShutDownProof() {
    m_proof = 0;
 
    return;
-
 }
 
 void SCycleController::WriteCycleOutput( TList* olist,
@@ -874,5 +874,4 @@ void SCycleController::WriteCycleOutput( TList* olist,
    }
 
    return;
-
 }

@@ -114,7 +114,6 @@ private:
 inline SLogger& SLogger::operator<< ( SLogger& ( *_f )( SLogger& ) ) {
 
    return ( _f )( *this );
-
 }
 
 /**
@@ -128,7 +127,6 @@ inline SLogger& SLogger::operator<< ( std::ostream& ( *_f )( std::ostream& ) ) {
       ( _f )( *this );
    }
    return *this;
-
 }
 
 /**
@@ -142,7 +140,6 @@ inline SLogger& SLogger::operator<< ( std::ios& ( *_f )( std::ios& ) ) {
       ( _f )( *this );
    }
    return *this;
-
 }
 
 /**
@@ -157,7 +154,69 @@ inline SLogger& SLogger::operator<< ( SMsgType type ) {
 
    m_activeType = type;
    return *this;
-
 }
+
+// This is a GCC extension for getting the name of the current function.
+#if defined( __GNUC__ )
+#   define SLOGGER_FNAME __PRETTY_FUNCTION__
+#else
+#   define SLOGGER_FNAME ""
+#endif
+
+/// Common prefix for the non-usual messages
+/**
+ * The idea is that a regular user usually only wants to see DEBUG, INFO
+ * and some WARNING messages. So those should be reasonably short. On the other
+ * hand serious warnings (ERROR, FATAL) or VERBOSE messages should be as precise
+ * as possible.
+ *
+ * So I stole the idea from Athena (what a surprise...) to have a few macros which
+ * produce messages with a common formatting. This macro provides the prefix for
+ * all the messages.
+ */
+#define SLOGGER_REPORT_PREFIX \
+   __FILE__ << ":" << __LINE__ << " (" << SLOGGER_FNAME << "): "
+
+/// Convenience macro for reporting VERBOSE messages in the code
+/**
+ * This macro is very similar to the REPORT_MESSAGE macros of Athena. It prints
+ * a nicely formatted output that specifies both the exact function name where
+ * the message was printed, and also the filename:line combination. It can be used
+ * like a regular function inside cycles:
+ *
+ * <code>
+ *   REPORT_VERBOSE( "This is a verbose message with a number: " << number );
+ * </code>
+ */
+#define REPORT_VERBOSE( MESSAGE ) \
+   m_logger << VERBOSE << SLOGGER_REPORT_PREFIX << MESSAGE << SLogger::endmsg
+
+/// Convenience macro for reporting ERROR messages in the code
+/**
+ * This macro is very similar to the REPORT_MESSAGE macros of Athena. It prints
+ * a nicely formatted output that specifies both the exact function name where
+ * the message was printed, and also the filename:line combination. It can be used
+ * like a regular function inside cycles:
+ *
+ * <code>
+ *   REPORT_ERROR( "A serious error message" );
+ * </code>
+ */
+#define REPORT_ERROR( MESSAGE ) \
+   m_logger << ERROR << SLOGGER_REPORT_PREFIX << MESSAGE << SLogger::endmsg
+
+/// Convenience macro for reporting FATAL messages in the code
+/**
+ * This macro is very similar to the REPORT_MESSAGE macros of Athena. It prints
+ * a nicely formatted output that specifies both the exact function name where
+ * the message was printed, and also the filename:line combination. It can be used
+ * like a regular function inside cycles:
+ *
+ * <code>
+ *   REPORT_FATAL( "A very serious error message" );
+ * </code>
+ */
+#define REPORT_FATAL( MESSAGE ) \
+   m_logger << FATAL << SLOGGER_REPORT_PREFIX << MESSAGE << SLogger::endmsg
 
 #endif // SFRAME_CORE_SLogger_H

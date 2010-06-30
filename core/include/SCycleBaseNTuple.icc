@@ -57,8 +57,8 @@ template< typename T >
 bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branchName,
                                         T& variable ) throw ( SError ) {
 
-   m_logger << VERBOSE << "ConnectVariable( treeName = \"" << treeName
-            << "\", branchName = \"" << branchName << "\" ) called" << SLogger::endmsg;
+   REPORT_VERBOSE( "Called with treeName = \"" << treeName
+                   << "\", branchName = \"" << branchName << "\"" );
 
    // Access the TTree. The function will throw an exception if unsuccessful
    TTree* tree = GetInputTree( treeName );
@@ -67,8 +67,8 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    // Check if the branch actually exists:
    TBranch* branch_info;
    if( ! ( branch_info = tree->GetBranch( branchName ) ) ) {
-      m_logger << ERROR << "Branch \"" << branchName << "\" doesn't exist in TTree \""
-               << treeName << "\"" << SLogger::endmsg;
+      REPORT_ERROR( "Branch \"" << branchName << "\" doesn't exist in TTree \""
+                    << treeName << "\"" );
       return false;
    }
 
@@ -76,36 +76,33 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    // Detect what kind of variable we're dealing with:
    //
    const char* type_name = typeid( variable ).name();
-   m_logger << VERBOSE << "Type ID: " << type_name << SLogger::endmsg;
+   REPORT_VERBOSE( "Type ID: " << type_name );
    if( strlen( type_name ) == 1 ) {
 
       // Check whether the branch matches the type of the variable given to this
       // function:
-      m_logger << VERBOSE << "Type of the variable held by the branch: "
-               << branch_info->GetTitle() << SLogger::endmsg;
+      REPORT_VERBOSE( "Type of the variable held by the branch: "
+                      << branch_info->GetTitle() );
       TString title( branch_info->GetTitle() );
       if( ! title.Contains( "/" ) ) {
-         m_logger << ERROR << "Trying to connect a primitive variable to the branch: "
-                  << branchName << SLogger::endmsg;
-         m_logger << ERROR << "  which has the type: " << branch_info->GetClassName()
-                  << SLogger::endmsg;
+         REPORT_ERROR( "Trying to connect a primitive variable to the branch: "
+                       << branchName );
+         REPORT_ERROR( "  which has the type: " << branch_info->GetClassName() );
          throw SError( "Wrong variable type given for branch: " + TString( branchName ),
                        SError::SkipCycle );
       }
       if( ! title.EndsWith( RootType( type_name ) ) ) {
-         m_logger << ERROR << "Trying to connect a wrong type of primitive to the branch: "
-                  << branchName << SLogger::endmsg;
-         m_logger << ERROR << "  Use variable of type: " << title << SLogger::endmsg;
+         REPORT_ERROR( "Trying to connect a wrong type of primitive to the branch: "
+                       << branchName );
+         REPORT_ERROR( "  Use variable of type: " << title );
          throw SError( "Wrong variable type given for branch: " + TString( branchName ),
                        SError::SkipCycle );
       } else {
-         m_logger << VERBOSE << "The branch and variable types seem to match"
-                  << SLogger::endmsg;
+         REPORT_VERBOSE( "The branch and variable types seem to match" );
       }
 
       // For primitive types nothing fancy needs to be done
-      m_logger << VERBOSE << "The supplied variable is a \"primitive\""
-               << SLogger::endmsg;
+      REPORT_VERBOSE( "The supplied variable is a \"primitive\"" );
       tree->SetBranchAddress( branchName, &variable, &br );
 
    } else {
@@ -120,7 +117,6 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
             << treeName << "\"" << SLogger::endmsg;
 
    return true;
-
 }
 
 /**
@@ -165,8 +161,8 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 
    // Check if the branch actually exists:
    if( ! tree->GetBranch( branchName ) ) {
-      m_logger << ERROR << "Branch \"" << branchName << "\" doesn't exist in TTree \""
-               << treeName << "\"" << SLogger::endmsg;
+      REPORT_ERROR( "Branch \"" << branchName << "\" doesn't exist in TTree \""
+                    << treeName << "\"" );
       return false;
    }
 
@@ -174,10 +170,9 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    // Print what kind of variable we're dealing with:
    //
    const char* type_name = typeid( variable ).name();
-   m_logger << VERBOSE << "Type ID: " << type_name << SLogger::endmsg;
+   REPORT_VERBOSE( "Type ID: " << type_name );
 
-   m_logger << VERBOSE << "The supplied variable is a \"primitive array\""
-            << SLogger::endmsg;
+   REPORT_VERBOSE( "The supplied variable is a \"primitive array\"" );
    tree->SetBranchAddress( branchName, variable, &br );
 
    this->RegisterInputBranch( br );
@@ -185,7 +180,6 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
             << treeName << "\"" << SLogger::endmsg;
 
    return true;
-
 }
 
 /**
@@ -226,8 +220,8 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 
    // Check if the branch actually exists:
    if( ! tree->GetBranch( branchName ) ) {
-      m_logger << ERROR << "Branch \"" << branchName << "\" doesn't exist in TTree \""
-               << treeName << "\"" << SLogger::endmsg;
+      REPORT_ERROR( "Branch \"" << branchName << "\" doesn't exist in TTree \""
+                    << treeName << "\"" );
       return false;
    }
 
@@ -235,7 +229,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    // Detect what kind of variable we're dealing with:
    //
    const char* type_name = typeid( *variable ).name();
-   m_logger << VERBOSE << "Type ID: " << type_name << SLogger::endmsg;
+   REPORT_VERBOSE( "Type ID: " << type_name );
    if( strlen( type_name ) == 1 ) {
 
       throw SError( "ConnectVariable(...) specialised for object pointers called "
@@ -245,8 +239,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 
       // The object pointers have to be initialised to zero before
       // connecting them to the branches
-      m_logger << VERBOSE << "The supplied variable is an object pointer"
-               << SLogger::endmsg;
+      REPORT_VERBOSE( "The supplied variable is an object pointer" );
       variable = 0;
       tree->SetBranchAddress( branchName, &variable, &br );
       // Take ownership of this new object:
@@ -322,8 +315,7 @@ TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
       throw error;
    }
 
-   m_logger << VERBOSE << "Found output tree with name: " << tree->GetName()
-            << SLogger::endmsg;
+   REPORT_VERBOSE( "Found output tree with name: " << tree->GetName() );
 
    // Check if the branch exists already:
    branch = tree->GetBranch( name );
@@ -343,8 +335,7 @@ TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
          //
          // This is a simple variable:
          //
-         m_logger << VERBOSE << "The supplied variable is a \"primitive\""
-                  << SLogger::endmsg;
+         REPORT_VERBOSE( "The supplied variable is a \"primitive\"" );
 
          std::ostringstream leaflist;
          leaflist << name << "/" << RootType( type_name );
@@ -355,7 +346,7 @@ TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
          //
          // This is an object:
          //
-         m_logger << VERBOSE << "The supplied variable is an object" << SLogger::endmsg;
+         REPORT_VERBOSE( "The supplied variable is an object" );
 
          int status;
          char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
@@ -365,10 +356,8 @@ TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
             throw error;
          }
 
-         m_logger << VERBOSE << "Mangled name of object: " << type_name
-                  << SLogger::endmsg;
-         m_logger << VERBOSE << "De-mangled name of object: " << real_type_name
-                  << SLogger::endmsg;
+         REPORT_VERBOSE( "Mangled name of object: " << type_name );
+         REPORT_VERBOSE( "De-mangled name of object: " << real_type_name );
 
          //
          // Then try to add the object to the TTree. We have to do it in such a weird way,
@@ -392,7 +381,7 @@ TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
          throw error;
       }
 
-      m_logger << VERBOSE << "Successfully added branch" << SLogger::endmsg;
+      REPORT_VERBOSE( "Successfully added branch" );
 
    } else {
 
@@ -403,7 +392,6 @@ TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
    }
 
    return branch;
-
 }
 
 #endif // SFRAME_CORE_SCycleBaseNTuple_ICC

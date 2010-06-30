@@ -35,10 +35,13 @@ public:
    /// Default constructor
    SCycleBaseBase();
    /// Default destructor
-   virtual ~SCycleBaseBase();
+   virtual ~SCycleBaseBase() {}
 
 protected:
+   /// Function used to set the name of the current cycle
    void SetLogName( const char* name );
+   /// Function for accessing the logger object
+   SLogger& logger() const { return m_logger; }
 
    /// Object used for output messages to the terminal
    /**

@@ -22,8 +22,7 @@
 // Local include(s):
 #include "../include/SCycleBaseConfig.h"
 #include "../include/SGeneratorCut.h"
-
-using namespace std;
+#include "../include/STreeType.h"
 
 /**
  * The constructor only initialises the base class.
@@ -31,17 +30,7 @@ using namespace std;
 SCycleBaseConfig::SCycleBaseConfig()
    : m_input( 0 ) {
 
-   m_logger << VERBOSE << "SCycleBaseConfig constructed" << SLogger::endmsg;
-
-}
-
-/**
- * Another one of the "I don't do anything" destructors.
- */
-SCycleBaseConfig::~SCycleBaseConfig() {
-
-   m_logger << VERBOSE << "SCycleBaseConfig destructed" << SLogger::endmsg;
-
+   REPORT_VERBOSE( "SCycleBaseConfig constructed" );
 }
 
 /**
@@ -56,10 +45,11 @@ SCycleBaseConfig::~SCycleBaseConfig() {
  */
 void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
 
-   m_logger << INFO << "Initializing..." << SLogger::endmsg;
+   m_logger << INFO << "Initializing from configuration" << SLogger::endmsg;
 
    // Clear the current cycle configuration:
    m_config.ClearConfig();
+   REPORT_VERBOSE( "Cleared the current configuration" );
 
    //
    // Get the properties of the Cycle node:
@@ -104,8 +94,8 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
 
       if( nodes->GetNodeName() == TString( "InputData" ) ) {
 
-         this->InitializeInputData( nodes );
-   
+         m_config.AddInputData( this->InitializeInputData( nodes ) );
+
       } else if( nodes->GetNodeName() == TString( "UserConfig" ) ) {
 
          this->InitializeUserConfig( nodes );
@@ -116,6 +106,7 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
 
    // now check if input data type appears multiple times
    m_config.ArrangeInputData();
+   REPORT_VERBOSE( "Arranged the input data" );
 
    // print configuration
    m_config.PrintConfig();
@@ -123,19 +114,16 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
    // ------------- xml parsing terminated -------------------------------
 
    return;
-
 }
 
 const SCycleConfig& SCycleBaseConfig::GetConfig() const {
 
    return m_config;
-
 }
 
 SCycleConfig& SCycleBaseConfig::GetConfig() {
 
    return m_config;
-
 }
 
 void SCycleBaseConfig::SetConfig( const SCycleConfig& config ) {
@@ -155,7 +143,6 @@ void SCycleBaseConfig::SetConfig( const SCycleConfig& config ) {
    }
 
    return;
-
 }
 
 const TList& SCycleBaseConfig::GetConfigurationObjects() const {
@@ -337,10 +324,12 @@ TObject* SCycleBaseConfig::GetConfigObject( const char* name ) const {
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
 
-void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
+SInputData SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
 
    // create SInputData object
    SInputData inputData;
+
+   REPORT_VERBOSE( "Reading an input data definition" );
 
    TListIter attribIt( node->GetAttributes() );
    TXMLAttr* curAttr( 0 );
@@ -378,22 +367,25 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
 
       // get the generator cuts
       if( child->GetNodeName() == TString( "GeneratorCut" ) ) {
+
          TString treeName = "";
          TString formula = "";
          attribute = 0;
-
          while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0) {
             if( attribute->GetName() == TString( "Tree" ) ) treeName = attribute->GetValue();
             if( attribute->GetName() == TString( "Formula" ) ) formula = attribute->GetValue();
          }
+
+         REPORT_VERBOSE( "Found a generator cut on tree \"" << treeName
+                         << "\" with formula: " << formula );
          inputData.AddGenCut( SGeneratorCut( treeName, formula ) );
 
       }
       // get the input datasets
       else if( child->GetNodeName() == TString( "DataSet" ) ) {
+
          TString name = "";
          Double_t lumi = 0.;
-
          attribute = 0;
          while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0) {
             if( attribute->GetName() == TString( "Name" ) )
@@ -401,14 +393,17 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
             if( attribute->GetName() == TString( "Lumi" ) )
                lumi = atof( attribute->GetValue() );
          }
+
+         REPORT_VERBOSE( "Found a dataset with name \"" << name << "\" and lumi: "
+                         << lumi );
          inputData.AddDataSet( SDataSet( name, lumi ) );
 
       }
       // get the input files
       else if( child->GetNodeName() == TString( "In" ) ) {
+
          TString fileName = "";
          Double_t lumi = 0.;
-
          attribute = 0;
          while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0) {
             if( attribute->GetName() == TString( "FileName" ) )
@@ -416,71 +411,85 @@ void SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
             if( attribute->GetName() == TString( "Lumi" ) )
                lumi = atof( attribute->GetValue() );
          }
+
+         REPORT_VERBOSE( "Found an input file with name \"" << fileName
+                         << "\" and lumi: " << lumi );
          inputData.AddSFileIn( SFile( fileName, lumi ) );
 
       }
       // get a "regular" input tree
       else if( child->GetNodeName() == TString( "InputTree" ) ) {
-         TString treeName = "";
 
+         TString treeName = "";
          attribute = 0;
          while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
             if( attribute->GetName() == TString( "Name" ) )
                treeName = attribute->GetValue();
          }
-         inputData.AddInputSTree( STree( treeName ) );
 
-      }
-      // get a "persistent" input tree (aka. DPD)
-      else if( child->GetNodeName() == TString( "PersTree" ) ) {
-         TString treeName = "";
-
-         attribute = 0;
-         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
-            if( attribute->GetName() == TString( "Name" ) )
-               treeName = attribute->GetValue();
-         }
-         inputData.AddPersSTree( STree( treeName ) );
+         REPORT_VERBOSE( "Found regular input tree with name: " << treeName );
+         inputData.AddTree( STreeType::InputSimpleTree,
+                            STree( treeName, ( STree::INPUT_TREE | STree::EVENT_TREE ) ) );
 
       }
       // get an output tree
       else if( child->GetNodeName() == TString( "OutputTree" ) ) {
-         TString treeName = "";
 
+         TString treeName = "";
          attribute = 0;
          while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
             if( attribute->GetName() == TString( "Name" ) )
                treeName = attribute->GetValue();
          }
-         inputData.AddOutputSTree( STree( treeName ) );
+
+         REPORT_VERBOSE( "Found regular output tree with name: " << treeName );
+         inputData.AddTree( STreeType::OutputSimpleTree,
+                            STree( treeName, ( STree::OUTPUT_TREE | STree::EVENT_TREE ) ) );
 
       }
-      // get a metadata tree
-      else if( child->GetNodeName() == TString( "MetadataTree" ) ) {
-         TString treeName = "";
+      // get an input metadata tree
+      else if( child->GetNodeName() == TString( "MetadataInputTree" ) ) {
 
+         TString treeName = "";
          attribute = 0;
          while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
             if( attribute->GetName() == TString( "Name" ) )
                treeName = attribute->GetValue();
          }
-         inputData.AddMetaSTree( STree( treeName ) );
+
+         REPORT_VERBOSE( "Found input metadata tree with name: " << treeName );
+         inputData.AddTree( STreeType::InputMetaTree,
+                            STree( treeName, STree::INPUT_TREE ) );
+
+      }
+      // get an output metadata tree
+      else if( child->GetNodeName() == TString( "MetadataOutputTree" ) ) {
+
+         TString treeName = "";
+         attribute = 0;
+         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
+            if( attribute->GetName() == TString( "Name" ) )
+               treeName = attribute->GetValue();
+         }
+
+         REPORT_VERBOSE( "Found output metadata tree with name: " << treeName );
+         inputData.AddTree( STreeType::OutputMetaTree,
+                            STree( treeName, STree::OUTPUT_TREE ) );
 
       } else {
-         // unknown field error
-         m_logger << ERROR << " *** ERROR - unknown field " << child->GetNodeName()
-                  << " ***" << SLogger::endmsg;
+         // Unknown field notification. It's not an ERROR anymore, as this function
+         // may actually find XML nodes that it doesn't recognise.
+         m_logger << DEBUG << "Unknown field: " << child->GetNodeName() << SLogger::endmsg;
       }
       child = child->GetNextNode();
    }
 
-   // Add this input data to the list:
-   m_config.AddInputData( inputData );
-
-   return;
+   return inputData;
 }
 
 void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
+
+   REPORT_VERBOSE( "Initializing the user configuration" );
 
    TXMLNode* userNode = node->GetChildren();
    while( userNode != 0 ) {
@@ -536,7 +545,7 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    // If it's a string list property:
    else if( m_stringListPrefs.find( name ) != m_stringListPrefs.end() ) {
       m_stringListPrefs[ name ]->clear();
-      istringstream stream( stringValue );
+      std::istringstream stream( stringValue );
       while( ! stream.eof() && ( stringValue != "" ) ) {
          std::string value;
          stream >> value;
@@ -546,7 +555,7 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    // If it's an integer list property:
    else if( m_intListPrefs.find( name ) != m_intListPrefs.end() ) {
       m_intListPrefs[ name ]->clear();
-      istringstream stream( stringValue );
+      std::istringstream stream( stringValue );
       while( ! stream.eof() && ( stringValue != "" ) ) {
          int value;
          stream >> value;
@@ -556,7 +565,7 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    // If it's a double list property:
    else if( m_doubleListPrefs.find( name ) != m_doubleListPrefs.end() ) {
       m_doubleListPrefs[ name ]->clear();
-      istringstream stream( stringValue );
+      std::istringstream stream( stringValue );
       while( ! stream.eof() && ( stringValue != "" ) ) {
          double value;
          stream >> value;
@@ -566,7 +575,7 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    // If it's a boolean list property:
    else if( m_boolListPrefs.find( name ) != m_boolListPrefs.end() ) {
       m_boolListPrefs[ name ]->clear();
-      istringstream stream( stringValue );
+      std::istringstream stream( stringValue );
       while( ! stream.eof() && ( stringValue != "" ) ) {
          std::string value;
          stream >> value;
@@ -576,8 +585,8 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    // If it hasn't been requested by the analysis cycle, issue a warning.
    // It might mean a typo somewhere...
    else {
-      m_logger << WARNING << "User property not found: " << name << endl
-               << "Value not set!" << SLogger::endmsg;
+      m_logger << WARNING << "User property not found: " << name << std::endl
+               << "  Value not set!" << SLogger::endmsg;
    }
 
    return;

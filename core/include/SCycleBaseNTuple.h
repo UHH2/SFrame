@@ -87,7 +87,7 @@ protected:
                              const char* treeName = 0 ) throw( SError );
 
    /// Access one of the metadata trees
-   TTree* GetMetadataTree( const char* name ) const;
+   virtual TTree* GetMetadataTree( const char* name ) const;
 
    //////////////////////////////////////////////////////////
    //                                                      //
@@ -99,6 +99,8 @@ protected:
    void CreateOutputTrees( const SInputData& id,
                            std::vector< TTree* >& outTrees,
                            TFile* outputFile = 0 ) throw( SError );
+   /// Save all the created output trees in the output
+   void SaveOutputTrees( TDirectory* output ) throw( SError );
    /// Load the input trees
    void LoadInputTrees( const SInputData& id, TTree* main_tree ) throw( SError );
    /// Read in the event from the "normal" trees
@@ -124,8 +126,10 @@ private:
 
    /// Vector to hold the output trees
    std::vector< TTree* > m_outputTrees;
-   /// Vector to hold the metadata trees
-   std::vector< TTree* > m_metaTrees;
+   /// Vector to hold the metadata input trees
+   std::vector< TTree* > m_metaInputTrees;
+   /// Vector to hold the metadata output trees
+   std::vector< TTree* > m_metaOutputTrees;
 
    // We have to keep the pointers to the output variables defined by the user.
    // ROOT keeps track of the objects by storing pointers to pointers to the

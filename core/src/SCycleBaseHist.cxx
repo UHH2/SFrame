@@ -23,31 +23,13 @@
 #include "../include/SCycleBaseHist.h"
 #include "../include/SCycleOutput.h"
 
-/*
-#ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseHist );
-#endif // DOXYGEN_IGNORE
-*/
-
-using namespace std;
-
 /**
  * The constructor initialises the base class and the member variables.
  */
 SCycleBaseHist::SCycleBaseHist()
    : SCycleBaseBase(), m_histoMap(), m_output( 0 ) {
 
-   m_logger << VERBOSE << "SCycleBaseHist constructed" << SLogger::endmsg;
-
-}
-
-/**
- * Another one of the "I don't do anything" destructors.
- */
-SCycleBaseHist::~SCycleBaseHist() {
-
-   m_logger << VERBOSE << "SCycleBaseHist destructed" << SLogger::endmsg;
-
+   REPORT_VERBOSE( "SCycleBaseHist constructed" );
 }
 
 void SCycleBaseHist::SetHistOutput( TList* output ) {
@@ -55,13 +37,11 @@ void SCycleBaseHist::SetHistOutput( TList* output ) {
    m_output = output;
    m_histoMap.clear();
    return;
-
 }
 
 TList* SCycleBaseHist::GetHistOutput() const {
 
    return m_output;
-
 }
 
 /**
@@ -132,19 +112,17 @@ TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) {
 
    TH1* result;
 
-   pair< string, string > this_pair( name, ( dir ? dir : "" ) );
-   map< pair< string, string >, TH1* >::const_iterator it;
+   std::pair< std::string, std::string > this_pair( name, ( dir ? dir : "" ) );
+   std::map< std::pair< std::string, std::string >, TH1* >::const_iterator it;
    if( ( it = m_histoMap.find( this_pair ) ) != m_histoMap.end() ) {
       result = it->second;
    } else {
-      m_logger << VERBOSE << "Hist(): Using Retrieve for name \""
-               << name << "\" and dir \"" << ( dir ? dir : "" ) << "\""
-               << SLogger::endmsg;
+      REPORT_VERBOSE( "Hist(): Using Retrieve for name \""
+                      << name << "\" and dir \"" << ( dir ? dir : "" ) << "\"" );
       result = m_histoMap[ this_pair ] = Retrieve< TH1 >( name, dir );
    }
 
    return result;
-
 }
 
 TDirectory* SCycleBaseHist::GetTempDir() const {
@@ -155,11 +133,9 @@ TDirectory* SCycleBaseHist::GetTempDir() const {
       gROOT->cd();
       tempdir = gROOT->mkdir( "SFrameTempDir" );
       if( ! tempdir ) {
-         m_logger << ERROR << "Temporary directory could not be created"
-                  << SLogger::endmsg;
+         REPORT_ERROR( "Temporary directory could not be created" );
       }
    }
 
    return tempdir;
-
 }

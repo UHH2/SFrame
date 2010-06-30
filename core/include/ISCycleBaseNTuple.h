@@ -56,6 +56,8 @@ protected:
    virtual void CreateOutputTrees( const SInputData& id,
                                    std::vector< TTree* >& outTrees,
                                    TFile* outputFile = 0 ) throw( SError ) = 0;
+   /// Save all the created output trees in the output
+   virtual void SaveOutputTrees( TDirectory* output ) throw( SError ) = 0;
    /// Load the input trees
    virtual void LoadInputTrees( const SInputData& id, TTree* main_tree ) throw( SError ) = 0;
    /// Read in the event from the "normal" trees

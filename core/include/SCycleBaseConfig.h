@@ -52,8 +52,6 @@ class SCycleBaseConfig : public virtual ISCycleBaseConfig,
 public:
    /// Default constructor
    SCycleBaseConfig();
-   /// Default destructor
-   virtual ~SCycleBaseConfig();
 
    /// Function initialising the cycle
    void Initialize( TXMLNode* ) throw( SError );
@@ -96,12 +94,11 @@ protected:
    /// Get a configuration object on the PROOF nodes
    TObject* GetConfigObject( const char* name ) const;
 
+   // Function that reads an InputData definition
+   virtual SInputData InitializeInputData( TXMLNode* ) throw( SError );
+   virtual void InitializeUserConfig( TXMLNode* ) throw( SError );
+
 private:
-   //
-   // Functions initialising different aspects of the cycle:
-   //
-   void InitializeInputData( TXMLNode* ) throw( SError );
-   void InitializeUserConfig( TXMLNode* ) throw( SError );
    void SetProperty( const std::string& name,
                      const std::string& value ) throw( SError );
 

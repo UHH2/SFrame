@@ -13,12 +13,6 @@
 // Local include(s):
 #include "../include/SCycleBaseBase.h"
 
-/*
-#ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseBase );
-#endif // DOXYGEN_IGNORE
-*/
-
 /**
  * The constructor is not doing much. It just initialises the m_logger
  * member.
@@ -26,19 +20,20 @@ ClassImp( SCycleBaseBase );
 SCycleBaseBase::SCycleBaseBase()
    : m_logger( "NameNotSet" ) {
 
-   m_logger << VERBOSE << "SCycleBaseBase constructed" << SLogger::endmsg;
-
+   REPORT_VERBOSE( "SCycleBaseBase constructed" );
 }
 
 /**
- * Another one of the "I don't do anything" destructors.
+ * Since this base class doesn't inherit from TObject anymore, it can't know
+ * the name of the user cycle anymore unfortunately. So all user cycles
+ * have to put a line like this in their constructor:
+ *
+ * <code>
+ *   SetLogName( this->GetName() );
+ * </code>
+ *
+ * @param name Name of the current cycle
  */
-SCycleBaseBase::~SCycleBaseBase() {
-
-   m_logger << VERBOSE << "SCycleBaseBase destructed" << SLogger::endmsg;
-
-}
-
 void SCycleBaseBase::SetLogName( const char* name ) {
 
    m_logger.SetSource( name );

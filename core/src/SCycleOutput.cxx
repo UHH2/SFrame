@@ -56,7 +56,6 @@ SCycleOutput::SCycleOutput( TObject* object, const char* name,
 SCycleOutput::~SCycleOutput() {
 
    if( m_object ) delete m_object;
-
 }
 
 /**
@@ -65,7 +64,6 @@ SCycleOutput::~SCycleOutput() {
 TObject* SCycleOutput::GetObject() const {
 
    return m_object;
-
 }
 
 /**
@@ -75,20 +73,17 @@ void SCycleOutput::SetObject( TObject* object ) {
 
    m_object = object;
    return;
-
 }
 
 const TString& SCycleOutput::GetPath() const {
 
    return m_path;
-
 }
 
 void SCycleOutput::SetPath( const TString& path ) {
 
    m_path = path;
    return;
-
 }
 
 /**
@@ -122,8 +117,8 @@ Int_t SCycleOutput::Merge( TCollection* coll ) {
       //
       SCycleOutput* sobj = dynamic_cast< SCycleOutput* >( obj );
       if( ! sobj ) {
-         m_logger << ERROR << "Trying to merge \"" << obj->ClassName()
-                  << "\" object into \"" << this->ClassName() << "\"" << SLogger::endmsg;
+         REPORT_ERROR( "Trying to merge \"" << obj->ClassName()
+                       << "\" object into \"" << this->ClassName() << "\"" );
          continue;
       }
 
@@ -133,9 +128,8 @@ Int_t SCycleOutput::Merge( TCollection* coll ) {
       TObject* mobj = sobj->GetObject();
       if( ! mobj ) continue;
       if( strcmp( mobj->ClassName(), this->GetObject()->ClassName() ) ) {
-         m_logger << ERROR << "Trying to merge \"" << mobj->ClassName()
-                  << "\" object into \"" << this->GetObject()->ClassName()
-                  << SLogger::endmsg;
+         REPORT_ERROR( "Trying to merge \"" << mobj->ClassName()
+                       << "\" object into \"" << this->GetObject()->ClassName() );
          continue;
       }
 
@@ -160,8 +154,8 @@ Int_t SCycleOutput::Merge( TCollection* coll ) {
    TMethodCall mergeMethod;
    mergeMethod.InitWithPrototype( this->GetObject()->IsA(), "Merge", "TCollection*" );
    if( ! mergeMethod.IsValid() ) {
-      m_logger << ERROR << "Object type \"" << this->GetObject()->ClassName()
-               << "\" doesn't support merging" << SLogger::endmsg;
+      REPORT_ERROR( "Object type \"" << this->GetObject()->ClassName()
+                    << "\" doesn't support merging" );
       return 0;
    }
 
@@ -217,9 +211,9 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
       // Check that it's the same type as the object that we want to save:
       //
       if( strcmp( original_obj->ClassName(), m_object->ClassName() ) ) {
-         m_logger << ERROR << "Object in file (\"" << original_obj->ClassName()
-                  << "\") is not the same type as the object in memory (\""
-                  << m_object->ClassName() << "\")" << SLogger::endmsg;
+         REPORT_ERROR( "Object in file (\"" << original_obj->ClassName()
+                       << "\") is not the same type as the object in memory (\""
+                       << m_object->ClassName() << "\")" );
          return 0;
       }
 
@@ -229,8 +223,8 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
       TMethodCall mergeMethod;
       mergeMethod.InitWithPrototype( original_obj->IsA(), "Merge", "TCollection*" );
       if( ! mergeMethod.IsValid() ) {
-         m_logger << ERROR << "Object type \"" << original_obj->ClassName()
-                  << "\" doesn't support merging" << SLogger::endmsg;
+         REPORT_ERROR( "Object type \"" << original_obj->ClassName()
+                       << "\" doesn't support merging" );
          return 0;
       }
 
@@ -275,8 +269,8 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
    // Remove the memory-resident TTree from the directory:
    if( tobject ) tobject->SetDirectory( 0 );
 
-   m_logger << VERBOSE << "Written object \"" << m_object->GetName()
-            <<"\" to: " << outDir->GetPath();
+   REPORT_VERBOSE( "Written object \"" << m_object->GetName()
+                   <<"\" to: " << outDir->GetPath() );
 
    return ret;
 
@@ -295,8 +289,8 @@ TDirectory* SCycleOutput::MakeDirectory( const TString& path ) const throw( SErr
    TDirectory* dir = 0;
    if( ! ( dir = gDirectory->GetDirectory( path ) ) ) {
 
-      m_logger << VERBOSE << "Creating directory: "
-               << gDirectory->GetPath() << "/" << path << SLogger::endmsg;
+      REPORT_VERBOSE( "Creating directory: "
+                      << gDirectory->GetPath() << "/" << path );
 
       //
       // Break up the path name at the slashes:
@@ -314,11 +308,9 @@ TDirectory* SCycleOutput::MakeDirectory( const TString& path ) const throw( SErr
          if( ! path_element ) continue;
          if( path_element->GetString() == "" ) continue;
 
-         m_logger << VERBOSE << "Accessing directory: " << path_element->GetString()
-                  << SLogger::endmsg;
+         REPORT_VERBOSE( "Accessing directory: " << path_element->GetString() );
          if( ! ( tempDir = dir->GetDirectory( path_element->GetString() ) ) ) {
-            m_logger << VERBOSE << "Directory doesn't exist, creating it..."
-                     << SLogger::endmsg;
+            REPORT_VERBOSE( "Directory doesn't exist, creating it..." );
             if( ! ( tempDir = dir->mkdir( path_element->GetString(), "dummy title" ) ) ) {
                SError error( SError::SkipInputData );
                error << "Couldn't create directory: " << path

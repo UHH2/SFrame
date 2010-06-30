@@ -24,6 +24,7 @@
 #include "../include/SCycleStatistics.h"
 #include "../include/SOutputFile.h"
 #include "../include/SLogWriter.h"
+#include "../include/STreeType.h"
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseExec );
@@ -36,22 +37,12 @@ SCycleBaseExec::SCycleBaseExec()
    : m_nProcessedEvents( 0 ), m_nSkippedEvents( 0 ) {
 
    SetLogName( this->GetName() );
-   m_logger << VERBOSE << "SCycleBaseExec constructed" << SLogger::endmsg;
-
-}
-
-/**
- * The destructor doesn't do anything.
- */
-SCycleBaseExec::~SCycleBaseExec() {
-
-   m_logger << VERBOSE << "SCycleBaseExec destructed" << SLogger::endmsg;
-
+   REPORT_VERBOSE( "SCycleBaseExec constructed" );
 }
 
 void SCycleBaseExec::Begin( TTree* ) {
 
-   m_logger << VERBOSE << "In SCycleBaseExec::Begin()" << SLogger::endmsg;
+   REPORT_VERBOSE( "Running initialization on master" );
 
    try {
 
@@ -66,19 +57,16 @@ void SCycleBaseExec::Begin( TTree* ) {
       this->BeginMasterInputData( *m_inputData );
 
    } catch( const SError& error ) {
-      m_logger << FATAL << "Exception caught in Begin( TTree* )"
-               << SLogger::endmsg;
-      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      REPORT_FATAL( "Exception caught with message: " << error.what() );
       throw;
    }
 
    return;
-
 }
 
 void SCycleBaseExec::SlaveBegin( TTree* ) {
 
-   m_logger << VERBOSE << "In SCycleBaseExec::SlaveBegin()" << SLogger::endmsg;
+   REPORT_VERBOSE( "Running initialization on slave" );
 
    try {
 
@@ -96,7 +84,8 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
       //
       // Open a PROOF output file for the ntuple(s):
       //
-      if( m_inputData->GetOutputTrees().size() ) {
+      if( m_inputData->GetTrees( STreeType::OutputSimpleTree ) ||
+          m_inputData->GetTrees( STreeType::OutputMetaTree ) ) {
 
          TProofOutputFile* proofFile = 0;
 
@@ -144,9 +133,7 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
       this->BeginInputData( *m_inputData );
 
    } catch( const SError& error ) {
-      m_logger << FATAL << "Exception caught in SlaveBegin( TTree* )"
-               << SLogger::endmsg;
-      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      REPORT_FATAL( "Exception caught with message: " << error.what() );
       throw;
    }
 
@@ -158,20 +145,19 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
             << ") on worker node" << SLogger::endmsg;
 
    return;
-
 }
 
 void SCycleBaseExec::Init( TTree* main_tree ) {
 
-   m_logger << VERBOSE << "In SCycleBaseExec::Init(...)" << SLogger::endmsg;
-
+   REPORT_VERBOSE( "Caching the pointer to the main input tree" );
    m_inputTree = main_tree;
 
    return;
-
 }
 
 Bool_t SCycleBaseExec::Notify() {
+
+   REPORT_VERBOSE( "Accessing a new input file" );
 
    try {
 
@@ -179,14 +165,11 @@ Bool_t SCycleBaseExec::Notify() {
       this->BeginInputFile( *m_inputData );
 
    } catch( const SError& error ) {
-      m_logger << FATAL << "Exception caught in Notify()"
-               << SLogger::endmsg;
-      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      REPORT_FATAL( "Exception caught with message: " << error.what() );
       throw;
    }
 
    return kTRUE;
-
 }
 
 Bool_t SCycleBaseExec::Process( Long64_t entry ) {
@@ -200,15 +183,13 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
 
    } catch( const SError& error ) {
       if( error.request() <= SError::SkipEvent ) {
-         m_logger << VERBOSE << "Exeption caught while processing event"
-                  << SLogger::endmsg;
-         m_logger << VERBOSE << "Message: " << error.what() << SLogger::endmsg;
-         m_logger << VERBOSE << "--> Skipping event!" << SLogger::endmsg;
+         REPORT_VERBOSE( "Exeption caught while processing event" );
+         REPORT_VERBOSE( " Message: " << error.what() );
+         REPORT_VERBOSE( " --> Skipping event!" );
          skipEvent = kTRUE;
       } else {
-         m_logger << FATAL << "Exception caught while processing event"
-                  << SLogger::endmsg;
-         m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+         REPORT_FATAL( "Exception caught while processing event" );
+         REPORT_FATAL( "Message: " << error.what() );
          throw;
       }
    }
@@ -219,8 +200,8 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
            tree != m_outputTrees.end(); ++tree ) {
          nbytes = ( *tree )->Fill();
          if( nbytes < 0 ) {
-            m_logger << ERROR << "Write error occured in tree \""
-                     << ( *tree )->GetName() << "\"" << SLogger::endmsg;
+            REPORT_ERROR( "Write error occured in tree \""
+                          << ( *tree )->GetName() << "\"" );
          } else if( nbytes == 0 ) {
             m_logger << WARNING << "No data written to tree \""
                      << ( *tree )->GetName() << "\"" << SLogger::endmsg;
@@ -243,12 +224,11 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
    }
 
    return kTRUE;
-
 }
 
 void SCycleBaseExec::SlaveTerminate() {
 
-   m_logger << VERBOSE << "In SCycleBaseExec::SlaveTerminate()" << SLogger::endmsg;
+   REPORT_VERBOSE( "Running finalization on slave" );
 
    //
    // Tell the user cycle that the InputData has ended:
@@ -256,9 +236,7 @@ void SCycleBaseExec::SlaveTerminate() {
    try {
       this->EndInputData( *m_inputData );
    } catch( const SError& error ) {
-      m_logger << FATAL << "Exception caught in SlaveTerminate()"
-               << SLogger::endmsg;
-      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      REPORT_FATAL( "Exception caught with message: " << error.what() );
       throw;
    }
 
@@ -277,20 +255,8 @@ void SCycleBaseExec::SlaveTerminate() {
       m_logger << DEBUG << "Closing output file: " << m_outputFile->GetName()
                << SLogger::endmsg;
 
-      // Remember which directory we were in:
-      TDirectory* savedir = gDirectory;
-      m_outputFile->cd();
-
-      // Save each output tree:
-      for( std::vector< TTree* >::iterator tree = m_outputTrees.begin();
-           tree != m_outputTrees.end(); ++tree ) {
-         ( *tree )->Write();
-         ( *tree )->SetDirectory( 0 );
-         delete ( *tree );
-      }
-
-      // Go back to the original directory:
-      gDirectory = savedir;
+      // Save all the output trees into the output file:
+      this->SaveOutputTrees( m_outputFile );
 
       // Close the output file and reset the variables:
       m_outputFile->Close();
@@ -305,24 +271,20 @@ void SCycleBaseExec::SlaveTerminate() {
             << ") on worker node" << SLogger::endmsg;
 
    return;
-
 }
 
 void SCycleBaseExec::Terminate() {
 
-   m_logger << VERBOSE << "In SCycleBaseExec::Terminate()" << SLogger::endmsg;
+   REPORT_VERBOSE( "Running finalization on the master" );
 
    try {
       this->EndMasterInputData( *m_inputData );
    } catch( const SError& error ) {
-      m_logger << FATAL << "Exception caught in Terminate()"
-               << SLogger::endmsg;
-      m_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
+      REPORT_FATAL( "Exception caught with message: " << error.what() );
       throw;
    }
 
    return;
-
 }
 
 /**
@@ -337,8 +299,7 @@ void SCycleBaseExec::ReadConfig() throw( SError ) {
    SCycleConfig* config =
       dynamic_cast< SCycleConfig* >( fInput->FindObject( SFrame::CycleConfigName ) );
    if( ! config ) {
-      m_logger << FATAL << "Couldn't retrieve the cycle configuration"
-               << SLogger::endmsg;
+      REPORT_FATAL( "Couldn't retrieve the cycle configuration" );
       throw SError( "Couldn't find cycle configuration object", SError::SkipCycle );
       return;
    }
@@ -351,12 +312,12 @@ void SCycleBaseExec::ReadConfig() throw( SError ) {
    m_inputData =
       dynamic_cast< SInputData* >( fInput->FindObject( SFrame::CurrentInputDataName ) );
    if( ! m_inputData ) {
-      m_logger << FATAL << "Couldn't retrieve the input data definition currently "
-               << "being processed" << SLogger::endmsg;
-      throw SError( "Couldn't find current input data configuration object", SError::SkipCycle );
+      REPORT_FATAL( "Couldn't retrieve the input data definition currently "
+                    << "being processed" );
+      throw SError( "Couldn't find current input data configuration object",
+                    SError::SkipCycle );
       return;
    }
 
    return;
-
 }

@@ -42,13 +42,12 @@ void SFileMerger::AddInput( const TString& fileName ) throw( SError ) {
    //
    TFile* ifile = TFile::Open( fileName, "READ" );
    if( ! ifile ) {
-      m_logger << ERROR << "Specified input file does not exist: "
-               << fileName << SLogger::endmsg;
+      REPORT_ERROR( "Specified input file does not exist: " << fileName );
       throw SError( "Input file does not exist: " + fileName,
                     SError::SkipCycle );
    }
    m_inputFiles.push_back( ifile );
-   m_logger << VERBOSE << fileName << " opened for reading" << SLogger::endmsg;
+   REPORT_VERBOSE( fileName << " opened for reading" );
 
    return;
 }
@@ -60,13 +59,12 @@ void SFileMerger::SetOutput( const TString& fileName ) throw( SError ) {
    //
    TFile* ofile = TFile::Open( fileName, "UPDATE" );
    if( ! ofile ) {
-      m_logger << ERROR << "Couldn't open output file: "
-               << fileName << SLogger::endmsg;
+      REPORT_ERROR( "Couldn't open output file: " << fileName );
       throw SError( "Output file could not be opened: " + fileName,
                     SError::SkipCycle );
    }
    m_outputFile = ofile;
-   m_logger << VERBOSE << fileName << " opened for writing" << SLogger::endmsg;
+   REPORT_VERBOSE( fileName << " opened for writing" );
 
    return;
 }
@@ -82,7 +80,7 @@ void SFileMerger::Merge() throw( SError ) {
    // Check that we have both input(s) and an output:
    //
    if( ! m_outputFile ) {
-      m_logger << ERROR << "Merge(): Output file not specified yet" << SLogger::endmsg;
+      REPORT_ERROR( "Merge(): Output file not specified yet" );
       return;
    }
    if( ! m_inputFiles.size() ) {
@@ -99,8 +97,7 @@ void SFileMerger::Merge() throw( SError ) {
    for( std::vector< TFile* >::const_iterator ifile = m_inputFiles.begin();
         ifile != m_inputFiles.end(); ++ifile ) {
 
-      m_logger << VERBOSE << "Now processing file: " << ( *ifile )->GetName()
-               << SLogger::endmsg;
+      REPORT_VERBOSE( "Now processing file: " << ( *ifile )->GetName() );
 
       //
       // I don't go into any sub-directories. SFrame only puts TTree-s in the root
@@ -125,8 +122,8 @@ void SFileMerger::Merge() throw( SError ) {
          //
          // Check whether we already processed an object with this name:
          //
-         m_logger << VERBOSE << "Processing key with name: " << key->GetName()
-                  << ";" << key->GetCycle() << SLogger::endmsg;
+         REPORT_VERBOSE( "Processing key with name: " << key->GetName()
+                         << ";" << key->GetCycle() );
          if( processedTrees.find( key->GetName() ) != processedTrees.end() ) {
             m_logger << DEBUG << "Object \"" << key->GetName() << "\" has already been processed"
                      << SLogger::endmsg;
@@ -168,7 +165,7 @@ void SFileMerger::Merge() throw( SError ) {
                m_outputFile->cd();
                TTree* itree = 0;
                if( ! ( itree = dynamic_cast< TTree* >( obj ) ) ) {
-                  m_logger << ERROR << "Coulnd't dynamic cast object to TTree" << SLogger::endmsg;
+                  REPORT_ERROR( "Coulnd't dynamic cast object to TTree" );
                   continue;
                }
 

@@ -51,9 +51,8 @@ T* SCycleBaseHist::Book( const T& histo,
    if( ! out ) {
       out = new SCycleOutput( histo.Clone(), path, directory );
       m_output->Add( out );
-      m_logger << VERBOSE << "Added new object with name \"" << histo.GetName()
-               << "\" in directory \"" << ( directory ? directory : "" ) << "\""
-               << SLogger::endmsg;
+      REPORT_VERBOSE( "Added new object with name \"" << histo.GetName()
+                      << "\" in directory \"" << ( directory ? directory : "" ) << "\"" );
    }
 
    T* ret = dynamic_cast< T* >( out->GetObject() );

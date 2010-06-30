@@ -117,9 +117,9 @@ void SH1< Type >::Fill( Double_t pos, Type weight ) throw( SError ) {
 
    // Check if the given parameters make sense:
    if( std::isnan( pos ) || std::isnan( weight ) ) {
-      SLogger logger( this );
-      logger << FATAL << "Fill( pos = " << pos << ", weight = " << weight
-             << " ): NaN received. Aborting..." << SLogger::endmsg;
+      SLogger m_logger( this ); // The name of the variable is like this on purpose
+      REPORT_FATAL( "Fill( pos = " << pos << ", weight = " << weight
+                    << " ): NaN received. Aborting..." );
       SError error( SError::StopExecution );
       error << "NaN received by Fill(...) function of histogram: " << GetName();
       throw error;
@@ -279,7 +279,7 @@ TH1* SH1< Type >::ToHist() const {
 template< typename Type >
 Int_t SH1< Type >::Merge( TCollection* coll ) {
 
-   SLogger logger( this->ClassName() );
+   SLogger m_logger( this->ClassName() ); // The name of the variable is like this on purpose...
 
    //
    // Return right away if the input is flawed:
@@ -296,8 +296,8 @@ Int_t SH1< Type >::Merge( TCollection* coll ) {
 
       SH1< Type >* hist = dynamic_cast< SH1< Type >* >( obj );
       if( ! hist ) {
-         logger << ERROR << "Trying to merge \"" << obj->ClassName()
-                << "\" object into \"" << this->ClassName() << "\"" << SLogger::endmsg;
+         REPORT_ERROR( "Trying to merge \"" << obj->ClassName()
+                       << "\" object into \"" << this->ClassName() << "\"" );
          continue;
       }
 
@@ -305,8 +305,7 @@ Int_t SH1< Type >::Merge( TCollection* coll ) {
           ( std::abs( hist->m_high - m_high ) > 0.001 ) ||
           ( m_bins != hist->m_bins ) ||
           ( m_computeErrors != hist->m_computeErrors ) ) {
-         logger << ERROR << "Trying to merge histograms with different settings"
-                << SLogger::endmsg;
+         REPORT_ERROR( "Trying to merge histograms with different settings" );
          continue;
       }
 

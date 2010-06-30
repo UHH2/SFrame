@@ -52,11 +52,9 @@ std::vector< Type > operator+( const std::vector< Type >& left,
          error << "Couldn't demangle type name: " << type_name;
          throw error;
       }
-      SLogger logger( real_type_name );
-      logger << ERROR << "Couldn't perform summation on type: "
-             << real_type_name << SLogger::endmsg;
-      logger << ERROR << "The results will not be correct!"
-             << SLogger::endmsg;
+      SLogger m_logger( real_type_name ); // Name given like this on purpose...
+      REPORT_ERROR( "Couldn't perform summation on type: " << real_type_name );
+      REPORT_ERROR( "The results will not be correct!" );
       ::free( real_type_name );
       return result;
    }
@@ -93,11 +91,9 @@ std::map< KeyType, ValueType > operator+( const std::map< KeyType, ValueType >& 
          error << "Couldn't demangle type name: " << type_name;
          throw error;
       }
-      SLogger logger( real_type_name );
-      logger << ERROR << "Couldn't perform summation on type: "
-             << real_type_name << SLogger::endmsg;
-      logger << ERROR << "The results will not be correct!"
-             << SLogger::endmsg;
+      SLogger m_logger( real_type_name ); // Name given like this on purpose...
+      REPORT_ERROR( "Couldn't perform summation on type: " << real_type_name );
+      REPORT_ERROR( "The results will not be correct!" );
       ::free( real_type_name );
       return result;
    }
@@ -118,11 +114,9 @@ std::map< KeyType, ValueType > operator+( const std::map< KeyType, ValueType >& 
             error << "Couldn't demangle type name: " << type_name;
             throw error;
          }
-         SLogger logger( real_type_name );
-         logger << ERROR << "Couldn't perform summation on type: "
-                << real_type_name << SLogger::endmsg;
-         logger << ERROR << "The results will not be correct!"
-                << SLogger::endmsg;
+         SLogger m_logger( real_type_name );
+         REPORT_ERROR( "Couldn't perform summation on type: " << real_type_name );
+         REPORT_ERROR( "The results will not be correct!" );
          ::free( real_type_name );
          return result;
       }
@@ -154,7 +148,7 @@ ProofSummedVar< Type >::ProofSummedVar( const char* name,
 template< class Type >
 Int_t ProofSummedVar< Type >::Merge( TCollection* coll ) {
 
-   SLogger logger( this->ClassName() );
+   SLogger m_logger( this->ClassName() );
 
    //
    // Return right away if the input is flawed:
@@ -174,8 +168,8 @@ Int_t ProofSummedVar< Type >::Merge( TCollection* coll ) {
       //
       ProofSummedVar< Type >* pobj = dynamic_cast< ProofSummedVar< Type >* >( obj );
       if( ! pobj ) {
-         logger << ERROR << "Trying to merge \"" << obj->ClassName()
-                << "\" object into \"" << this->ClassName() << "\"" << SLogger::endmsg;
+         REPORT_ERROR( "Trying to merge \"" << obj->ClassName()
+                       << "\" object into \"" << this->ClassName() << "\"" );
          continue;
       }
 
@@ -188,11 +182,10 @@ Int_t ProofSummedVar< Type >::Merge( TCollection* coll ) {
 
    }
 
-   logger << DEBUG << "Merged objects with name \"" << GetName()
-          << "\"" << SLogger::endmsg;
+   m_logger << DEBUG << "Merged objects with name \"" << GetName()
+            << "\"" << SLogger::endmsg;
 
    return 1;
-
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -211,70 +204,60 @@ template< class Type >
 SSummedVar< Type >::operator Type&() {
 
    return GetReference();
-
 }
 
 template< class Type >
 SSummedVar< Type >::operator const Type&() const {
 
    return GetReference();
-
 }
 
 template< class Type >
 Type& SSummedVar< Type >::operator*() {
 
    return GetReference();
-
 }
 
 template< class Type >
 Type* SSummedVar< Type >::operator->() {
 
    return GetPointer();
-
 }
 
 template< class Type >
 Type& SSummedVar< Type >::GetReference() {
 
    return GetObject()->m_member;
-
 }
 
 template< class Type >
 Type* SSummedVar< Type >::GetPointer() {
 
    return &( GetObject()->m_member );
-
 }
 
 template< class Type >
 const Type& SSummedVar< Type >::operator*() const {
 
    return GetReference();
-
 }
 
 template< class Type >
 const Type* SSummedVar< Type >::operator->() const {
 
    return GetPointer();
-
 }
 
 template< class Type >
 const Type& SSummedVar< Type >::GetReference() const {
 
    return GetObject()->m_member;
-
 }
 
 template< class Type >
 const Type* SSummedVar< Type >::GetPointer() const {
 
    return &( GetObject()->m_member );
-
 }
 
 /**
@@ -317,14 +300,14 @@ ProofSummedVar< Type >* SSummedVar< Type >::GetObject() const throw( SError ) {
          error << "Couldn't demangle type name: " << type_name;
          throw error;
       }
-      SLogger logger( real_type_name );
+      SLogger m_logger( real_type_name );
       free( real_type_name );
 
       //
       // Create a new object and add it to the output list:
       //
-      logger << VERBOSE << "Creating new object with name \""
-             << m_objName << "\"" << SLogger::endmsg;
+      REPORT_VERBOSE( "Creating new object with name \""
+                      << m_objName << "\"" );
       m_object = new ProofSummedVar< Type >( m_objName, "Internal SFrame object" );
       m_parent->GetHistOutput()->Add( m_object );
    }

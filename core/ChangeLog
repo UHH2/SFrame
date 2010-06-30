@@ -1,3 +1,16 @@
+2010.06.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Re-designed the SInputData class in some details. Now the
+	  types of input and output trees can be extended by the
+	  libraries built on top of SFrame. (Like SFrameARA.)
+	* Modifed all the code handling the SInputData class (basically
+	  all SFrame classes...) to use the new "formalism".
+	* Added some macros to SLogger.h to help with printing
+	  verbose and error messages with more information on
+	  where they're coming from in the code.
+	* Added a new helper class, STreeTypeDecoder that is used
+	  by the framework so that it doesn't have to know about all
+	  the possible tree types in the base library.
+
 2010.06.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed the long-standing double-event-issue in the output
 	  TTree-s...

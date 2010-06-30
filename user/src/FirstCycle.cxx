@@ -38,12 +38,9 @@ FirstCycle::FirstCycle()
    DeclareProperty( "TestDoubleVector", m_doubleVecVariable );
    DeclareProperty( "TestStringVector", m_stringVecVariable );
    DeclareProperty( "TestBoolVector", m_boolVecVariable );
-   DeclareProperty( "RecoTreeString", m_RecoTreeName );
 
-}
-
-FirstCycle::~FirstCycle() {
-
+   DeclareProperty( "RecoTreeString", m_recoTreeName );
+   DeclareProperty( "MetaTreeName", m_metaTreeName );
 }
 
 void FirstCycle::BeginCycle() throw( SError ) {
@@ -97,11 +94,11 @@ void FirstCycle::BeginInputFile( const SInputData& )  throw( SError ) {
    //
    // Connect the input variables:
    //
-   ConnectVariable( m_RecoTreeName.c_str(), "El_N", m_El_N );
-   ConnectVariable( m_RecoTreeName.c_str(), "El_p_T", m_El_p_T );
-   ConnectVariable( m_RecoTreeName.c_str(), "El_eta", m_El_eta );
-   ConnectVariable( m_RecoTreeName.c_str(), "El_phi", m_El_phi );
-   ConnectVariable( m_RecoTreeName.c_str(), "El_E", m_El_E );
+   ConnectVariable( m_recoTreeName.c_str(), "El_N", m_El_N );
+   ConnectVariable( m_recoTreeName.c_str(), "El_p_T", m_El_p_T );
+   ConnectVariable( m_recoTreeName.c_str(), "El_eta", m_El_eta );
+   ConnectVariable( m_recoTreeName.c_str(), "El_phi", m_El_phi );
+   ConnectVariable( m_recoTreeName.c_str(), "El_E", m_El_E );
 
    return;
 }
@@ -114,6 +111,20 @@ void FirstCycle::BeginInputData( const SInputData& ) throw( SError ) {
    DeclareVariable( m_o_example_variable, "example_variable" );
    DeclareVariable( m_o_El_p_T, "El_p_T" );
    DeclareVariable( m_o_El, "El" );
+
+   //
+   // Declare the metadata variables. This is completely up to the user
+   // at this point to operate directly on the output TTree.
+   //
+   m_electronTree = GetMetadataTree( m_metaTreeName.c_str() );
+   if( ! m_electronTree ) {
+      throw SError( "Couldn't access the output metadata tree",
+                    SError::SkipInputData );
+   }
+   m_electronTree->Branch( "p_T", &m_meta_El_p_T, "p_T/D" );
+   m_electronTree->Branch( "eta", &m_meta_El_eta, "eta/D" );
+   m_electronTree->Branch( "phi", &m_meta_El_phi, "phi/D" );
+   m_electronTree->Branch( "E",   &m_meta_El_E,   "E/D" );
 
    //
    // Declare the output histograms:
@@ -184,6 +195,19 @@ void FirstCycle::ExecuteEvent( const SInputData&, Double_t weight ) throw( SErro
                                    ( * m_El_phi )[ i ],
                                    ( * m_El_E )[ i ] ) );
 
+      // Fill the metadata tree. The user has to call TTree::Fill() by hand.
+      m_meta_El_p_T = ( * m_El_p_T )[ i ];
+      m_meta_El_eta = ( * m_El_eta )[ i ];
+      m_meta_El_phi = ( * m_El_phi )[ i ];
+      m_meta_El_E   = ( * m_El_E )[ i ];
+      int nbytes = m_electronTree->Fill();
+      if( nbytes < 0 ) {
+         m_logger << ERROR << "Write error occured in metadata tree \""
+                  << m_electronTree->GetName() << "\"" << SLogger::endmsg;
+      } else if( nbytes == 0 ) {
+         m_logger << WARNING << "No data written to tree \""
+                  << m_electronTree->GetName() << "\"" << SLogger::endmsg;
+      }
    }
 
    // Count the total number of processed events:

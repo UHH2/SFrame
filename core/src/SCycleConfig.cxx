@@ -22,118 +22,100 @@ SCycleConfig::SCycleConfig( const char* name )
 SCycleConfig::RunMode SCycleConfig::GetRunMode() const {
 
    return m_mode;
-
 }
 
 void SCycleConfig::SetRunMode( SCycleConfig::RunMode mode ) {
 
    m_mode = mode;
    return;
-
 }
 
 const TString& SCycleConfig::GetProofServer() const {
 
    return m_server;
-
 }
 
 void SCycleConfig::SetProofServer( const TString& server ) {
 
    m_server = server;
    return;
-
 }
 
 const Int_t& SCycleConfig::GetProofNodes() const {
 
    return m_nodes;
-
 }
 
 void SCycleConfig::SetProofNodes( const Int_t nodes ) {
 
    m_nodes = nodes;
    return;
-
 }
 
 const TString& SCycleConfig::GetProofWorkDir() const {
 
    return m_workdir;
-
 }
 
 void SCycleConfig::SetProofWorkDir( const TString& workdir ) {
 
    m_workdir = workdir;
    return;
-
 }
 
 const SCycleConfig::property_type& SCycleConfig::GetProperties() const {
 
    return m_properties;
-
 }
 
 void SCycleConfig::SetProperty( const std::string& name, const std::string& value ) {
 
    m_properties.push_back( std::make_pair( name, value ) );
    return;
-
 }
 
 const SCycleConfig::id_type& SCycleConfig::GetInputData() const {
 
    return m_inputData;
-
 }
 
 void SCycleConfig::AddInputData( const SInputData& id ) {
 
    m_inputData.push_back( id );
    return;
-
 }
 
 void SCycleConfig::SetOutputDirectory( const TString& outDir ) {
 
    m_outputDirectory = outDir;
    return;
-
 }
 
 const TString& SCycleConfig::GetOutputDirectory() const {
 
    return m_outputDirectory;
-
 }
 
 void SCycleConfig::SetPostFix( const TString& postFix ) {
 
    m_postFix = postFix;
    return;
-
 }
 
 const TString& SCycleConfig::GetPostFix() const {
 
    return m_postFix;
-
 }
 
 void SCycleConfig::SetMsgLevel( SMsgType level ) {
 
    m_msgLevel = level;
    return;
-
 }
 
 SMsgType SCycleConfig::GetMsgLevel() const {
 
    return m_msgLevel;
-
 }
 
 void SCycleConfig::PrintConfig() const {
@@ -146,6 +128,7 @@ void SCycleConfig::PrintConfig() const {
           << ( m_mode == LOCAL ? "LOCAL" : "PROOF" ) << SLogger::endmsg;
    if( m_mode == PROOF ) {
       logger << INFO << "  - PROOF server: " << m_server << SLogger::endmsg;
+      logger << INFO << "  - PROOF nodes: " << m_nodes << SLogger::endmsg;
    }
    logger << INFO << "  - Target luminosity: " << m_targetLumi << SLogger::endmsg;
    logger << INFO << "  - Output directory: " << m_outputDirectory << SLogger::endmsg;
@@ -153,12 +136,13 @@ void SCycleConfig::PrintConfig() const {
 
    for( id_type::const_iterator id = m_inputData.begin(); id != m_inputData.end();
         ++id ) {
-      id->print();
+      id->Print();
    }
 
    logger << INFO << "==========================================================="
           << SLogger::endmsg;
 
+   return;
 }
 
 void SCycleConfig::ArrangeInputData() throw ( SError ) {
@@ -210,7 +194,6 @@ void SCycleConfig::ArrangeInputData() throw ( SError ) {
    }
 
    return;
-
 }
 
 void SCycleConfig::ValidateInput() {
@@ -220,18 +203,20 @@ void SCycleConfig::ValidateInput() {
    }
 
    return;
-
 }
 
 void SCycleConfig::ClearConfig() {
 
    m_mode = LOCAL;
    m_server = "";
+   m_workdir = "";
+   m_nodes = -1;
    m_properties.clear();
    m_inputData.clear();
    m_targetLumi = 1.0;
    m_outputDirectory = "./";
    m_postFix = "";
-   return;
+   m_msgLevel = INFO;
 
+   return;
 }

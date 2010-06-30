@@ -27,6 +27,8 @@
 #pragma link C++ class std::vector<SFile>+;
 #pragma link C++ class STree+;
 #pragma link C++ class std::vector<STree>+;
+#pragma link C++ class std::pair<int,vector<STree> >+; // Can't use std::vector notation here...
+#pragma link C++ class std::map<int,std::vector<STree> >+;
 #pragma link C++ class SInputData+;
 #pragma link C++ class std::vector<SInputData>+;
 #pragma link C++ class std::pair<std::string,std::string>+;
