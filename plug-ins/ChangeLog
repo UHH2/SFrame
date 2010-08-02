@@ -1,3 +1,10 @@
+2010.08.02. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Created the new SOutputVariables class, which works in an
+	  analogous way to SInputVariables.
+	* Fixed the friend relations of SToolBase to make it possible
+	  to use SInputVariable and SOutputVariable classes with such
+	  a parent as well.
+
 2010.06.30. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* The helper classes are now using the message macros from
 	  SLogger.h.

@@ -1,3 +1,15 @@
+2010.08.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified the friend-relations of SCycleNTupleBase to make
+	  it possible to use SOutputVariables-derived classes with this
+	  template parameter.
+	* Created the new SOutputVariables class, which works in an
+	  analogous way to SInputVariables.
+	* Fixed the friend relations of SToolBase to make it possible
+	  to use SInputVariable and SOutputVariable classes with such
+	  a parent as well.
+	* Tested with some simple code that the new class seems to work.
+	* Tagging as SFrame-03-03-12
+
 2010.06.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Re-designed the SInputData class in some details. Now the
 	  types of input and output trees can be extended by the

@@ -22,6 +22,8 @@ class TH1;
 class TObject;
 class TBranch;
 class SCycleBase;
+template< class T > class SInputVariables;
+template< class T > class SOutputVariables;
 
 /**
  *   @short Base class for tools that can be used during the analysis
@@ -35,6 +37,11 @@ class SCycleBase;
  * @version $Revision$
  */
 class SToolBase {
+
+   /// To enable the usage of the protected functions for SInputVariables
+   friend class SInputVariables< SToolBase >;
+   /// To enable the usage of the protected functions for SOutputVariables
+   friend class SOutputVariables< SToolBase >;
 
 public:
    /// Constructor specifying the parent of the tool

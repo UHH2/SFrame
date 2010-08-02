@@ -1,0 +1,32 @@
+// Dear emacs, this is -*- c++ -*-
+// $Id$
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Plug-ins
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ *
+ ***************************************************************************/
+
+#ifndef SFRAME_PLUGINS_SOutputVariables_ICC
+#define SFRAME_PLUGINS_SOutputVariables_ICC
+
+template< class ParentType >
+SOutputVariables< ParentType >::SOutputVariables( ParentType* parent )
+   : m_parent( parent ) {
+
+}
+
+template< class ParentType >
+template< typename T >
+TBranch*
+SOutputVariables< ParentType >::DeclareVariable( T& obj, const char* name,
+                                                 const char* treeName ) throw( SError ) {
+
+   return m_parent->template DeclareVariable( obj, name, treeName );
+}
+
+#endif // SFRAME_PLUGINS_SOutputVariables_ICC
