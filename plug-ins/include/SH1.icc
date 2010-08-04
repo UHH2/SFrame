@@ -337,4 +337,10 @@ Int_t SH1< Type >::Write( const char* name, Int_t option, Int_t bufsize ) const 
    return 1;
 }
 
+template< typename Type >
+Int_t SH1< Type >::Write( const char* name, Int_t option, Int_t bufsize ) {
+
+   return const_cast< const SH1< Type >* >( this )->Write( name, option, bufsize );
+}
+
 #endif // SFRAME_PLUGINS_SH1_ICC

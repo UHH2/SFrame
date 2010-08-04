@@ -453,7 +453,7 @@ Bool_t SInputData::operator!= ( const SInputData& rh ) const {
  * which was configured in the XML file. This function is used to print
  * the configuration of a given input data object.
  */
-void SInputData::Print() const {
+void SInputData::Print( const Option_t* ) const {
 
    m_logger << INFO << " ---------------------------------------------------------" << endl;
    m_logger << " Type               : " << GetType() << endl;

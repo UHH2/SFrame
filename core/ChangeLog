@@ -1,3 +1,13 @@
+2010.08.04 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a few non-const Write(...) functions to various classes.
+	  This is to get rid of some of the overloaded virtual warnings
+	  of GCC. However I still couldn't get rid of all these warnings.
+	  TObject has a function called ExecuteEvent(...) and even if I
+	  remove the warning from the compilation of SCycleBaseExec, the
+	  users would still have to modify their cycles as well.
+	  So for now I leave the flag that turns the overloaded virtual
+	  warning off active in the Makefile.
+
 2010.08.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified the friend-relations of SCycleNTupleBase to make
 	  it possible to use SOutputVariables-derived classes with this

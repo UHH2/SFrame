@@ -89,9 +89,12 @@ public:
 
    /// Merge a collection of SH1 objects
    virtual Int_t Merge( TCollection* coll );
-   /// Write the SH1 object as a TH1 object
+   /// Write the SH1 object as a TH1 object (const version)
    virtual Int_t Write( const char* name = 0, Int_t option = 0,
                         Int_t bufsize = 0 ) const;
+   /// Write the SH1 object as a TH1 object (non-const version)
+   virtual Int_t Write( const char* name = 0, Int_t option = 0,
+                        Int_t bufsize = 0 );
 
 private:
    /// Size of the internal arrays (needed for dictionary generation)

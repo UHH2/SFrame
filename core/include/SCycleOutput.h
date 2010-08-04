@@ -61,9 +61,12 @@ public:
 
    /// Merge the contents of other objects into this one
    Int_t Merge( TCollection* list );
-   /// Write the wrapped object in the correct output directory
+   /// Write the wrapped object in the correct output directory (const version)
    virtual Int_t Write( const char* name = 0, Int_t option = 0,
                         Int_t bufsize = 0 ) const;
+   /// Write the wrapped object in the correct output directory (non-const version)
+   virtual Int_t Write( const char* name = 0, Int_t option = 0,
+                        Int_t bufsize = 0 );
 
 private:
    /// Return the requested output directory

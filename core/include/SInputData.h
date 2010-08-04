@@ -285,7 +285,7 @@ public:
    Bool_t      operator!= ( const SInputData& rh ) const;
 
    /// Function printing the contents of the object
-   void Print() const;
+   void Print( const Option_t* opt = 0 ) const;
 
 private:
    void ValidateInputFiles() throw( SError );

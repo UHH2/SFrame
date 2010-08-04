@@ -131,3 +131,8 @@ Int_t SCycleStatistics::Write( const char* name, Int_t option, Int_t bufsize ) c
    return TObject::Write( name, option, bufsize );
 
 }
+
+Int_t SCycleStatistics::Write( const char* name, Int_t option, Int_t bufsize ) {
+
+   return const_cast< const SCycleStatistics* >( this )->Write( name, option, bufsize );
+}

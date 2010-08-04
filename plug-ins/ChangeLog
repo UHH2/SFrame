@@ -1,3 +1,8 @@
+2010.08.04. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a non-const version of the Write(...) function to
+	  SH1. This shouldn't change the functioning of the code at
+	  all, but it should make GCC happier.
+
 2010.08.02. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Created the new SOutputVariables class, which works in an
 	  analogous way to SInputVariables.

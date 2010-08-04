@@ -276,6 +276,12 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
 
 }
 
+Int_t SCycleOutput::Write( const char* name, Int_t option,
+                           Int_t bufsize ) {
+
+   return const_cast< const SCycleOutput* >( this )->Write( name, option, bufsize );
+}
+
 /**
  * Function accessing/creating the required directory in the output file:
  *

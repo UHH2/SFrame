@@ -55,9 +55,12 @@ public:
 
    /// Function merging the information from the worker nodes
    Int_t Merge( TCollection* coll );
-   /// Write the object in the current output directory:
+   /// Write the object in the current output directory (const version)
    virtual Int_t Write( const char* name = 0, Int_t option = 0,
                         Int_t bufsize = 0 ) const;
+   /// Write the object in the current output directory (non-const version)
+   virtual Int_t Write( const char* name = 0, Int_t option = 0,
+                        Int_t bufsize = 0 );
 
 private:
    Long64_t m_processedEvents; ///< The number of processed events
