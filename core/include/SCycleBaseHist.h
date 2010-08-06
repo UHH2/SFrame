@@ -31,6 +31,8 @@
 class TDirectory;
 class TH1;
 class TList;
+class SCycleBase;
+template< class T > class SToolBaseT;
 
 /**
  *   @short Histogramming part of SCycleBase
@@ -48,7 +50,7 @@ class SCycleBaseHist : public virtual ISCycleBaseHist,
                        public virtual SCycleBaseBase {
 
    /// To enable the usage of the protected functions for SToolBase
-   friend class SToolBase;
+   friend class SToolBaseT< SCycleBase >;
 
 public:
    /// Default constructor

@@ -14,39 +14,88 @@
 #ifndef SFRAME_PLUGINS_SToolBase_ICC
 #define SFRAME_PLUGINS_SToolBase_ICC
 
-// SFrame include(s):
-#include "core/include/SCycleBase.h"
+template< class Type >
+SToolBaseT< Type >::SToolBaseT( ParentType* parent )
+   : m_logger( "SToolBase" ), m_parent( parent ) {
 
+}
+
+template< class Type >
+typename SToolBaseT< Type >::ParentType* SToolBaseT< Type >::GetParent() const {
+
+   return m_parent;
+}
+
+template< class Type >
 template< class T >
-T* SToolBase::Book( const T& histo, const char* directory ) throw( SError ) {
+T* SToolBaseT< Type >::Book( const T& histo, const char* directory ) throw( SError ) {
 
    return GetParent()->template Book( histo, directory );
 }
 
+template< class Type >
 template< class T >
-T* SToolBase::Retrieve( const char* name, const char* directory ) throw( SError ) {
+T* SToolBaseT< Type >::Retrieve( const char* name,
+                                 const char* directory ) throw( SError ) {
 
    return GetParent()->template Retrieve< T >( name, directory );
 }
 
+template< class Type >
+void SToolBaseT< Type >::WriteObj( const TObject& obj,
+                                   const char* directory ) throw( SError ) {
+
+   GetParent()->WriteObj( obj, directory );
+   return;
+}
+
+template< class Type >
+TH1* SToolBaseT< Type >::Hist( const char* name, const char* dir ) {
+
+   return GetParent()->Hist( name, dir );
+}
+
+template< class Type >
 template< typename T >
-bool SToolBase::ConnectVariable( const char* treeName, const char* branchName,
-                                 T& variable ) throw ( SError ) {
+bool SToolBaseT< Type >::ConnectVariable( const char* treeName, const char* branchName,
+                                          T& variable ) throw ( SError ) {
 
    return GetParent()->template ConnectVariable( treeName, branchName, variable );
 }
 
+template< class Type >
 template< typename T >
-TBranch* SToolBase::DeclareVariable( T& obj, const char* name,
-                                     const char* treeName ) throw( SError ) {
+TBranch* SToolBaseT< Type >::DeclareVariable( T& obj, const char* name,
+                                              const char* treeName ) throw( SError ) {
 
    return GetParent()->template DeclareVariable( obj, name, treeName );
 }
 
+template< class Type >
 template< typename T >
-void SToolBase::DeclareProperty( const std::string& name, T& value ) {
+void SToolBaseT< Type >::DeclareProperty( const std::string& name, T& value ) {
 
    GetParent()->DeclareProperty( name, value );
+   return;
+}
+
+template< class Type >
+void SToolBaseT< Type >::AddConfigObject( TObject* object ) {
+
+   GetParent()->AddConfigObject( object );
+   return;
+}
+
+template< class Type >
+TObject* SToolBaseT< Type >::GetConfigObject( const char* name ) const {
+
+   return GetParent()->GetConfigObject( name );
+}
+
+template< class Type >
+void SToolBaseT< Type >::SetLogName( const char* name ) {
+
+   m_logger.SetSource( name );
    return;
 }
 

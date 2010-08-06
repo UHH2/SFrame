@@ -12,6 +12,7 @@
 #***************************************************************************
 
 # Import the needed modules:
+import sys
 import optparse
 import os.path
 import ROOT
@@ -38,16 +39,21 @@ def main():
         print "ERROR:"
         print "ERROR: You have to define at least one file for the dataset!"
         print "ERROR:"
-        return
+        return 255
 
     if options.dset == "":
         print "ERROR:"
         print "ERROR: You have to specify the dataset name!"
         print "ERROR:"
-        return
+        return 255
 
     print "Opening connection to PROOF server: " + options.server
     proof = ROOT.TProof.Open( options.server, "masteronly" )
+    if ( not proof ) or ( not proof.IsValid() ):
+        print "ERROR:"
+        print "ERROR: Coulnd't connect to PROOF server: " + options.server
+        print "ERROR:"
+        return 255
 
     filecoll = ROOT.TFileCollection( "dsetcoll", "File collection for making a data set" )
     for file in files:
@@ -60,17 +66,20 @@ def main():
         print "ERROR:"
         print "ERROR: Couldn't register data set with name \"" + options.dset + "\""
         print "ERROR:"
-        return
+        return 255
     else:
         print "Data set registered with name \"" + options.dset + "\""
 
     print "Verifying data set..."
-    proof.VerifyDataSet( options.dset )
+    if proof.VerifyDataSet( options.dset ):
+        print "WARNING:"
+        print "WARNING: Some files are physically missing from the new dataset!"
+        print "WARNING:"
 
-    return
+    return 0
 
 #
 # Execute the main() function, when running the script directly:
 #
 if __name__ == "__main__":
-    main()
+    sys.exit( main() )

@@ -35,19 +35,31 @@ def main():
         print "WARNING: Didn't recognise the following option(s): " + unrec
         print "WARNING:"
 
-    print "Opening connection to PROOF server: " + options.server
-    proof = ROOT.TProof.Open( options.server, "masteronly" )
-
     if options.dset == "":
         print "ERROR:"
         print "ERROR: You have to specify a data set!"
         print "ERROR:"
-        return
+        return 255
+
+    print "Opening connection to PROOF server: " + options.server
+    proof = ROOT.TProof.Open( options.server, "masteronly" )
+    if ( not proof ) or ( not proof.IsValid() ):
+        print "ERROR:"
+        print "ERROR: Coulnd't connect to PROOF server: " + options.server
+        print "ERROR:"
+        return 255
 
     print "Removing data set: " + options.dset
-    proof.RemoveDataSet( options.dset )
+    # Unfortunately the following check doesn't seem to work. The script always
+    # returns with a success even for non-existent datasets...
+    if proof.RemoveDataSet( options.dset ) != 0 :
+        print "ERROR:"
+        print "ERROR: Something went wrong while removing dataset:"
+        print "ERROR:    " + options.dset
+        print "ERROR:"
+        return 255
 
-    return
+    return 0
 
 #
 # Execute the main() function, when running the script directly:

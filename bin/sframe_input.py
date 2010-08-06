@@ -55,14 +55,25 @@ def main():
   parser.add_option( "-p", "--prefix", dest="prefix",
                      action="store", type="string", default="",
                      help="Prefix to be put before the absolute path" )
+  parser.add_option( "-r", "--real-filenames", dest="real_filenames",
+                     action="store_true",
+                     help="The file names should not be modified by the script" )
 
   ( options, files ) = parser.parse_args()
 
+  # Check that at least one file is specified:
   if not len( files ):
     print "You should define at least one input file!"
     print ""
     parser.print_help()
-    return
+    return 255
+
+  # On Panda the list of input files is given as a comma separated list.
+  # While it is possible to transform that list into a space separated list
+  # outside of this script, it is very conventient if this script can handle
+  # such inputs as well.
+  if ( len( files ) == 1 ) and files[ 0 ].count( ',' ):
+    files = files[ 0 ].split( ',' )
 
   # Switch ROOT to batch mode:
   import ROOT
@@ -73,13 +84,14 @@ def main():
   if options.data:
     print "The input files are DATA files"
     print ""
-    SFrameHelpers.CreateDataInput( files, options.output, options.tree, options.prefix )
+    return SFrameHelpers.CreateDataInput( files, options.output, options.tree, options.prefix,
+                                          options.real_filenames )
   else:
     print "The input files are Monte Carlo files"
     print ""
-    SFrameHelpers.CreateInput( options.xsection, files, options.output, options.tree,
-                               options.prefix )
+    return SFrameHelpers.CreateInput( options.xsection, files, options.output, options.tree,
+                                      options.prefix, options.real_filenames )
 
 # Call the main function:
 if __name__ == "__main__":
-  main()
+  sys.exit( main() )

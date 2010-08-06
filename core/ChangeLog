@@ -1,3 +1,7 @@
+2010.08.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified the friend relations of the classes a little bit in
+	  order to account for the changes in the SToolBase class.
+
 2010.08.04 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a few non-const Write(...) functions to various classes.
 	  This is to get rid of some of the overloaded virtual warnings

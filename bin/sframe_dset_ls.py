@@ -12,6 +12,7 @@
 #***************************************************************************
 
 # Import the needed modules:
+import sys
 import optparse
 import ROOT
 
@@ -37,6 +38,11 @@ def main():
 
     print "Opening connection to PROOF server: " + options.server
     proof = ROOT.TProof.Open( options.server, "masteronly" )
+    if ( not proof ) or ( not proof.IsValid() ):
+        print "ERROR:"
+        print "ERROR: Coulnd't connect to PROOF server: " + options.server
+        print "ERROR:"
+        return 255
 
     if options.dset == "":
         # We just give a list of all the data sets:
@@ -47,10 +53,10 @@ def main():
         print "Information about data set \"" + options.dset + "\""
         proof.ShowDataSet( options.dset )
 
-    return
+    return 0
 
 #
 # Execute the main() function, when running the script directly:
 #
 if __name__ == "__main__":
-    main()
+    sys.exit( main() )

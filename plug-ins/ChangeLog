@@ -1,3 +1,8 @@
+2010.08.06. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified SToolBase to be much more flexible than it was.
+	  This will make it possible to extend it much more
+	  easily in SFrameARA.
+
 2010.08.04. Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a non-const version of the Write(...) function to
 	  SH1. This shouldn't change the functioning of the code at

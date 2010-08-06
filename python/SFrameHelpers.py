@@ -41,7 +41,7 @@ import ROOT
 # @param output       Name of the output file
 # @param tree         Name of the main TTree in the files
 # @param prefix       Prefix to be put before the file paths. E.g. root://mymachine/
-def CreateInput( crossSection, files, output, tree, prefix ):
+def CreateInput( crossSection, files, output, tree, prefix, real_filenames ):
 
   # Turn off ROOT error messages:
   oldErrorIgnoreLevel = ROOT.gErrorIgnoreLevel
@@ -66,10 +66,10 @@ def CreateInput( crossSection, files, output, tree, prefix ):
     print "Processing file: %s" % os.path.basename( file )
 
     # Open the AANT file:
-    tfile = ROOT.TFile( file, "READ" )
+    tfile = ROOT.TFile.Open( file )
     if not tfile.IsOpen():
       print "*ERROR* File \"" + file + "\" does not exist *ERROR*"
-      continue
+      return 255
 
     # Access a tree in the ntuple:
     collTree = tfile.Get( tree  )
@@ -88,8 +88,13 @@ def CreateInput( crossSection, files, output, tree, prefix ):
     # Compose the XML node. Make sure that the file name has an absolute path
     # (no symbolic link, or relative path) and that the luminosity is printed with
     # a meaningful precision.
-    outfile.write( "<In FileName=\"" + prefix + os.path.abspath( os.path.realpath( file ) ) \
-                   + ( "\" Lumi=\"%.3g" % luminosity ) + "\" />\n" )
+    if real_filenames:
+      outfile.write( "<In FileName=\"" + prefix + file + \
+                     ( "\" Lumi=\"%.3g" % luminosity ) + "\" />\n" )
+    else:
+      outfile.write( "<In FileName=\"" + prefix + \
+                     os.path.abspath( os.path.realpath( file ) ) + \
+                     ( "\" Lumi=\"%.3g" % luminosity ) + "\" />\n" )
 
   # Save some summary information:
   outfile.write( "\n<!-- Total number of events processed: %s -->\n" % totEvents )
@@ -105,7 +110,7 @@ def CreateInput( crossSection, files, output, tree, prefix ):
   # Turn back ROOT error messages:
   ROOT.gErrorIgnoreLevel = oldErrorIgnoreLevel
 
-  return
+  return 0
 
 ##
 # @short Function creating <In ... /> configuration nodes
@@ -120,8 +125,8 @@ def CreateInput( crossSection, files, output, tree, prefix ):
 # @param output       Name of the output file
 # @param tree         Name of the main TTree in the files
 # @param prefix       Prefix to be put before the file paths. E.g. root://mymachine/
-def CreateDataInput( files, output, tree, prefix ):
-  
+def CreateDataInput( files, output, tree, prefix, real_filenames ):
+
   # Turn off ROOT error messages:
   oldErrorIgnoreLevel = ROOT.gErrorIgnoreLevel
   ROOT.gErrorIgnoreLevel = ROOT.kSysError
@@ -143,10 +148,10 @@ def CreateDataInput( files, output, tree, prefix ):
     print "Processing file: %s" % os.path.basename( file )
 
     # Open the AANT file:
-    tfile = ROOT.TFile( file, "READ" )
-    if not tfile.IsOpen():
+    tfile = ROOT.TFile.Open( file )
+    if ( not tfile ) or ( not tfile.IsOpen() ):
       print "*ERROR* File \"" + file + "\" does not exist *ERROR*"
-      continue
+      return 255
 
     # Access a tree in the ntuple:
     collTree = tfile.Get( tree )
@@ -163,8 +168,13 @@ def CreateDataInput( files, output, tree, prefix ):
     # Compose the XML node. Make sure that the file name has an absolute path
     # (no symbolic link, or relative path) and that the luminosity is printed with
     # a meaningful precision.
-    outfile.write( "<In FileName=\"" + prefix + os.path.abspath( os.path.realpath( file ) ) \
-                   + "\" Lumi=\"1.0\" />\n" )
+    if real_filenames:
+      outfile.write( "<In FileName=\"" + prefix + file + \
+                     "\" Lumi=\"1.0\" />\n" )
+    else:
+      outfile.write( "<In FileName=\"" + prefix + \
+                     os.path.abspath( os.path.realpath( file ) ) + \
+                     "\" Lumi=\"1.0\" />\n" )
 
   # Save some summary information:
   outfile.write( "\n<!-- Total number of events processed: %s -->\n" % totEvents )
@@ -178,4 +188,4 @@ def CreateDataInput( files, output, tree, prefix ):
   # Turn back ROOT error messages:
   ROOT.gErrorIgnoreLevel = oldErrorIgnoreLevel
 
-  return
+  return 0

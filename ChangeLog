@@ -1,3 +1,18 @@
+2010.08.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified sframe_input.py a bit. Now it should be able to receive
+	  any kind of input filenames. (So the filenames don't have to point
+	  to locally accessible files.)
+	* Added the possibility to sframe_input.py to receive a comma separated
+	  list of input filenames. This is a nice feature when running an
+	  SFrame job with prun.
+	* Pimped up the python scripts so that they now return proper exit
+	  codes. So an automated script that calls them can know when
+	  something has gone wrong.
+	* Modified SToolBase to be able to extend it more easily in SFrameARA.
+	  Also modified the friend relations in some core classes because
+	  of this change.
+	* Tagging as SFrame-03-03-13
+
 2010.08.04 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a few non-const Write(...) functions to various classes.
 	  This is to get rid of some of the overloaded virtual warnings

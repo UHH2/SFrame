@@ -30,6 +30,8 @@
 
 // Forward declaration(s):
 class TXMLNode;
+class SCycleBase;
+template< class T > class SToolBaseT;
 
 /**
  *   @short Base class for reading the XML configuration
@@ -47,7 +49,7 @@ class SCycleBaseConfig : public virtual ISCycleBaseConfig,
                          public virtual SCycleBaseBase {
 
    /// To enable the usage of the protected functions for SToolBase
-   friend class SToolBase;
+   friend class SToolBaseT< SCycleBase >;
 
 public:
    /// Default constructor

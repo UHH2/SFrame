@@ -31,6 +31,8 @@ class TTree;
 class TFile;
 class TBranch;
 class SInputData;
+class SCycleBase;
+template< class T > class SToolBaseT;
 template< class T > class SInputVariables;
 template< class T > class SOutputVariables;
 
@@ -51,7 +53,7 @@ class SCycleBaseNTuple : public virtual ISCycleBaseConfig,
                          public virtual SCycleBaseBase {
 
    /// To enable the usage of the protected functions for SToolBase
-   friend class SToolBase;
+   friend class SToolBaseT< SCycleBase >;
    /// To enable the usage of the protected functions for SInputVariables
    friend class SInputVariables< SCycleBaseNTuple >;
    /// To enable the usage of the protected functions for SOutputVariables

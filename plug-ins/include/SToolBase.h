@@ -16,12 +16,12 @@
 
 // SFrame include(s):
 #include "core/include/SLogger.h"
+#include "core/include/SCycleBase.h"
 
 // Forward declaration(s):
 class TH1;
 class TObject;
 class TBranch;
-class SCycleBase;
 template< class T > class SInputVariables;
 template< class T > class SOutputVariables;
 
@@ -36,19 +36,25 @@ template< class T > class SOutputVariables;
  *
  * @version $Revision$
  */
-class SToolBase {
+template< class Type >
+class SToolBaseT {
 
    /// To enable the usage of the protected functions for SInputVariables
-   friend class SInputVariables< SToolBase >;
+   friend class SInputVariables< SToolBaseT< SCycleBase > >;
    /// To enable the usage of the protected functions for SOutputVariables
-   friend class SOutputVariables< SToolBase >;
+   friend class SOutputVariables< SToolBaseT< SCycleBase > >;
+   /// To enable the instantiation of SToolBaseT< SToolBase > tools
+   friend class SToolBaseT< SToolBaseT< SCycleBase > >;
 
 public:
+   /// Declaration of the used type
+   typedef Type ParentType;
+
    /// Constructor specifying the parent of the tool
-   SToolBase( SCycleBase* parent );
+   SToolBaseT( ParentType* parent );
 
    /// Get a pointer to the parent cycle of this tool
-   SCycleBase* GetParent() const;
+   ParentType* GetParent() const;
 
 protected:
    /////////////////////////////////////////////////////////////
@@ -111,13 +117,25 @@ protected:
    mutable SLogger m_logger; ///< Logger object for the tool
 
 private:
-   SCycleBase* m_parent; ///< Pointer to the parent cycle of this tool
+   ParentType* m_parent; ///< Pointer to the parent cycle of this tool
 
-}; // class SToolBase
+}; // class SToolBaseT
 
 // Include the template implementation:
 #ifndef __CINT__
 #include "SToolBase.icc"
 #endif // __CINT__
+
+/// This typedef is for backward compatibility with the old implementation
+/**
+ * Since people probably have some code already lying around which uses tools
+ * inheriting from SToolBase, this typedef takes care of all that code still
+ * compiling.
+ *
+ * However I don't intend to add more typedefs like this, for new types of
+ * tools (for instance tools that have another tool as parent) people should
+ * create the template specialisations themselves.
+ */
+typedef SToolBaseT< SCycleBase > SToolBase;
 
 #endif // SFRAME_PLUGINS_SToolBase_H
