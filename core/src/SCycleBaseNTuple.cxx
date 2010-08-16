@@ -470,11 +470,14 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
  */
 void SCycleBaseNTuple::SetInputCacheConfigured() throw( SError ) {
 
+   // This feature is only available in new ROOT versions...
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
    // Tell all input trees that their cache is now configured:
    for( std::vector< TTree* >::const_iterator it = m_inputTrees.begin();
         it != m_inputTrees.end(); ++it ) {
       ( *it )->StopCacheLearningPhase();
    }
+#endif // ROOT_VERSION...
 
    return;
 }

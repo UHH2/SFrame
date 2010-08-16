@@ -1,4 +1,10 @@
 2010.08.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Put the function calls operation on the cache inside #if
+	  statements, as these function calls are not available in old ROOT
+	  releases. So SFrameARA would not be able to compile with them.
+	* Tagging as SFrame-03-03-15
+
+2010.08.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made the GetInputTree(...) and GetOutputTree(...) functions
 	  of SCycleBaseNTuple protected. This should help users in some
 	  special circumstances.

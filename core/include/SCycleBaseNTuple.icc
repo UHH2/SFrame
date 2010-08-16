@@ -113,7 +113,9 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    }
 
    tree->SetBranchStatus( branchName, 1 );
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
    tree->AddBranchToCache( br, kTRUE );
+#endif // ROOT_VERSION...
    this->RegisterInputBranch( br );
    m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
@@ -178,7 +180,9 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    tree->SetBranchAddress( branchName, variable, &br );
 
    tree->SetBranchStatus( branchName, 1 );
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
    tree->AddBranchToCache( br, kTRUE );
+#endif // ROOT_VERSION...
    this->RegisterInputBranch( br );
    m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
@@ -252,7 +256,9 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    }
 
    tree->SetBranchStatus( branchName, 1 );
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
    tree->AddBranchToCache( br, kTRUE );
+#endif // ROOT_VERSION...
    this->RegisterInputBranch( br );
    m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
