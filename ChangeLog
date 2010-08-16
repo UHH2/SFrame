@@ -1,3 +1,10 @@
+2010.08.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added the ability to sframe_input.py to ignore a hyphen
+	  ("-") in the argument list. One needs to give "-" as the
+	  first argument to the script on some GRID sites, to ignore
+	  a nasty PyROOT bug.
+	* Not tagging yet, as more updates should also come soon.
+
 2010.08.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified sframe_input.py a bit. Now it should be able to receive
 	  any kind of input filenames. (So the filenames don't have to point

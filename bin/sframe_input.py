@@ -68,6 +68,11 @@ def main():
     parser.print_help()
     return 255
 
+  # To avoid a PyROOT bug the script receives "-" as the first argument when being
+  # executed on the GRID. This argument should just be ignored by the script...
+  if "-" in files:
+    files.remove( "-" )
+
   # On Panda the list of input files is given as a comma separated list.
   # While it is possible to transform that list into a space separated list
   # outside of this script, it is very conventient if this script can handle
