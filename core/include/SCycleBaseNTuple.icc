@@ -112,6 +112,8 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 
    }
 
+   tree->SetBranchStatus( branchName, 1 );
+   tree->AddBranchToCache( br, kTRUE );
    this->RegisterInputBranch( br );
    m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
@@ -175,6 +177,8 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    REPORT_VERBOSE( "The supplied variable is a \"primitive array\"" );
    tree->SetBranchAddress( branchName, variable, &br );
 
+   tree->SetBranchStatus( branchName, 1 );
+   tree->AddBranchToCache( br, kTRUE );
    this->RegisterInputBranch( br );
    m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
@@ -247,6 +251,8 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 
    }
 
+   tree->SetBranchStatus( branchName, 1 );
+   tree->AddBranchToCache( br, kTRUE );
    this->RegisterInputBranch( br );
    m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;

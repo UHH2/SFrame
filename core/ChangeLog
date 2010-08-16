@@ -1,3 +1,12 @@
+2010.08.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made the GetInputTree(...) and GetOutputTree(...) functions
+	  of SCycleBaseNTuple protected. This should help users in some
+	  special circumstances.
+	* Started playing with TTreeCache, but not much effect on the
+	  performance so far. Will talk with Gerri next week (when he's
+	  back from vacation) to see how caching could be used effectively
+	  in SFrame.
+
 2010.08.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified the friend relations of the classes a little bit in
 	  order to account for the changes in the SToolBase class.

@@ -1,3 +1,8 @@
+2010.08.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Put a security check into FirstCycle::EndMasterInputData(...).
+	  This way when the worker nodes die, the master process is
+	  still able to collect the messages from the workers.
+
 2010.06.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Updated FirstCycle to show off some of the new features of
 	  the framework.

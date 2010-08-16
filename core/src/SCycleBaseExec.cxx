@@ -163,6 +163,7 @@ Bool_t SCycleBaseExec::Notify() {
 
       this->LoadInputTrees( *m_inputData, m_inputTree );
       this->BeginInputFile( *m_inputData );
+      this->SetInputCacheConfigured();
 
    } catch( const SError& error ) {
       REPORT_FATAL( "Exception caught with message: " << error.what() );

@@ -78,7 +78,7 @@ TList* SCycleBaseNTuple::GetNTupleOutput() const {
  * @param name Name of the requested metadata tree
  * @returns The pointer to the requested metadata tree
  */
-TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const {
+TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const throw( SError ) {
 
    //
    // Strip off the directory name from the given tree name:
@@ -123,6 +123,65 @@ TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const {
    //
    SError error( SError::SkipFile );
    error << "Couldn't find input metadata TTree with name: " << tname;
+   throw error;
+
+   return 0;
+}
+
+/**
+ * Function used by a few of the variable handling functions. It finds
+ * the tree with a given name among the input trees, or throws an exception
+ * if such tree doesn't exist.
+ */
+TTree* SCycleBaseNTuple::GetInputTree( const char* treeName ) const throw( SError ) {
+
+   //
+   // Look for such input tree:
+   //
+   TString tname( treeName );
+   for( std::vector< TTree* >::const_iterator it = m_inputTrees.begin();
+        it != m_inputTrees.end(); ++it ) {
+      if( *it ) {
+         if( tname == ( *it )->GetName() ) {
+            REPORT_VERBOSE( "Found input tree with name " << treeName 
+                            << " at " << ( *it ) );
+            return *it;
+         }
+      }
+   }
+
+   //
+   // Throw an exception if the tree hasn't been found:
+   //
+   SError error( SError::SkipFile );
+   error << "Couldn't find input TTree with name: " << treeName;
+   throw error;
+
+   return 0;
+}
+
+TTree* SCycleBaseNTuple::GetOutputTree( const char* treeName ) const throw( SError ) {
+
+   //
+   // Look for such output tree:
+   //
+   TString tname( treeName );
+   for( std::vector< TTree* >::const_iterator it = m_outputTrees.begin();
+        it != m_outputTrees.end(); ++it ) {
+      if( *it ) {
+         if( tname == ( *it )->GetName() ) {
+            REPORT_VERBOSE( "Found output tree with name " << treeName 
+                            << " at " << ( *it ) );
+            return *it;
+         }
+      }
+   }
+
+   //
+   // Throw an exception if the tree hasn't been found:
+   //
+   SError error( SError::SkipFile );
+   error << "Couldn't find output TTree with name: " << treeName;
    throw error;
 
    return 0;
@@ -333,47 +392,49 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
             error << "Tree " << st->treeName << " doesn't exist in File "
                   << file->GetName();
             throw error;
-         } else {
+         }
 
-            // do we need this at all now that we loop over the branches
-            // one-by-one?
+         // do we need this at all now that we loop over the branches
+         // one-by-one?
          
-            // Remove friends if any, for better performance
-            bool skipFriends = true; // can be made configurable
-            if( skipFriends ) {
-               TList* flist = tree->GetListOfFriends();
-               TIter nextf( flist );
-               TFriendElement* fe = 0;
-               while( ( fe = ( TFriendElement* ) nextf() ) ) {
-                  m_logger << DEBUG << "Remove friend " << fe->GetName() << " from tree " 
-                           << tree->GetName() << SLogger::endmsg;
-                  flist->Remove( fe );
-                  delete fe;
-                  fe = 0;
-               }
+         // Remove friends if any, for better performance
+         bool skipFriends = true; // can be made configurable
+         if( skipFriends ) {
+            TList* flist = tree->GetListOfFriends();
+            TIter nextf( flist );
+            TFriendElement* fe = 0;
+            while( ( fe = ( TFriendElement* ) nextf() ) ) {
+               m_logger << DEBUG << "Remove friend " << fe->GetName() << " from tree " 
+                        << tree->GetName() << SLogger::endmsg;
+               flist->Remove( fe );
+               delete fe;
+               fe = 0;
             }
-            // Delete index if any, for better performance
-            bool deleteIndex = true; // can be made configurable
-            if( deleteIndex ) {
-               if( tree->GetTreeIndex() ) {
-                  m_logger << DEBUG << "Delete index from tree " 
-                           << tree->GetName() << SLogger::endmsg;
-                  tree->SetTreeIndex( 0 );
-                  delete tree->GetTreeIndex();
-               }
+         }
+         // Delete index if any, for better performance
+         bool deleteIndex = true; // can be made configurable
+         if( deleteIndex ) {
+            if( tree->GetTreeIndex() ) {
+               m_logger << DEBUG << "Delete index from tree " 
+                        << tree->GetName() << SLogger::endmsg;
+               tree->SetTreeIndex( 0 );
+               delete tree->GetTreeIndex();
             }
+         }
 
-            m_inputTrees.push_back( tree );
-            if( firstPassed && tree->GetEntries() != nEvents ) {
-               SError error( SError::SkipFile );
-               error << "Conflict in number of entries - Tree " << tree->GetName()
-                     << " has " << tree->GetEntries() << ", NOT "
-                     << nEvents;
-               throw error;
-            } else if( ! firstPassed ) {
-               firstPassed = kTRUE;
-               nEvents = tree->GetEntries();
-            }
+         // Disable reading all the branches. (We do it explicitly by hand.)
+         tree->SetBranchStatus( "*", 0 );
+
+         m_inputTrees.push_back( tree );
+         if( firstPassed && tree->GetEntries() != nEvents ) {
+            SError error( SError::SkipFile );
+            error << "Conflict in number of entries - Tree " << tree->GetName()
+                  << " has " << tree->GetEntries() << ", NOT "
+                  << nEvents;
+            throw error;
+         } else if( ! firstPassed ) {
+            firstPassed = kTRUE;
+            nEvents = tree->GetEntries();
          }
       }
    }
@@ -401,6 +462,24 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
 }
 
 /**
+ * Function telling the input trees that all branches that need to be cached, have
+ * now been declared. The code will not try to be smart about the caching from
+ * here on, but just cache all the branches that were explicitly requested.
+ *
+ * <strong>The function is used internally by the framework!</strong>
+ */
+void SCycleBaseNTuple::SetInputCacheConfigured() throw( SError ) {
+
+   // Tell all input trees that their cache is now configured:
+   for( std::vector< TTree* >::const_iterator it = m_inputTrees.begin();
+        it != m_inputTrees.end(); ++it ) {
+      ( *it )->StopCacheLearningPhase();
+   }
+
+   return;
+}
+
+/**
  * Function reading in the same entry for each of the connected branches.
  * It is called first for each new event.
  *
@@ -409,6 +488,12 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
  * @param entry The event number to read in
  */
 void SCycleBaseNTuple::GetEvent( Long64_t entry ) throw( SError ) {
+
+   // Tell all trees to update their cache:
+   for( std::vector< TTree* >::const_iterator it = m_inputTrees.begin();
+        it != m_inputTrees.end(); ++it ) {
+      ( *it )->LoadTree( entry );
+   }
 
    // Load the current entry for all the regular input variables:
    for( std::vector< TBranch* >::const_iterator it = m_inputBranches.begin();
@@ -543,63 +628,6 @@ const char* SCycleBaseNTuple::RootType( const char* typeid_type ) {
 
    return "";
 
-}
-
-/**
- * Function used by a few of the variable handling functions. It finds
- * the tree with a given name among the input trees, or throws an exception
- * if such tree doesn't exist.
- */
-TTree* SCycleBaseNTuple::GetInputTree( const std::string& treeName ) throw( SError ) {
-
-   //
-   // Look for such input tree:
-   //
-   for( std::vector< TTree* >::iterator it = m_inputTrees.begin();
-        it != m_inputTrees.end(); ++it ) {
-      if( *it ) {
-         if( treeName == ( *it )->GetName() ) {
-            REPORT_VERBOSE( "Found input tree with name " << treeName 
-                            << " at " << ( *it ) );
-            return *it;
-         }
-      }
-   }
-
-   //
-   // Throw an exception if the tree hasn't been found:
-   //
-   SError error( SError::SkipFile );
-   error << "Couldn't find input TTree with name: " << treeName;
-   throw error;
-
-   return 0;
-}
-
-TTree* SCycleBaseNTuple::GetOutputTree( const std::string& treeName ) throw( SError ) {
-
-   //
-   // Look for such output tree:
-   //
-   for( std::vector< TTree* >::iterator it = m_outputTrees.begin();
-        it != m_outputTrees.end(); ++it ) {
-      if( *it ) {
-         if( treeName == ( *it )->GetName() ) {
-            REPORT_VERBOSE( "Found output tree with name " << treeName 
-                            << " at " << ( *it ) );
-            return *it;
-         }
-      }
-   }
-
-   //
-   // Throw an exception if the tree hasn't been found:
-   //
-   SError error( SError::SkipFile );
-   error << "Couldn't find output TTree with name: " << treeName;
-   throw error;
-
-   return 0;
 }
 
 /**

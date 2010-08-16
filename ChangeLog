@@ -1,4 +1,17 @@
 2010.08.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made the GetInputTree(...) and GetOutputTree(...) functions
+	  of SCycleBaseNTuple protected. This should help users in some
+	  special circumstances.
+	* Started playing with TTreeCache, but not much effect on the
+	  performance so far. Will talk with Gerri next week (when he's
+	  back from vacation) to see how caching could be used effectively
+	  in SFrame.
+	* Put a security check into FirstCycle::EndMasterInputData(...).
+	  This way when the worker nodes die, the master process is
+	  still able to collect the messages from the workers.
+	* Tagging as SFrame-03-03-14
+
+2010.08.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added the ability to sframe_input.py to ignore a hyphen
 	  ("-") in the argument list. One needs to give "-" as the
 	  first argument to the script on some GRID sites, to ignore

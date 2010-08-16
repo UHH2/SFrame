@@ -159,9 +159,11 @@ void FirstCycle::BeginMasterInputData( const SInputData& ) throw( SError ) {
 void FirstCycle::EndMasterInputData( const SInputData& ) throw( SError ) {
 
    m_logger << INFO << "Number of all processed events: "
-            << *m_allEvents << " " << ( *m_test )[ 0 ] << SLogger::endmsg;
+            << *m_allEvents << " " << ( m_test->size() > 0 ? ( *m_test )[ 0 ] : 0 )
+            << SLogger::endmsg;
    m_logger << INFO << "Number of events passing selection: "
-            << *m_passedEvents << " " << ( *m_test )[ 1 ] << SLogger::endmsg;
+            << *m_passedEvents << " " << ( m_test->size() > 1 ? ( *m_test )[ 1 ] : 0 )
+            << SLogger::endmsg;
 
    return;
 

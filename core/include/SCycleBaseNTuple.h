@@ -90,7 +90,11 @@ protected:
                              const char* treeName = 0 ) throw( SError );
 
    /// Access one of the metadata trees
-   virtual TTree* GetMetadataTree( const char* name ) const;
+   virtual TTree* GetMetadataTree( const char* name ) const throw( SError );
+   /// Access one of the input trees
+   virtual TTree* GetInputTree( const char* treeName ) const throw( SError );
+   /// Access one of the output trees
+   virtual TTree* GetOutputTree( const char* treeName ) const throw( SError );
 
    //////////////////////////////////////////////////////////
    //                                                      //
@@ -106,6 +110,8 @@ protected:
    void SaveOutputTrees( TDirectory* output ) throw( SError );
    /// Load the input trees
    void LoadInputTrees( const SInputData& id, TTree* main_tree ) throw( SError );
+   /// Declare that the cache for the input trees is now configured
+   void SetInputCacheConfigured() throw( SError );
    /// Read in the event from the "normal" trees
    void GetEvent( Long64_t entry ) throw( SError );
    /// Calculate the weight of the current event
@@ -113,8 +119,6 @@ protected:
 
 private:
    static const char* RootType( const char* typeid_type );
-   TTree* GetInputTree( const std::string& treeName ) throw( SError );
-   TTree* GetOutputTree( const std::string& treeName ) throw( SError );
    void RegisterInputBranch( TBranch* br ) throw( SError );
    void DeleteInputVariables();
 
