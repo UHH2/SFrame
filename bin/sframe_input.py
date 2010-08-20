@@ -42,7 +42,7 @@ def main():
   parser = optparse.OptionParser( usage="%prog [options] <input files>" )
   parser.add_option( "-x", "--xsection", dest="xsection",
                      action="store", type="float", default=1.0,
-                     help="Cross-section of the MC data in pb-1" )
+                     help="Cross-section of the MC (for instance in pb)" )
   parser.add_option( "-d", "--data", dest="data",
                      action="store_true",
                      help="The input files are DATA" )

@@ -103,6 +103,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 
       // For primitive types nothing fancy needs to be done
       REPORT_VERBOSE( "The supplied variable is a \"primitive\"" );
+      tree->SetBranchStatus( branchName, 1 );
       tree->SetBranchAddress( branchName, &variable, &br );
 
    } else {
@@ -112,7 +113,6 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
 
    }
 
-   tree->SetBranchStatus( branchName, 1 );
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
    tree->AddBranchToCache( br, kTRUE );
 #endif // ROOT_VERSION...
@@ -177,9 +177,9 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
    REPORT_VERBOSE( "Type ID: " << type_name );
 
    REPORT_VERBOSE( "The supplied variable is a \"primitive array\"" );
+   tree->SetBranchStatus( branchName, 1 );
    tree->SetBranchAddress( branchName, variable, &br );
 
-   tree->SetBranchStatus( branchName, 1 );
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
    tree->AddBranchToCache( br, kTRUE );
 #endif // ROOT_VERSION...
@@ -249,13 +249,13 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
       // connecting them to the branches
       REPORT_VERBOSE( "The supplied variable is an object pointer" );
       variable = 0;
+      tree->SetBranchStatus( branchName, 1 );
       tree->SetBranchAddress( branchName, &variable, &br );
       // Take ownership of this new object:
       m_inputVarPointers.push_back( new SPointer< T >( variable ) );
 
    }
 
-   tree->SetBranchStatus( branchName, 1 );
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
    tree->AddBranchToCache( br, kTRUE );
 #endif // ROOT_VERSION...
@@ -264,7 +264,6 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
             << treeName << "\"" << SLogger::endmsg;
 
    return true;
-
 }
 
 /**

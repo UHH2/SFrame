@@ -1,3 +1,14 @@
+2010.08.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Changed the order of the TTree::SetBranchAddress(...) and
+	  TTree::SetBranchStatus(...) calls in the ConnectVariable(...)
+	  functions. Apparently putting them in the wrong order can
+	  disable the reading of the branches completely... :-/
+	* As it turns out, the previous two tags are broken because of
+	  this, don't use them!
+	* Fixed the description of the x-section parameter in
+	  sframe_input.py.
+	* Tagging as SFrame-03-03-16
+
 2010.08.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Put the function calls operation on the cache inside #if
 	  statements, as these function calls are not available in old ROOT
