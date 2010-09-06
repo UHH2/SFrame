@@ -1,3 +1,9 @@
+2010.09.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* sframe_input.py should now be able to handle any number of
+	  input files. (Fixed SFrameHelpers.py so that each file gets
+	  closed after it's not needed anymore.)
+	* Tagging as SFrame-03-03-17
+
 2010.08.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed the order of the TTree::SetBranchAddress(...) and
 	  TTree::SetBranchStatus(...) calls in the ConnectVariable(...)

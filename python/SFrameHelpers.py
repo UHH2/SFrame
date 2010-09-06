@@ -96,6 +96,9 @@ def CreateInput( crossSection, files, output, tree, prefix, real_filenames ):
                      os.path.abspath( os.path.realpath( file ) ) + \
                      ( "\" Lumi=\"%.3g" % luminosity ) + "\" />\n" )
 
+    # Close the opened input file:
+    tfile.Close()
+
   # Save some summary information:
   outfile.write( "\n<!-- Total number of events processed: %s -->\n" % totEvents )
   outfile.write( "<!-- Representing a total luminosity : %.3g -->" % totLuminosity )
@@ -175,6 +178,9 @@ def CreateDataInput( files, output, tree, prefix, real_filenames ):
       outfile.write( "<In FileName=\"" + prefix + \
                      os.path.abspath( os.path.realpath( file ) ) + \
                      "\" Lumi=\"1.0\" />\n" )
+
+    # Close the opened input file:
+    tfile.Close()
 
   # Save some summary information:
   outfile.write( "\n<!-- Total number of events processed: %s -->\n" % totEvents )
