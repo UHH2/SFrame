@@ -207,7 +207,8 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
  *   </code>
  *
  * Note that you don't get ownership of the object created by this function! It
- * will be deleted automatically!
+ * will be deleted automatically! At the same time, you shouldn't create a new
+ * object before calling this function, as that will lead to a memory leak.
  *
  * Note also that the code doesn't need to check the type of the pointer given
  * to the function. ROOT does this for us.
@@ -233,11 +234,16 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
       return false;
    }
 
+   // To make sure that typeid(...) will succeed. All classes that can be written out
+   // by ROOT have to have a default constructor anyway...
+   variable = new T();
+
    //
    // Detect what kind of variable we're dealing with:
    //
    const char* type_name = typeid( *variable ).name();
    REPORT_VERBOSE( "Type ID: " << type_name );
+   delete variable; // now let's dispose of the object
    if( strlen( type_name ) == 1 ) {
 
       throw SError( "ConnectVariable(...) specialised for object pointers called "
@@ -249,7 +255,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
       // connecting them to the branches
       REPORT_VERBOSE( "The supplied variable is an object pointer" );
       variable = 0;
-      tree->SetBranchStatus( branchName, 1 );
+      tree->SetBranchStatus( TString( branchName ) + "*", 1 );
       tree->SetBranchAddress( branchName, &variable, &br );
       // Take ownership of this new object:
       m_inputVarPointers.push_back( new SPointer< T >( variable ) );

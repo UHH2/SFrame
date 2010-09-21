@@ -1,3 +1,13 @@
+2010.09.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Migrated back the change from the development branch that
+	  enables the user to connect polymorphic object pointers to
+	  input ntuple branches.
+	* Unfortunately the code to write out poymorphic objects in
+	  a smart way to the output is still not fully solved. (I can't
+	  get the sub-branch names to inherit the name of the main branch
+	  as prefix correctly...)
+	* Tagging as SFrame-03-03-18
+
 2010.09.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* sframe_input.py should now be able to handle any number of
 	  input files. (Fixed SFrameHelpers.py so that each file gets
