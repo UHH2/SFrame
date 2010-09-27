@@ -118,7 +118,8 @@ protected:
    Double_t CalculateWeight( const SInputData& inputData, Long64_t entry );
 
 private:
-   static const char* RootType( const char* typeid_type );
+   static const char* RootType( const char* typeid_type ) throw( SError );
+   static const char* TypeidType( const char* root_type ) throw( SError );
    void RegisterInputBranch( TBranch* br ) throw( SError );
    void DeleteInputVariables();
 

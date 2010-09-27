@@ -579,12 +579,11 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,
  * Note: The translation is probably only valid on various UNIX systems, probably
  * doesn't work on Windows. (Did anyone ever try SFrame on Windows anyway???)
  */
-const char* SCycleBaseNTuple::RootType( const char* typeid_type ) {
+const char* SCycleBaseNTuple::RootType( const char* typeid_type ) throw( SError ) {
 
    if( strlen( typeid_type ) != 1 ) {
-      SError error( SError::StopExecution );
-      error << "SCycleBaseNTuple::RootType received complex object description";
-      throw error;
+      throw SError( "SCycleBaseNTuple::RootType received complex object description",
+                    SError::StopExecution );
    }
 
    switch( typeid_type[ 0 ] ) {
@@ -625,12 +624,47 @@ const char* SCycleBaseNTuple::RootType( const char* typeid_type ) {
 
    }
 
-   SError error( SError::StopExecution );
-   error << "Unknown primitive type encountered: " << typeid_type;
-   throw error;
-
+   throw SError( "Unknown primitive type encountered: " + TString( typeid_type ),
+                 SError::StopExecution );
    return "";
+}
 
+/**
+ * This function is used internally to check whether the user tries to connect
+ * the correct type of primitive to the branches. ROOT can have some trouble
+ * identifying such code problems...
+ *
+ * Note: The implementation might be platform specific!
+ */
+const char* SCycleBaseNTuple::TypeidType( const char* root_type ) throw( SError ) {
+
+   if( ! strcmp( root_type, "Char_t" ) ) {
+      return "c";
+   } else if( ! strcmp( root_type, "UChar_t" ) ) {
+      return "h";
+   } else if( ! strcmp( root_type, "Short_t" ) ) {
+      return "s";
+   } else if( ! strcmp( root_type, "UShort_t" ) ) {
+      return "t";
+   } else if( ! strcmp( root_type, "Int_t" ) ) {
+      return "i";
+   } else if( ! strcmp( root_type, "UInt_t" ) ) {
+      return "j";
+   } else if( ! strcmp( root_type, "Float_t" ) ) {
+      return "f";
+   } else if( ! strcmp( root_type, "Double_t" ) ) {
+      return "d";
+   } else if( ! strcmp( root_type, "Long64_t" ) ) {
+      return "x";
+   } else if( ! strcmp( root_type, "ULong64_t" ) ) {
+      return "y";
+   } else if( ! strcmp( root_type, "Bool_t" ) ) {
+      return "b";
+   }
+
+   throw SError( "Unknown ROOT primitive type encountered: " + TString( root_type ),
+                 SError::StopExecution );
+   return "";
 }
 
 /**

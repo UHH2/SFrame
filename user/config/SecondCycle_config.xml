@@ -47,7 +47,7 @@
   <!--              Set it to "" or "lite" to run PROOF-Lite on your local  -->
   <!--              machine.                                                -->
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
-  <Cycle Name="SecondCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite"
+  <Cycle Name="SecondCycle" TargetLumi="1." RunMode="LOCAL" ProofServer="lite"
          OutputDirectory="./" PostFix="" >
 
     <!-- list of input data for given data type                                   -->

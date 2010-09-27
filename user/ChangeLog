@@ -1,3 +1,8 @@
+2010.09.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* The example SecondCycle configuration uses LOCAL mode once
+	  again. Unfortunately PROOF(-Lite) doesn't play nicely with
+	  relative file paths.
+
 2010.08.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Put a security check into FirstCycle::EndMasterInputData(...).
 	  This way when the worker nodes die, the master process is

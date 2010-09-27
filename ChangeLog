@@ -1,3 +1,13 @@
+2010.09.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Re-wrote how ConnectVariable(...) checks whether the user
+	  tries to connect the correct type of primitive to a branch.
+	  The previous implementation used a convention of the ATLAS
+	  D3PDs which is not followed anymore...
+	* The example SecondCycle configuration uses LOCAL mode once
+	  again. Unfortunately PROOF(-Lite) doesn't play nicely with
+	  relative file paths.
+	* Tagging as SFrame-03-03-19
+
 2010.09.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Migrated back the change from the development branch that
 	  enables the user to connect polymorphic object pointers to
