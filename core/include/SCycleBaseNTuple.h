@@ -31,10 +31,6 @@ class TTree;
 class TFile;
 class TBranch;
 class SInputData;
-class SCycleBase;
-template< class T > class SToolBaseT;
-template< class T > class SInputVariables;
-template< class T > class SOutputVariables;
 
 /**
  *   @short NTuple handling part of SCycleBase
@@ -52,13 +48,6 @@ class SCycleBaseNTuple : public virtual ISCycleBaseConfig,
                          public virtual ISCycleBaseNTuple,
                          public virtual SCycleBaseBase {
 
-   /// To enable the usage of the protected functions for SToolBase
-   friend class SToolBaseT< SCycleBase >;
-   /// To enable the usage of the protected functions for SInputVariables
-   friend class SInputVariables< SCycleBaseNTuple >;
-   /// To enable the usage of the protected functions for SOutputVariables
-   friend class SOutputVariables< SCycleBaseNTuple >;
-
 public:
    /// Default constructor
    SCycleBaseNTuple();
@@ -70,7 +59,6 @@ public:
    /// Get the object list used for NTuple output
    virtual TList* GetNTupleOutput() const;
 
-protected:
    /// Connect an input variable
    template< typename T >
    bool ConnectVariable( const char* treeName, const char* branchName,
@@ -96,6 +84,7 @@ protected:
    /// Access one of the output trees
    virtual TTree* GetOutputTree( const char* treeName ) const throw( SError );
 
+protected:
    //////////////////////////////////////////////////////////
    //                                                      //
    //          Functions called by the framework:          //
@@ -146,7 +135,7 @@ private:
    // pointer issue by itself...
    std::list< void* > m_outputVarPointers;
 
-   TList* m_output;
+   TList* m_output; ///< Pointer to the output object list
 
 }; // class SCycleBaseNTuple
 

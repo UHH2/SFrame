@@ -30,8 +30,6 @@
 
 // Forward declaration(s):
 class TXMLNode;
-class SCycleBase;
-template< class T > class SToolBaseT;
 
 /**
  *   @short Base class for reading the XML configuration
@@ -47,9 +45,6 @@ template< class T > class SToolBaseT;
  */
 class SCycleBaseConfig : public virtual ISCycleBaseConfig,
                          public virtual SCycleBaseBase {
-
-   /// To enable the usage of the protected functions for SToolBase
-   friend class SToolBaseT< SCycleBase >;
 
 public:
    /// Default constructor
@@ -73,7 +68,6 @@ public:
    /// Check which list should be used for the configuration input
    virtual TList* GetConfInput() const;
 
-protected:
    /// Declare a <strong>std::string</strong> property
    void DeclareProperty( const std::string& name, std::string& value );
    /// Declare an <strong>int</strong> property
@@ -96,11 +90,14 @@ protected:
    /// Get a configuration object on the PROOF nodes
    TObject* GetConfigObject( const char* name ) const;
 
-   // Function that reads an InputData definition
+protected:
+   /// Function that reads an InputData definition
    virtual SInputData InitializeInputData( TXMLNode* ) throw( SError );
+   /// Function that reads the user properties from the XML
    virtual void InitializeUserConfig( TXMLNode* ) throw( SError );
 
 private:
+   /// Internal function for setting a property value
    void SetProperty( const std::string& name,
                      const std::string& value ) throw( SError );
 

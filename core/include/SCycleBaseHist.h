@@ -31,8 +31,6 @@
 class TDirectory;
 class TH1;
 class TList;
-class SCycleBase;
-template< class T > class SToolBaseT;
 
 /**
  *   @short Histogramming part of SCycleBase
@@ -49,9 +47,6 @@ template< class T > class SToolBaseT;
 class SCycleBaseHist : public virtual ISCycleBaseHist,
                        public virtual SCycleBaseBase {
 
-   /// To enable the usage of the protected functions for SToolBase
-   friend class SToolBaseT< SCycleBase >;
-
 public:
    /// Default constructor
    SCycleBaseHist();
@@ -61,7 +56,6 @@ public:
    /// Check which list should be used for the histogramming output
    virtual TList* GetHistOutput() const;
 
-protected:
    /// Function placing a ROOT object in the output file
    template< class T > T* Book( const T& histo,
                                 const char* directory = 0 ) throw( SError );

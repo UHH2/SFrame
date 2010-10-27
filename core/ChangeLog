@@ -1,3 +1,10 @@
+2010.10.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Moved some of the functions of SCycleBaseConfig,
+	  SCycleBaseHist and SCycleBaseNTuple into public scope.
+	  Having them as protected function and declaring all
+	  SToolBase incarnations as friends of these classes was just
+	  not scaling...
+
 2010.09.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Re-wrote how ConnectVariable(...) checks whether the user
 	  tries to connect the correct type of primitive to a branch.
