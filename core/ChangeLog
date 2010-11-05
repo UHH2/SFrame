@@ -1,3 +1,11 @@
+2010.11.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Linked the SFrameCore library against the Cintex ROOT library.
+	  It turns out that this ROOT library has been with us since
+	  a long time (it's already in ROOT 5.20). So explicitly
+	  relying on it is not a problem.
+	* This should solve the issues seen by people using a ROOT
+	  version coupled to an ATLAS offline software release.
+
 2010.10.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Moved some of the functions of SCycleBaseConfig,
 	  SCycleBaseHist and SCycleBaseNTuple into public scope.
