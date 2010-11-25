@@ -13,7 +13,7 @@
 <!--                                                                         -->
 <!-- ======================================================================= -->
 
-<!ELEMENT JobConfiguration (PyLibrary*,Library*,Package*,Cycle+)>
+<!ELEMENT JobConfiguration ((PyLibrary|Library|Package)*,Cycle+) >
 <!ATTLIST JobConfiguration
         JobName              CDATA            #REQUIRED
         OutputLevel          CDATA            "INFO"
@@ -46,8 +46,8 @@
         ProofNodes           CDATA            "-1"
 >
 
-<!ELEMENT InputData (GeneratorCut*,DataSet*,In*,InputTree*,OutputTree*,
-                     MetadataInputTree*,MetadataOutputTree*)>
+<!ELEMENT InputData ((GeneratorCut|DataSet|In|InputTree|OutputTree|
+                      MetadataInputTree|MetadataOutputTree)*) >
 <!ATTLIST InputData
         Type                 CDATA            #REQUIRED
         Version              CDATA            #REQUIRED

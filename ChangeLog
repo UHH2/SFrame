@@ -1,3 +1,17 @@
+2010.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Created a new SFrame sub-package as MacOS X wasn't playing nicely with
+	  SFrameCore enabling Cintex at loading time. Somehow the
+	  ROOT::Cintex::Cintex::Enable() command messed up the memory when
+	  sframe_main was starting up.
+	* This package makes it possible to have sframe_main load the library after
+	  the ROOT services are already up and running in the background.
+	* Removed the Cintex specific code from the core library.
+	* Modified the DTD to enable the declaration of some of the XML
+	  elements in random order inside the configuration XMLs.
+	* Extended the FirstCycle_config.xml example to explicitly
+	  load the SFrameCintex library.
+	* Tagging as SFrame-03-04-01
+
 2010.11.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Linked the SFrameCore library against the Cintex ROOT library.
 	  It turns out that this ROOT library has been with us since

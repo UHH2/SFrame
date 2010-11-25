@@ -1,7 +1,7 @@
 // $Id$
 /***************************************************************************
  * @Project: SFrame - ROOT-based analysis framework for ATLAS
- * @Package: Core
+ * @Package: Cintex
  *
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
@@ -32,7 +32,7 @@ Int_t EnableCintex() {
    ROOT::Cintex::Cintex::Enable();
 
    // Let the user know what we just did:
-   logger << DEBUG << "Usage of the Cintex library is now enabled" << SLogger::endmsg;
+   logger << INFO << "Usage of the Cintex library is now enabled" << SLogger::endmsg;
    return 0;
 }
 

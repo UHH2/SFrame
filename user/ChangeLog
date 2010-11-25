@@ -1,3 +1,9 @@
+2010.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified the DTD to enable the declaration of some of the XML
+	  elements in random order inside the configuration XMLs.
+	* Extended the FirstCycle_config.xml example to explicitly
+	  load the SFrameCintex library.
+
 2010.09.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* The example SecondCycle configuration uses LOCAL mode once
 	  again. Unfortunately PROOF(-Lite) doesn't play nicely with

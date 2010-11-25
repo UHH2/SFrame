@@ -1,0 +1,13 @@
+2010.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Created a new SFrame sub-package as MacOS X wasn't playing nicely with
+	  SFrameCore enabling Cintex at loading time. Somehow the
+	  ROOT::Cintex::Cintex::Enable() command messed up the memory when
+	  sframe_main was starting up.
+	* This package makes it possible to have sframe_main load the library after
+	  the ROOT services are already up and running in the background.
+	* To use the Cintex functionality (because you use the ATLAS offline environment
+	  for compiling SFrame for instance) then you have to load this library explicitly,
+	  by putting the following lines into your configuration XML file:
+
+	   <Library Name="libSFrameCintex" />
+	   <Package Name="SFrameCintex.par" />

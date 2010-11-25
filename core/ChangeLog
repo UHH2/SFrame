@@ -1,3 +1,6 @@
+2010.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Removed the Cintex specific code from the core library.
+
 2010.11.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Linked the SFrameCore library against the Cintex ROOT library.
 	  It turns out that this ROOT library has been with us since
