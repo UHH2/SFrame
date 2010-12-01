@@ -18,6 +18,7 @@
 #include <TROOT.h>
 #include <TH1.h>
 #include <TList.h>
+#include <TFile.h>
 
 // Local include(s):
 #include "SCycleOutput.h"
@@ -73,8 +74,12 @@ T* SCycleBaseHist::Book( const T& histo,
 }
 
 /**
- * Function searching for any kind of object (inheriting from TObject)
- * in the output file. You have to specify the return type to the
+ * Function searching for any kind of object (inheriting from TObject).
+ * First the function searches for the object in the output object list,
+ * and if it doesn't find it there, it looks for it in the currently open
+ * input file.
+ *
+ * You have to specify the return type to the
  * function explicitely, as the compiler can't know this from the
  * argument list.
  *
@@ -90,20 +95,50 @@ template< class T >
 T* SCycleBaseHist::Retrieve( const char* name,
                              const char* directory ) throw( SError ) {
 
+   // Just to make sure that we're in the default directory in
+   // memory:
+   gROOT->cd();
+
+   // Construct a path name from the specified parameters:
    TString path = ( directory ? directory + TString( "/" ) : "" ) +
       TString( name );
+
+   // Pointer to the requested object:
+   T* result = 0;
+
+   //
+   // Try to find this object in the output list:
+   //
    SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
-   if( ! out ) {
+   if( out ) {
+      result = dynamic_cast< T* >( out->GetObject() );
+      if( ! result ) {
+         SError error( SError::SkipCycle );
+         error << "No object found in the holder with name: " << name
+               << " in directory: " << directory;
+         throw error;
+      }
+      return result;
+   }
+
+   // Check that we have an input file already specified:
+   if( ! m_input ) {
+      throw SError( "No input file defined, and requested object "
+                    "not found in output list", SError::SkipCycle );
+   }
+
+   //
+   // Try to find this object inside the input file:
+   //
+   result = dynamic_cast< T* >( m_input->Get( path ) );
+   if( ! result ) {
       SError error( SError::SkipCycle );
       error << "Couldn't access object with name: " << name
             << " in directory: " << directory;
       throw error;
    }
 
-   gROOT->cd(); // So that the temporary objects would not be
-                // created in the file itself...
-
-   return dynamic_cast< T* >( out->GetObject() );
+   return result;
 }
 
 #endif // SFRAME_CORE_SCycleBaseHist_ICC

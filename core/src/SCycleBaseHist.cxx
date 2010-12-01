@@ -18,6 +18,7 @@
 #include <TDirectory.h>
 #include <TH1.h>
 #include <TList.h>
+#include <TFile.h>
 
 // Local inlcude(s):
 #include "../include/SCycleBaseHist.h"
@@ -27,7 +28,7 @@
  * The constructor initialises the base class and the member variables.
  */
 SCycleBaseHist::SCycleBaseHist()
-   : SCycleBaseBase(), m_histoMap(), m_output( 0 ) {
+   : SCycleBaseBase(), m_histoMap(), m_output( 0 ), m_input( 0 ) {
 
    REPORT_VERBOSE( "SCycleBaseHist constructed" );
 }
@@ -125,6 +126,24 @@ TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) {
    return result;
 }
 
+void SCycleBaseHist::SetHistInputFile( TFile* file ) {
+
+   m_input = file;
+   return;
+}
+
+TFile* SCycleBaseHist::GetHistInputFile() const {
+
+   return m_input;
+}
+
+/**
+ * This function is used internally to put all the output TObject-s into a
+ * separate directory in memory. This way they don't clash with the objects
+ * created in the "default" in-memory directory.
+ *
+ * @returns A pointer to the common temporary directory
+ */
 TDirectory* SCycleBaseHist::GetTempDir() const {
 
    static TDirectory* tempdir = 0;

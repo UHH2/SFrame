@@ -12,6 +12,7 @@
 
 // ROOT include(s):
 #include "TH1F.h"
+#include "TGraph.h"
 
 // Local include(s):
 #include "../include/SecondCycle.h"
@@ -48,7 +49,7 @@ void SecondCycle::EndInputData( const SInputData& ) throw( SError ) {
    return;
 }
 
-void SecondCycle::BeginInputFile( const SInputData& inputData )  throw( SError ) {
+void SecondCycle::BeginInputFile( const SInputData& inputData ) throw( SError ) {
 
    //
    // Connect the input variables:
@@ -56,6 +57,22 @@ void SecondCycle::BeginInputFile( const SInputData& inputData )  throw( SError )
    ConnectVariable( m_FirstCycleTreeName.c_str(), "example_variable", m_example_variable );
    ConnectVariable( m_FirstCycleTreeName.c_str(), "El_p_T", m_El_p_T );
    ConnectVariable( m_FirstCycleTreeName.c_str(), "El", m_El );
+
+   //
+   // Retrieve some objects from the input file:
+   //
+   TH1* hist = Retrieve< TH1 >( "El_p_T_hist" );
+   if( ! hist ) {
+      throw SError( "Coulnd't find histogram with name El_p_T_hist in the input",
+                    SError::SkipCycle );
+   }
+   hist->Print(); // Show that we succeeded
+   TGraph* graph = Retrieve< TGraph >( "MyGraph", "graph_dir" );
+   if( ! graph ) {
+      throw SError( "Couldn't find graph with name \"graph_dir/MyGraph\" in the input",
+                    SError::SkipCycle );
+   }
+   graph->Print(); // Show that we succeeded
 
    return;
 }

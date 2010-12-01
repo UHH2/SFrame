@@ -161,7 +161,9 @@ Bool_t SCycleBaseExec::Notify() {
 
    try {
 
-      this->LoadInputTrees( *m_inputData, m_inputTree );
+      TFile* inputFile = 0;
+      this->LoadInputTrees( *m_inputData, m_inputTree, inputFile );
+      this->SetHistInputFile( inputFile );
       this->BeginInputFile( *m_inputData );
       this->SetInputCacheConfigured();
 

@@ -95,9 +95,9 @@ private:
    //
    // Some counters:
    //
-   SSummedVar< Int_t > m_allEvents;
-   SSummedVar< Int_t > m_passedEvents;
-   SSummedVar< std::vector< Int_t > > m_test;
+   SSummedVar< Int_t > m_allEvents; //!
+   SSummedVar< Int_t > m_passedEvents; //!
+   SSummedVar< std::vector< Int_t > > m_test; //!
 
    ClassDef( FirstCycle , 0 );
 

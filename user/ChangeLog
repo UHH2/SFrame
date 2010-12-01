@@ -1,3 +1,10 @@
+2010.12.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Marked the SSummedVar variables as transient in the FirstCycle
+	  class.
+	* Added some code to SecodCycle to show off how to use the
+	  Retrieve<...>(...) function for accessing objects from
+	  the input file.
+
 2010.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified the DTD to enable the declaration of some of the XML
 	  elements in random order inside the configuration XMLs.

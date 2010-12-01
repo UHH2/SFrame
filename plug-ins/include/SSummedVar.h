@@ -67,6 +67,12 @@ public:
  *          to it on the worker nodes are added up and are visible on the
  *          master node.
  *
+ *          Note that when you add such a variable as a member to your cycle,
+ *          you should hide the variable from the dictionary generation in
+ *          the newer ROOT releases. (5.28 and the development releases leading
+ *          up to it.) This is done the easiest by putting "//!" after the
+ *          variable declaration. See the FirstCycle example.
+ *
  * @version $Revision$
  */
 template< class Type >

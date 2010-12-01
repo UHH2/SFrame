@@ -1,3 +1,25 @@
+2010.12.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Tried to fix the ERROR messages coming from the SCycleBaseConfig
+	  class in ROOT 5.28, but didn't succeed for now. Issue is
+	  followed up on: http://savannah.cern.ch/bugs/?75727
+	* Added the long missing functionality to be able to retrieve
+	  histograms and other kinds of objects from the input files.
+	  Now the Retrieve<...>(...) function of SCycleBaseHist looks
+	  first in the output object list for the requested object,
+	  and if it doesn't find it there, it looks in the input file.
+	* Extended the documentation for SSummedVar a bit, stating that
+	  users should always mark such variables as transient when
+	  using new ROOT versions.
+	* Marked the SSummedVar variables as transient in the FirstCycle
+	  class.
+	* Added some code to SecodCycle to show off how to use the
+	  Retrieve<...>(...) function for accessing objects from
+	  the input file.
+	* Now the code now works out of the box with the trunk version of
+	  ROOT, but it still produces some (mostly harmless) ERROR
+	  messages. So for the time being you should stick to ROOT 5.26.
+	* Tagging as SFrame-03-04-02
+
 2010.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Created a new SFrame sub-package as MacOS X wasn't playing nicely with
 	  SFrameCore enabling Cintex at loading time. Somehow the

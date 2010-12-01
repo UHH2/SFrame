@@ -16,6 +16,7 @@
 
 // Forward declaration(s):
 class TList;
+class TFile;
 
 /**
  *   @short Interface providing histogramming capabilities
@@ -38,6 +39,12 @@ public:
    virtual void SetHistOutput( TList* output ) = 0;
    /// Get the PROOF output list
    virtual TList* GetHistOutput() const = 0;
+
+protected:
+   /// Set the current input file
+   virtual void SetHistInputFile( TFile* file ) = 0;
+   /// Get the currently set input file
+   virtual TFile* GetHistInputFile() const = 0;
 
 }; // class ISCycleBaseHist
 

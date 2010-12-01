@@ -31,6 +31,7 @@
 class TDirectory;
 class TH1;
 class TList;
+class TFile;
 
 /**
  *   @short Histogramming part of SCycleBase
@@ -69,13 +70,21 @@ public:
    /// Function searching for 1-dimensional histograms in the output file
    TH1* Hist( const char* name, const char* dir = 0 );
 
+protected:
+   /// Set the current input file
+   virtual void SetHistInputFile( TFile* file );
+   /// Get the currently set input file
+   virtual TFile* GetHistInputFile() const;
+
 private:
+   /// Function creating a temporary directory in memory
    TDirectory* GetTempDir() const;
 
    /// Map used by the Hist function
    std::map< std::pair< std::string, std::string >, TH1* > m_histoMap;
 
-   TList* m_output;
+   TList* m_output; ///< PROOF output list
+   TFile* m_input; ///< Currently open input file
 
 }; // class SCycleBaseHist
 

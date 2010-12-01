@@ -1,3 +1,13 @@
+2010.12.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Tried to fix the ERROR messages coming from the SCycleBaseConfig
+	  class in ROOT 5.28, but didn't succeed for now. Issue is
+	  followed up on: http://savannah.cern.ch/bugs/?75727
+	* Added the long missing functionality to be able to retrieve
+	  histograms and other kinds of objects from the input files.
+	  Now the Retrieve<...>(...) function of SCycleBaseHist looks
+	  first in the output object list for the requested object,
+	  and if it doesn't find it there, it looks in the input file.
+
 2010.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Removed the Cintex specific code from the core library.
 

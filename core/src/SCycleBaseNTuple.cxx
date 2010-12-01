@@ -339,7 +339,8 @@ void SCycleBaseNTuple::SaveOutputTrees( TDirectory* output ) throw( SError ) {
  * @param file     Pointer to the input file that the function opens
  */
 void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
-                                       TTree* main_tree ) throw( SError ) {
+                                       TTree* main_tree,
+                                       TFile*& inputFile ) throw( SError ) {
 
    REPORT_VERBOSE( "Loading/accessing the event-level input trees" );
 
@@ -358,24 +359,25 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
    //
    // Access the physical file that is currently being opened:
    //
-   TFile* file = 0;
+   inputFile = 0;
    if( GetConfig().GetRunMode() == SCycleConfig::LOCAL ) {
       TChain* chain = dynamic_cast< TChain* >( main_tree );
       if( ! chain ) {
          throw SError( "In LOCAL running the input TTree is not a TChain!",
                        SError::StopExecution );
       }
-      file = chain->GetFile();
+      inputFile = chain->GetFile();
    } else if( GetConfig().GetRunMode() == SCycleConfig::PROOF ) {
-      file = main_tree->GetCurrentFile();
+      inputFile = main_tree->GetCurrentFile();
    } else {
       throw SError( "Running mode not recongnised", SError::SkipCycle );
+      return;
    }
-   if( ! file ) {
+   if( ! inputFile ) {
       throw SError( "Couldn't get the input file pointer!", SError::SkipFile );
       return;
    }
-   REPORT_VERBOSE( "Accessed the pointer to the input file: " << file );
+   REPORT_VERBOSE( "Accessed the pointer to the input file: " << inputFile );
 
    //
    // Handle the regular input trees:
@@ -386,11 +388,11 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
 
          REPORT_VERBOSE( "Now trying to access TTree: " << st->treeName );
 
-         TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
+         TTree* tree = dynamic_cast< TTree* >( inputFile->Get( st->treeName ) );
          if( ! tree ) {
             SError error( SError::SkipFile );
             error << "Tree " << st->treeName << " doesn't exist in File "
-                  << file->GetName();
+                  << inputFile->GetName();
             throw error;
          }
 
@@ -446,11 +448,11 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
       for( std::vector< STree >::const_iterator mt = sMetaTree->begin();
            mt != sMetaTree->end(); ++mt ) {
 
-         TTree* tree = dynamic_cast< TTree* >( file->Get( mt->treeName ) );
+         TTree* tree = dynamic_cast< TTree* >( inputFile->Get( mt->treeName ) );
          if( ! tree ) {
             SError error( SError::SkipFile );
             error << "Tree " << mt->treeName << " doesn't exist in File "
-                  << file->GetName();
+                  << inputFile->GetName();
             throw error;
          } else {
             m_metaInputTrees.push_back( tree );

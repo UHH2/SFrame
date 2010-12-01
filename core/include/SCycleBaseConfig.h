@@ -106,8 +106,14 @@ private:
 
    //
    // These are the object used to handle the preferences of the
-   // derived classes:
+   // derived classes. Note that because of some "improvements" in
+   // the ROOT code, now these have to be very strictly hidden from
+   // the dictionary generation. Unfortunately that doesn't work right
+   // now, so all SFrame jobs in ROOT 5.28 will always print some
+   // "harmless" ERROR messages.
    //
+   //#ifndef __MAKECINT__
+   //#ifndef G__DICTIONARY
    std::map< const std::string, std::string* >                m_stringPrefs;
    std::map< const std::string, int* >                        m_intPrefs;
    std::map< const std::string, double* >                     m_doublePrefs;
@@ -116,6 +122,8 @@ private:
    std::map< const std::string, std::vector< int >* >         m_intListPrefs;
    std::map< const std::string, std::vector< double >* >      m_doubleListPrefs;
    std::map< const std::string, std::vector< bool >* >        m_boolListPrefs;
+   //#endif // G_DICTIONARY
+   //#endif // __MAKECINT__
 
    /// The cycle configuration:
    SCycleConfig m_config;

@@ -59,7 +59,8 @@ protected:
    /// Save all the created output trees in the output
    virtual void SaveOutputTrees( TDirectory* output ) throw( SError ) = 0;
    /// Load the input trees
-   virtual void LoadInputTrees( const SInputData& id, TTree* main_tree ) throw( SError ) = 0;
+   virtual void LoadInputTrees( const SInputData& id, TTree* main_tree,
+                                TFile*& inputFile ) throw( SError ) = 0;
    /// Declare that the cache for the input trees is now configured
    virtual void SetInputCacheConfigured() throw( SError ) = 0;
    /// Read in the event from the "normal" trees
