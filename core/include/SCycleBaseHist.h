@@ -80,11 +80,17 @@ private:
    /// Function creating a temporary directory in memory
    TDirectory* GetTempDir() const;
 
+#ifndef __MAKECINT__
    /// Map used by the Hist function
    std::map< std::pair< std::string, std::string >, TH1* > m_histoMap;
+#endif // __MAKECINT__
 
    TList* m_output; ///< PROOF output list
    TFile* m_input; ///< Currently open input file
+
+#ifndef DOXYGEN_IGNORE
+   ClassDef( SCycleBaseHist, 0 );
+#endif // DOXYGEN_IGNORE
 
 }; // class SCycleBaseHist
 

@@ -13,6 +13,10 @@
 // Local include(s):
 #include "../include/SCycleBaseBase.h"
 
+#ifndef DOXYGEN_IGNORE
+ClassImp( SCycleBaseBase );
+#endif // DOXYGEN_IGNORE
+
 /**
  * The constructor is not doing much. It just initialises the m_logger
  * member.

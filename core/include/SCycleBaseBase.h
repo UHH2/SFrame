@@ -53,6 +53,10 @@ protected:
     */
    mutable SLogger m_logger;
 
+#ifndef DOXYGEN_IGNORE
+   ClassDef( SCycleBaseBase, 0 );
+#endif // DOXYGEN_IGNORE
+
 }; // class SCycleBaseBase
 
 /**  @class TSelector

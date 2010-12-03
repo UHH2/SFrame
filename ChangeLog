@@ -1,3 +1,14 @@
+2010.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Re-introduced the ClassDef(...) and ClassImp(...) macros
+	  for the SCycleBase component classes. These macros are
+	  necessary if you want to hide some member variables from
+	  the dictionary generation. This is unfortunately a needed
+	  feature for making the code work without WARNING/ERROR
+	  messages in the ROOT trunk. (To become 5.28 soon.)
+	* Hid some of the SCycleBase variables from the dictionary
+	  generator.
+	* Tagging as SFrame-03-04-03
+
 2010.12.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Tried to fix the ERROR messages coming from the SCycleBaseConfig
 	  class in ROOT 5.28, but didn't succeed for now. Issue is

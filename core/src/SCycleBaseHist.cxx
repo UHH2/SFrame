@@ -24,6 +24,10 @@
 #include "../include/SCycleBaseHist.h"
 #include "../include/SCycleOutput.h"
 
+#ifndef DOXYGEN_IGNORE
+ClassImp( SCycleBaseHist );
+#endif // DOXYGEN_IGNORE
+
 /**
  * The constructor initialises the base class and the member variables.
  */

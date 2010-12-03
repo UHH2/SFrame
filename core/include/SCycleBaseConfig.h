@@ -108,12 +108,9 @@ private:
    // These are the object used to handle the preferences of the
    // derived classes. Note that because of some "improvements" in
    // the ROOT code, now these have to be very strictly hidden from
-   // the dictionary generation. Unfortunately that doesn't work right
-   // now, so all SFrame jobs in ROOT 5.28 will always print some
-   // "harmless" ERROR messages.
+   // the dictionary generation.
    //
-   //#ifndef __MAKECINT__
-   //#ifndef G__DICTIONARY
+#ifndef __MAKECINT__
    std::map< const std::string, std::string* >                m_stringPrefs;
    std::map< const std::string, int* >                        m_intPrefs;
    std::map< const std::string, double* >                     m_doublePrefs;
@@ -122,16 +119,27 @@ private:
    std::map< const std::string, std::vector< int >* >         m_intListPrefs;
    std::map< const std::string, std::vector< double >* >      m_doubleListPrefs;
    std::map< const std::string, std::vector< bool >* >        m_boolListPrefs;
-   //#endif // G_DICTIONARY
-   //#endif // __MAKECINT__
+#endif // __MAKECINT__
 
    /// The cycle configuration:
    SCycleConfig m_config;
 
+   //
+   // The TList has to be hidden from the dictionary generator because one
+   // of the internal components of TList doesn't have a dictionary. This
+   // produces a WARNING message when the CINT dictionary knows about this
+   // variable.
+   //
+#ifndef __MAKECINT__
    /// A list of all the configuration objects
    TList m_configList;
+#endif // __MAKECINT__
    /// List with the PROOF input objects
    TList* m_input;
+
+#ifndef DOXYGEN_IGNORE
+   ClassDef( SCycleBaseConfig, 0 );
+#endif // DOXYGEN_IGNORE
 
 }; // class SCycleBaseConfig
 

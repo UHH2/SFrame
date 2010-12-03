@@ -24,6 +24,10 @@
 #include "../include/SGeneratorCut.h"
 #include "../include/STreeType.h"
 
+#ifndef DOXYGEN_IGNORE
+ClassImp( SCycleBaseConfig );
+#endif // DOXYGEN_IGNORE
+
 /**
  * The constructor only initialises the base class.
  */

@@ -138,6 +138,10 @@ private:
 
    TList* m_output; ///< Pointer to the output object list
 
+#ifndef DOXYGEN_IGNORE
+   ClassDef( SCycleBaseNTuple, 0 );
+#endif // DOXYGEN_IGNORE
+
 }; // class SCycleBaseNTuple
 
 // Don't include the templated function(s) when we're generating
