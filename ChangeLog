@@ -1,3 +1,12 @@
+2011.01.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified PARHelpers.py according to the suggestions of
+	  Simon Heisterkamp, slightly improving on his recipe.
+	* sframe_parMaker.py now creates a unique temporary directory
+	  when making the PAR packages, so there should be no more clashes
+	  between "make processes" compiling the same package
+	  on the same node at the same time.
+	* Tagging as SFrame-03-04-04
+
 2010.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Re-introduced the ClassDef(...) and ClassImp(...) macros
 	  for the SCycleBase component classes. These macros are
