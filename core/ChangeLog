@@ -1,3 +1,12 @@
+2011.02.09 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Extended SInputData with the current entry number
+	  This can be used to feed the D3PDReader objects with
+	  the information.
+	* Updated SCycleBaseExec so that it fills this information.
+	* Fixed a problem in SCycleBaseHist::Hist(...) in which it
+	  could get into an improper state when the user asked for
+	  a non-existent histogram.
+
 2010.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Re-introduced the ClassDef(...) and ClassImp(...) macros
 	  for the SCycleBase component classes. These macros are

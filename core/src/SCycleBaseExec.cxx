@@ -181,6 +181,7 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
    try {
 
       this->GetEvent( entry );
+      m_inputData->SetEventTreeEntry( entry );
       this->ExecuteEvent( *m_inputData, this->CalculateWeight( *m_inputData,
                                                                entry ) );
 

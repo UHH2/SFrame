@@ -113,7 +113,7 @@ void SCycleBaseHist::WriteObj( const TObject& obj,
  * @param name The name of the histogram
  * @param dir  The name of the directory the histogram is in
  */
-TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) {
+TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) throw( SError ) {
 
    TH1* result;
 
@@ -124,7 +124,8 @@ TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) {
    } else {
       REPORT_VERBOSE( "Hist(): Using Retrieve for name \""
                       << name << "\" and dir \"" << ( dir ? dir : "" ) << "\"" );
-      result = m_histoMap[ this_pair ] = Retrieve< TH1 >( name, dir );
+      result = Retrieve< TH1 >( name, dir ); // This line can throw an exception...
+      m_histoMap[ this_pair ] = result;
    }
 
    return result;

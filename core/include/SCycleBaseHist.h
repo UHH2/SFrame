@@ -68,7 +68,7 @@ public:
                   const char* directory = 0 ) throw( SError );
 
    /// Function searching for 1-dimensional histograms in the output file
-   TH1* Hist( const char* name, const char* dir = 0 );
+   TH1* Hist( const char* name, const char* dir = 0 ) throw( SError );
 
 protected:
    /// Set the current input file

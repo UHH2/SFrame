@@ -228,6 +228,11 @@ public:
    /// Get whether the file/dataset validation can be skipped
    Bool_t GetSkipValid() const                           { return m_skipValid; }
 
+   /// Set the current entry which is being read from the input
+   void SetEventTreeEntry( Long64_t entry )              { m_entry = entry; }
+   /// Get the current entry which is being read from the input
+   Long64_t GetEventTreeEntry() const                    { return m_entry; }
+
    /// Add a new generator cut to the input data
    void AddGenCut ( const SGeneratorCut& gencuts ) { m_gencuts.push_back( gencuts ); }
    /// Add a new input file to the input data
@@ -310,6 +315,7 @@ private:
    Long64_t                     m_neventsskip; ///< The number of events to skip
    Bool_t                       m_cacheable; ///< Flag showing whether to cache the ID info
    Bool_t                       m_skipValid; ///< Flag showing whether to skip the ID validation
+   Long64_t                     m_entry; ///< Current entry read from the input
 
    TDSet*                       m_dset; //! Transient dataset representation of input files
 

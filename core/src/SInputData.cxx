@@ -182,8 +182,8 @@ SInputData::SInputData( const char* name )
    : TNamed( name, "SFrame input data object" ), m_type( "unknown" ),
      m_version( 0 ), m_totalLumiGiven( 0 ), m_totalLumiSum( 0 ),
      m_eventsTotal( 0 ), m_neventsmax( -1 ), m_neventsskip( 0 ),
-     m_cacheable( kFALSE ), m_skipValid( kFALSE ), m_dset( 0 ),
-     m_logger( "SInputData" ) {
+     m_cacheable( kFALSE ), m_skipValid( kFALSE ), m_entry( 0 ),
+     m_dset( 0 ), m_logger( "SInputData" ) {
 
    REPORT_VERBOSE( "In constructor" );
 }

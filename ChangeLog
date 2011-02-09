@@ -1,3 +1,13 @@
+2011.02.09 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Extended SInputData with the current entry number
+	  This can be used to feed the D3PDReader objects with
+	  the information.
+	* Updated SCycleBaseExec so that it fills this information.
+	* Fixed a problem in SCycleBaseHist::Hist(...) in which it
+	  could get into an improper state when the user asked for
+	  a non-existent histogram.
+	* Tagging as SFrame-03-04-05
+
 2011.01.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified PARHelpers.py according to the suggestions of
 	  Simon Heisterkamp, slightly improving on his recipe.
