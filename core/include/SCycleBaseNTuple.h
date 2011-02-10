@@ -106,6 +106,8 @@ protected:
    void GetEvent( Long64_t entry ) throw( SError );
    /// Calculate the weight of the current event
    Double_t CalculateWeight( const SInputData& inputData, Long64_t entry );
+   /// Forget about the internally cached TTree pointers
+   void ClearCachedTrees();
 
 private:
    static const char* RootType( const char* typeid_type ) throw( SError );

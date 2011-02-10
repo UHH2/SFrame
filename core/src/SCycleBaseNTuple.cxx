@@ -576,6 +576,22 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,
 }
 
 /**
+ * This function instructs the object to forget about all the TTree pointers
+ * that it collected at the beginning of executing the cycle. It's a security
+ * measure for when the cycle is run multiple times.
+ */
+void SCycleBaseNTuple::ClearCachedTrees() {
+
+   m_inputTrees.clear();
+   m_inputBranches.clear();
+   m_outputTrees.clear();
+   m_metaInputTrees.clear();
+   m_metaOutputTrees.clear();
+
+   return;
+}
+
+/**
  * This is a tricky one. In SCycleBaseNTuple::DeclareVariable(...) the function
  * automatically detects the type of the variable to be put into the output tree.
  * Since ROOT uses a different naming scheme for the primitives than C++'s typeid

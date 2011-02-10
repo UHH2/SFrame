@@ -67,6 +67,8 @@ protected:
    virtual void GetEvent( Long64_t entry ) throw( SError ) = 0;
    /// Calculate the weight of the current event
    virtual Double_t CalculateWeight( const SInputData& inputData, Long64_t entry ) = 0;
+   /// Forget about the internally cached TTree pointers
+   virtual void ClearCachedTrees() = 0;
 
 }; // class ISCycleBaseNTuple
 

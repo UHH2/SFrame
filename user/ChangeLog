@@ -1,3 +1,8 @@
+2011.02.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified JobConfig.dtd to allow the user to run the same
+	  cycle with different configurations one after the other.
+	  (There's no reason for not allowing this.)
+
 2010.12.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Marked the SSummedVar variables as transient in the FirstCycle
 	  class.

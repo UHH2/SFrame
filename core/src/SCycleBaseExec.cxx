@@ -270,6 +270,9 @@ void SCycleBaseExec::SlaveTerminate() {
 
    }
 
+   // Reset the ntuple handling component:
+   this->ClearCachedTrees();
+
    m_logger << INFO << "Terminated InputData \"" << m_inputData->GetType()
             << "\" (Version:" << m_inputData->GetVersion()
             << ") on worker node" << SLogger::endmsg;

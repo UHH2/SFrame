@@ -1,3 +1,13 @@
+2011.02.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a cleanup function to SCycleBaseNTuple. Justin
+	  Griffiths reported that under certain conditions dangling
+	  TTree pointers can cause problems. Now the code should
+	  always clean up after itself.
+	* Modified JobConfig.dtd to allow the user to run the same
+	  cycle with different configurations one after the other.
+	  (There's no reason for not allowing this.)
+	* Tagging as SFrame-03-04-06
+
 2011.02.09 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Extended SInputData with the current entry number
 	  This can be used to feed the D3PDReader objects with

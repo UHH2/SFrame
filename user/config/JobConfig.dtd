@@ -35,8 +35,8 @@
 >
 
 <!ELEMENT Cycle (InputData+,UserConfig?)>
-<!ATTLIST Cycle 
-        Name                 ID               #REQUIRED
+<!ATTLIST Cycle
+        Name                 CDATA            #REQUIRED
         TargetLumi           CDATA            #REQUIRED
         OutputDirectory      CDATA            "./"
         PostFix              CDATA            ""
