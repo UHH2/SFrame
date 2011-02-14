@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
+#include <limits>
 
 // ROOT include(s):
 #include <TDOMParser.h>
@@ -502,7 +503,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       //
       // Calculate how many events to process:
       //
-      Long64_t evmax = ( id->GetNEventsMax() == -1 ? 100000000 :
+      Long64_t evmax = ( id->GetNEventsMax() == -1 ? std::numeric_limits< Long64_t >::max() :
                          id->GetNEventsMax() );
 
       // This will point to the created output objects:

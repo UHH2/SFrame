@@ -1,4 +1,10 @@
 2011.02.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed a previous limitation of the code, that it would
+	  only process a maximum of 1E8 events if "EvMax" was set
+	  to "-1" in the configuration. Now the code uses the
+	  maximal number that can be expressed with Long64_t.
+
+2011.02.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made the type checking in the "primitive version" of
 	  ConnectVariable(...) more permissive. The previous
 	  implementation was very much based on the conventions
