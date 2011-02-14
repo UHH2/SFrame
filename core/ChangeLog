@@ -1,3 +1,13 @@
+2011.02.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made the type checking in the "primitive version" of
+	  ConnectVariable(...) more permissive. The previous
+	  implementation was very much based on the conventions
+	  of ATLAS ntuples. With the new one it's now even possible
+	  to use branches which have multiple leaves for multiple
+	  primitives. While this is not used in ATLAS, it's one of the
+	  common ways of creating a TTree.
+	  (See: http://root.cern.ch/root/html528/TTree.html)
+
 2011.02.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a cleanup function to SCycleBaseNTuple. Justin
 	  Griffiths reported that under certain conditions dangling

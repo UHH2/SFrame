@@ -85,27 +85,65 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
       REPORT_VERBOSE( "Type of the variable held by the branch: "
                       << branch_info->GetTitle() );
 
-      // Access the only leaf of the supposedly primitive branch. If the leaf
-      // can't be found, that's already a problem:
+      // Try to determine if the user is trying to connect a variable of the correct
+      // type to the branch. Let's first assume that there is only one leaf, which
+      // is called the same as the branch. This is the ATLAS convention.
       TLeaf* leaf = branch_info->GetLeaf( branchName );
+      Bool_t simple_branch = kFALSE;
       if( ! leaf ) {
-         REPORT_ERROR( "Couldn't interrogate branch: " << branchName );
-         REPORT_ERROR( "Are you trying to connect a primitive to a branch describing "
-                       "an object?" );
-         throw SError( "Couldn't interrogate branch: " + TString( branchName ),
-                       SError::SkipFile );
-      }
-      REPORT_VERBOSE( "Leaf type: " << leaf->GetTypeName() );
-
-      // Now check if the leaf has the correct type:
-      if( strcmp( type_name, TypeidType( leaf->GetTypeName() ) ) ) {
-         REPORT_ERROR( "Trying to connect a wrong type of primitive to the branch: "
-                       << branchName );
-         REPORT_ERROR( "  Use variable of type: " << leaf->GetTypeName() );
-         throw SError( "Wrong variable type given for branch: " + TString( branchName ),
-                       SError::SkipCycle );
+         // If there isn't a leaf with the name of the branch, try to look for all the
+         // leaves. It could be that there is a single leaf with some other name, or that
+         // there are a number of leaves.
+         std::vector< TLeaf* > leaves;
+         TObjArray* tleaves = branch_info->GetListOfLeaves();
+         for( Int_t i = 0; i < tleaves->GetSize(); ++i ) {
+            // In my experience not all objects in the array are actual TLeaf
+            // objects...
+            TLeaf* local_leaf = dynamic_cast< TLeaf* >( tleaves->At( i ) );
+            if( local_leaf ) {
+               leaves.push_back( local_leaf );
+            }
+         }
+         // If there is a single leaf, then the type checking can continue:
+         if( leaves.size() == 1 ) {
+            leaf = leaves[ 0 ];
+            simple_branch = kTRUE;
+         }
+         // If there are multiple leaves, then we'll have to skip the type checking:
+         else if( leaves.size() > 1 ) {
+            simple_branch = kFALSE;
+         }
+         // If we didn't find any leaves, then something is definitely wrong:
+         else {
+            REPORT_ERROR( "Couldn't interrogate branch: " << branchName );
+            REPORT_ERROR( "Are you trying to connect a primitive to a branch describing "
+                          "an object?" );
+            throw SError( "Couldn't interrogate branch: " + TString( branchName ),
+                          SError::SkipFile );
+         }
       } else {
-         REPORT_VERBOSE( "The branch and variable types seem to match" );
+         simple_branch = kTRUE;
+      }
+      //
+      // Only do the type checking if there is a single leaf:
+      //
+      if( simple_branch ) {
+         REPORT_VERBOSE( "Leaf type: " << leaf->GetTypeName() );
+
+         // Now check if the leaf has the correct type:
+         if( strcmp( type_name, TypeidType( leaf->GetTypeName() ) ) ) {
+            REPORT_ERROR( "Trying to connect a wrong type of primitive to the branch: "
+                          << branchName );
+            REPORT_ERROR( "  Use variable of type: " << leaf->GetTypeName() );
+            throw SError( "Wrong variable type given for branch: " + TString( branchName ),
+                          SError::SkipCycle );
+         } else {
+            REPORT_VERBOSE( "The branch and variable types seem to match" );
+         }
+      } else {
+         // Let the user know that we can't do any type checking...
+         m_logger << INFO << "Connecting to a branch with multiple leaves."
+                  << "Type correctness can't be checked!" << SLogger::endmsg;
       }
 
       // For primitive types nothing fancy needs to be done
