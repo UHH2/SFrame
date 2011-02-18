@@ -139,6 +139,7 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
 
    m_nProcessedEvents = 0;
    m_nSkippedEvents = 0;
+   m_firstInit = kTRUE;
 
    m_logger << INFO << "Initialised InputData \"" << m_inputData->GetType()
             << "\" (Version:" << m_inputData->GetVersion()
@@ -158,6 +159,14 @@ void SCycleBaseExec::Init( TTree* main_tree ) {
 Bool_t SCycleBaseExec::Notify() {
 
    REPORT_VERBOSE( "Accessing a new input file" );
+
+   // Should not run the initialization when it's first called in LOCAL mode.
+   // ROOT always calls Notify() twice in this mode. Note that this behavior
+   // might change in future ROOT versions...
+   if( ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ) && m_firstInit ) {
+      m_firstInit = kFALSE;
+      return kTRUE;
+   }
 
    try {
 

@@ -146,6 +146,9 @@ private:
    Bool_t m_keepOutputFile;
    Bool_t m_firstInputDataOfMany;
 
+   /// Flag specifying if this is the first initialization of input variables
+   Bool_t m_firstInit;
+
    TTree*                m_inputTree; ///< TTree used to load all input trees
    SInputData*           m_inputData; ///< Pointer to the currently active ID
    std::vector< TTree* > m_outputTrees; ///< List of all the event-level output TTree-s

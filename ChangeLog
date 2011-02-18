@@ -1,3 +1,12 @@
+2011.02.18 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a little hack to SCycleBaseExec so that it would
+	  only call BeginInputFile(...) once at the beginning of the
+	  job when running in LOCAL mode. Previously this function
+	  was always called twice for the first file in this mode.
+	* Tried to check in all running scenarios that the modification
+	  is not disruptive.
+	* Tagging as SFrame-03-04-09
+
 2011.02.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed a previous limitation of the code, that it would
 	  only process a maximum of 1E8 events if "EvMax" was set
