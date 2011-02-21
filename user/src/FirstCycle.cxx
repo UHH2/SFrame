@@ -81,6 +81,17 @@ void FirstCycle::BeginCycle() throw( SError ) {
    }
    m_logger << SLogger::endmsg;
 
+   //
+   // Test how various printed lines look like:
+   //
+   m_logger << VERBOSE << "This is a VERBOSE line" << SLogger::endmsg;
+   m_logger << DEBUG << "This is a DEBUG line" << SLogger::endmsg;
+   m_logger << INFO << "This is an INFO line" << SLogger::endmsg;
+   m_logger << WARNING << "This is a WARNING line" << SLogger::endmsg;
+   m_logger << ERROR << "This is an ERROR line" << SLogger::endmsg;
+   m_logger << FATAL << "This is a FATAL line" << SLogger::endmsg;
+   m_logger << ALWAYS << "This is an ALWAYS line" << SLogger::endmsg;
+
    return;
 }
 

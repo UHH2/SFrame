@@ -21,8 +21,6 @@ extern "C" {
 // Local include(s):
 #include "../include/SLogWriter.h"
 
-using namespace std;
-
 SLogWriter* SLogWriter::m_instance = 0;
 
 /**
@@ -58,20 +56,19 @@ SLogWriter::~SLogWriter() {
 void SLogWriter::Write( SMsgType type, const std::string& line ) const {
 
    if( type < m_minType ) return;
-   map< SMsgType, std::string >::const_iterator stype;
+   std::map< SMsgType, std::string >::const_iterator stype;
    if( ( stype = m_typeMap.find( type ) ) == m_typeMap.end() ) return;
 
    // Print the output in colours only if it's printed to the console. If it's
    // redirected to a logfile, then produce simple black on while output.
    if( isatty( STDOUT_FILENO ) ) {
-      cout << m_colorMap.find( type )->second << " (" << stype->second << ")  "
-           << line << "\033[0m" << endl;
+      std::cout << m_colorMap.find( type )->second << " (" << stype->second << ")  "
+                << line << "\033[0m" << std::endl;
    } else {
-      cout << " (" << stype->second << ")  " << line  << endl;
+      std::cout << " (" << stype->second << ")  " << line << std::endl;
    }
 
    return;
-
 }
 
 /**
@@ -86,7 +83,6 @@ void SLogWriter::SetMinType( SMsgType type ) {
 
    m_minType = type;
    return;
-
 }
 
 /**
@@ -97,14 +93,14 @@ void SLogWriter::SetMinType( SMsgType type ) {
 SMsgType SLogWriter::GetMinType() const {
 
    return m_minType;
-
 }
 
 /**
  * The constructor takes care of filling the two std::map-s that are
  * used for generating the nice colured output.
  */
-SLogWriter::SLogWriter() {
+SLogWriter::SLogWriter()
+   : m_minType( INFO ) {
 
    m_typeMap[ VERBOSE ] = "VERBOSE";
    m_typeMap[ DEBUG ]   = " DEBUG ";
@@ -120,8 +116,6 @@ SLogWriter::SLogWriter() {
    m_colorMap[ WARNING ] = "\033[35m";
    m_colorMap[ ERROR ]   = "\033[31m";
    m_colorMap[ FATAL ]   = "\033[1;31;40m";
-   m_colorMap[ ALWAYS ]  = "\033[30m";
-
-   m_minType = INFO;
+   m_colorMap[ ALWAYS ]  = ""; // Used to be: "\033[30m";
 
 }

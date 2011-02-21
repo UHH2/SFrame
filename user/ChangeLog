@@ -1,3 +1,8 @@
+2011.02.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a few lines of output to FirstCycle::BeginCycle() that
+	  demonstrate how messages of different message levels look
+	  like on the terminal.
+
 2011.02.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified JobConfig.dtd to allow the user to run the same
 	  cycle with different configurations one after the other.

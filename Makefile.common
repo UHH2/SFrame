@@ -114,7 +114,11 @@ $(SFRAME_LIB_PATH)/$(LIBRARY).par: $(SHLIBFILE)
 # - this can be achieved using the makedepend command 
 ##############################
 # .d tries to pre-process .cc
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
 -include $(foreach var,$(notdir $(CPPLIST:.$(SrcSuf)=.d)),$(DEPDIR)/$(var))
+endif
+endif
 
 $(DEPDIR)/%.d: %.$(SrcSuf)
 	@mkdir -p $(DEPDIR)
