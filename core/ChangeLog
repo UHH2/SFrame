@@ -1,3 +1,15 @@
+2011.03.18 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made the temporary file creation in LOCAL running more a
+	  little smarter. Now the code always creates unique file
+	  names, making it possible to run multiple jobs in the
+	  same directory.
+	* Added a protection to the DeclareProperty(...) functions
+	  which will print an ERROR message if the user tries to
+	  use the same property name in multiple places by
+	  mistake.
+	* Tried to get rid of some memory leaks, but apparently
+	  there are still a few of them... :-(
+
 2011.02.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Modified SLogWriter so the ALWAYS messages would be shown
 	  with the default terminal colors from now on. Beforehand

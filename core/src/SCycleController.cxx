@@ -870,6 +870,14 @@ void SCycleController::WriteCycleOutput( TList* olist,
       for( std::vector< TString >::const_iterator mfile = filesToMerge.begin();
            mfile != filesToMerge.end(); ++mfile ) {
          gSystem->Unlink( *mfile );
+         // This is not too nice, but for LOCAL running we also have to remove
+         // the temporary directory that the file was in:
+         if( mfile->Contains( SFrame::ProofOutputFileName ) ) {
+            TString dirname = gSystem->DirName( *mfile );
+            if( dirname != "." ) {
+               gSystem->Unlink( dirname );
+            }
+         }
       }
 
    }

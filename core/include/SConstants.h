@@ -20,6 +20,7 @@ namespace SFrame {
    static const char* CurrentInputDataName = "CurrentInputData";
    static const char* RunStatisticsName    = "RunStatistics";
    static const char* ProofOutputName      = "PROOF_OUTPUTFILE";
+   static const char* ProofOutputDirName   = "jobTempOutput_XXXXXX";
    static const char* ProofOutputFileName  = "SFramePROOFTempOutput.root";
 
 } // namespace SFrame

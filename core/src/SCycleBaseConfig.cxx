@@ -182,6 +182,12 @@ TList* SCycleBaseConfig::GetConfInput() const {
  */
 void SCycleBaseConfig::DeclareProperty( const std::string& name, std::string& value ) {
 
+   // Check if the property name is still available:
+   if( m_stringPrefs.find( name ) != m_stringPrefs.end() ) {
+      REPORT_ERROR( "The property name \"" << name << "\" is used in multiple locations!" );
+      REPORT_ERROR( "Some parts of the code will not be configured correctly!" );
+   }
+
    m_stringPrefs[ name ] = &value;
    return;
 
@@ -197,6 +203,12 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name, std::string& va
  */
 void SCycleBaseConfig::DeclareProperty( const std::string& name, int& value ) {
 
+   // Check if the property name is still available:
+   if( m_intPrefs.find( name ) != m_intPrefs.end() ) {
+      REPORT_ERROR( "The property name \"" << name << "\" is used in multiple locations!" );
+      REPORT_ERROR( "Some parts of the code will not be configured correctly!" );
+   }
+
    m_intPrefs[ name ] = &value;
    return;
 
@@ -211,6 +223,12 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name, int& value ) {
  * @param value The double variable that you use as the property
  */
 void SCycleBaseConfig::DeclareProperty( const std::string& name, double& value ) {
+
+   // Check if the property name is still available:
+   if( m_doublePrefs.find( name ) != m_doublePrefs.end() ) {
+      REPORT_ERROR( "The property name \"" << name << "\" is used in multiple locations!" );
+      REPORT_ERROR( "Some parts of the code will not be configured correctly!" );
+   }
 
    m_doublePrefs[ name ] = &value;
    return;
@@ -231,6 +249,12 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name, double& value )
  */
 void SCycleBaseConfig::DeclareProperty( const std::string& name, bool& value ) {
 
+   // Check if the property name is still available:
+   if( m_boolPrefs.find( name ) != m_boolPrefs.end() ) {
+      REPORT_ERROR( "The property name \"" << name << "\" is used in multiple locations!" );
+      REPORT_ERROR( "Some parts of the code will not be configured correctly!" );
+   }
+
    m_boolPrefs[ name ] = &value;
    return;
 
@@ -247,6 +271,12 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name, bool& value ) {
  */
 void SCycleBaseConfig::DeclareProperty( const std::string& name,
                                         std::vector< std::string >& value ) {
+
+   // Check if the property name is still available:
+   if( m_stringListPrefs.find( name ) != m_stringListPrefs.end() ) {
+      REPORT_ERROR( "The property name \"" << name << "\" is used in multiple locations!" );
+      REPORT_ERROR( "Some parts of the code will not be configured correctly!" );
+   }
 
    m_stringListPrefs[ name ] = &value;
    return;
@@ -265,6 +295,12 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name,
 void SCycleBaseConfig::DeclareProperty( const std::string& name,
                                         std::vector< int >& value ) {
 
+   // Check if the property name is still available:
+   if( m_intListPrefs.find( name ) != m_intListPrefs.end() ) {
+      REPORT_ERROR( "The property name \"" << name << "\" is used in multiple locations!" );
+      REPORT_ERROR( "Some parts of the code will not be configured correctly!" );
+   }
+
    m_intListPrefs[ name ] = &value;
    return;
 
@@ -281,6 +317,12 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name,
  */
 void SCycleBaseConfig::DeclareProperty( const std::string& name,
                                         std::vector< double >& value ) {
+
+   // Check if the property name is still available:
+   if( m_doubleListPrefs.find( name ) != m_doubleListPrefs.end() ) {
+      REPORT_ERROR( "The property name \"" << name << "\" is used in multiple locations!" );
+      REPORT_ERROR( "Some parts of the code will not be configured correctly!" );
+   }
 
    m_doubleListPrefs[ name ] = &value;
    return;
@@ -302,6 +344,12 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name,
  */
 void SCycleBaseConfig::DeclareProperty( const std::string& name,
                                         std::vector< bool >& value ) {
+
+   // Check if the property name is still available:
+   if( m_boolListPrefs.find( name ) != m_boolListPrefs.end() ) {
+      REPORT_ERROR( "The property name \"" << name << "\" is used in multiple locations!" );
+      REPORT_ERROR( "Some parts of the code will not be configured correctly!" );
+   }
 
    m_boolListPrefs[ name ] = &value;
    return;

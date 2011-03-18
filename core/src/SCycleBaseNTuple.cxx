@@ -588,6 +588,8 @@ void SCycleBaseNTuple::ClearCachedTrees() {
    m_metaInputTrees.clear();
    m_metaOutputTrees.clear();
 
+   DeleteInputVariables();
+
    return;
 }
 

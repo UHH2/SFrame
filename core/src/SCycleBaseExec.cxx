@@ -10,6 +10,9 @@
  *
  ***************************************************************************/
 
+// System include(s):
+#include <cstdlib>
+
 // ROOT include(s):
 #include <TTree.h>
 #include <TFile.h>
@@ -88,6 +91,7 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
           m_inputData->GetTrees( STreeType::OutputMetaTree ) ) {
 
          TProofOutputFile* proofFile = 0;
+         char* tempDirName = 0;
 
          TNamed* out =
             dynamic_cast< TNamed* >( fInput->FindObject( SFrame::ProofOutputName ) );
@@ -95,12 +99,22 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
             proofFile =
                new TProofOutputFile( gSystem->BaseName( TUrl( out->GetTitle() ).GetFile() ) );
             proofFile->SetOutputFileName( out->GetTitle() );
+            tempDirName = 0;
             fOutput->Add( proofFile );
          } else {
             m_logger << DEBUG << "No PROOF output file specified in configuration -> "
                      << "Running in LOCAL mode" << SLogger::endmsg;
             proofFile = 0;
-            fOutput->Add( new SOutputFile( "SFrameOutputFile", SFrame::ProofOutputFileName ) );
+            // Use a more or less POSIX method for creating a unique file name:
+            tempDirName = new char[ 100 ];
+            sprintf( tempDirName, SFrame::ProofOutputDirName );
+            if( ! mkdtemp( tempDirName ) ) {
+               REPORT_FATAL( "Couldn't create temporary directory name from template: "
+                             << SFrame::ProofOutputDirName );
+               return;
+            }
+            fOutput->Add( new SOutputFile( "SFrameOutputFile", TString( tempDirName ) +
+                                           "/" +  SFrame::ProofOutputFileName ) );
          }
 
          if( proofFile ) {
@@ -114,17 +128,27 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
                         << m_outputFile->GetName() << SLogger::endmsg;
             }
          } else {
-            if( ! ( m_outputFile = new TFile( SFrame::ProofOutputFileName, "RECREATE" ) ) ) {
+            if( ! tempDirName ) {
+               REPORT_FATAL( "No temporary directory name? There's some serious error "
+                             "in the code!" );
+               return;
+            }
+
+            // Open an intermediate file in this temporary directory:
+            if( ! ( m_outputFile = TFile::Open( TString( tempDirName ) + "/" +
+                                                SFrame::ProofOutputFileName , "RECREATE" ) ) ) {
                m_logger << WARNING << "Couldn't open output file: "
-                        << SFrame::ProofOutputFileName << SLogger::endmsg;
+                        << tempDirName << "/" << SFrame::ProofOutputFileName << SLogger::endmsg;
                m_logger << WARNING << "Saving the ntuples to memory" << SLogger::endmsg;
             } else {
                m_logger << DEBUG << "LOCAL temp file opened with name: "
-                        << SFrame::ProofOutputFileName << SLogger::endmsg;
+                        << tempDirName << "/" << SFrame::ProofOutputFileName << SLogger::endmsg;
             }
          }
 
          this->CreateOutputTrees( *m_inputData, m_outputTrees, m_outputFile );
+
+         if( tempDirName ) delete[] tempDirName;
 
       } else {
          m_outputFile = 0;
