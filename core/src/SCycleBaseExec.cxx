@@ -107,7 +107,7 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
             proofFile = 0;
             // Use a more or less POSIX method for creating a unique file name:
             tempDirName = new char[ 100 ];
-            sprintf( tempDirName, SFrame::ProofOutputDirName );
+            sprintf( tempDirName, "%s", SFrame::ProofOutputDirName );
             if( ! mkdtemp( tempDirName ) ) {
                REPORT_FATAL( "Couldn't create temporary directory name from template: "
                              << SFrame::ProofOutputDirName );

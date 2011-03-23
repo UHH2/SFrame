@@ -1,3 +1,7 @@
+2011.03.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixing a compilation warning on MacOS X that was introduced
+	  with the last update.
+
 2011.03.18 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made the temporary file creation in LOCAL running more a
 	  little smarter. Now the code always creates unique file
