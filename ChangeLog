@@ -1,3 +1,9 @@
+2011.05.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixing a crash on the NYU Tier3. The previous cleanup
+	  method for PROOF doesn't seem to work nicely with
+	  ROOT 5.28c installed on the US Tier3s...
+	* Tagging as SFrame-03-04-13
+
 2011.03.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixing a compilation warning on MacOS X that was introduced
 	  with the last update.

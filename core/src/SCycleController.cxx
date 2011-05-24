@@ -713,7 +713,13 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          id->GetType() + "." + id->GetVersion() + config.GetPostFix() + ".root";
       outputFileName.ReplaceAll( "::", "." );
       WriteCycleOutput( outputs, outputFileName, updateOutput );
+
+      // This cleanup is giving me endless trouble on the NYU Tier3 with
+      // ROOT 5.28c. So, knowing no better solution, I just disabled it
+      // on new ROOT versions for now...
+#if ROOT_VERSION_CODE < ROOT_VERSION( 5, 28, 0 )
       outputs->SetOwner( kTRUE );
+#endif
       outputs->Clear();
 
    }
