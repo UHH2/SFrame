@@ -1,3 +1,10 @@
+2011.06.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Disabling the usage of TTreeCache when running in PROOF mode.
+	  This is a temporary measure to avoid crashes on MC10b D3PDs.
+	  But obviously this will cause a significant performance
+	  decrease, so a proper fix will have to be found quickly!
+	* Tagging as SFrame-03-04-14
+
 2011.05.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixing a crash on the NYU Tier3. The previous cleanup
 	  method for PROOF doesn't seem to work nicely with

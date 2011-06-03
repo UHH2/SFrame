@@ -591,6 +591,10 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
                                                ( eventsPerNode / 10 ) :
                                                1000 ) );
          m_proof->SetParameter( "PROOF_MaxSlavesPerNode", ( Long_t ) 9999999 );
+         //
+         // This is just a temporary measure to avoid crashes with MC10b D3PDs:
+         //
+         m_proof->SetParameter( "PROOF_UseTreeCache", ( Int_t ) 0 );
          gEnv->SetValue( "Proof.StatsHist", 1 );
          m_proof->AddInput( &config );
          m_proof->AddInput( &inputData );
