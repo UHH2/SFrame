@@ -1,3 +1,11 @@
+2011.06.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made output ntuple management a bit more robust.
+	  Now the code can efficiently use distant PROOF clusters
+	  and retrieve the merged ntuple files from the PROOF
+	  work directory using TFileMerger. Then it uses
+	  SFileMerger to merge the file into the InputData's
+	  output file.
+
 2011.06.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Disabling the usage of TTreeCache when running in PROOF mode.
 	  This is a temporary measure to avoid crashes on MC10b D3PDs.
