@@ -79,6 +79,10 @@ public:
 
    /// Access one of the metadata trees
    virtual TTree* GetMetadataTree( const char* name ) const throw( SError );
+   /// Access one of the input metadata trees
+   virtual TTree* GetInputMetadataTree( const char* name ) const throw( SError );
+   /// Access one of the output metadata trees
+   virtual TTree* GetOutputMetadataTree( const char* name ) const throw( SError );
    /// Access one of the input trees
    virtual TTree* GetInputTree( const char* treeName ) const throw( SError );
    /// Access one of the output trees
@@ -114,6 +118,7 @@ private:
    static const char* TypeidType( const char* root_type ) throw( SError );
    void RegisterInputBranch( TBranch* br ) throw( SError );
    void DeleteInputVariables();
+   TDirectory* MakeSubDirectory( const TString& path, TDirectory* dir ) const throw( SError );
 
    //
    // These are the objects used to handle the input and output data:

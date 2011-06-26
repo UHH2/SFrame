@@ -1,3 +1,12 @@
+2011.06.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made it possible to write out metadata trees into
+	  sub-directories. This required changes in SCycleBaseNTuple
+	  and SFileMerger.
+	* For the moment event-level trees are still only supported in
+	  the main directory. But on request it should be pretty simple
+	  to add this capability for those trees as well.
+	* Tagging as SFrame-03-04-16
+
 2011.06.24 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made output ntuple management a bit more robust.
 	  Now the code can efficiently use distant PROOF clusters

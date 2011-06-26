@@ -77,12 +77,61 @@ TList* SCycleBaseNTuple::GetNTupleOutput() const {
  * The reading of these trees is completely up to the user at this point.
  *
  * Output metadata trees are also completely in the control of the user. Entries
- * in them are only written out on the users request.
+ * in them are only written out on the user's request.
  *
  * @param name Name of the requested metadata tree
  * @returns The pointer to the requested metadata tree
  */
 TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const throw( SError ) {
+
+   // The result tree:
+   TTree* result = 0;
+
+   // See if this is an input tree:
+   try {
+      result = GetInputMetadataTree( name );
+      return result;
+   } catch( const SError& error ) {
+      if( error.request() <= SError::SkipFile ) {
+         REPORT_VERBOSE( "Input metadata tree with name \"" << name << "\" not found" );
+      } else {
+         REPORT_ERROR( "Exception message caught with message: " << error.what() );
+         throw;
+      }
+   }
+
+   // See if this is an output tree:
+   try {
+      result = GetOutputMetadataTree( name );
+      return result;
+   } catch( const SError& error ) {
+      if( error.request() <= SError::SkipFile ) {
+         REPORT_VERBOSE( "Output metadata tree with name \"" << name << "\" not found" );
+      } else {
+         REPORT_ERROR( "Exception message caught with message: " << error.what() );
+         throw;
+      }
+   }
+
+   //
+   // Throw an exception if the tree hasn't been found:
+   //
+   SError error( SError::SkipFile );
+   error << "Couldn't find metadata TTree with name: " << name;
+   throw error;
+
+   return result;
+}
+
+/**
+ * This function can be used to retrieve input metadata trees.
+ * Input metadata trees are TTree-s that don't desribe event level information.
+ * The reading of these trees is completely up to the user at this point.
+ *
+ * @param name Name of the requested input metadata tree
+ * @returns The pointer to the requested metadata tree
+ */
+TTree* SCycleBaseNTuple::GetInputMetadataTree( const char* name ) const throw( SError ) {
 
    //
    // Strip off the directory name from the given tree name:
@@ -96,7 +145,8 @@ TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const throw( SError
       delete array;
    }
 
-   m_logger << DEBUG << "Looking for metadata tree with name: " << tname << SLogger::endmsg;
+   m_logger << DEBUG << "Looking for input metadata tree with name: "
+            << tname << SLogger::endmsg;
 
    //
    // Look for such a metadata tree:
@@ -111,6 +161,45 @@ TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const throw( SError
          }
       }
    }
+
+   //
+   // Throw an exception if the tree hasn't been found:
+   //
+   SError error( SError::SkipFile );
+   error << "Couldn't find input metadata TTree with name: " << tname;
+   throw error;
+
+   return 0;
+}
+
+/**
+ * This function can be used to retrieve output metadata trees.
+ * Output metadata trees are completely in the control of the user. Entries
+ * in them are only written out on the user's request.
+ *
+ * @param name Name of the requested output metadata tree
+ * @returns The pointer to the requested metadata tree
+ */
+TTree* SCycleBaseNTuple::GetOutputMetadataTree( const char* name ) const throw( SError ) {
+
+   //
+   // Strip off the directory name from the given tree name:
+   //
+   TString tname( name );
+   if( tname.Contains( "/" ) ) {
+      REPORT_VERBOSE( "Tokenizing the metadata tree name: " << tname );
+      TObjArray* array = tname.Tokenize( "/" );
+      TObjString* real_name = dynamic_cast< TObjString* >( array->Last() );
+      tname = real_name->GetString();
+      delete array;
+   }
+
+   m_logger << DEBUG << "Looking for output metadata tree with name: "
+            << tname << SLogger::endmsg;
+
+   //
+   // Look for such a metadata tree:
+   //
    for( std::vector< TTree* >::const_iterator it = m_metaOutputTrees.begin();
         it != m_metaOutputTrees.end(); ++it ) {
       if( *it ) {
@@ -268,10 +357,32 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
       for( std::vector< STree >::const_iterator mt = sMetaTrees->begin();
            mt != sMetaTrees->end(); ++mt ) {
 
-         m_logger << DEBUG << "Creating output metadata tree with name: "
-                  << mt->treeName << SLogger::endmsg;
+         //
+         // Split the name into the name of the tree and the name of the
+         // directory:
+         //
+         TString tname( mt->treeName ), dirname( "" );
+         if( tname.Contains( "/" ) ) {
+            REPORT_VERBOSE( "Tokenizing the metadata tree name: " << tname );
+            TObjArray* array = tname.Tokenize( "/" );
+            TObjString* real_name = dynamic_cast< TObjString* >( array->Last() );
+            tname = real_name->GetString();
+            if( array->GetSize() > 1 ) {
+               for( Int_t i = 0; i < array->GetSize() - 1; ++i ) {
+                  TObjString* dirletname = dynamic_cast< TObjString* >( array->At( i ) );
+                  if( ! dirletname ) continue;
+                  if( dirletname->GetString() == "" ) continue;
+                  if( dirletname->GetString() == tname ) break;
+                  dirname += ( dirname == "" ? dirletname->GetString() : "/" + dirletname->GetString() );
+               }
+            }
+            delete array;
+         }
 
-         TTree* tree = new TTree( mt->treeName, TString( "Format: User" ) +
+         m_logger << DEBUG << "Creating output metadata tree with name: "
+                  << tname  << " in directory: " << dirname << SLogger::endmsg;
+
+         TTree* tree = new TTree( tname, TString( "Format: User" ) +
                                   ", data type: " + iD.GetType() );
 
          tree->SetAutoSave( autoSave );
@@ -280,11 +391,11 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
          m_metaOutputTrees.push_back( tree );
 
          if( outputFile ) {
-            tree->SetDirectory( outputFile );
+            tree->SetDirectory( MakeSubDirectory( dirname, outputFile ) );
             REPORT_VERBOSE( "Attached TTree \"" << mt->treeName
                             << "\" to file: " << outputFile->GetName() );
          } else {
-            SCycleOutput* out = new SCycleOutput( tree, mt->treeName );
+            SCycleOutput* out = new SCycleOutput( tree, tname, dirname );
             m_output->Add( out );
             REPORT_VERBOSE( "Keeping TTree \"" << mt->treeName
                             << "\" in memory" );
@@ -303,15 +414,16 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
  *
  * @param output The directory where the trees have to be written (Usually a TFile)
  */
-void SCycleBaseNTuple::SaveOutputTrees( TDirectory* output ) throw( SError ) {
+void SCycleBaseNTuple::SaveOutputTrees( TDirectory* /*output*/ ) throw( SError ) {
 
    // Remember which directory we were in:
    TDirectory* savedir = gDirectory;
-   output->cd();
 
    // Save each regular output tree:
    for( std::vector< TTree* >::iterator tree = m_outputTrees.begin();
         tree != m_outputTrees.end(); ++tree ) {
+      TDirectory* dir = ( *tree )->GetDirectory();
+      if( dir ) dir->cd();
       ( *tree )->Write();
       ( *tree )->SetDirectory( 0 );
       delete ( *tree );
@@ -320,6 +432,8 @@ void SCycleBaseNTuple::SaveOutputTrees( TDirectory* output ) throw( SError ) {
    // Save each metadata output tree:
    for( std::vector< TTree* >::iterator tree = m_metaOutputTrees.begin();
         tree != m_metaOutputTrees.end(); ++tree ) {
+      TDirectory* dir = ( *tree )->GetDirectory();
+      if( dir ) dir->cd();
       ( *tree )->Write();
       ( *tree )->SetDirectory( 0 );
       delete ( *tree );
@@ -723,4 +837,62 @@ void SCycleBaseNTuple::DeleteInputVariables() {
    m_inputVarPointers.clear();
 
    return;
+}
+
+/**
+ * This function can create a sub-directory inside an existing directory (a file
+ * for instance). It's used to make directories for output trees.
+ *
+ * @param path The path name that should be created
+ * @param dir The parent directory for the sub-directory (structure)
+ * @returns A pointer to the inner-most directory
+ */
+TDirectory*
+SCycleBaseNTuple::MakeSubDirectory( const TString& path,
+                                    TDirectory* dir ) const throw( SError ) {
+
+   if( ! path.Length() ) return dir;
+
+   TDirectory* result = 0;
+   if( ! ( result = dir->GetDirectory( path ) ) ) {
+
+      REPORT_VERBOSE( "Creating directory: "
+                      << dir->GetPath() << "/" << path );
+
+      //
+      // Break up the path name at the slashes:
+      //
+      TObjArray* directories = path.Tokenize( "/" );
+
+      //
+      // Create each necessary directory:
+      //
+      result = dir;
+      TDirectory* tempDir = 0;
+      for( Int_t i = 0; i < directories->GetSize(); ++i ) {
+
+         TObjString* path_element = dynamic_cast< TObjString* >( directories->At( i ) );
+         if( ! path_element ) continue;
+         if( path_element->GetString() == "" ) continue;
+
+         REPORT_VERBOSE( "Accessing directory: " << path_element->GetString() );
+         if( ! ( tempDir = result->GetDirectory( path_element->GetString() ) ) ) {
+            REPORT_VERBOSE( "Directory doesn't exist, creating it..." );
+            if( ! ( tempDir = result->mkdir( path_element->GetString(), "dummy title" ) ) ) {
+               SError error( SError::SkipInputData );
+               error << "Couldn't create directory: " << path
+                     << " in the output file!";
+               throw error;
+            }
+         }
+         result = tempDir;
+
+      }
+
+      // Delete the object created by TString::Tokenize(...):
+      delete directories;
+
+   }
+
+   return result;
 }

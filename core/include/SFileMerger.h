@@ -35,8 +35,7 @@ class TFile;
  *          otherwise I would've just used that class.
  *
  *          The class loops over all input files specified with AddInput(),
- *          and copies the TTree-s from them (only the root directory of the
- *          files is searched!) into the output file.
+ *          and copies the TTree-s from them into the output file.
  *
  *          Note that the output can be an existing file. In this case the
  *          TTrees from the input files are merged into the TTrees already
@@ -47,7 +46,9 @@ class TFile;
 class SFileMerger {
 
 public:
+   /// Default constructor
    SFileMerger();
+   /// Destructor
    ~SFileMerger();
 
    /// Add an input file that should be processed
@@ -61,6 +62,8 @@ public:
 private:
    /// Close all open files
    void CloseFiles();
+   /// Merge the contents of one directory
+   void MergeDirectory( TDirectory* input, TDirectory* output ) throw( SError );
 
    std::vector< TFile* > m_inputFiles; ///< List of all specified input files
    TFile*                m_outputFile; ///< The output file
