@@ -1,4 +1,8 @@
 2011.06.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added the missing virtual destructor to SToolBaseT.
+	  (Didn't get a complaint on MacOS X... :-P)
+
+2011.06.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Followed the developments of SCycleBaseHist with
 	  SToolBaseT.
 	* Added some functions to SToolBaseT that were missing so

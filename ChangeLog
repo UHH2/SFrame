@@ -1,4 +1,9 @@
 2011.06.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added the missing virtual destructor to SToolBaseT.
+	  (Didn't get a complaint on MacOS X... :-P)
+	* Tagging as SFrame-03-04-18
+
+2011.06.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made the Retrieve<...>(...) function in SCycleBaseHist a bit
 	  more general by making it possible to retrieve output objects
 	  only. (This is needed for the ATLAS lumiblock merger code.)

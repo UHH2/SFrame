@@ -52,6 +52,8 @@ public:
 
    /// Constructor specifying the parent of the tool
    SToolBaseT( ParentType* parent );
+   /// Destructor (needed to make vtable happy)
+   virtual ~SToolBaseT() {}
 
    /// Get a pointer to the parent cycle of this tool
    ParentType* GetParent() const;
