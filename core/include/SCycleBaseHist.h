@@ -62,7 +62,12 @@ public:
                                 const char* directory = 0 ) throw( SError );
    /// Function searching for a ROOT object in the output file
    template< class T > T* Retrieve( const char* name,
-                                    const char* directory = 0 ) throw( SError );
+                                    const char* directory = 0,
+                                    Bool_t outputOnly = kFALSE ) throw( SError );
+   /// Function retrieving all ROOT objects of this name from the input file
+   template< class T >
+   std::vector< T* > RetrieveAll( const char* name,
+                                  const char* directory = 0 ) throw( SError );
    /// Function for persistifying a ROOT object to the output
    void WriteObj( const TObject& obj,
                   const char* directory = 0 ) throw( SError );

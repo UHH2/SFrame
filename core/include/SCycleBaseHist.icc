@@ -19,6 +19,7 @@
 #include <TH1.h>
 #include <TList.h>
 #include <TFile.h>
+#include <TKey.h>
 
 // Local include(s):
 #include "SCycleOutput.h"
@@ -90,17 +91,22 @@ T* SCycleBaseHist::Book( const T& histo,
  * </code>
  *
  * @see SCycleBaseHist::Book
+ * @param name The name of the object you're looking for
+ * @param directory The directory the object is supposed to be in
+ * @param outputOnly Search only amongst the output objects of the cycle
+ * @returns A pointer to the object in question, or a null pointer if the object can't be found
  */
 template< class T >
 T* SCycleBaseHist::Retrieve( const char* name,
-                             const char* directory ) throw( SError ) {
+                             const char* directory,
+                             Bool_t outputOnly ) throw( SError ) {
 
    // Just to make sure that we're in the default directory in
    // memory:
    gROOT->cd();
 
    // Construct a path name from the specified parameters:
-   TString path = ( directory ? directory + TString( "/" ) : "" ) +
+   const TString path = ( directory ? directory + TString( "/" ) : "" ) +
       TString( name );
 
    // Pointer to the requested object:
@@ -121,6 +127,12 @@ T* SCycleBaseHist::Retrieve( const char* name,
       return result;
    }
 
+   // Return gracefully if the input should not be checked:
+   if( outputOnly ) {
+      REPORT_VERBOSE( "Object not found in output: " << path );
+      return 0;
+   }
+
    // Check that we have an input file already specified:
    if( ! m_input ) {
       throw SError( "No input file defined, and requested object "
@@ -138,6 +150,71 @@ T* SCycleBaseHist::Retrieve( const char* name,
       throw error;
    }
 
+   return result;
+}
+
+/**
+ * This function can be used to retrieve all versions of a given object from the
+ * input file. It doesn't search in the output list, as each object should only
+ * be present in one version in the output.
+ *
+ * The main use-case for this function right now is to be able to read the lumiblock
+ * metadata from input ATLAS D3PDs.
+ *
+ * Example:
+ *
+ *   <code>
+ *     std::vector< TObjString* > lumiblocks =
+ *        RetrieveAll< TObjString* >( "physics", "Lumi" );
+ *   </code>
+ *
+ * @param name The name of the object(s) we're looking for
+ * @param directory The directory in which the object(s) is/are located
+ * @returns A vector of pointers to the objects found
+ */
+template< class T >
+std::vector< T* > SCycleBaseHist::RetrieveAll( const char* name,
+                                               const char* directory ) throw( SError ) {
+
+   // The result object:
+   std::vector< T* > result;
+
+   // Decide which directory to search in:
+   TDirectory* dir = m_input;
+   if( directory ) {
+      dir = dynamic_cast< TDirectory* >( m_input->Get( directory ) );
+      // If the requestested directory doesn't exist that's not necessariy an
+      // error condition:
+      if( ! dir ) {
+         m_logger << DEBUG << "Directory \"" << directory << "\" doesn't exist in the input file"
+                  << SLogger::endmsg;
+         return result;
+      }
+   }
+
+   // Get a list of all keys from the directory:
+   TList* keyList = dir->GetListOfKeys();
+   // Search for objects of the specified name:
+   for( Int_t i = 0; i < keyList->GetEntries(); ++i ) {
+      // Convert object to a TKey:
+      TKey* key = dynamic_cast< TKey* >( keyList->At( i ) );
+      if( ! key ) {
+         REPORT_ERROR( "Couldn't cast to TKey. There is some problem in the code" );
+         throw SError( "Couldn't cast to TKey. There is some problem in the code",
+                       SError::StopExecution );
+      }
+      // Check if the object has the right name:
+      if( strcmp( key->GetName(), name ) ) continue;
+      // Check if this object is of the right type:
+      T* obj =
+         dynamic_cast< T* >( dir->Get( TString( key->GetName() ) + ";" +
+                                       TString::Format( "%hi", key->GetCycle() ) ) );
+      if( ! obj ) continue;
+      // Add it to our output:
+      result.push_back( obj );
+   }
+
+   // Return the full list:
    return result;
 }
 

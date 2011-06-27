@@ -1,3 +1,9 @@
+2011.06.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Followed the developments of SCycleBaseHist with
+	  SToolBaseT.
+	* Added some functions to SToolBaseT that were missing so
+	  far. (Coming from SCycleBaseNTuple.)
+
 2010.12.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Extended the documentation for SSummedVar a bit, stating that
 	  users should always mark such variables as transient when

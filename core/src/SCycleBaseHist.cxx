@@ -71,7 +71,7 @@ void SCycleBaseHist::WriteObj( const TObject& obj,
 
    GetTempDir()->cd();
 
-   TString path = ( directory ? directory + TString( "/" ) : "" ) +
+   const TString path = ( directory ? directory + TString( "/" ) : "" ) +
       TString( obj.GetName() );
    SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
    if( ! out ) {

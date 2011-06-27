@@ -1,3 +1,12 @@
+2011.06.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made the Retrieve<...>(...) function in SCycleBaseHist a bit
+	  more general by making it possible to retrieve output objects
+	  only. (This is needed for the ATLAS lumiblock merger code.)
+	* Added a new function, RetrieveAll<...>(...) to SCycleBaseHist.
+	  It can be used to retrieve all versions of a given object from
+	  the input file. (Was needed for the ATLAS lumiblock merger
+	  code.)
+
 2011.06.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made it possible to write out metadata trees into
 	  sub-directories. This required changes in SCycleBaseNTuple
