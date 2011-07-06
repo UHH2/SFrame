@@ -1,3 +1,11 @@
+2011.07.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* At the end of processing an InputData block using PROOF,
+	  the cycle controller can now print which files were not
+	  available/had problems during event processing.
+	* This is because we had some faulty file replications on the
+	  NYU Tier3.
+	* Tagging as SFrame-03-04-19
+
 2011.06.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added the missing virtual destructor to SToolBaseT.
 	  (Didn't get a complaint on MacOS X... :-P)

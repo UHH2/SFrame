@@ -1,3 +1,10 @@
+2011.07.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* At the end of processing an InputData block using PROOF,
+	  the cycle controller can now print which files were not
+	  available/had problems during event processing.
+	* This is because we had some faulty file replications on the
+	  NYU Tier3.
+
 2011.06.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made the Retrieve<...>(...) function in SCycleBaseHist a bit
 	  more general by making it possible to retrieve output objects

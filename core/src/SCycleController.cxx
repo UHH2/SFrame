@@ -35,6 +35,9 @@
 #include <TDSet.h>
 #include <TEnv.h>
 #include <TFileMerger.h>
+#include <TFileCollection.h>
+#include <THashList.h>
+#include <TFileInfo.h>
 
 // Local include(s):
 #include "../include/SCycleController.h"
@@ -680,6 +683,27 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
 
          } else {
             REPORT_ERROR( "Nothing was executed using PROOF!" );
+         }
+
+         // Get the list of missing files:
+         TFileCollection* missing = m_proof->GetMissingFiles();
+         if( missing ) {
+            // Get the list of files:
+            THashList* flist = missing->GetList();
+            if( flist->GetEntries() ) {
+               m_logger << WARNING << "The following files were not processed:" << SLogger::endmsg;
+               for( Int_t i = 0; i < flist->GetEntries(); ++i ) {
+                  TFileInfo* finfo = dynamic_cast< TFileInfo* >( flist->At( i ) );
+                  if( ! finfo ) {
+                     REPORT_ERROR( "Missing file list not in expected format" );
+                     continue;
+                  }
+                  m_logger << "    " << finfo->GetCurrentUrl()->GetUrl() << SLogger::endmsg;
+               }
+            }
+            // Remove the object:
+            delete missing;
+            missing = 0;
          }
 
          outputs = m_proof->GetOutputList();
