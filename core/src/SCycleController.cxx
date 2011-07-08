@@ -685,6 +685,8 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
             REPORT_ERROR( "Nothing was executed using PROOF!" );
          }
 
+         // The missing file accounting only started in ROOT 5.28 as far as I can tell:
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 28, 00 )
          // Get the list of missing files:
          TFileCollection* missing = m_proof->GetMissingFiles();
          if( missing ) {
@@ -705,6 +707,7 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
             delete missing;
             missing = 0;
          }
+#endif // ROOT_VERSION( 5, 28, 00 )
 
          outputs = m_proof->GetOutputList();
 

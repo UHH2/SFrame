@@ -1,3 +1,9 @@
+2011.07.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Found out that the last change only works with ROOT versions
+	  >= 5.28. So now that code is protected by pre-processor
+	  macros.
+	* Tagging as SFrame-03-04-20
+
 2011.07.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* At the end of processing an InputData block using PROOF,
 	  the cycle controller can now print which files were not
