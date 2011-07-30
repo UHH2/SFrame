@@ -263,7 +263,7 @@ $(DEPDIR)/%.d: %.$(SrcSuf)
 $(SHLIBFILE): $(OLIST) $(DICTOBJ)
 	@echo "Making shared library: $(SHLIBFILE)"
 	@rm -f $(SHLIBFILE)
-ifeq ($(ARCH),macosx)
+ifneq (,$(findstring macosx,$(ARCH)))
 	@$(LD) $(LDFLAGS) -dynamiclib -single_module -undefined dynamic_lookup -O2 $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
 else
 	@$(LD) $(LDFLAGS) $(SOFLAGS) -O2 $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)

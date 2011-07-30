@@ -34,7 +34,6 @@
 #include <TProofOutputFile.h>
 #include <TDSet.h>
 #include <TEnv.h>
-#include <TFileMerger.h>
 #include <TFileCollection.h>
 #include <THashList.h>
 #include <TFileInfo.h>
@@ -895,20 +894,14 @@ void SCycleController::WriteCycleOutput( TList* olist,
       m_logger << DEBUG << "Merging disk-resident TTrees into \""
                << filename << "\"" << SLogger::endmsg;
 
-      // Merge the files into the output file using TFileMerger:
-      TFileMerger merger;
+      // Merge the file(s) into the output file using SFileMerger:
+      SFileMerger merger;
       for( std::vector< TString >::const_iterator mfile = filesToMerge.begin();
            mfile != filesToMerge.end(); ++mfile ) {
-         merger.AddFile( *mfile );
+         merger.AddInput( *mfile );
       }
-      if( ! merger.OutputFile( filename + ".tfm.temp" ) ) {
-         REPORT_ERROR( "Couldn't open output file for merging: " << filename );
-         return;
-      }
-      if( ! merger.Merge() ) {
-         REPORT_ERROR( "There was an error merging the files" );
-         return;
-      }
+      merger.SetOutput( filename );
+      merger.Merge();
 
       // Remove the temporary files:
       for( std::vector< TString >::const_iterator mfile = filesToMerge.begin();
@@ -923,16 +916,6 @@ void SCycleController::WriteCycleOutput( TList* olist,
             }
          }
       }
-
-      // Now merge the resulting file into our histogram file using SFileMerger:
-      SFileMerger merger2;
-      merger2.AddInput( filename + ".tfm.temp" );
-      merger2.SetOutput( filename );
-      merger2.Merge();
-
-      // Remove the file created by TFileMerger:
-      gSystem->Unlink( filename + ".tfm.temp" );
-
    }
 
    return;

@@ -296,6 +296,7 @@ void SCycleBaseExec::SlaveTerminate() {
       this->SaveOutputTrees( m_outputFile );
 
       // Close the output file and reset the variables:
+      m_outputFile->SaveSelf( kTRUE );
       m_outputFile->Close();
       delete m_outputFile;
       m_outputFile = 0;

@@ -425,6 +425,7 @@ void SCycleBaseNTuple::SaveOutputTrees( TDirectory* /*output*/ ) throw( SError )
       TDirectory* dir = ( *tree )->GetDirectory();
       if( dir ) dir->cd();
       ( *tree )->Write();
+      ( *tree )->AutoSave();
       ( *tree )->SetDirectory( 0 );
       delete ( *tree );
    }
@@ -435,6 +436,7 @@ void SCycleBaseNTuple::SaveOutputTrees( TDirectory* /*output*/ ) throw( SError )
       TDirectory* dir = ( *tree )->GetDirectory();
       if( dir ) dir->cd();
       ( *tree )->Write();
+      ( *tree )->AutoSave();
       ( *tree )->SetDirectory( 0 );
       delete ( *tree );
    }

@@ -1,3 +1,15 @@
+2011.07.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed hopefully all the file merging issues on MacOS X
+	  Lion, while keeping all the previous features of the code.
+	* The usage of TFileMerger has once again been dropped, as
+	  it was producing unreliable results somehow... (Don't know
+	  why, since PROOF-Lite uses the same code, and that makes
+	  usable output files...)
+	* Fixed the .par files for being used on a 64-bit Mac in
+	  PROOF(-Lite) mode. Very surprised that nobody complained
+	  about this so far... :-/
+	* Tagging as SFrame-03-04-21
+
 2011.07.08 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Found out that the last change only works with ROOT versions
 	  >= 5.28. So now that code is protected by pre-processor

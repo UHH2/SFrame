@@ -20,6 +20,8 @@
 #include <TList.h>
 #include <TTree.h>
 #include <TKey.h>
+#include <TSystem.h>
+#include <TUUID.h>
 
 // Local include(s):
 #include "../include/SFileMerger.h"
@@ -38,16 +40,30 @@ SFileMerger::~SFileMerger() {
 void SFileMerger::AddInput( const TString& fileName ) throw( SError ) {
 
    //
+   // Copy the file locally. This is important when reading an ntuple file
+   // from a remote PROOF farm that might be half way around the world...
+   //
+   TUUID uuid;
+   TString localName = TString::Format( "%s/SFRAMEMERGE-%s.root", gSystem->TempDirectory(),
+                                        uuid.AsString() );
+   if( ! TFile::Cp( fileName, localName, kTRUE ) ) {
+      REPORT_ERROR( "Couldn't create local copy of: " << fileName );
+      throw SError( "Couldn't create local copy of: " + fileName,
+                    SError::SkipCycle );
+   }
+   REPORT_VERBOSE( fileName << " copied locally as " << localName );
+
+   //
    // Try to open the specified file. Throw an exception if it wasn't possible.
    //
-   TFile* ifile = TFile::Open( fileName, "READ" );
+   TFile* ifile = TFile::Open( localName, "READ" );
    if( ! ifile ) {
-      REPORT_ERROR( "Specified input file does not exist: " << fileName );
-      throw SError( "Input file does not exist: " + fileName,
+      REPORT_ERROR( "Local file could not be opened: " << localName );
+      throw SError( "Local file could not be opened: " + fileName,
                     SError::SkipCycle );
    }
    m_inputFiles.push_back( ifile );
-   REPORT_VERBOSE( fileName << " opened for reading" );
+   REPORT_VERBOSE( localName << " opened for reading" );
 
    return;
 }
@@ -117,6 +133,11 @@ void SFileMerger::CloseFiles() {
    for( std::vector< TFile* >::iterator ifile = m_inputFiles.begin();
         ifile != m_inputFiles.end(); ++ifile ) {
       ( *ifile )->Close();
+      // Remove the local copy of the file:
+      TString p( ( *ifile )->GetPath() );
+      p = p( 0, p.Index( ':', 0 ) );
+      REPORT_VERBOSE( "Removing local file: " << p );
+      gSystem->Unlink( p );
       delete ( *ifile );
    }
    m_inputFiles.clear();
