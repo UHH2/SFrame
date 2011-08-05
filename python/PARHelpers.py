@@ -237,7 +237,7 @@ OLIST = $(patsubst %.$(SrcSuf),%.o,$(notdir $(CPPLIST)))
 %.o : %.$(SrcSuf)
 	@echo "Compiling $<"
 	@mkdir -p $(OBJDIR)
-	@$(CXX) $(CXXFLAGS) -O2 -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES)
+	@$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$(notdir $@) $(INCLUDES)
 
 # Rule to create the dictionary
 $(DICTFILE): $(HLIST) $(DICTLDEF)
@@ -248,7 +248,7 @@ $(DICTFILE): $(HLIST) $(DICTLDEF)
 $(DICTOBJ): $(DICTFILE)
 	@echo "Compiling $<"
 	@mkdir -p $(OBJDIR)
-	$(CXX) $(CXXFLAGS) -O2 -c $(INCLUDES) -o $@ $<
+	$(CXX) $(CXXFLAGS) -c $(INCLUDES) -o $@ $<
 
 -include $(foreach var,$(notdir $(CPPLIST:.$(SrcSuf)=.d)),$(DEPDIR)/$(var))
 
@@ -264,9 +264,9 @@ $(SHLIBFILE): $(OLIST) $(DICTOBJ)
 	@echo "Making shared library: $(SHLIBFILE)"
 	@rm -f $(SHLIBFILE)
 ifneq (,$(findstring macosx,$(ARCH)))
-	@$(LD) $(LDFLAGS) -dynamiclib -single_module -undefined dynamic_lookup -O2 $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
+	@$(LD) $(LDFLAGS) -dynamiclib -single_module -undefined dynamic_lookup $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
 else
-	@$(LD) $(LDFLAGS) $(SOFLAGS) -O2 $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
+	@$(LD) $(LDFLAGS) $(SOFLAGS) $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
 endif
 
 # Useful build targets

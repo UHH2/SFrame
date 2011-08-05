@@ -1,3 +1,8 @@
+2011.08.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Disabled some messages from being printed on PROOF.
+	  This reduces the logs considerably when creating many histograms
+	  in a PROOF session.
+
 2011.07.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed hopefully all the file merging issues on MacOS X
 	  Lion, while keeping all the previous features of the code.

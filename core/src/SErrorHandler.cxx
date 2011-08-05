@@ -44,6 +44,12 @@ static std::map< int, SMsgType > msgLevelMap;
 void SErrorHandler( int level, Bool_t abort, const char* location,
                     const char* message ) {
 
+   // Veto some message locations:
+   TString tlocation( location );
+   if( tlocation.Contains( "NotifyMemory" ) ) {
+      return;
+   }
+
    // Create a local logger object:
    SLogger logger( location );
 

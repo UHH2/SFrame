@@ -1,3 +1,14 @@
+2011.08.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Removed the explicit optimization flags from Makefile.common
+	  and the PAR Makefile generator. This way the code is only
+	  built in optimized mode when the ROOT version used is in
+	  optimized mode. (Using a debug build of ROOT builds the
+	  SFrame libraries in debug mode automatically as well.)
+	* Disabled some messages from being printed on PROOF.
+	  This reduces the logs considerably when creating many histograms
+	  in a PROOF session.
+	* Tagging as SFrame-03-04-22
+
 2011.07.30 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed hopefully all the file merging issues on MacOS X
 	  Lion, while keeping all the previous features of the code.
