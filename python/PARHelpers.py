@@ -24,6 +24,7 @@ def PARMaker( srcdir, makefile, include, src, proofdir, output, verbose ):
         print "  >>"
         print "  >> Running PARHelpers.PARMaker"
         print "  >>"
+        pass
 
     # Split the output file name into constituents:
     ( outputdir, outputfile ) = os.path.split( output )
@@ -32,6 +33,7 @@ def PARMaker( srcdir, makefile, include, src, proofdir, output, verbose ):
         print "  >> outputdir  = " + outputdir
         print "  >> outputbase = " + outputbase
         print "  >> outputext  = " + outputext
+        pass
 
     # Check that the output file name has the correct extension:
     if( outputext != ".par" ):
@@ -43,6 +45,7 @@ def PARMaker( srcdir, makefile, include, src, proofdir, output, verbose ):
     tempdir = tempfile.mkdtemp()
     if verbose:
         print "  >> tempdir = " + tempdir
+        pass
 
     # Create the temporary directories for the package:
     os.system( "rm -rf " + tempdir + "/" + outputbase )
@@ -54,18 +57,20 @@ def PARMaker( srcdir, makefile, include, src, proofdir, output, verbose ):
     # Get the list of header files to be included in the package:
     headers = os.listdir( srcdir + include )
     headers_filt = [ file for file in headers if
-                     ( re.search( "\.h$", file ) or
-                       re.search( "\.icc$", file ) ) ]
+                    ( re.search( "\.h$", file ) or
+                      re.search( "\.icc$", file ) ) ]
     if verbose:
         print "  >> headers = " + ", ".join( headers_filt )
+        pass
 
     # Get the list of source files to be included in the package:
     sources = os.listdir( srcdir + src )
     sources_filt = [ file for file in sources if
-                     ( re.search( "\.cxx$", file ) and not
-                       re.search( "\_Dict\.cxx$", file ) ) ]
+                    ( ( re.search( "\.cxx$", file ) or re.search( "\.h$", file ) ) and not
+                      ( re.search( "\_Dict\.cxx$", file ) or re.search( "\_Dict\.h$", file ) ) ) ]
     if verbose:
         print "  >> sources = " + ", ".join( sources_filt )
+        pass
 
     # Copy the header and source files to the correct directories, and
     # then transform them in-situ:
@@ -73,10 +78,12 @@ def PARMaker( srcdir, makefile, include, src, proofdir, output, verbose ):
         shutil.copy( srcdir + "/" + include + "/" + header,
                      tempdir + "/" + outputbase + "/" + include )
         SourceTransform( tempdir + "/" + outputbase + "/" + include + "/" + header )
+        pass
     for source in sources_filt:
         shutil.copy( srcdir + "/" + src + "/" + source,
                      tempdir + "/" + outputbase + "/" + src )
         SourceTransform( tempdir + "/" + outputbase + "/" + src + "/" + source )
+        pass
 
     # Copy the package makefile to the correct directory:
     shutil.copy( srcdir + "/" + makefile,
@@ -94,20 +101,24 @@ def PARMaker( srcdir, makefile, include, src, proofdir, output, verbose ):
                      os.path.isfile( srcdir + "/" + proofdir + "/" + file ) ) ]
     if verbose:
         print "  >> proof files = " + ", ".join( proof_filt )
+        pass
 
     # Copy the proof files:
     for pfile in proof_filt:
         shutil.copy( srcdir + "/" + proofdir + "/" + pfile,
                      tempdir + "/" + outputbase + "/PROOF-INF" )
+        pass
 
     # Create the PAR package:
     if verbose:
         print "  >> Now creating " + output
+        pass
     os.system( "tar -C " + tempdir + " -czf " + output + " " + outputbase + "/" )
 
     # Remove the temporary directory:
     if verbose:
         print "  >> Now removing " + tempdir + "/" + outputbase
+        pass
     os.system( "rm -rf " + tempdir + "/" + outputbase )
     # The temporary directory itself has to be removed as well:
     os.system( "rmdir " + tempdir )

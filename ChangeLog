@@ -1,3 +1,10 @@
+2011.09.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated python/PARHelpers.py to include header files from the
+	  source directory as well. (On the request of Mark Owen.)
+	* Added some additional "pass" statements to the module
+	  while I was at it...
+	* Tagging as SFrame-03-04-23
+
 2011.08.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Removed the explicit optimization flags from Makefile.common
 	  and the PAR Makefile generator. This way the code is only
