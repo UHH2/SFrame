@@ -18,6 +18,7 @@
 #include <TXMLNode.h>
 #include <TList.h>
 #include <TXMLAttr.h>
+#include <TSystem.h>
 
 // Local include(s):
 #include "../include/SCycleBaseConfig.h"
@@ -546,6 +547,9 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
    TXMLNode* userNode = node->GetChildren();
    while( userNode != 0 ) {
 
+      REPORT_VERBOSE( "Node name " << userNode->GetNodeName() << " has attrib "
+                      << userNode->HasAttributes() );
+
       if( ! userNode->HasAttributes() ||
           ( userNode->GetNodeName() != TString( "Item" ) ) ) {
          userNode = userNode->GetNextNode();
@@ -559,7 +563,7 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
          if( attribute->GetName() == TString( "Name" ) )
             name = attribute->GetValue();
          if( attribute->GetName() == TString( "Value" ) )
-            stringValue = attribute->GetValue();
+            stringValue = DecodeEnvVar( attribute->GetValue() );
       }
       m_logger << DEBUG << "Found user property with name \"" << name
                << "\" and value \"" << stringValue << "\"" << SLogger::endmsg;
@@ -644,6 +648,27 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    return;
 
 }
+
+/**
+ * This function simply uses TSystem to do the environment variable expansion in
+ * path names. One can use either "$SOMETHING" or "$(SOMETHING)" in the path names.
+ * (The latter is also Win32 compatible, not that it matters for SFrame...)
+ *
+ * @param value The path name that you want expanded based on the environment settings
+ * @returns The path name that was expanded to be a real file name
+ */
+std::string SCycleBaseConfig::DecodeEnvVar( const std::string& value ) throw( SError ) { 
+
+   // TSystem operates on TString objects:
+   TString result( value );
+   // Let TSystem do the expansion:
+   if( ! gSystem->ExpandPathName( result ) ) {
+      REPORT_ERROR( "Failed 'expanding' path name:" << value );
+      return value;
+   }
+
+   return result.Data(); 
+} 
 
 /**
  * This function is used in InitializeUserConfig to translate the value(s)

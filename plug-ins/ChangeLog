@@ -1,3 +1,8 @@
+2011.10.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Modified SToolBase to make it possible to generate
+	  dictionaries for tools inheriting from it. The modifications
+	  came from Massimiliano.
+
 2011.06.27 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added the missing virtual destructor to SToolBaseT.
 	  (Didn't get a complaint on MacOS X... :-P)

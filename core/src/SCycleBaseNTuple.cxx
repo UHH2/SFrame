@@ -544,9 +544,6 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
             }
          }
 
-         // Disable reading all the branches. (We do it explicitly by hand.)
-         tree->SetBranchStatus( "*", 0 );
-
          m_inputTrees.push_back( tree );
          if( firstPassed && tree->GetEntries() != nEvents ) {
             SError error( SError::SkipFile );

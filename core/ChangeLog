@@ -1,3 +1,13 @@
+2011.10.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Removed the automatic disabling of branches in
+	  SCycleBaseNTuple::LoadInputTrees(...). That function call
+	  was just giving us problems, and now actually caused
+	  very measurable performance problems.
+	* Added the patches of Massimiliano to SCycleBaseConfig,
+	  needed for his extension to SFrame.
+	* Made his code a bit more general in the DecodeEnvVar(...)
+	  function.
+
 2011.08.05 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Disabled some messages from being printed on PROOF.
 	  This reduces the logs considerably when creating many histograms

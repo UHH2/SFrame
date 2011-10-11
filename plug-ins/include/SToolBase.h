@@ -50,6 +50,8 @@ public:
    /// Declaration of the used type
    typedef Type ParentType;
 
+   /// Defaul Constructor 
+   SToolBaseT();
    /// Constructor specifying the parent of the tool
    SToolBaseT( ParentType* parent );
    /// Destructor (needed to make vtable happy)
@@ -57,6 +59,8 @@ public:
 
    /// Get a pointer to the parent cycle of this tool
    ParentType* GetParent() const;
+   /// Get a pointer to the parent cycle of this tool
+   void SetParent( ParentType* parent );
 
 protected:
    /////////////////////////////////////////////////////////////

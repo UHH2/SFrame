@@ -58,7 +58,7 @@ public:
    /// Get the overall cycle configuration object
    SCycleConfig& GetConfig();
    /// Set the overall cycle configuration
-   void SetConfig( const SCycleConfig& config );
+   virtual void SetConfig( const SCycleConfig& config );
 
    /// Get the list of all declared configuration objects
    virtual const TList& GetConfigurationObjects() const;
@@ -96,11 +96,17 @@ protected:
    /// Function that reads the user properties from the XML
    virtual void InitializeUserConfig( TXMLNode* ) throw( SError );
 
-private:
    /// Internal function for setting a property value
    void SetProperty( const std::string& name,
                      const std::string& value ) throw( SError );
 
+   /// Function for decoding a shell environment variable
+   std::string DecodeEnvVar( const std::string& value ) throw( SError ); 
+
+   /// The cycle configuration:
+   SCycleConfig m_config;
+
+private:
    /// Function for decoding a string to bool:
    bool ToBool( const std::string& value ) throw( SError );
 
@@ -120,9 +126,6 @@ private:
    std::map< const std::string, std::vector< double >* >      m_doubleListPrefs;
    std::map< const std::string, std::vector< bool >* >        m_boolListPrefs;
 #endif // __MAKECINT__
-
-   /// The cycle configuration:
-   SCycleConfig m_config;
 
    //
    // The TList has to be hidden from the dictionary generator because one
