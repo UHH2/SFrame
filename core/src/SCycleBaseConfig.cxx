@@ -657,7 +657,7 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
  * @param value The path name that you want expanded based on the environment settings
  * @returns The path name that was expanded to be a real file name
  */
-std::string SCycleBaseConfig::DecodeEnvVar( const std::string& value ) throw( SError ) { 
+std::string SCycleBaseConfig::DecodeEnvVar( const std::string& value ) const { 
 
    // TSystem operates on TString objects:
    TString result( value );

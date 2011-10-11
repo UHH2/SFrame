@@ -101,7 +101,7 @@ protected:
                      const std::string& value ) throw( SError );
 
    /// Function for decoding a shell environment variable
-   std::string DecodeEnvVar( const std::string& value ) throw( SError ); 
+   std::string DecodeEnvVar( const std::string& value ) const; 
 
    /// The cycle configuration:
    SCycleConfig m_config;

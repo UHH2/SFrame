@@ -1,4 +1,8 @@
 2011.10.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Small correction to the SCycleBaseConfig::DecodeEnvVar(...)
+	  function.
+
+2011.10.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Removed the automatic disabling of branches in
 	  SCycleBaseNTuple::LoadInputTrees(...). That function call
 	  was just giving us problems, and now actually caused
