@@ -662,7 +662,7 @@ std::string SCycleBaseConfig::DecodeEnvVar( const std::string& value ) const {
    // TSystem operates on TString objects:
    TString result( value );
    // Let TSystem do the expansion:
-   if( ! gSystem->ExpandPathName( result ) ) {
+   if( gSystem->ExpandPathName( result ) ) {
       REPORT_ERROR( "Failed 'expanding' path name:" << value );
       return value;
    }

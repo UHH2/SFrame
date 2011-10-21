@@ -1,3 +1,7 @@
+2011.10.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed the DecodeEnvVar(...) function after reading the ROOT
+	  documentation a little more carefully.
+
 2011.10.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Small correction to the SCycleBaseConfig::DecodeEnvVar(...)
 	  function.

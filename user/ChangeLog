@@ -1,3 +1,7 @@
+2011.10.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Changed "lite" to "lite://" as the PROOF server name in the
+	  example configuration. This is the new ROOT naming scheme.
+
 2011.02.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a few lines of output to FirstCycle::BeginCycle() that
 	  demonstrate how messages of different message levels look

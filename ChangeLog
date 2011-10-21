@@ -1,3 +1,10 @@
+2011.10.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed the DecodeEnvVar(...) function after reading the ROOT
+	  documentation a little more carefully.
+	* Changed "lite" to "lite://" as the PROOF server name in the
+	  example configuration. This is the new ROOT naming scheme.
+	* Tagging as SFrame-03-04-26
+
 2011.10.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Small correction to the SCycleBaseConfig::DecodeEnvVar(...)
 	  function.

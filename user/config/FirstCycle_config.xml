@@ -65,7 +65,7 @@
   <!--             When set to "-1" (default setting) all available workers -->
   <!--             are used.                                                -->
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
-  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite"
+  <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite://"
          ProofWorkDir="" ProofNodes="-1" OutputDirectory="./" PostFix="" >
 
     <!-- list of input data for given data type                                   -->
