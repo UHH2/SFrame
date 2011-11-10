@@ -122,6 +122,21 @@ public:
    /// Get the minimum printed message level
    SMsgType GetMsgLevel() const;
 
+   /// Set whether TTreeCache should be used
+   void SetUseTreeCache( Bool_t status = kTRUE );
+   /// Get whether TTreeCache should be used
+   Bool_t GetUseTreeCache() const;
+
+   /// Set the memory size to be used by TTreeCache
+   void SetCacheSize( Long64_t size );
+   /// Gett the memory size to be used by TTreeCache
+   Long64_t GetCacheSize() const;
+
+   /// Set how many events should be used to learn the access pattern
+   void SetCacheLearnEntries( Int_t entries );
+   /// Get how many events should be used to learn the access pattern
+   Int_t GetCacheLearnEntries() const;
+
    /// Print the configuration to the screen
    void PrintConfig() const;
    /// Re-arrange the input data objects
@@ -153,6 +168,9 @@ private:
    TString       m_outputDirectory;
    TString       m_postFix;
    SMsgType      m_msgLevel;
+   Bool_t        m_useTreeCache;
+   Long64_t      m_cacheSize;
+   Int_t         m_cacheLearnEntries;
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleConfig, 1 );

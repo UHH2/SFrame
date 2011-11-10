@@ -1,3 +1,17 @@
+2011.11.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Changed the message printed by DecodeEnvVar from ERROR
+	  to DEBUG when something unexpected happens. Apparently
+	  unexpected things can happen more often than I thought.
+	* Added 3 new parameters to a cycle, which control how
+	  TTreeCache should be used by the SFrame job.
+	* At the moment TTreeCache is only used in PROOF mode,
+	  but I plan on adding this feature for LOCAL running as well.
+	* The default configuration still has TTreeCache disabled, as
+	  it doesn't play nicely with MC10b D3PDs.
+	* Added some documentation about the new TTreeCache features
+	  to FirstCycle_config.xml
+	* Tagging as SFrame-03-05-00
+
 2011.10.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed the DecodeEnvVar(...) function after reading the ROOT
 	  documentation a little more carefully.

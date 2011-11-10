@@ -44,6 +44,9 @@
         ProofServer          CDATA            ""
         ProofWorkDir         CDATA            ""
         ProofNodes           CDATA            "-1"
+        UseTreeCache         (True|False|1|0) "False"
+        TreeCacheSize        CDATA            "30000000"
+        TreeCacheLearnEntries CDATA           "100"
 >
 
 <!ELEMENT InputData ((GeneratorCut|DataSet|In|InputTree|OutputTree|

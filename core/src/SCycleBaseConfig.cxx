@@ -85,6 +85,12 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
          m_config.SetOutputDirectory( curAttr->GetValue() );
       } else if( curAttr->GetName() == TString( "PostFix" ) ) {
          m_config.SetPostFix( curAttr->GetValue() );
+      } else if( curAttr->GetName() == TString( "UseTreeCache" ) ) {
+         m_config.SetUseTreeCache( ToBool( curAttr->GetValue() ) );
+      } else if( curAttr->GetName() == TString( "TreeCacheSize" ) ) {
+         m_config.SetCacheSize( atoi( curAttr->GetValue() ) );
+      } else if( curAttr->GetName() == TString( "TreeCacheLearnEntries" ) ) {
+         m_config.SetCacheLearnEntries( atoi( curAttr->GetValue() ) );
       }
    }
 
@@ -663,7 +669,7 @@ std::string SCycleBaseConfig::DecodeEnvVar( const std::string& value ) const {
    TString result( value );
    // Let TSystem do the expansion:
    if( gSystem->ExpandPathName( result ) ) {
-      REPORT_ERROR( "Failed 'expanding' path name:" << value );
+      m_logger << DEBUG << "Failed 'expanding' property: " << value << SLogger::endmsg;
       return value;
    }
 

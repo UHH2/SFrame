@@ -65,8 +65,18 @@
   <!--             When set to "-1" (default setting) all available workers -->
   <!--             are used.                                                -->
   <!-- TargetLumi: luminosity value the output of this cycle is weighted to -->
+  <!-- UseTreeCache: Boolean flag that accepts "True" or "False". Controls  -->
+  <!--               whether TTreeCache usage is enabled in the job.        -->
+  <!--               Beware that some ntuples don't "like" TTreeCache!      -->
+  <!-- TreeCacheSize: Size of the TTreeCache in bytes.                      -->
+  <!-- TreeCacheLearnEntries: Number of entries used to learn the access    -->
+  <!--                        pattern of the analysis, and select which     -->
+  <!--                        branches should be cached.                    -->
+  <!--                        Set to a negative number to "blindly" cache   -->
+  <!--                        all branches of the primary input TTree.      -->
   <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite://"
-         ProofWorkDir="" ProofNodes="-1" OutputDirectory="./" PostFix="" >
+         ProofWorkDir="" ProofNodes="-1" OutputDirectory="./" PostFix=""
+         UseTreeCache="False" >
 
     <!-- list of input data for given data type                                   -->
     <!-- Type, Version: Type of the events. They have pretty free formats.        -->

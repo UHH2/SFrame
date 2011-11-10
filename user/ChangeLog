@@ -1,3 +1,7 @@
+2011.11.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added some documentation about the new TTreeCache features
+	  to FirstCycle_config.xml
+
 2011.10.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed "lite" to "lite://" as the PROOF server name in the
 	  example configuration. This is the new ROOT naming scheme.

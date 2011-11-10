@@ -192,6 +192,15 @@ Bool_t SCycleBaseExec::Notify() {
       return kTRUE;
    }
 
+   // Tell the cache to learn the access pattern for the configured number
+   // of entries:
+   if( GetConfig().GetCacheLearnEntries() > 0 ) {
+      m_inputTree->SetCacheLearnEntries( GetConfig().GetCacheLearnEntries() );
+   } else {
+      m_inputTree->AddBranchToCache( "*", kTRUE );
+      m_inputTree->StopCacheLearningPhase();
+   }
+
    try {
 
       TFile* inputFile = 0;

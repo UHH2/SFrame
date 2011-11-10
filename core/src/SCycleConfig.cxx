@@ -15,7 +15,8 @@ SCycleConfig::SCycleConfig( const char* name )
    : TNamed( name, "SFrame cycle configuration" ), m_mode( LOCAL ),
      m_server( "" ), m_workdir( "" ), m_nodes( -1 ), m_properties(),
      m_inputData(), m_targetLumi( 1. ), m_outputDirectory( "" ),
-     m_postFix( "" ), m_msgLevel( INFO ) {
+     m_postFix( "" ), m_msgLevel( INFO ), m_useTreeCache( kFALSE ),
+     m_cacheSize( 30000000 ), m_cacheLearnEntries( 100 ) {
 
 }
 
@@ -118,6 +119,39 @@ SMsgType SCycleConfig::GetMsgLevel() const {
    return m_msgLevel;
 }
 
+void SCycleConfig::SetUseTreeCache( Bool_t status ) {
+
+   m_useTreeCache = status;
+   return;
+}
+
+Bool_t SCycleConfig::GetUseTreeCache() const {
+
+   return m_useTreeCache;
+}
+
+void SCycleConfig::SetCacheSize( Long64_t size ) {
+
+   m_cacheSize = size;
+   return;
+}
+
+Long64_t SCycleConfig::GetCacheSize() const {
+
+   return m_cacheSize;
+}
+
+void SCycleConfig::SetCacheLearnEntries( Int_t entries ) {
+
+   m_cacheLearnEntries = entries;
+   return;
+}
+
+Int_t SCycleConfig::GetCacheLearnEntries() const {
+
+   return m_cacheLearnEntries;
+}
+
 void SCycleConfig::PrintConfig() const {
 
    SLogger logger( "SCycleConfig" );
@@ -133,6 +167,15 @@ void SCycleConfig::PrintConfig() const {
    logger << INFO << "  - Target luminosity: " << m_targetLumi << SLogger::endmsg;
    logger << INFO << "  - Output directory: " << m_outputDirectory << SLogger::endmsg;
    logger << INFO << "  - Post-fix: " << m_postFix << SLogger::endmsg;
+   if( m_useTreeCache ) {
+      logger << INFO << "  - Using TTreeCache with size: " << m_cacheSize << SLogger::endmsg;
+      if( m_cacheLearnEntries > 0 ) {
+         logger << INFO << "                 learn entries: " << m_cacheLearnEntries
+                << SLogger::endmsg;
+      } else {
+         logger << INFO << "    All branches added to the cache" << SLogger::endmsg;
+      }
+   }
 
    for( id_type::const_iterator id = m_inputData.begin(); id != m_inputData.end();
         ++id ) {
@@ -217,6 +260,9 @@ void SCycleConfig::ClearConfig() {
    m_outputDirectory = "./";
    m_postFix = "";
    m_msgLevel = INFO;
+   m_useTreeCache = kFALSE;
+   m_cacheSize = 30000000;
+   m_cacheLearnEntries = 100;
 
    return;
 }
