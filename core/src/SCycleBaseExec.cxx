@@ -192,27 +192,33 @@ Bool_t SCycleBaseExec::Notify() {
       return kTRUE;
    }
 
-   // Tell the cache to learn the access pattern for the configured number
-   // of entries:
-   if( GetConfig().GetCacheLearnEntries() > 0 ) {
-      m_inputTree->SetCacheLearnEntries( GetConfig().GetCacheLearnEntries() );
-   } else {
-      m_inputTree->AddBranchToCache( "*", kTRUE );
-      m_inputTree->StopCacheLearningPhase();
-   }
-
    try {
 
       TFile* inputFile = 0;
       this->LoadInputTrees( *m_inputData, m_inputTree, inputFile );
       this->SetHistInputFile( inputFile );
       this->BeginInputFile( *m_inputData );
-      this->SetInputCacheConfigured();
 
    } catch( const SError& error ) {
       REPORT_FATAL( "Exception caught with message: " << error.what() );
       throw;
    }
+
+   // Tell the cache to learn the access pattern for the configured number
+   // of entries:
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
+   if( GetConfig().GetCacheLearnEntries() > 0 ) {
+      m_inputTree->SetCacheLearnEntries( GetConfig().GetCacheLearnEntries() );
+   } else {
+      // If it's set to a negative number, add all the branches to the cache.
+      // Otherwise (it's 0) trust that the user already added all the necessary branches
+      // inside BeginInputFile(...).
+      if( GetConfig().GetCacheLearnEntries() < 0 ) {
+         m_inputTree->AddBranchToCache( "*", kTRUE );
+      }
+      m_inputTree->StopCacheLearningPhase();
+   }
+#endif // ROOT_VERSION...
 
    return kTRUE;
 }

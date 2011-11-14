@@ -104,8 +104,6 @@ protected:
    /// Load the input trees
    void LoadInputTrees( const SInputData& id, TTree* main_tree,
                         TFile*& inputFile ) throw( SError );
-   /// Declare that the cache for the input trees is now configured
-   void SetInputCacheConfigured() throw( SError );
    /// Read in the event from the "normal" trees
    void GetEvent( Long64_t entry ) throw( SError );
    /// Calculate the weight of the current event

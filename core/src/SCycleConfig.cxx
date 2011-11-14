@@ -172,8 +172,11 @@ void SCycleConfig::PrintConfig() const {
       if( m_cacheLearnEntries > 0 ) {
          logger << INFO << "                 learn entries: " << m_cacheLearnEntries
                 << SLogger::endmsg;
-      } else {
+      } else if( m_cacheLearnEntries < 0 ) {
          logger << INFO << "    All branches added to the cache" << SLogger::endmsg;
+      } else {
+         logger << INFO << "    The user is expected to choose branches to cache"
+                << SLogger::endmsg;
       }
    }
 

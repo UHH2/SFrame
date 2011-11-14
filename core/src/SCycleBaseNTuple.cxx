@@ -581,27 +581,6 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
 }
 
 /**
- * Function telling the input trees that all branches that need to be cached, have
- * now been declared. The code will not try to be smart about the caching from
- * here on, but just cache all the branches that were explicitly requested.
- *
- * <strong>The function is used internally by the framework!</strong>
- */
-void SCycleBaseNTuple::SetInputCacheConfigured() throw( SError ) {
-
-   // This feature is only available in new ROOT versions...
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
-   // Tell all input trees that their cache is now configured:
-   for( std::vector< TTree* >::const_iterator it = m_inputTrees.begin();
-        it != m_inputTrees.end(); ++it ) {
-      ( *it )->StopCacheLearningPhase();
-   }
-#endif // ROOT_VERSION...
-
-   return;
-}
-
-/**
  * Function reading in the same entry for each of the connected branches.
  * It is called first for each new event.
  *

@@ -1,3 +1,13 @@
+2011.11.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixing how the learning period of TTreeCache is handled on
+	  PROOF. Now setting a positive number for the learning
+	  period actually works...
+	* Added the possibility for letting the user set up the caching
+	  details when the new files are opened. Will be useful with
+	  the new D3PDReader features.
+	* DecodeEnvVar(...) still waiting for yet more updates... :-(
+	* Tagging as SFrame-03-05-01
+
 2011.11.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Changed the message printed by DecodeEnvVar from ERROR
 	  to DEBUG when something unexpected happens. Apparently
