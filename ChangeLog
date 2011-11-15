@@ -1,3 +1,16 @@
+2011.11.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* DecodeEnvVar(...) now only does anything if a property value
+	  begins with ":exp:". This is needed to be able to give actual
+	  regular expressions, and unexpanded environment variable
+	  names to the code.
+	* Returned to printing an ERROR in this function when the
+	  environment variable expansion fails, even though the user
+	  explicitly requested it.
+	* Added some documentation to FirstCycle_config.xml about
+	  how to use the environment variable expansion in property
+	  values.
+	* Tagging as SFrame-03-05-02
+
 2011.11.14 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixing how the learning period of TTreeCache is handled on
 	  PROOF. Now setting a positive number for the learning

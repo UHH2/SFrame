@@ -74,6 +74,8 @@
   <!--                        branches should be cached.                    -->
   <!--                        Set to a negative number to "blindly" cache   -->
   <!--                        all branches of the primary input TTree.      -->
+  <!--                        Set to 0 if you want to select the branches   -->
+  <!--                        to be cached in BeginInputFile(...).          -->
   <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite://"
          ProofWorkDir="" ProofNodes="-1" OutputDirectory="./" PostFix=""
          UseTreeCache="False" >
@@ -161,6 +163,10 @@
     <!--  names in the constructor of the cycle. The properties are    -->
     <!--  then set automatically in the C++ code according to the      -->
     <!--  configuration in the XML file.                               -->
+    <!--  Note that you can put environment variables into the values  -->
+    <!--  which get replaced by the value of the environment variable, -->
+    <!--  if you begin the string with ":exp:". (This is removed from  -->
+    <!--  the value given to your cycle in C++.)                       -->
     <!-- Name: Name of the property (as set in C++)                    -->
     <!-- Value: String representation of the value                     -->
     <UserConfig>

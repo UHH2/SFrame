@@ -660,16 +660,27 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
  * path names. One can use either "$SOMETHING" or "$(SOMETHING)" in the path names.
  * (The latter is also Win32 compatible, not that it matters for SFrame...)
  *
- * @param value The path name that you want expanded based on the environment settings
+ * Note that now the expansion is only done if the property begins with ":exp:".
+ * If it does, then these 5 characters are removed from the beginning of the string,
+ * and the rest of the string is given to TSystem for expansion.
+ *
+ * @param value The property that you want expanded based on the environment settings
  * @returns The path name that was expanded to be a real file name
  */
 std::string SCycleBaseConfig::DecodeEnvVar( const std::string& value ) const { 
 
-   // TSystem operates on TString objects:
-   TString result( value );
+   // If the string doesn't begin with ":exp:", then do nothing:
+   if( value.find( ":exp:" ) != 0 ) {
+      return value;
+   }
+
+   // TSystem operates on TString objects. Note that we remove the ":exp:" from
+   // the beginning of the string here:
+   TString result( value.substr( 5, value.npos ) );
+
    // Let TSystem do the expansion:
    if( gSystem->ExpandPathName( result ) ) {
-      m_logger << DEBUG << "Failed 'expanding' property: " << value << SLogger::endmsg;
+      REPORT_ERROR( "Failed 'expanding' property: " << value );
       return value;
    }
 
