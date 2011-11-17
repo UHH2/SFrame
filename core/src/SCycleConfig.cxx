@@ -152,6 +152,17 @@ Int_t SCycleConfig::GetCacheLearnEntries() const {
    return m_cacheLearnEntries;
 }
 
+void SCycleConfig::SetProcessOnlyLocal( Bool_t flag ) {
+
+   m_processOnlyLocal = flag;
+   return;
+}
+
+Bool_t SCycleConfig::GetProcessOnlyLocal() const {
+
+   return m_processOnlyLocal;
+}
+
 void SCycleConfig::PrintConfig() const {
 
    SLogger logger( "SCycleConfig" );
@@ -178,6 +189,10 @@ void SCycleConfig::PrintConfig() const {
          logger << INFO << "    The user is expected to choose branches to cache"
                 << SLogger::endmsg;
       }
+   }
+   if( m_processOnlyLocal ) {
+      logger << INFO << "  - Workers will only process local files"
+             << SLogger::endmsg;
    }
 
    for( id_type::const_iterator id = m_inputData.begin(); id != m_inputData.end();

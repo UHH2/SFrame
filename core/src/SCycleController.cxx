@@ -593,16 +593,25 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
                                 ( Long64_t ) ( eventsPerNode > 10000 ?
                                                ( eventsPerNode / 10 ) :
                                                1000 ) );
+         // Make sure that we can use as many workers per node as we want:
          m_proof->SetParameter( "PROOF_MaxSlavesPerNode", ( Long_t ) 9999999 );
-         // Some ntuples (MC10b...) have problems with TTreeCache, so it's possible
-         // to disable this feature in the configuration:
+         // Configure the usage of TTreeCache on the cluster:
          if( config.GetUseTreeCache() ) {
             m_proof->SetParameter( "PROOF_UseTreeCache", ( Int_t ) 1 );
          } else {
             m_proof->SetParameter( "PROOF_UseTreeCache", ( Int_t ) 0 );
          }
          m_proof->SetParameter( "PROOF_CacheSize", config.GetCacheSize() );
+         // Configure whether the workers are allowed to read each others' files:
+         if( config.GetProcessOnlyLocal() ) {
+            m_proof->SetParameter( "PROOF_ForceLocal", ( Int_t ) 1 );
+         } else {
+            m_proof->SetParameter( "PROOF_ForceLocal", ( Int_t ) 0 );
+         }
+         // Enable PROOF performance monitoring:
          gEnv->SetValue( "Proof.StatsHist", 1 );
+
+         // Add the "input objects" to PROOF:
          m_proof->AddInput( &config );
          m_proof->AddInput( &inputData );
          m_proof->AddInput( &proofOutputFile );

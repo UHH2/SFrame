@@ -1,3 +1,20 @@
+2011.11.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a new cycle property (ProcessOnlyLocal) for forcing
+	  the PROOF workers to only process files that are on their
+	  local disks. In some cases enabling this speeded up long
+	  jobs on the NYU PROOF cluster. (By default it is left off.)
+	* Introduced some more rigorous testing for the user
+	  properties. If the same property is defined multiple times
+	  in the XML, the code will now print a warning.
+	* The DeclareProperty(...) functions also do a more verbose
+	  checking to decide whether a given property name was used
+	  already or not.
+	* Added some extra documentation to the SCycleConfig
+	  members.
+	* Added the new property (ProcessOnlyLocal) to the common
+	  DTD (JobConfig.dtd)
+	* Tagging as SFrame-03-05-03
+
 2011.11.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* DecodeEnvVar(...) now only does anything if a property value
 	  begins with ":exp:". This is needed to be able to give actual

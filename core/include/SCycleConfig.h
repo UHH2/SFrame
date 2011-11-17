@@ -137,6 +137,11 @@ public:
    /// Get how many events should be used to learn the access pattern
    Int_t GetCacheLearnEntries() const;
 
+   /// Set whether the PROOF nodes are allowed to read each other's files
+   void SetProcessOnlyLocal( Bool_t flag );
+   /// Get whether the PROOF nodes are allowed to read each other's files
+   Bool_t GetProcessOnlyLocal() const;
+
    /// Print the configuration to the screen
    void PrintConfig() const;
    /// Re-arrange the input data objects
@@ -158,19 +163,20 @@ public:
    void ClearConfig();
 
 private:
-   RunMode       m_mode;
-   TString       m_server;
-   TString       m_workdir;
-   Int_t         m_nodes;
-   property_type m_properties;
-   id_type       m_inputData;
-   Double_t      m_targetLumi;
-   TString       m_outputDirectory;
-   TString       m_postFix;
-   SMsgType      m_msgLevel;
-   Bool_t        m_useTreeCache;
-   Long64_t      m_cacheSize;
-   Int_t         m_cacheLearnEntries;
+   RunMode       m_mode; ///< Running mode for the cycle
+   TString       m_server; ///< Name of the PROOF server to use
+   TString       m_workdir; ///< PROOF work directory, used for handling ntuple output
+   Int_t         m_nodes; ///< Number of nodes to use on the specified PROOF farm
+   property_type m_properties; ///< All the properties defined for the cycle
+   id_type       m_inputData; ///< All SInputData objects defined for the cycle
+   Double_t      m_targetLumi; ///< Luminosity to scale all MC samples to
+   TString       m_outputDirectory; ///< Output directory for the output ROOT file
+   TString       m_postFix; ///< Postfix to be added at the end of the created ROOT file's name
+   SMsgType      m_msgLevel; ///< Message level to be used by the cycle
+   Bool_t        m_useTreeCache; ///< Switch for turning on TTreeCache usage
+   Long64_t      m_cacheSize; ///< Size of the used TTreeCache in bytes
+   Int_t         m_cacheLearnEntries; ///< Number of entries used for learning the TTree access pattern
+   Bool_t        m_processOnlyLocal; ///< Flag for only processing local files on the PROOF workers
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleConfig, 1 );

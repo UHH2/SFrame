@@ -47,6 +47,7 @@
         UseTreeCache         (True|False|1|0) "False"
         TreeCacheSize        CDATA            "30000000"
         TreeCacheLearnEntries CDATA           "100"
+        ProcessOnlyLocal     (True|False|1|0) "False"
 >
 
 <!ELEMENT InputData ((GeneratorCut|DataSet|In|InputTree|OutputTree|

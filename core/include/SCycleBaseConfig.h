@@ -18,6 +18,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <set>
 
 // ROOT include(s):
 #include "TList.h"
@@ -117,6 +118,7 @@ private:
    // the dictionary generation.
    //
 #ifndef __MAKECINT__
+   std::set< std::string >                                    m_configuredPrefs;
    std::map< const std::string, std::string* >                m_stringPrefs;
    std::map< const std::string, int* >                        m_intPrefs;
    std::map< const std::string, double* >                     m_doublePrefs;

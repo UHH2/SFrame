@@ -1,3 +1,7 @@
+2011.11.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added the new property (ProcessOnlyLocal) to the common
+	  DTD (JobConfig.dtd)
+
 2011.11.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added some documentation to FirstCycle_config.xml about
 	  how to use the environment variable expansion in property
