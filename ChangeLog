@@ -1,3 +1,8 @@
+2011.12.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated Makefile.common to find Makefile.arch in
+	  ROOT 5.32 and up.
+	* Tagging as SFrame-03-05-04
+
 2011.11.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a new cycle property (ProcessOnlyLocal) for forcing
 	  the PROOF workers to only process files that are on their
