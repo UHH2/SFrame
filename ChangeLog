@@ -1,3 +1,12 @@
+2012.01.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* In ROOT 5.32 TProof::GetMissingFiles() doesn't play nicely
+	  with PROOF-Lite. So for the moment I just disabled the
+	  missing file list request for PROOF-Lite until I understand
+	  what's going wrong.
+	* Updated python/PARHelpers.py to make .par packages that
+	  play nicely with ROOT 5.32
+	* Tagging as SFrame-03-05-05
+
 2011.12.06 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Updated Makefile.common to find Makefile.arch in
 	  ROOT 5.32 and up.

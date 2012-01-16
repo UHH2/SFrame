@@ -202,6 +202,7 @@ MakefileProofContent = """MAKEFLAGS = --no-print-directory -r -s
 ARCH_LOC_1 := $(wildcard $(shell root-config --prefix)/test/Makefile.arch)
 ARCH_LOC_2 := $(wildcard $(shell root-config --prefix)/share/root/test/Makefile.arch)
 ARCH_LOC_3 := $(wildcard $(shell root-config --prefix)/share/doc/root/test/Makefile.arch)
+ARCH_LOC_4 := $(wildcard $(shell root-config --prefix)/etc/Makefile.arch)
 ifneq ($(strip $(ARCH_LOC_1)),)
   $(info Using $(ARCH_LOC_1))
   include $(ARCH_LOC_1)
@@ -214,7 +215,12 @@ else
       $(info Using $(ARCH_LOC_3))
       include $(ARCH_LOC_3)
     else
-      $(error Could not find Makefile.arch!)
+      ifneq ($(strip $(ARCH_LOC_4)),)
+        $(info Using $(ARCH_LOC_4))
+        include $(ARCH_LOC_4)
+      else
+        $(error Could not find Makefile.arch!)
+      endif
     endif
   endif
 endif

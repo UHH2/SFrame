@@ -1,3 +1,9 @@
+2012.01.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* In ROOT 5.32 TProof::GetMissingFiles() doesn't play nicely
+	  with PROOF-Lite. So for the moment I just disabled the
+	  missing file list request for PROOF-Lite until I understand
+	  what's going wrong.
+
 2011.11.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a new cycle property (ProcessOnlyLocal) for forcing
 	  the PROOF workers to only process files that are on their

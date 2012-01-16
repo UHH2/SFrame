@@ -33,7 +33,6 @@
 #include <TProof.h>
 #include <TProofOutputFile.h>
 #include <TDSet.h>
-#include <TEnv.h>
 #include <TFileCollection.h>
 #include <THashList.h>
 #include <TFileInfo.h>
@@ -608,8 +607,6 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          } else {
             m_proof->SetParameter( "PROOF_ForceLocal", ( Int_t ) 0 );
          }
-         // Enable PROOF performance monitoring:
-         gEnv->SetValue( "Proof.StatsHist", 1 );
 
          // Add the "input objects" to PROOF:
          m_proof->AddInput( &config );
@@ -699,25 +696,28 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
 
          // The missing file accounting only started in ROOT 5.28 as far as I can tell:
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 28, 00 )
-         // Get the list of missing files:
-         TFileCollection* missing = m_proof->GetMissingFiles();
-         if( missing ) {
-            // Get the list of files:
-            THashList* flist = missing->GetList();
-            if( flist->GetEntries() ) {
-               m_logger << WARNING << "The following files were not processed:" << SLogger::endmsg;
-               for( Int_t i = 0; i < flist->GetEntries(); ++i ) {
-                  TFileInfo* finfo = dynamic_cast< TFileInfo* >( flist->At( i ) );
-                  if( ! finfo ) {
-                     REPORT_ERROR( "Missing file list not in expected format" );
-                     continue;
+         // Only do this for non-Lite PROOF:
+         if( ! m_proof->IsLite() ) {
+            // Get the list of missing files:
+            TFileCollection* missing = m_proof->GetMissingFiles();
+            if( missing ) {
+               // Get the list of files:
+               THashList* flist = missing->GetList();
+               if( flist->GetEntries() ) {
+                  m_logger << WARNING << "The following files were not processed:" << SLogger::endmsg;
+                  for( Int_t i = 0; i < flist->GetEntries(); ++i ) {
+                     TFileInfo* finfo = dynamic_cast< TFileInfo* >( flist->At( i ) );
+                     if( ! finfo ) {
+                        REPORT_ERROR( "Missing file list not in expected format" );
+                        continue;
+                     }
+                     m_logger << "    " << finfo->GetCurrentUrl()->GetUrl() << SLogger::endmsg;
                   }
-                  m_logger << "    " << finfo->GetCurrentUrl()->GetUrl() << SLogger::endmsg;
                }
+               // Remove the object:
+               delete missing;
+               missing = 0;
             }
-            // Remove the object:
-            delete missing;
-            missing = 0;
          }
 #endif // ROOT_VERSION( 5, 28, 00 )
 
