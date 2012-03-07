@@ -1,4 +1,8 @@
 2012.03.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed the == operator as well... :-P
+	* Tagging as SFrame-03-05-07
+
+2012.03.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed the assignment operator of SInputData. The operator
 	  forgot about the dataset and current-entry variables. This
 	  lead to weird problems when the InputData objects were

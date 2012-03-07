@@ -421,6 +421,7 @@ Bool_t SInputData::operator== ( const SInputData& rh ) const {
        ( this->m_totalLumiGiven == rh.m_totalLumiGiven ) &&
        ( this->m_gencuts == rh.m_gencuts ) && ( this->m_sfileIn == rh.m_sfileIn ) &&
        ( this->m_trees == rh.m_trees ) &&
+       ( this->m_dataSets == rh.m_dataSets ) &&
        ( this->m_totalLumiSum == rh.m_totalLumiSum ) &&
        ( this->m_eventsTotal == rh.m_eventsTotal ) &&
        ( this->m_neventsmax == rh.m_neventsmax ) &&
