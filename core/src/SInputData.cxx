@@ -391,12 +391,14 @@ SInputData& SInputData::operator= ( const SInputData& parent ) {
    this->m_gencuts = parent.m_gencuts;
    this->m_sfileIn = parent.m_sfileIn;
    this->m_trees = parent.m_trees;
+   this->m_dataSets = parent.m_dataSets;
    this->m_totalLumiSum = parent.m_totalLumiSum;
    this->m_eventsTotal = parent.m_eventsTotal;
    this->m_neventsmax = parent.m_neventsmax;
    this->m_neventsskip = parent.m_neventsskip;
    this->m_cacheable = parent.m_cacheable;
    this->m_skipValid = parent.m_skipValid;
+   this->m_entry = parent.m_entry;
 
    this->m_dset = parent.m_dset;
 

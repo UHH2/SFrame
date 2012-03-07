@@ -1,3 +1,10 @@
+2012.03.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed the assignment operator of SInputData. The operator
+	  forgot about the dataset and current-entry variables. This
+	  lead to weird problems when the InputData objects were
+	  re-ordered.
+	* Tagging as SFrame-03-05-06
+
 2012.01.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* In ROOT 5.32 TProof::GetMissingFiles() doesn't play nicely
 	  with PROOF-Lite. So for the moment I just disabled the
