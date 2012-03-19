@@ -1,3 +1,10 @@
+2012.03.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Exchanged the simple Add(...) calls with TList::AddLast(...) in
+	  the Book(...) and WriteObj(...) functions on the suggestion
+	  of Mike Hance. Previously both SFrame and ROOT were
+	  checking for duplicates in the output object list, leading to
+	  measurable slowdowns when handling a lot of histograms.
+
 2012.03.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed the == operator as well... :-P
 

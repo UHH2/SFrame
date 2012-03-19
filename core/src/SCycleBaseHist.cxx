@@ -76,7 +76,7 @@ void SCycleBaseHist::WriteObj( const TObject& obj,
    SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
    if( ! out ) {
       out = new SCycleOutput( obj.Clone(), path, directory );
-      m_output->Add( out );
+      m_output->TList::AddLast( out );
    }
 
    gROOT->cd(); // So that the temporary objects would be created
