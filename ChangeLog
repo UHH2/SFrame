@@ -1,3 +1,9 @@
+2012.03.29 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Adding support for the Makefile.arch location used by
+	  MacPorts installed 5.32.XX. (Thanks to Martin Zeman for
+	  pointing this out.)
+	* Tagging as SFrame-03-05-10
+
 2012.03.28 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Trying to enable TTree caching in LOCAL mode once more.
 	* Code seems to be reasonably stable (no crashes at file changes
