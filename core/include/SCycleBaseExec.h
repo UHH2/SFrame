@@ -32,6 +32,7 @@ class TTree;
 class SInputData;
 class TFile;
 class TList;
+class TTreeCache;
 
 /**
  *   @short The SCycleBase constituent responsible for running the cycle
@@ -153,6 +154,7 @@ private:
    SInputData*           m_inputData; ///< Pointer to the currently active ID
    std::vector< TTree* > m_outputTrees; ///< List of all the event-level output TTree-s
    TFile*                m_outputFile; ///< Pointer to the active temporary output file
+   TTreeCache*           m_treeCache; ///< Cache used for readin the input TTree
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseExec, 0 );

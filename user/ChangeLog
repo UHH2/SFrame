@@ -1,3 +1,6 @@
+2012.03.28 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated FirstCycle example to use TTree caching explicitly.
+
 2011.11.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added the new property (ProcessOnlyLocal) to the common
 	  DTD (JobConfig.dtd)

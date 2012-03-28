@@ -18,6 +18,7 @@
 #include <TFile.h>
 #include <TProofOutputFile.h>
 #include <TSystem.h>
+#include <TTreeCache.h>
 
 // Local include(s):
 #include "../include/SCycleBaseExec.h"
@@ -37,7 +38,7 @@ ClassImp( SCycleBaseExec );
  * The constructor just initialises some member variable(s).
  */
 SCycleBaseExec::SCycleBaseExec()
-   : m_nProcessedEvents( 0 ), m_nSkippedEvents( 0 ) {
+   : m_nProcessedEvents( 0 ), m_nSkippedEvents( 0 ), m_treeCache( 0 ) {
 
    SetLogName( this->GetName() );
    REPORT_VERBOSE( "SCycleBaseExec constructed" );
@@ -192,9 +193,9 @@ Bool_t SCycleBaseExec::Notify() {
       return kTRUE;
    }
 
+   TFile* inputFile = 0;
    try {
 
-      TFile* inputFile = 0;
       this->LoadInputTrees( *m_inputData, m_inputTree, inputFile );
       this->SetHistInputFile( inputFile );
       this->BeginInputFile( *m_inputData );
@@ -204,9 +205,9 @@ Bool_t SCycleBaseExec::Notify() {
       throw;
    }
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
    // Tell the cache to learn the access pattern for the configured number
    // of entries:
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 5, 26, 0 )
    if( GetConfig().GetCacheLearnEntries() > 0 ) {
       m_inputTree->SetCacheLearnEntries( GetConfig().GetCacheLearnEntries() );
    } else {
@@ -217,6 +218,24 @@ Bool_t SCycleBaseExec::Notify() {
          m_inputTree->AddBranchToCache( "*", kTRUE );
       }
       m_inputTree->StopCacheLearningPhase();
+   }
+
+   // If the tree caching is turned on in LOCAL mode, make sure that this
+   // actually happens:
+   if( GetConfig().GetUseTreeCache() &&
+       ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ) ) {
+      if( ! inputFile ) {
+         m_logger << WARNING << "No input file? Can't set up TTreeCache!" << SLogger::endmsg;
+      } else {
+         m_inputTree->SetCacheSize( GetConfig().GetCacheSize() );
+         m_treeCache = dynamic_cast< TTreeCache* >( inputFile->GetCacheRead() );
+         if( ! m_treeCache ) {
+            REPORT_FATAL( "Couldn't create TTreeCache" );
+            throw SError( "Couldn't create TTreeCache",
+                          SError::StopExecution );
+         }
+         m_treeCache->UpdateBranches( m_inputTree );
+      }
    }
 #endif // ROOT_VERSION...
 

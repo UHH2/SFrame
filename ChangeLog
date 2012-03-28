@@ -1,3 +1,11 @@
+2012.03.28 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Trying to enable TTree caching in LOCAL mode once more.
+	* Code seems to be reasonably stable (no crashes at file changes
+	  anymore), but the D3PDReader code still reports inconsistent
+	  cache sizes...
+	* Updated FirstCycle example to use TTree caching explicitly.
+	* Tagging as SFrame-03-05-09
+
 2012.03.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Exchanged the simple Add(...) calls with TList::AddLast(...) in
 	  the Book(...) and WriteObj(...) functions on the suggestion

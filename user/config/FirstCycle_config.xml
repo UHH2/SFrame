@@ -78,7 +78,7 @@
   <!--                        to be cached in BeginInputFile(...).          -->
   <Cycle Name="FirstCycle" TargetLumi="1." RunMode="PROOF" ProofServer="lite://"
          ProofWorkDir="" ProofNodes="-1" OutputDirectory="./" PostFix=""
-         UseTreeCache="False" >
+         UseTreeCache="True" TreeCacheSize="30000000" TreeCacheLearnEntries="10" >
 
     <!-- list of input data for given data type                                   -->
     <!-- Type, Version: Type of the events. They have pretty free formats.        -->
