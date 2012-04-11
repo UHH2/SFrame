@@ -142,14 +142,19 @@ void SCycleController::Initialize() throw( SError ) {
          else if( curAttr->GetName() == TString( "OutputLevel" ) )
             outputLevelString = curAttr->GetValue();
       }
-      SMsgType type = DEBUG;
-      if( outputLevelString == "VERBOSE" ) type = VERBOSE;
+      SMsgType type = INFO;
+      if     ( outputLevelString == "VERBOSE" ) type = VERBOSE;
       else if( outputLevelString == "DEBUG" )   type = DEBUG;
       else if( outputLevelString == "INFO" )    type = INFO;
       else if( outputLevelString == "WARNING" ) type = WARNING;
       else if( outputLevelString == "ERROR" )   type = ERROR;
       else if( outputLevelString == "FATAL" )   type = FATAL;
       else if( outputLevelString == "ALWAYS" )  type = ALWAYS;
+      else {
+         m_logger << WARNING << "Message output level ("
+                  << outputLevelString << ") not recognized"
+                  << SLogger::endmsg;
+      }
       SLogWriter::Instance()->SetMinType( type );
 
       TXMLNode* nodes = rootNode->GetChildren();
@@ -382,36 +387,38 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       //
       // Upload and compile all the packages specified in the configuration:
       //
-      for( std::vector< TString >::const_iterator package = m_parPackages.begin();
-           package != m_parPackages.end(); ++package ) {
+      if( ! SProofManager::Instance()->IsConfigured( config.GetProofServer() ) ) {
+         for( std::vector< TString >::const_iterator package = m_parPackages.begin();
+              package != m_parPackages.end(); ++package ) {
 
-         // Find the full path name of the package:
-         TString pkg = SParLocator::Locate( *package );
-         if( pkg == "" ) continue;
+            // Find the full path name of the package:
+            TString pkg = SParLocator::Locate( *package );
+            if( pkg == "" ) continue;
 
-         REPORT_VERBOSE( "Uploading package: " << pkg );
-         if( m_proof->UploadPackage( pkg ) ) {
-            REPORT_ERROR( "There was a problem with uploading "
-                          << *package );
-            throw SError( *package + " could not be uploaded to PROOF",
-                          SError::SkipCycle );
+            REPORT_VERBOSE( "Uploading package: " << pkg );
+            if( m_proof->UploadPackage( pkg ) ) {
+               REPORT_ERROR( "There was a problem with uploading "
+                             << *package );
+               throw SError( *package + " could not be uploaded to PROOF",
+                             SError::SkipCycle );
+            }
+
+            Ssiz_t slash_pos = pkg.Last( '/' );
+            pkg.Remove( 0, slash_pos + 1 );
+            if( pkg.EndsWith( ".par", TString::kIgnoreCase ) ) {
+               pkg.Remove( pkg.Length() - 4, 4 );
+            }
+
+            m_logger << INFO << "Enabling package: " << pkg << SLogger::endmsg;
+            if( m_proof->EnablePackage( pkg, kTRUE ) ) {
+               REPORT_ERROR( "There was a problem with enabling "
+                             << *package );
+               throw SError( *package + " could not be enabled on PROOF",
+                             SError::SkipCycle );
+            }
          }
-
-         Ssiz_t slash_pos = pkg.Last( '/' );
-         pkg.Remove( 0, slash_pos + 1 );
-         if( pkg.EndsWith( ".par", TString::kIgnoreCase ) ) {
-            pkg.Remove( pkg.Length() - 4, 4 );
-         }
-
-         m_logger << INFO << "Enabling package: " << pkg << SLogger::endmsg;
-         if( m_proof->EnablePackage( pkg, kTRUE ) ) {
-            REPORT_ERROR( "There was a problem with enabling "
-                          << *package );
-            throw SError( *package + " could not be enabled on PROOF",
-                          SError::SkipCycle );
-         }
-
       }
+      SProofManager::Instance()->SetConfigured( config.GetProofServer() );
 
    }
 

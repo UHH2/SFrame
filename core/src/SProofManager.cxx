@@ -55,7 +55,7 @@ SProofManager* SProofManager::Instance() {
  * If the connection is not yet available, it creates it using TProof::Open(...),
  * and adds the created object to its internal cache.
  *
- * @param url Name of the PROOF server
+ * @param url   Name of the PROOF server
  * @param param Additional parameters given to TProof::Open(...)
  * @returns The created TProof object
  */
@@ -67,22 +67,83 @@ TProof* SProofManager::Open( const TString& url, const TString& param ) throw( S
    if( ( conn = m_connections.find( connection ) ) != m_connections.end() ) {
       m_logger << DEBUG << "Connection to \"" << url << "\" is already open"
                << SLogger::endmsg;
-      return conn->second;
+      return conn->second.first;
    }
 
    // Try to open the connection:
    TProof* server = TProof::Open( url, param );
    if( ! server ) {
-      m_logger << ERROR << "Couldn't open connection to: " << url << SLogger::endmsg;
+      REPORT_ERROR( "Couldn't open connection to: " << url );
       throw SError( "Couldn't open connection to: " + url,
                     SError::SkipCycle );
    } else {
       m_logger << INFO << "Connection opened to \"" << url << "\"" << SLogger::endmsg;
    }
 
-   m_connections[ connection ] = server;
+   // Remember that the server is connected, but not initialized yet:
+   m_connections[ connection ] = std::make_pair( server, kFALSE );
 
    return server;
+}
+
+/**
+ * This function is used to decide if a given PROOF server has already been configured
+ * (packages uploaded, compiled and loaded). This helps avoid having to wait while
+ * packages load multiple times in a job that runs many separately configured cycles.
+ *
+ * @param url   Name of the PROOF server
+ * @param param Additional parameters given to TProof::Open(...)
+ * @returns <code>kTRUE</code> if the server is already configured, or
+ *          <code>kFALSE</code> if it's not
+ */
+Bool_t SProofManager::IsConfigured( const TString& url,
+                                    const TString& param ) const {
+   
+   // Check if the connection has already been opened:
+   ConnMap_t::key_type connection = std::make_pair( url, param );
+   ConnMap_t::const_iterator conn = m_connections.find( connection );
+   if( conn != m_connections.end() ) {
+      // Return the configuration state:
+      return conn->second.second;
+   }
+   
+   // If the server is not even connected, then it is definitely not configured:
+   REPORT_ERROR( "Asking about a server that's not yet connected (\""
+                 << url << "\", \"" << param << "\")" );
+   return kFALSE;
+}
+
+/**
+ * This function can be used to set the "configured state" of a PROOF server
+ * connection. "Configured" means that all necessary PAR packages have already
+ * been uploaded to, compiled and loaded on the server.
+ *
+ * @param url   Name of the PROOF server
+ * @param param Additional parameters given to TProof::Open(...)
+ * @param state Configuration state (<code>kTRUE</code> for configured,
+ *              <code>kFALSE</code> for not configured.)
+ */
+void SProofManager::SetConfigured( const TString& url,
+                                   const TString& param,
+                                   Bool_t state ) throw( SError ) {
+
+   // Make sure the connection is open. This call can throw an error
+   // if unsuccessful, so no point in checking its return value.
+   Open( url, param );
+
+   // Now find it in our internal cache:
+   ConnMap_t::key_type connection = std::make_pair( url, param );
+   ConnMap_t::iterator conn = m_connections.find( connection );
+   if( conn == m_connections.end() ) {
+      REPORT_FATAL( "Internal logic error discovered" );
+      throw SError( "Internal logic error discovered",
+                    SError::StopExecution );
+   }
+
+   // Update the state:
+   conn->second.second = state;
+
+   return;
 }
 
 /**
@@ -99,10 +160,10 @@ void SProofManager::Cleanup() {
    PrintWorkerLogs();
 
    if( m_connections.size() ) {
-      TProofMgr* mgr = m_connections.begin()->second->GetManager();
+      TProofMgr* mgr = m_connections.begin()->second.first->GetManager();
       for( ConnMap_t::iterator server = m_connections.begin();
            server != m_connections.end(); ++server ) {
-         delete server->second;
+         delete server->second.first;
       }
       delete mgr;
    }
@@ -136,25 +197,27 @@ void SProofManager::PrintWorkerLogs() const {
       //
       // Message identifying the server:
       //
-      m_logger << INFO << "***************************************************************"
+      m_logger << INFO
+               << "***************************************************************"
                << SLogger::endmsg;
       m_logger << INFO << "*" << SLogger::endmsg;
       m_logger << INFO << "* Printing all worker logs from server:"
                << SLogger::endmsg;
       m_logger << INFO << "*     " << server->first.first << SLogger::endmsg;
       m_logger << INFO << "*" << SLogger::endmsg;
-      m_logger << INFO << "***************************************************************"
+      m_logger << INFO
+               << "***************************************************************"
                << SLogger::endmsg;
 
       //
       // Get info about the slaves:
       //
-      TList* slaveInfos = server->second->GetListOfSlaveInfos();
+      TList* slaveInfos = server->second.first->GetListOfSlaveInfos();
 
       //
       // Retrieve all logs:
       //
-      TProofLog* log = server->second->GetManager()->GetSessionLogs();
+      TProofLog* log = server->second.first->GetManager()->GetSessionLogs();
       TList* logList = log->GetListOfLogs();
       for( Int_t i = 0; i < logList->GetSize(); ++i ) {
 
@@ -163,7 +226,7 @@ void SProofManager::PrintWorkerLogs() const {
          //
          TProofLogElem* element = dynamic_cast< TProofLogElem* >( logList->At( i ) );
          if( ! element ) {
-            m_logger << ERROR << "Log element not recognised!" << SLogger::endmsg;
+            REPORT_ERROR( "Log element not recognised!" );
             continue;
          }
 
@@ -173,13 +236,13 @@ void SProofManager::PrintWorkerLogs() const {
          // identifiers to the proper node names in the slaveInfos list.
          //
          // If the identifier is not found in the list, then it has to be the master:
-         TString nodeName = server->second->GetMaster();
+         TString nodeName = server->second.first->GetMaster();
          for( Int_t i = 0; i < slaveInfos->GetSize(); ++i ) {
 
             // Access the TSlaveInfo object:
             TSlaveInfo* info = dynamic_cast< TSlaveInfo* >( slaveInfos->At( i ) );
             if( ! info ) {
-               m_logger << ERROR << "Couldn't use a TSlaveInfo object!" << SLogger::endmsg;
+               REPORT_ERROR( "Couldn't use a TSlaveInfo object!" );
                continue;
             }
             // Check if this TSlaveInfo describes the source of the log:
@@ -211,5 +274,4 @@ void SProofManager::PrintWorkerLogs() const {
    }
 
    return;
-
 }

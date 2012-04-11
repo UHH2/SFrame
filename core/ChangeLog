@@ -1,3 +1,11 @@
+2012.04.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * SProofManager now keeps track of which PROOF servers have been
+     "configured" already. This way the code no longer needs to go through
+     the exercise of loading all packages on all nodes in a job that runs
+     multiple cycle instances. (The package configuration is job-wide,
+     not specific for a given cycle.)
+   * Updated SCycleController to take advantage of the new feature.
+
 2012.03.28 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Trying to enable TTree caching in LOCAL mode once more.
 	* Code seems to be reasonably stable (no crashes at file changes

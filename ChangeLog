@@ -1,3 +1,12 @@
+2012.04.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * SProofManager now keeps track of which PROOF servers have been
+     "configured" already. This way the code no longer needs to go through
+     the exercise of loading all packages on all nodes in a job that runs
+     multiple cycle instances. (The package configuration is job-wide,
+     not specific for a given cycle.)
+   * Updated SCycleController to take advantage of the new feature.
+   * Tagging as SFrame-03-05-11
+
 2012.03.29 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Adding support for the Makefile.arch location used by
 	  MacPorts installed 5.32.XX. (Thanks to Martin Zeman for

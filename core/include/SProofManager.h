@@ -43,7 +43,8 @@ class TProof;
 class SProofManager {
 
    /// Typedef for the internal cache
-   typedef std::map< std::pair< TString, TString >, TProof* > ConnMap_t;
+   typedef std::map< std::pair< TString, TString >,
+                     std::pair< TProof*, Bool_t > > ConnMap_t;
 
 public:
    /// Destructor that deletes the open connections
@@ -54,6 +55,11 @@ public:
 
    /// Function to open/access a PROOF connection
    TProof* Open( const TString& url, const TString& param = "" ) throw( SError );
+   /// Function to check if a PROOF server connection is configured already
+   Bool_t IsConfigured( const TString& url, const TString& param = "" ) const;
+   /// Set a given PROOF server to "configured" state
+   void SetConfigured( const TString& url, const TString& param = "",
+                       Bool_t state = kTRUE ) throw( SError );
    /// Function deleting all the open PROOF connections
    void Cleanup();
 
