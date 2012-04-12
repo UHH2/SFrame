@@ -1,3 +1,9 @@
+2012.04.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Updated all BUILD.sh scripts not to compile the code when running
+     on PROOF-Lite
+   * Updated sframe_new_package.sh to add the same protection for new packages.
+   * Tagging as SFrame-03-05-12
+
 2012.04.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * SProofManager now keeps track of which PROOF servers have been
      "configured" already. This way the code no longer needs to go through

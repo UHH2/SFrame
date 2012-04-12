@@ -1,3 +1,6 @@
+2012.04.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Updated BUILD.sh not to compile the code when running on PROOF-Lite
+
 2010.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Created a new SFrame sub-package as MacOS X wasn't playing nicely with
 	  SFrameCore enabling Cintex at loading time. Somehow the

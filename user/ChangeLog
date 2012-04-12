@@ -1,3 +1,6 @@
+2012.04.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Updated BUILD.sh not to compile the code when running on PROOF-Lite
+
 2012.03.28 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Updated FirstCycle example to use TTree caching explicitly.
 

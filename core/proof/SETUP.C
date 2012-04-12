@@ -24,5 +24,4 @@ int SETUP() {
    if( gSystem->Load( "libSFrameCore" ) == -1 ) return -1;
 
    return 0;
-
 }
