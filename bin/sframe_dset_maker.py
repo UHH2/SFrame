@@ -47,6 +47,9 @@ def main():
         print "ERROR:"
         return 255
 
+    # Switch ROOT to batch mode:
+    ROOT.gROOT.SetBatch()
+
     print "Opening connection to PROOF server: " + options.server
     proof = ROOT.TProof.Open( options.server, "masteronly" )
     if ( not proof ) or ( not proof.IsValid() ):

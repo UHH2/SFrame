@@ -1,3 +1,8 @@
+2012.04.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Added the long missing feature to the PROOF handling convenience scripts
+     that they wouldn't open X11 for no reason, when running on a Mac.
+   * Tagging as SFrame-03-05-13
+
 2012.04.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Updated all BUILD.sh scripts not to compile the code when running
      on PROOF-Lite

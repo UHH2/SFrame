@@ -34,12 +34,16 @@ def main():
         print "WARNING:"
         print "WARNING: Didn't recognise the following option(s): " + unrec
         print "WARNING:"
+        pass
 
     if options.dset == "":
         print "ERROR:"
         print "ERROR: You have to specify a data set!"
         print "ERROR:"
         return 255
+
+    # Switch ROOT to batch mode:
+    ROOT.gROOT.SetBatch()
 
     print "Opening connection to PROOF server: " + options.server
     proof = ROOT.TProof.Open( options.server, "masteronly" )

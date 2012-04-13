@@ -35,6 +35,10 @@ def main():
         print "WARNING:"
         print "WARNING: Didn't recognise the following option(s): " + unrec
         print "WARNING:"
+        pass
+
+   # Switch ROOT to batch mode:
+   ROOT.gROOT.SetBatch()
 
     print "Opening connection to PROOF server: " + options.server
     proof = ROOT.TProof.Open( options.server )
