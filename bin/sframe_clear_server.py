@@ -37,8 +37,8 @@ def main():
         print "WARNING:"
         pass
 
-   # Switch ROOT to batch mode:
-   ROOT.gROOT.SetBatch()
+    # Switch ROOT to batch mode:
+    ROOT.gROOT.SetBatch()
 
     print "Opening connection to PROOF server: " + options.server
     proof = ROOT.TProof.Open( options.server )
