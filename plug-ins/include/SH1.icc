@@ -15,12 +15,12 @@
 #define SFRAME_PLUGINS_SH1_ICC
 
 // System include(s):
-#include <string.h>
-#include <cmath>
+//#include <cstring>
 
 // ROOT include(s):
 #include <TCollection.h>
 #include <TH1.h>
+#include <TMath.h>
 
 // SFrame include(s):
 #include "core/include/SLogger.h"
@@ -116,7 +116,7 @@ template< typename Type >
 void SH1< Type >::Fill( Double_t pos, Type weight ) throw( SError ) {
 
    // Check if the given parameters make sense:
-   if( std::isnan( pos ) || std::isnan( weight ) ) {
+   if( TMath::IsNaN( pos ) || TMath::IsNaN( weight ) ) {
       SLogger m_logger( this ); // The name of the variable is like this on purpose
       REPORT_FATAL( "Fill( pos = " << pos << ", weight = " << weight
                     << " ): NaN received. Aborting..." );
@@ -199,7 +199,7 @@ template< typename Type >
 Type SH1< Type >::GetBinError( Int_t bin ) const {
 
    if( ! m_computeErrors ) return 0;
-   else return static_cast< Type >( std::sqrt( m_errors[ bin ] ) );
+   else return static_cast< Type >( TMath::Sqrt( m_errors[ bin ] ) );
 }
 
 /**
@@ -301,8 +301,8 @@ Int_t SH1< Type >::Merge( TCollection* coll ) {
          continue;
       }
 
-      if( ( std::abs( hist->m_low - m_low ) > 0.001 ) ||
-          ( std::abs( hist->m_high - m_high ) > 0.001 ) ||
+      if( ( TMath::Abs( hist->m_low - m_low ) > 0.001 ) ||
+          ( TMath::Abs( hist->m_high - m_high ) > 0.001 ) ||
           ( m_bins != hist->m_bins ) ||
           ( m_computeErrors != hist->m_computeErrors ) ) {
          REPORT_ERROR( "Trying to merge histograms with different settings" );

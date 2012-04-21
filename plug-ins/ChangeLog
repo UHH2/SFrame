@@ -1,3 +1,8 @@
+2012.04.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Updated SH1.icc not to use <cmath> anymore. There is no good reason for
+     this, just that Xcode seems to go crazy over <cmath>, so my IDE is happier
+     if I use TMath.h instead.
+
 2012.04.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Updated BUILD.sh not to compile the code when running on PROOF-Lite
 
