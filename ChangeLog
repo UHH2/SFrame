@@ -1,3 +1,9 @@
+2012.05.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Added the possibility in sframe_clear_server.py to not only be able to
+     purge all packages from a cluster, but also only remove a single
+     package. The suggestion and code came from George Lewis.
+   * Tagging as SFrame-03-05-16
+
 2012.04.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Updated SH1.icc not to use <cmath> anymore. There is no good reason for
      this, just that Xcode seems to go crazy over <cmath>, so my IDE is happier
