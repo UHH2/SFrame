@@ -1,3 +1,10 @@
+2012.06.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * "Stole" a header from the ATLAS offline code, and added it under
+     plug-ins/include/FPCompare.h. It holds function and functors that can be
+     used to implement safe floating point comparisons. (Sidestepping an x87
+     "bug".)
+   * Tagging as SFrame-03-05-17
+
 2012.05.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Added the possibility in sframe_clear_server.py to not only be able to
      purge all packages from a cluster, but also only remove a single
