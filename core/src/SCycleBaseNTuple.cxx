@@ -38,7 +38,7 @@
 static const Double_t EPSILON = 1e-15;
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseNTuple );
+ClassImp( SCycleBaseNTuple )
 #endif // DOXYGEN_IGNORE
 
 /**

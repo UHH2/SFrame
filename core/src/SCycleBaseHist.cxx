@@ -25,7 +25,7 @@
 #include "../include/SCycleOutput.h"
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseHist );
+ClassImp( SCycleBaseHist )
 #endif // DOXYGEN_IGNORE
 
 /**

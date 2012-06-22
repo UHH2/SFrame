@@ -32,7 +32,6 @@ class TTree;
 class SInputData;
 class TFile;
 class TList;
-class TTreeCache;
 
 /**
  *   @short The SCycleBase constituent responsible for running the cycle
@@ -136,6 +135,8 @@ public:
 private:
    /// Function for reading the cycle configuration on the worker nodes
    void ReadConfig() throw( SError );
+   /// Dummy override for the function defined in TObject
+   virtual void ExecuteEvent( Int_t event, Int_t px, Int_t py );
 
    /// The number of already processed events
    Long64_t m_nProcessedEvents;
@@ -154,7 +155,6 @@ private:
    SInputData*           m_inputData; ///< Pointer to the currently active ID
    std::vector< TTree* > m_outputTrees; ///< List of all the event-level output TTree-s
    TFile*                m_outputFile; ///< Pointer to the active temporary output file
-   TTreeCache*           m_treeCache; ///< Cache used for readin the input TTree
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseExec, 0 );

@@ -1,3 +1,19 @@
+2012.06.22 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Added some non-siginificant updates to make the code fit more on
+     my screen.
+   * Added an implementation to TObject::ExecuteEvent(...) in SCycleBase to
+     avoid a very verbose warning from the compiler. This doesn't however
+     change the fact that the user code would still fire this warning.
+   * Tweaked the cache handling a bit, to no effect.
+   * Added the ability to start the memory profiling of the PROOF master or
+     worker processes by specifying ";MemProfMaster" or ";MemProfWorkers"
+     after the PROOF server name in the ProofServer XML property of the
+     cycles.
+   * SProofManager still doesn't download the full Valgrind logs correctly.
+     This will have to be fixed. For now one has to look at the full Valgrind
+     logs directly on the PROOF workers.
+   * Tagging as SFrame-03-06-00
+
 2012.06.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * "Stole" a header from the ATLAS offline code, and added it under
      plug-ins/include/FPCompare.h. It holds function and functors that can be

@@ -16,6 +16,8 @@
 #include <TProofLog.h>
 #include <TMacro.h>
 #include <TList.h>
+#include <TObjArray.h>
+#include <TObjString.h>
 
 // Local include(s):
 #include "../include/SProofManager.h"
@@ -59,10 +61,82 @@ SProofManager* SProofManager::Instance() {
  * @param param Additional parameters given to TProof::Open(...)
  * @returns The created TProof object
  */
-TProof* SProofManager::Open( const TString& url, const TString& param ) throw( SError ) {
+TProof* SProofManager::Open( const TString& url,
+                             const TString& param ) throw( SError ) {
 
-   // Check if the connection has already been opened:
-   ConnMap_t::key_type connection = std::make_pair( url, param );
+   // Copy the contents of the parameters, as we may have to change them:
+   TString urlcopy( url );
+   TString paramcopy( param );
+
+   // The user may specify some special additional tags in the URL string,
+   // which have to be searched for here:
+   TObjArray* tokens = url.Tokenize( ";" );
+   if( tokens->GetEntries() > 1 ) {
+      TObjString* token = dynamic_cast< TObjString* >( tokens->At( 0 ) );
+      if( ! token ) {
+         REPORT_ERROR( "The tokenized array contains something that's not a "
+                       "TObjString!" );
+         delete tokens;
+         throw SError( "Problems with tokenizing PROOF URL",
+                       SError::SkipCycle );
+      }
+      urlcopy = token->GetString();
+   }
+   // We override the parameters given to the function if extra tokens are
+   // found. Then again, the SFrame code never gives anything as "param" to the
+   // function anyway. (May change at one point.)
+   if( ( tokens->GetEntries() > 1 ) && ( paramcopy != "" ) ) {
+      m_logger << WARNING << "Extra parameters provided both in the URL and "
+               << "the extra parameters field. Using the one(s) from the "
+               << "URL field." << SLogger::endmsg;
+      paramcopy = "";
+   }
+   for( Int_t i = 1; i < tokens->GetEntries(); ++i ) {
+      TObjString* tokenobj = dynamic_cast< TObjString* >( tokens->At( i ) );
+      if( ! tokenobj ) {
+         REPORT_ERROR( "The tokenized array contains something that's not a "
+                       "TObjString!" );
+         delete tokens;
+         throw SError( "Problems with tokenizing PROOF URL",
+                       SError::SkipCycle );
+      }
+      const TString token = tokenobj->GetString();
+      // Did the user ask for the memory-leak profiling of the PROOF master?
+      if( token == "MemProfMaster" ) {
+         m_logger << INFO << "Running memory profiling on the master node"
+                  << SLogger::endmsg;
+         paramcopy = "valgrind=master";
+         TProof::AddEnvVar( "PROOF_MASTER_WRAPPERCMD",
+                            "valgrind_opts:--leak-check=full "
+                            "--track-origins=yes --num-callers=32" );
+      }
+      // Did the user ask for the memory-leak profiling of the PROOF workers?
+      else if( token == "MemProfWorkers" ) {
+         m_logger << INFO << "Running memory profiling on the worker nodes"
+                  << SLogger::endmsg;
+         paramcopy = "valgrind=workers";
+         TProof::AddEnvVar( "PROOF_SLAVE_WRAPPERCMD",
+                            "valgrind_opts:--leak-check=full "
+                            "--track-origins=yes --num-callers=32" );
+      } else {
+         REPORT_ERROR( "Unknown extra parameter specified: " << token );
+      }
+      // Extend the memory available to the PROOF processes in all memory
+      // profiling jobs:
+      if( token.BeginsWith( "MemProf" ) ) {
+         // This should make sure that at least 10 GBs are available to the
+         // process:
+         TProof::AddEnvVar( "PROOF_RESMEMMAX",  "10000" );
+         TProof::AddEnvVar( "PROOF_VIRTMEMMAX", "10000" );
+      }
+   }
+   REPORT_VERBOSE( "Using URL: " << urlcopy << ", Param: " << paramcopy );
+   // Clean up:
+   delete tokens;
+
+   // Check if the connection has already been opened. Notice that we're
+   // using the original URL and parameters here.
+   const ConnMap_t::key_type connection = std::make_pair( url, param );
    ConnMap_t::const_iterator conn;
    if( ( conn = m_connections.find( connection ) ) != m_connections.end() ) {
       m_logger << DEBUG << "Connection to \"" << url << "\" is already open"
@@ -71,13 +145,14 @@ TProof* SProofManager::Open( const TString& url, const TString& param ) throw( S
    }
 
    // Try to open the connection:
-   TProof* server = TProof::Open( url, param );
+   TProof* server = TProof::Open( urlcopy, paramcopy );
    if( ! server ) {
       REPORT_ERROR( "Couldn't open connection to: " << url );
       throw SError( "Couldn't open connection to: " + url,
                     SError::SkipCycle );
    } else {
-      m_logger << INFO << "Connection opened to \"" << url << "\"" << SLogger::endmsg;
+      m_logger << INFO << "Connection opened to \"" << url << "\""
+               << SLogger::endmsg;
    }
 
    // Remember that the server is connected, but not initialized yet:

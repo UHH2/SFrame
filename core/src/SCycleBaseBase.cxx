@@ -14,7 +14,7 @@
 #include "../include/SCycleBaseBase.h"
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseBase );
+ClassImp( SCycleBaseBase )
 #endif // DOXYGEN_IGNORE
 
 /**
@@ -42,5 +42,4 @@ void SCycleBaseBase::SetLogName( const char* name ) {
 
    m_logger.SetSource( name );
    return;
-
 }

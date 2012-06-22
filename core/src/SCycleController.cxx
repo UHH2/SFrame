@@ -478,7 +478,8 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
               id->GetTrees().begin(); trees != id->GetTrees().end(); ++trees ) {
          for( std::vector< STree >::const_iterator st = trees->second.begin();
               st != trees->second.end(); ++st ) {
-            if( ( st->type & STree::INPUT_TREE ) && ( st->type & STree::EVENT_TREE ) ) {
+            if( ( st->type & STree::INPUT_TREE ) &&
+                ( st->type & STree::EVENT_TREE ) ) {
                treeName = st->treeName.Data();
                break;
             }
@@ -512,8 +513,9 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       //
       // Calculate how many events to process:
       //
-      Long64_t evmax = ( id->GetNEventsMax() == -1 ? std::numeric_limits< Long64_t >::max() :
-                         id->GetNEventsMax() );
+      const Long64_t evmax = ( id->GetNEventsMax() == -1 ?
+                               std::numeric_limits< Long64_t >::max() :
+                               id->GetNEventsMax() );
 
       // This will point to the created output objects:
       TList* outputs = 0;
@@ -578,7 +580,8 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
                                  ( config.GetProofWorkDir() == "" ? "./" :
                                    config.GetProofWorkDir() + "/" ) +
                                  cycle->GetName() + "-" + inputData.GetType() +
-                                 "-" + inputData.GetVersion() + "-TempNTuple.root" );
+                                 "-" + inputData.GetVersion() +
+                                 "-TempNTuple.root" );
 
          //
          // Clear the query results from memory (Thanks to Gerri!):
@@ -594,7 +597,8 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          //
          m_proof->ClearInput();
          // Only output a maximum of 10 messages per node about memory usage per query:
-         Long64_t eventsPerNode = inputData.GetEventsTotal() / m_proof->GetParallel();
+         const Long64_t eventsPerNode = ( inputData.GetEventsTotal() /
+                                          m_proof->GetParallel() );
          m_proof->SetParameter( "PROOF_MemLogFreq",
                                 ( Long64_t ) ( eventsPerNode > 10000 ?
                                                ( eventsPerNode / 10 ) :

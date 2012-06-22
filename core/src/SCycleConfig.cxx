@@ -8,7 +8,7 @@
 #include "../include/SLogger.h"
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SCycleConfig );
+ClassImp( SCycleConfig )
 #endif // DOXYGEN_IGNORE
 
 SCycleConfig::SCycleConfig( const char* name )
@@ -16,7 +16,8 @@ SCycleConfig::SCycleConfig( const char* name )
      m_server( "" ), m_workdir( "" ), m_nodes( -1 ), m_properties(),
      m_inputData(), m_targetLumi( 1. ), m_outputDirectory( "" ),
      m_postFix( "" ), m_msgLevel( INFO ), m_useTreeCache( kFALSE ),
-     m_cacheSize( 30000000 ), m_cacheLearnEntries( 100 ) {
+     m_cacheSize( 30000000 ), m_cacheLearnEntries( 100 ),
+     m_processOnlyLocal( kFALSE ) {
 
 }
 

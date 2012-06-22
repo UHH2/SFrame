@@ -14,7 +14,7 @@
 #include "../include/SCycleBase.h"
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBase );
+ClassImp( SCycleBase )
 #endif // DOXYGEN_IGNORE
 
 /**
@@ -22,8 +22,7 @@ ClassImp( SCycleBase );
  */
 SCycleBase::SCycleBase() {
 
-   m_logger << VERBOSE << "SCycleBase constructed" << SLogger::endmsg;
-
+   REPORT_VERBOSE( "SCycleBase constructed" );
 }
 
 
@@ -32,6 +31,5 @@ SCycleBase::SCycleBase() {
  */
 SCycleBase::~SCycleBase() {
 
-   m_logger << VERBOSE << "SCycleBase destructed" << SLogger::endmsg;
-
+   REPORT_VERBOSE( "SCycleBase destructed" );
 }

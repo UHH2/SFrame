@@ -31,14 +31,14 @@
 #include "../include/STreeType.h"
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseExec );
+ClassImp( SCycleBaseExec )
 #endif // DOXYGEN_IGNORE
 
 /**
  * The constructor just initialises some member variable(s).
  */
 SCycleBaseExec::SCycleBaseExec()
-   : m_nProcessedEvents( 0 ), m_nSkippedEvents( 0 ), m_treeCache( 0 ) {
+   : m_nProcessedEvents( 0 ), m_nSkippedEvents( 0 ) {
 
    SetLogName( this->GetName() );
    REPORT_VERBOSE( "SCycleBaseExec constructed" );
@@ -228,13 +228,14 @@ Bool_t SCycleBaseExec::Notify() {
          m_logger << WARNING << "No input file? Can't set up TTreeCache!" << SLogger::endmsg;
       } else {
          m_inputTree->SetCacheSize( GetConfig().GetCacheSize() );
-         m_treeCache = dynamic_cast< TTreeCache* >( inputFile->GetCacheRead() );
-         if( ! m_treeCache ) {
+         TTreeCache* treeCache =
+            dynamic_cast< TTreeCache* >( inputFile->GetCacheRead() );
+         if( ! treeCache ) {
             REPORT_FATAL( "Couldn't create TTreeCache" );
             throw SError( "Couldn't create TTreeCache",
                           SError::StopExecution );
          }
-         m_treeCache->UpdateBranches( m_inputTree );
+         treeCache->UpdateBranches( m_inputTree );
       }
    }
 #endif // ROOT_VERSION...
@@ -393,6 +394,14 @@ void SCycleBaseExec::ReadConfig() throw( SError ) {
                     SError::SkipCycle );
       return;
    }
+
+   return;
+}
+
+void SCycleBaseExec::ExecuteEvent( Int_t /*event*/, Int_t /*px*/,
+                                   Int_t /*py*/ ) {
+
+   REPORT_ERROR( "This function should never get called!" );
 
    return;
 }

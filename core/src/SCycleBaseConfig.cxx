@@ -26,7 +26,7 @@
 #include "../include/STreeType.h"
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SCycleBaseConfig );
+ClassImp( SCycleBaseConfig )
 #endif // DOXYGEN_IGNORE
 
 /// Macro used in the DeclareProperty(...) functions
@@ -217,7 +217,8 @@ TList* SCycleBaseConfig::GetConfInput() const {
  * @param name  The name under which the property appears in XML
  * @param value The std::string object that you use as the property
  */
-void SCycleBaseConfig::DeclareProperty( const std::string& name, std::string& value ) {
+void SCycleBaseConfig::DeclareProperty( const std::string& name,
+                                        std::string& value ) {
 
    // Check if the property name is still available:
    CHECK_FOR_DUPLICATES( name );
@@ -253,7 +254,8 @@ void SCycleBaseConfig::DeclareProperty( const std::string& name, int& value ) {
  * @param name  The name under which the property appears in XML
  * @param value The double variable that you use as the property
  */
-void SCycleBaseConfig::DeclareProperty( const std::string& name, double& value ) {
+void SCycleBaseConfig::DeclareProperty( const std::string& name,
+                                        double& value ) {
 
    // Check if the property name is still available:
    CHECK_FOR_DUPLICATES( name );
@@ -389,7 +391,8 @@ TObject* SCycleBaseConfig::GetConfigObject( const char* name ) const {
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
 
-SInputData SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
+SInputData
+SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
 
    // create SInputData object
    SInputData inputData;
@@ -436,9 +439,13 @@ SInputData SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError
          TString treeName = "";
          TString formula = "";
          attribute = 0;
-         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0) {
-            if( attribute->GetName() == TString( "Tree" ) ) treeName = attribute->GetValue();
-            if( attribute->GetName() == TString( "Formula" ) ) formula = attribute->GetValue();
+         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
+            if( attribute->GetName() == TString( "Tree" ) ) {
+               treeName = attribute->GetValue();
+            }
+            if( attribute->GetName() == TString( "Formula" ) ) {
+               formula = attribute->GetValue();
+            }
          }
 
          REPORT_VERBOSE( "Found a generator cut on tree \"" << treeName
@@ -452,7 +459,7 @@ SInputData SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError
          TString name = "";
          Double_t lumi = 0.;
          attribute = 0;
-         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0) {
+         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
             if( attribute->GetName() == TString( "Name" ) )
                name = attribute->GetValue();
             if( attribute->GetName() == TString( "Lumi" ) )
@@ -470,7 +477,7 @@ SInputData SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError
          TString fileName = "";
          Double_t lumi = 0.;
          attribute = 0;
-         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0) {
+         while( ( attribute = dynamic_cast< TXMLAttr* >( attributes() ) ) != 0 ) {
             if( attribute->GetName() == TString( "FileName" ) )
                fileName = attribute->GetValue();
             if( attribute->GetName() == TString( "Lumi" ) )
@@ -544,7 +551,8 @@ SInputData SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError
       } else {
          // Unknown field notification. It's not an ERROR anymore, as this function
          // may actually find XML nodes that it doesn't recognise.
-         m_logger << DEBUG << "Unknown field: " << child->GetNodeName() << SLogger::endmsg;
+         m_logger << DEBUG << "Unknown field: " << child->GetNodeName()
+                  << SLogger::endmsg;
       }
       child = child->GetNextNode();
    }
@@ -592,16 +600,18 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
    return;
 }
 
-void SCycleBaseConfig::SetProperty( const std::string& name,
-                                    const std::string& stringValue ) throw( SError ) {
+void SCycleBaseConfig::
+SetProperty( const std::string& name,
+             const std::string& stringValue ) throw( SError ) {
 
    // Check if the user is specifying the same property multiple times.
    // XML doesn't guarantee in which order the properties are getting
    // read, so print explicitly what's happening.
    if( ! m_configuredPrefs.insert( name ).second ) {
-      m_logger << WARNING << "Property \"" << name << "\" is getting set multiple times"
+      m_logger << WARNING << "Property \"" << name
+               << "\" is getting set multiple times" << SLogger::endmsg;
+      m_logger << WARNING << "Now taking value: " << stringValue
                << SLogger::endmsg;
-      m_logger << WARNING << "Now taking value: " << stringValue << SLogger::endmsg;
    }
 
    // If it's a string property:
@@ -670,7 +680,6 @@ void SCycleBaseConfig::SetProperty( const std::string& name,
    }
 
    return;
-
 }
 
 /**
@@ -727,5 +736,4 @@ bool SCycleBaseConfig::ToBool( const std::string& value ) throw( SError ) {
    throw error;
 
    return false;
-
 }
