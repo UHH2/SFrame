@@ -1,3 +1,8 @@
+2012.07.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Disabled the code setting up TTreeCache in LOCAL mode for now.
+     It seems to cause serious problems.
+   * Tagging as SFrame-03-06-01
+
 2012.06.22 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Added some non-siginificant updates to make the code fit more on
      my screen.

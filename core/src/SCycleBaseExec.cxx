@@ -220,23 +220,14 @@ Bool_t SCycleBaseExec::Notify() {
       m_inputTree->StopCacheLearningPhase();
    }
 
-   // If the tree caching is turned on in LOCAL mode, make sure that this
-   // actually happens:
+   // According to user reports, trying to turn on TTreeCache in LOCAL mode
+   // leads to hard-to-detect, but serious problems. (The results don't match
+   // up with the ones acquired without using a cache.) So, for now the code
+   // doesn't try to use a cache in this case.
    if( GetConfig().GetUseTreeCache() &&
        ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ) ) {
-      if( ! inputFile ) {
-         m_logger << WARNING << "No input file? Can't set up TTreeCache!" << SLogger::endmsg;
-      } else {
-         m_inputTree->SetCacheSize( GetConfig().GetCacheSize() );
-         TTreeCache* treeCache =
-            dynamic_cast< TTreeCache* >( inputFile->GetCacheRead() );
-         if( ! treeCache ) {
-            REPORT_FATAL( "Couldn't create TTreeCache" );
-            throw SError( "Couldn't create TTreeCache",
-                          SError::StopExecution );
-         }
-         treeCache->UpdateBranches( m_inputTree );
-      }
+      m_logger << WARNING << "Can't use a TTreeCache in LOCAL mode, sorry..."
+               << SLogger::endmsg;
    }
 #endif // ROOT_VERSION...
 
