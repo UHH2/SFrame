@@ -16,6 +16,12 @@
  #   - SRCDIR                                                              #
  #   - INCDIR                                                              #
  #                                                                         #
+ #  It is also possible to extend the following variables in a package's   #
+ #  Makefile:                                                              #
+ #   - INCLUDES                                                            #
+ #   - USERCXXFLAGS                                                        #
+ #   - USERLDFLAGS                                                         #
+ #                                                                         #
  #  And of course all the definitions from $(ROOTSYS)/test/Makefile.arch   #
  #                                                                         #
  ###########################################################################
@@ -64,7 +70,7 @@ endif
 # Some compilation options
 VPATH    += $(OBJDIR) $(SRCDIR)
 INCLUDES += -I$(SFRAME_DIR) -I./
-CXXFLAGS += -Wall -Wno-overloaded-virtual -Wno-unused
+CXXFLAGS += -Wall -Wno-overloaded-virtual -Wno-unused $(USERCXXFLAGS)
 
 # Set the locations of some files
 DICTHEAD  = $(SRCDIR)/$(LIBRARY)_Dict.h
@@ -96,7 +102,8 @@ OLIST = $(patsubst %.$(SrcSuf),%.o,$(notdir $(CPPLIST)))
 # Rule to create the dictionary
 $(DICTFILE): $(HLIST) $(DICTLDEF)
 	@echo "Generating dictionary $@" 
-	@$(shell root-config --exec-prefix)/bin/rootcint -f $(DICTFILE) -c -p $(INCLUDES) $^
+	@$(shell root-config --exec-prefix)/bin/rootcint -f $(DICTFILE) -c -p \
+		$(INCLUDES) $^
 
 # Rule to comile the dictionary
 $(DICTOBJ): $(DICTFILE)
@@ -144,9 +151,12 @@ $(SHLIBFILE): $(OLIST) $(DICTOBJ)
 	@echo "Making shared library: $(SHLIBFILE)"
 	@rm -f $(SHLIBFILE)
 ifneq (,$(findstring macosx,$(ARCH)))
-	@$(LD) $(LDFLAGS) -dynamiclib -single_module -undefined dynamic_lookup $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
+	@$(LD) $(LDFLAGS) $(USERLDFLAGS) -dynamiclib -single_module -undefined \
+		dynamic_lookup $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) \
+		-o $(SHLIBFILE)
 else
-	@$(LD) $(LDFLAGS) $(SOFLAGS) $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
+	@$(LD) $(LDFLAGS) $(USERLDFLAGS) $(SOFLAGS) $(addprefix $(OBJDIR)/,$(OLIST)) \
+		$(DICTOBJ) -o $(SHLIBFILE)
 endif
 
 # Useful build targets

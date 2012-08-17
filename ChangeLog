@@ -1,3 +1,10 @@
+2012.08.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added two new variables that the user can set in their package's
+	  Makefile: USERCXXFLAGS and USERLDFLAGS. They can be used
+	  to fine-tune the compilation of user libraries. It is also still
+	  possible to modify the INCLUDES variable in the user Makefile.
+	* Tagging as SFrame-03-06-02
+
 2012.07.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Disabled the code setting up TTreeCache in LOCAL mode for now.
      It seems to cause serious problems.
