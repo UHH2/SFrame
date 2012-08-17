@@ -234,7 +234,7 @@ endif
 # Some compilation options
 VPATH    += $(OBJDIR) $(SRCDIR)
 INCLUDES += -I./ -I../
-CXXFLAGS += -Wall -Wno-overloaded-virtual -Wno-unused
+CXXFLAGS += -Wall -Wno-overloaded-virtual -Wno-unused $(USERCXXFLAGS)
 
 # Set the locations of some files
 DICTHEAD  = $(SRCDIR)/$(LIBRARY)_Dict.h
@@ -287,9 +287,9 @@ $(SHLIBFILE): $(OLIST) $(DICTOBJ)
 	@echo "Making shared library: $(SHLIBFILE)"
 	@rm -f $(SHLIBFILE)
 ifneq (,$(findstring macosx,$(ARCH)))
-	@$(LD) $(LDFLAGS) -dynamiclib -single_module -undefined dynamic_lookup $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
+	@$(LD) $(LDFLAGS) $(USERLDFLAGS) -dynamiclib -single_module -undefined dynamic_lookup $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
 else
-	@$(LD) $(LDFLAGS) $(SOFLAGS) $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
+	@$(LD) $(LDFLAGS) $(USERLDFLAGS) $(SOFLAGS) $(addprefix $(OBJDIR)/,$(OLIST)) $(DICTOBJ) -o $(SHLIBFILE)
 endif
 
 # Useful build targets
