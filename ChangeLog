@@ -1,4 +1,10 @@
 2012.08.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Added a new script (sframe_reset_proof.py) that can be used
+	  to conveniently kill a PROOF job. This is sometimes needed,
+	  and SFrame didn't really help with it so far.
+	* Tagging as SFrame-03-06-03
+
+2012.08.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added two new variables that the user can set in their package's
 	  Makefile: USERCXXFLAGS and USERLDFLAGS. They can be used
 	  to fine-tune the compilation of user libraries. It is also still
