@@ -26,7 +26,7 @@
  #                                                                         #
  ###########################################################################
 
-MAKEFLAGS = --no-print-directory -r -s -j2
+MAKEFLAGS = --no-print-directory -r -s
 
 #
 # Include the architecture definitions from the ROOT sources

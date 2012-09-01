@@ -14,16 +14,16 @@
 all: core plug-ins cintex user
 
 core::
-	(cd core; make)
+	+(cd core; make)
 
 plug-ins::
-	(cd plug-ins; make)
+	+(cd plug-ins; make)
 
 cintex::
-	(cd cintex; make)
+	+(cd cintex; make)
 
 user::
-	(cd user; make)
+	+(cd user; make)
 
 clean::
 	(cd core; make clean)

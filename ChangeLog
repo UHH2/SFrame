@@ -1,3 +1,10 @@
+2012.09.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated the Makefile-s to handle parallel builds a little
+	  better. The code is no longer built on 2 cores by default,
+	  but now the user can freely specify the number of build
+	  processes with -jX after the make command.
+	* Tagging as SFrame-03-06-04
+
 2012.08.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Added a new script (sframe_reset_proof.py) that can be used
 	  to conveniently kill a PROOF job. This is sometimes needed,
