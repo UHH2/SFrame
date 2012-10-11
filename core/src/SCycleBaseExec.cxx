@@ -107,8 +107,16 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
                      << "Running in LOCAL mode" << SLogger::endmsg;
             proofFile = 0;
             // Use a more or less POSIX method for creating a unique file name:
-            tempDirName = new char[ 100 ];
-            sprintf( tempDirName, "%s", SFrame::ProofOutputDirName );
+            tempDirName = new char[ 300 ];
+            if( gSystem->Getenv( "SFRAME_TEMP_DIR" ) ) {
+               // Honor the user's preference for the temporary directory
+               // location:
+               sprintf( tempDirName, "%s/%s",
+                        gSystem->Getenv( "SFRAME_TEMP_DIR" ),
+                        SFrame::ProofOutputDirName );
+            } else {
+               sprintf( tempDirName, "%s", SFrame::ProofOutputDirName );
+            }
             if( ! mkdtemp( tempDirName ) ) {
                REPORT_FATAL( "Couldn't create temporary directory name from template: "
                              << SFrame::ProofOutputDirName );

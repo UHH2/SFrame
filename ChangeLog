@@ -1,3 +1,11 @@
+2012.10.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Cycles running in LOCAL mode will now either create a temporary directory
+     in the running directory as they did so far, or, if the
+     SFRAME_TEMP_DIR environment variable is set, create a temporary directory
+     inside that directory. (A unique directory is still made, the files are
+     not just put blindly into the specified directory.)
+   * Tagging as SFrame-03-06-05
+
 2012.09.01 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Updated the Makefile-s to handle parallel builds a little
 	  better. The code is no longer built on 2 cores by default,

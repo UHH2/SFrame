@@ -1,3 +1,10 @@
+2012.10.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Cycles running in LOCAL mode will now either create a temporary directory
+     in the running directory as they did so far, or, if the
+     SFRAME_TEMP_DIR environment variable is set, create a temporary directory
+     inside that directory. (A unique directory is still made, the files are
+     not just put blindly into the specified directory.)
+
 2012.07.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Disabled the code setting up TTreeCache in LOCAL mode for now.
      It seems to cause serious problems.
