@@ -496,6 +496,82 @@ void SInputData::Print( const Option_t* ) const {
    return;
 }
 
+/**
+ * This function is used to get an "XML representation" of the configuration
+ * stored in this input data object. It is used to archive the cycle
+ * configuration into the job's output file.
+ *
+ * @returns The InputData configuration as an XML string
+ */
+TString SInputData::GetStringConfig() const {
+
+   // The result string:
+   TString result;
+
+   // Compose the "header" of the input data:
+   result += TString::Format( "    <InputData Type=\"%s\"\n", m_type.Data() );
+   result += TString::Format( "               Version=\"%s\"\n",
+                              m_version.Data() );
+   result += TString::Format( "               Lumi=\"%g\"\n",
+                              m_totalLumiGiven );
+   result += TString::Format( "               NEventsMax=\"%lld\"\n",
+                              m_neventsmax );
+   result += TString::Format( "               NEventsSkip=\"%lld\"\n",
+                              m_neventsskip );
+   result += TString::Format( "               Cacheable=\"%s\"\n",
+                              ( m_cacheable ? "True" : "False" ) );
+   result += TString::Format( "               SkipValid=\"%s\">\n\n",
+                              ( m_skipValid ? "True" : "False" ) );
+
+   // Add all the input files:
+   std::vector< SFile >::const_iterator f_itr = m_sfileIn.begin();
+   std::vector< SFile >::const_iterator f_end = m_sfileIn.end();
+   for( ; f_itr != f_end; ++f_itr ) {
+      result += TString::Format( "        <In FileName=\"%s\" Lumi=\"%g\"/>\n",
+                                 f_itr->file.Data(), f_itr->lumi );
+   }
+
+   // Add all the input datasets:
+   std::vector< SDataSet >::const_iterator d_itr = m_dataSets.begin();
+   std::vector< SDataSet >::const_iterator d_end = m_dataSets.end();
+   for( ; d_itr != d_end; ++d_itr ) {
+      result += TString::Format( "        <DataSet Name=\"%s\" Lumi=\"%g\"/>\n",
+                                 d_itr->name.Data(), d_itr->lumi );
+   }
+
+   // Add all the generator cuts:
+   std::vector< SGeneratorCut >::const_iterator g_itr = m_gencuts.begin();
+   std::vector< SGeneratorCut >::const_iterator g_end = m_gencuts.end();
+   for( ; g_itr != g_end; ++g_itr ) {
+      result += TString::Format( "        <GeneratorCut Tree=\"%s\" "
+                                 "Formula=\"%s\"/>\n",
+                                 g_itr->GetTreeName().Data(),
+                                 g_itr->GetFormula().Data() );
+   }
+
+   // Add all the trees:
+   const STreeTypeDecoder* decoder = STreeTypeDecoder::Instance();
+   std::map< Int_t, std::vector< STree > >::const_iterator t_itr =
+      m_trees.begin();
+   std::map< Int_t, std::vector< STree > >::const_iterator t_end =
+      m_trees.end();
+   for( ; t_itr != t_end; ++t_itr ) {
+      std::vector< STree >::const_iterator tt_itr = t_itr->second.begin();
+      std::vector< STree >::const_iterator tt_end = t_itr->second.end();
+      for( ; tt_itr != tt_end; ++tt_itr ) {
+         result += TString::Format( "        <%s Name=\"%s\"/>\n",
+                                    decoder->GetXMLName( t_itr->first ).Data(),
+                                    tt_itr->treeName.Data() );
+      }
+   }
+
+   // Close the input data block:
+   result += "    </InputData>";
+
+   // Return the constructed string:
+   return result;
+}
+
 void SInputData::ValidateInputFiles() throw( SError ) {
 
    //

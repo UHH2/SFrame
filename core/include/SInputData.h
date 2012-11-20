@@ -292,6 +292,9 @@ public:
    /// Function printing the contents of the object
    void Print( const Option_t* opt = 0 ) const;
 
+   /// Get the input data configuration as a TString object
+   TString GetStringConfig() const;
+
 private:
    void ValidateInputFiles() throw( SError );
    void ValidateInputDataSets( const char* pserver ) throw( SError );

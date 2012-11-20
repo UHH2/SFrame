@@ -36,6 +36,7 @@
 #include <TFileCollection.h>
 #include <THashList.h>
 #include <TFileInfo.h>
+#include <TObjString.h>
 
 // Local include(s):
 #include "../include/SCycleController.h"
@@ -767,7 +768,9 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
       TString outputFileName = config.GetOutputDirectory() + cycleName + "." +
          id->GetType() + "." + id->GetVersion() + config.GetPostFix() + ".root";
       outputFileName.ReplaceAll( "::", "." );
-      WriteCycleOutput( outputs, outputFileName, updateOutput );
+      WriteCycleOutput( outputs, outputFileName,
+                        config.GetStringConfig( &inputData ),
+                        updateOutput );
 
       // This cleanup is giving me endless trouble on the NYU Tier3 with
       // ROOT 5.28c. So, knowing no better solution, I just disabled it
@@ -858,7 +861,9 @@ void SCycleController::ShutDownProof() {
 }
 
 void SCycleController::WriteCycleOutput( TList* olist,
-                                         const TString& filename, Bool_t update ) const {
+                                         const TString& filename,
+                                         const TString& config,
+                                         Bool_t update ) const {
 
    m_logger << INFO << "Writing output of \""
             << m_analysisCycles.at( m_curCycle )->GetName() << "\" to: "
@@ -902,6 +907,24 @@ void SCycleController::WriteCycleOutput( TList* olist,
       m_logger << DEBUG << "Written object: " << olist->At( i )->GetName()
                << SLogger::endmsg;
 
+   }
+
+   //
+   // Add the cycle configuration as metadata to the output file:
+   //
+   if( ! update ) {
+      // Make a directory for all SFrame related metadata. Might want to
+      // add other metadata types as well to the output files later on.
+      TDirectory* sframeDir = outputFile.GetDirectory( "SFrame" );
+      if( ! sframeDir ) {
+         sframeDir = outputFile.mkdir( "SFrame" );
+      }
+      sframeDir->cd();
+
+      // Create a TObjString out of the cycle configuration, and write it
+      // out:
+      TObjString configString( config );
+      configString.Write( "CycleConfiguration" );
    }
 
    //

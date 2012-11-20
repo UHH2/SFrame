@@ -1,7 +1,14 @@
 // $Id$
 
+// System include(s):
+#include <ctime>
+#include <locale>
+
 // STL include(s):
 #include <map>
+
+// ROOT include(s):
+#include <TSystem.h>
 
 // Local include(s):
 #include "../include/SCycleConfig.h"
@@ -12,13 +19,25 @@ ClassImp( SCycleConfig )
 #endif // DOXYGEN_IGNORE
 
 SCycleConfig::SCycleConfig( const char* name )
-   : TNamed( name, "SFrame cycle configuration" ), m_mode( LOCAL ),
+   : TNamed( name, "SFrame cycle configuration" ),
+     m_cycleName( "Unknown" ), m_mode( LOCAL ),
      m_server( "" ), m_workdir( "" ), m_nodes( -1 ), m_properties(),
      m_inputData(), m_targetLumi( 1. ), m_outputDirectory( "" ),
      m_postFix( "" ), m_msgLevel( INFO ), m_useTreeCache( kFALSE ),
      m_cacheSize( 30000000 ), m_cacheLearnEntries( 100 ),
      m_processOnlyLocal( kFALSE ) {
 
+}
+
+const TString& SCycleConfig::GetCycleName() const {
+
+   return m_cycleName;
+}
+
+void SCycleConfig::SetCycleName( const TString& name ) {
+
+   m_cycleName = name;
+   return;
 }
 
 SCycleConfig::RunMode SCycleConfig::GetRunMode() const {
@@ -265,6 +284,115 @@ void SCycleConfig::ValidateInput() {
    }
 
    return;
+}
+
+/**
+ * This function makes a nice string representation of the cycle's
+ * configuration. This makes it easy to archive the configuration into the
+ * output file of the cycle.
+ *
+ * @param id If specified only the configuration of this one ID is added to the
+ *           string. If it's left as a null pointer, all IDs are added.
+ * @returns The string that should be put into the output file of the cycle
+ *          for future reference
+ */
+TString SCycleConfig::GetStringConfig( const SInputData* id ) const {
+
+   // The result string:
+   TString result;
+
+   // Get the system information:
+   SysInfo_t sysInfo;
+   gSystem->GetSysInfo( &sysInfo );
+
+   // Get the user information:
+   UserGroup_t* userInfo = gSystem->GetUserInfo();
+
+   // Get the current time:
+   time_t rawtime = time( NULL );
+   const char* currentTime = ctime( &rawtime );
+   TString printedTime = currentTime ? currentTime : "unknown";
+   if( printedTime.EndsWith( "\n" ) ) {
+      printedTime.Remove( printedTime.Length() - 1 );
+   }
+
+   // Interestingly enough, it's not needed to delete the return value of
+   // ctime(...). It even causes problems if I try to do it. Even though
+   // it actually returns "char*" and not "const char*". Very strange...
+
+   // Some disclaimer:
+   result += "<!-- Archived cycle configuration -->\n";
+   result += TString::Format( "<!--  host: %s -->\n", gSystem->HostName() );
+   result += TString::Format( "<!--  syst: %s / %s -->\n", sysInfo.fOS.Data(),
+                              sysInfo.fModel.Data() );
+   result += TString::Format( "<!--  user: %s (%s) -->\n",
+                              ( userInfo ? userInfo->fUser.Data() :
+                                "unknown" ),
+                              ( userInfo ? userInfo->fRealName.Data() :
+                                "N/A" ) );
+   result += TString::Format( "<!--  time: %s -->\n\n", printedTime.Data() );
+
+   // Delete the created object(s):
+   if( userInfo ) delete userInfo;
+
+   // Put together the <Cycle...> part of the configuration:
+   result += TString::Format( "<Cycle Name=\"%s\"\n", m_cycleName.Data() );
+   result += TString::Format( "       OutputDirectory=\"%s\"\n",
+                              m_outputDirectory.Data() );
+   result += TString::Format( "       PostFix=\"%s\"\n",
+                              m_postFix.Data() );
+   result += TString::Format( "       TargetLumi=\"%g\"\n", m_targetLumi );
+   result += "       RunMode=\"";
+   if( m_mode == LOCAL ) {
+      result += "LOCAL";
+   } else if( m_mode == PROOF ) {
+      result += "PROOF";
+   } else {
+      result += "UNKNOWN";
+   }
+   result += "\"\n";
+   result += TString::Format( "       ProofServer=\"%s\"\n",
+                              m_server.Data() );
+   result += TString::Format( "       ProofNodes=\"%i\"\n", m_nodes );
+   result += TString::Format( "       ProofWorkDir=\"%s\"\n",
+                              m_workdir.Data() );
+   result += TString::Format( "       UseTreeCache=\"%s\"\n",
+                              ( m_useTreeCache ? "True" : "False" ) );
+   result += TString::Format( "       TreeCacheSize=\"%lld\"\n", m_cacheSize );
+   result += TString::Format( "       TreeCacheLearnEntries=\"%i\"\n",
+                              m_cacheLearnEntries );
+   result += TString::Format( "       ProcessOnlyLocal=\"%s\">\n\n",
+                              ( m_processOnlyLocal ? "True" : "False" ) );
+
+   // Decide how to add the input data information:
+   if( id ) {
+      // Add just this one SInputData to the output:
+      result += TString::Format( "%s\n\n", id->GetStringConfig().Data() );
+   } else {
+      // Put all the InputData options in there:
+      id_type::const_iterator i_itr = m_inputData.begin();
+      id_type::const_iterator i_end = m_inputData.end();
+      for( ; i_itr != i_end; ++i_itr ) {
+         result += TString::Format( "%s\n\n", i_itr->GetStringConfig().Data() );
+      }
+   }
+
+   // Put all the user configuration options in there:
+   result += "    <UserConfig>\n";
+   property_type::const_iterator p_itr = m_properties.begin();
+   property_type::const_iterator p_end = m_properties.end();
+   for( ; p_itr != p_end; ++p_itr ) {
+      result += TString::Format( "       <Item Name=\"%s\" Value=\"%s\"/>\n",
+                                 p_itr->first.c_str(),
+                                 p_itr->second.c_str() );
+   }
+   result += "    </UserConfig>\n";
+
+   // Close the <Cycle> block:
+   result += "</Cycle>";
+
+   // Return the string that we just made:
+   return result;
 }
 
 void SCycleConfig::ClearConfig() {

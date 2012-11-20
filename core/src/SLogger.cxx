@@ -95,6 +95,15 @@ void SLogger::SetSource( const std::string& source ) {
 
 }
 
+const char* SLogger::GetSource() const {
+
+   if( m_objSource ) {
+      return m_objSource->GetName();
+   } else {
+      return m_strSource.c_str();
+   }
+}
+
 /**
  * Operator for copying the configuration of one SLogger object into
  * another. It is mostly used by the copy constructor.

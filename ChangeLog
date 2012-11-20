@@ -1,3 +1,19 @@
+2012.11.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* All SFrame cycles will now add a TObjString description to their
+	  output files, which describes the full configuration that was used
+	  to produce this output file.
+	* Only configuration that the cycle knows about is written at the
+	  moment. But it wouldn't be terribly difficult to add some info
+	  about the loaded libraries/packages later on as well.
+	* Had to touch quite a few classes to implement this new feature in
+	  a way that I liked...
+	* Added a new script, sframe_print_config.py, which can nicely print
+	  the configuration of the cycle that was used to create an output
+	  ROOT file.
+	* Fixed sframe_new_package.sh to make the BUILD.sh file correctly
+	  for PROOF-Lite builds.
+	* Tagging as SFrame-03-06-06
+
 2012.10.11 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Cycles running in LOCAL mode will now either create a temporary directory
      in the running directory as they did so far, or, if the

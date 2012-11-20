@@ -108,8 +108,11 @@ protected:
    SCycleConfig m_config;
 
 private:
-   /// Function for decoding a string to bool:
+   /// Function for decoding a string to bool
    bool ToBool( const std::string& value ) throw( SError );
+   /// Function used in constructing the user configuration options
+   template< typename T >
+   void AddUserOptions( const std::map< const std::string, T* >& prefs );
 
    //
    // These are the object used to handle the preferences of the

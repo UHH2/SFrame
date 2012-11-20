@@ -81,7 +81,7 @@ if [ "\$1" = "clean" ]; then
     exit 0
 fi
 
-if [ "x$ROOTPROOFLITE" != "x" ]; then
+if [ "x\$ROOTPROOFLITE" != "x" ]; then
     echo "Running on PROOF-Lite, skipping build"
     exit 0
 fi

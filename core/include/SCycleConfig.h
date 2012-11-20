@@ -45,6 +45,11 @@ public:
    /// Simple constructor with a name
    SCycleConfig( const char* name = "SCycleConfig" );
 
+   /// Get the name of the cycle holding this configuration
+   const TString& GetCycleName() const;
+   /// Set the name of the cycle holding this configuration
+   void SetCycleName( const TString& name );
+
    /// Run mode enumeration
    /**
     * This enumeration defines how the analysis cycle can be run. At the
@@ -159,10 +164,14 @@ public:
     */
    void ValidateInput();
 
+   /// Get the cycle configuration as a TString object
+   TString GetStringConfig( const SInputData* id = 0 ) const;
+
    /// Clear the configuration
    void ClearConfig();
 
 private:
+   TString       m_cycleName; ///< Name of the cycle holding this configuration
    RunMode       m_mode; ///< Running mode for the cycle
    TString       m_server; ///< Name of the PROOF server to use
    TString       m_workdir; ///< PROOF work directory, used for handling ntuple output

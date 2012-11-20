@@ -54,8 +54,13 @@ public:
    /// Default destructor
    virtual ~SLogger();
 
+   /// Set the source name using a TObject parent
    void SetSource( const TObject* source );
+   /// Set the source name using a simple string
    void SetSource( const std::string& source );
+
+   /// Get the source string of the logger
+   const char* GetSource() const;
 
    /// Copy operator
    SLogger& operator= ( const SLogger& parent );

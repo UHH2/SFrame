@@ -75,7 +75,9 @@ private:
    void DeleteAllAnalysisCycles();
    void InitProof( const TString& server, const Int_t& nodes);
    void ShutDownProof();
-   void WriteCycleOutput( TList* olist, const TString& filename, Bool_t update ) const;
+   void WriteCycleOutput( TList* olist, const TString& filename,
+                          const TString& config,
+                          Bool_t update ) const;
 
    /// vector holding all analysis cycles to be executed
    std::vector< ISCycleBase* > m_analysisCycles;

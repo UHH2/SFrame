@@ -49,12 +49,17 @@ public:
    static STreeTypeDecoder* Instance();
 
    /// Function adding a new type to the dictionary
-   void AddType( const TString& name, Int_t code );
+   void AddType( const TString& xmlName, const TString& name, Int_t code );
 
    /// Get the name belonging to a given code
    const TString& GetName( Int_t code ) const;
    /// Get the code belonging to a given name
    Int_t GetCode( const TString& name ) const;
+
+   /// Get the XML name belonging to a given code
+   const TString& GetXMLName( Int_t code ) const;
+   /// Get the code belonging to an XML name
+   Int_t GetXMLCode( const TString& name ) const;
 
 private:
    /// The constructor is private, to implement the singleton pattern
@@ -63,8 +68,15 @@ private:
    std::map< TString, Int_t > m_forwardMap; ///< Map assigning codes to names
    std::map< Int_t, TString > m_reverseMap; ///< Map assigning names to codes
 
-   static const TString m_unknownName; ///< A variable needed for technical reasons
-   static const Int_t   m_unknownCode; ///< A variable used to be symmetric
+   /// Map associating codes to XML names
+   std::map< TString, Int_t > m_xmlForwardMap;
+   /// Map associating XML names to codes
+   std::map< Int_t, TString > m_xmlReverseMap;
+
+   /// A variable needed for technical reasons
+   static const TString m_unknownName;
+   /// A variable used to be symmetric
+   static const Int_t   m_unknownCode;
 
    static STreeTypeDecoder* m_instance; ///< Pointer to the singleton instance
 
