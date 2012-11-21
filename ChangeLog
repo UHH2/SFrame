@@ -1,3 +1,19 @@
+2012.11.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* SCycleBaseNTuple::DeclareVariable(...) will now add variables
+	  to metadata output trees as well if the user asks explicitly
+	  for such a tree by name.
+	* The ConnectVariable(...) functions still don't support
+	  metadata trees, as this would mean a big-big development
+	  effort, and nobody really asked for this functionality anyway...
+	* The name of the cycle is written into the metadata of the
+	  output file in a more robust way now.
+	* Updated the FirstCycle example to make use of the new feature
+	  that allows us to create branches in output metadata trees
+	  using DeclareVariable(...).
+	* SecondCycle now prints messages with their proper source string
+	  when running.
+	* Tagging as SFrame-03-06-07
+
 2012.11.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* All SFrame cycles will now add a TObjString description to their
 	  output files, which describes the full configuration that was used

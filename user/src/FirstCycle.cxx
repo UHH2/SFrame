@@ -120,22 +120,20 @@ void FirstCycle::BeginInputData( const SInputData& ) throw( SError ) {
    // Declare the output variables:
    //
    DeclareVariable( m_o_example_variable, "example_variable" );
-   DeclareVariable( m_o_El_p_T, "El_p_T" );
-   DeclareVariable( m_o_El, "El" );
+   DeclareVariable( m_o_El_p_T,           "El_p_T" );
+   DeclareVariable( m_o_El,               "El" );
 
    //
-   // Declare the metadata variables. This is completely up to the user
-   // at this point to operate directly on the output TTree.
+   // Declare the metadata variables:
    //
+   DeclareVariable( m_meta_El_p_T, "p_T", m_metaTreeName.c_str() );
+   DeclareVariable( m_meta_El_eta, "eta", m_metaTreeName.c_str() );
+   DeclareVariable( m_meta_El_phi, "phi", m_metaTreeName.c_str() );
+   DeclareVariable( m_meta_El_E,   "E",   m_metaTreeName.c_str() );
+
+   // Access the metadata tree to be able to control how entries
+   // are written to it:
    m_electronTree = GetMetadataTree( m_metaTreeName.c_str() );
-   if( ! m_electronTree ) {
-      throw SError( "Couldn't access the output metadata tree",
-                    SError::SkipInputData );
-   }
-   m_electronTree->Branch( "p_T", &m_meta_El_p_T, "p_T/D" );
-   m_electronTree->Branch( "eta", &m_meta_El_eta, "eta/D" );
-   m_electronTree->Branch( "phi", &m_meta_El_phi, "phi/D" );
-   m_electronTree->Branch( "E",   &m_meta_El_E,   "E/D" );
 
    //
    // Declare the output histograms:

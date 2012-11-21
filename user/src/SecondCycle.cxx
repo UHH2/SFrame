@@ -21,8 +21,9 @@ ClassImp( SecondCycle );
 
 SecondCycle::SecondCycle() {
 
-   DeclareProperty( "FirstCycleTreeString", m_FirstCycleTreeName );
+   SetLogName( GetName() );
 
+   DeclareProperty( "FirstCycleTreeString", m_FirstCycleTreeName );
 }
 
 SecondCycle::~SecondCycle() {

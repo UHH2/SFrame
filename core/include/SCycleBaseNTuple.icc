@@ -349,7 +349,23 @@ TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,
    //
    if( treeName ) {
 
-      tree = GetOutputTree( treeName );
+      // Consider both "normal" and metadata trees:
+      try {
+         tree = GetOutputTree( treeName );
+      } catch( const SError& error ) {
+         if( error.request() <= SError::SkipFile ) {
+            // Try to find a metadata tree if a regular tree is not found
+            // with this name:
+            REPORT_VERBOSE( "Output tree with name \"" << name
+                            << "\" not found. Trying to find a metadata tree "
+                            << "instead." );
+            tree = GetOutputMetadataTree( treeName );
+         } else {
+            REPORT_ERROR( "Exception message caught with message: "
+                          << error.what() );
+            throw;
+         }
+      }
 
    } else {
 

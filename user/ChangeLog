@@ -1,3 +1,10 @@
+2012.11.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated the FirstCycle example to make use of the new feature
+	  that allows us to create branches in output metadata trees
+	  using DeclareVariable(...).
+	* SecondCycle now prints messages with their proper source string
+	  when running.
+
 2012.04.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Updated BUILD.sh not to compile the code when running on PROOF-Lite
 
