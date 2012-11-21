@@ -312,6 +312,12 @@ void SCycleBaseExec::SlaveTerminate() {
    }
 
    //
+   // Write the objects that are meant to be merged in-file, into
+   // the output file:
+   //
+   this->WriteHistObjects( m_outputFile );
+
+   //
    // Write the node statistics to the output:
    //
    SCycleStatistics* stat = new SCycleStatistics( SFrame::RunStatisticsName,

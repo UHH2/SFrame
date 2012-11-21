@@ -52,18 +52,21 @@ public:
    ~SFileMerger();
 
    /// Add an input file that should be processed
-   void AddInput( const TString& fileName ) throw( SError );
+   Bool_t AddFile( const TString& fileName ) throw( SError );
    /// Specify the output of the merging
-   void SetOutput( const TString& fileName ) throw( SError );
+   Bool_t OutputFile( const TString& fileName,
+                      const TString& mode = "UPDATE" ) throw( SError );
 
    /// Execute the merging itself
-   void Merge() throw( SError );
+   Bool_t Merge() throw( SError );
 
 private:
    /// Close all open files
    void CloseFiles();
    /// Merge the contents of one directory
    void MergeDirectory( TDirectory* input, TDirectory* output ) throw( SError );
+   /// Merge two objects together
+   void MergeObjects( TObject* in, TObject* out ) throw( SError );
 
    std::vector< TFile* > m_inputFiles; ///< List of all specified input files
    TFile*                m_outputFile; ///< The output file

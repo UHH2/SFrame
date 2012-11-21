@@ -18,7 +18,7 @@
 #include <TROOT.h>
 #include <TH1.h>
 #include <TList.h>
-#include <TFile.h>
+#include <TDirectory.h>
 #include <TKey.h>
 
 // Local include(s):
@@ -40,23 +40,41 @@
  *          SCycleBaseHist::Retrieve are quite slow.
  *
  * @see SCycleBaseHist::Retrieve
+ *
+ * @param histo The object (usually histogram) to put into the output
+ * @param directory Optional directory name where the object should end up
+ * @param inFile If set to <code>kTRUE</code>, the object will be merged
+ *               using the output file, and not in memory
  */
 template< class T >
 T* SCycleBaseHist::Book( const T& histo,
-                         const char* directory ) throw( SError ) {
+                         const char* directory,
+                         Bool_t inFile ) throw( SError ) {
 
+   // Put the object into our temporary directory in memory:
    GetTempDir()->cd();
 
+   // Construct a full path name for the object:
    TString path = ( directory ? directory + TString( "/" ) : "" ) +
       TString( histo.GetName() );
-   SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
+
+   // Decide which TList to store the object in:
+   TList* output = ( inFile ? &m_fileOutput : m_proofOutput );
+
+   // Check if the object was already added:
+   SCycleOutput* out =
+      dynamic_cast< SCycleOutput* >( output->FindObject( path ) );
+
+   // If not, add it now:
    if( ! out ) {
       out = new SCycleOutput( histo.Clone(), path, directory );
-      m_output->TList::AddLast( out );
+      output->TList::AddLast( out );
       REPORT_VERBOSE( "Added new object with name \"" << histo.GetName()
-                      << "\" in directory \"" << ( directory ? directory : "" ) << "\"" );
+                      << "\" in directory \"" << ( directory ? directory : "" )
+                      << "\"" );
    }
 
+   // Get the pointer to the created object:
    T* ret = dynamic_cast< T* >( out->GetObject() );
 
    gROOT->cd(); // So that the temporary objects would be
@@ -71,6 +89,7 @@ T* SCycleBaseHist::Book( const T& histo,
       }
    }
 
+   // Return the object pointer:
    return ret;
 }
 
@@ -94,7 +113,8 @@ T* SCycleBaseHist::Book( const T& histo,
  * @param name The name of the object you're looking for
  * @param directory The directory the object is supposed to be in
  * @param outputOnly Search only amongst the output objects of the cycle
- * @returns A pointer to the object in question, or a null pointer if the object can't be found
+ * @returns A pointer to the object in question, or a null pointer if the
+ *          object can't be found
  */
 template< class T >
 T* SCycleBaseHist::Retrieve( const char* name,
@@ -113,12 +133,34 @@ T* SCycleBaseHist::Retrieve( const char* name,
    T* result = 0;
 
    //
-   // Try to find this object in the output list:
+   // Try to find this object in the output PROOF list:
    //
-   SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
+   SCycleOutput* out =
+      dynamic_cast< SCycleOutput* >( m_proofOutput->FindObject( path ) );
    if( out ) {
       result = dynamic_cast< T* >( out->GetObject() );
       if( ! result ) {
+         REPORT_ERROR( "Output object with name \"" << name << "\" found in "
+                       << "directory \"" << ( directory ? directory : "" )
+                       << "\" but is not of the requested type" );
+         SError error( SError::SkipCycle );
+         error << "No object found in the holder with name: " << name
+               << " in directory: " << directory;
+         throw error;
+      }
+      return result;
+   }
+
+   //
+   // Try to find this object in our private object list:
+   //
+   out = dynamic_cast< SCycleOutput* >( m_fileOutput.FindObject( path ) );
+   if( out ) {
+      result = dynamic_cast< T* >( out->GetObject() );
+      if( ! result ) {
+         REPORT_ERROR( "Output object with name \"" << name << "\" found in "
+                       << "directory \"" << ( directory ? directory : "" )
+                       << "\" but is not of the requested type" );
          SError error( SError::SkipCycle );
          error << "No object found in the holder with name: " << name
                << " in directory: " << directory;
@@ -134,7 +176,9 @@ T* SCycleBaseHist::Retrieve( const char* name,
    }
 
    // Check that we have an input file already specified:
-   if( ! m_input ) {
+   if( ! m_inputFile ) {
+      REPORT_ERROR( "No input file defined, and requested object "
+                    "not found in output list" );
       throw SError( "No input file defined, and requested object "
                     "not found in output list", SError::SkipCycle );
    }
@@ -142,8 +186,9 @@ T* SCycleBaseHist::Retrieve( const char* name,
    //
    // Try to find this object inside the input file:
    //
-   result = dynamic_cast< T* >( m_input->Get( path ) );
+   result = dynamic_cast< T* >( m_inputFile->Get( path ) );
    if( ! result ) {
+      REPORT_ERROR( "Couldn't access object with path: " << path );
       SError error( SError::SkipCycle );
       error << "Couldn't access object with name: " << name
             << " in directory: " << directory;
@@ -158,8 +203,8 @@ T* SCycleBaseHist::Retrieve( const char* name,
  * input file. It doesn't search in the output list, as each object should only
  * be present in one version in the output.
  *
- * The main use-case for this function right now is to be able to read the lumiblock
- * metadata from input ATLAS D3PDs.
+ * The main use-case for this function right now is to be able to read the
+ * lumiblock metadata from input ATLAS D3PDs.
  *
  * Example:
  *
@@ -173,21 +218,22 @@ T* SCycleBaseHist::Retrieve( const char* name,
  * @returns A vector of pointers to the objects found
  */
 template< class T >
-std::vector< T* > SCycleBaseHist::RetrieveAll( const char* name,
-                                               const char* directory ) throw( SError ) {
+std::vector< T* >
+SCycleBaseHist::RetrieveAll( const char* name,
+                             const char* directory ) throw( SError ) {
 
    // The result object:
    std::vector< T* > result;
 
    // Decide which directory to search in:
-   TDirectory* dir = m_input;
+   TDirectory* dir = m_inputFile;
    if( directory ) {
-      dir = dynamic_cast< TDirectory* >( m_input->Get( directory ) );
+      dir = dynamic_cast< TDirectory* >( m_inputFile->Get( directory ) );
       // If the requestested directory doesn't exist that's not necessariy an
       // error condition:
       if( ! dir ) {
-         m_logger << DEBUG << "Directory \"" << directory << "\" doesn't exist in the input file"
-                  << SLogger::endmsg;
+         m_logger << DEBUG << "Directory \"" << directory
+                  << "\" doesn't exist in the input file" << SLogger::endmsg;
          return result;
       }
    }
@@ -199,8 +245,10 @@ std::vector< T* > SCycleBaseHist::RetrieveAll( const char* name,
       // Convert object to a TKey:
       TKey* key = dynamic_cast< TKey* >( keyList->At( i ) );
       if( ! key ) {
-         REPORT_ERROR( "Couldn't cast to TKey. There is some problem in the code" );
-         throw SError( "Couldn't cast to TKey. There is some problem in the code",
+         REPORT_ERROR( "Couldn't cast to TKey. "
+                       "There is some problem in the code" );
+         throw SError( "Couldn't cast to TKey. "
+                       "There is some problem in the code",
                        SError::StopExecution );
       }
       // Check if the object has the right name:
@@ -208,7 +256,8 @@ std::vector< T* > SCycleBaseHist::RetrieveAll( const char* name,
       // Check if this object is of the right type:
       T* obj =
          dynamic_cast< T* >( dir->Get( TString( key->GetName() ) + ";" +
-                                       TString::Format( "%hi", key->GetCycle() ) ) );
+                                       TString::Format( "%hi",
+                                                        key->GetCycle() ) ) );
       if( ! obj ) continue;
       // Add it to our output:
       result.push_back( obj );

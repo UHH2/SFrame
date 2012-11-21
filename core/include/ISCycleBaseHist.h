@@ -16,7 +16,7 @@
 
 // Forward declaration(s):
 class TList;
-class TFile;
+class TDirectory;
 
 /**
  *   @short Interface providing histogramming capabilities
@@ -42,9 +42,12 @@ public:
 
 protected:
    /// Set the current input file
-   virtual void SetHistInputFile( TFile* file ) = 0;
+   virtual void SetHistInputFile( TDirectory* file ) = 0;
    /// Get the currently set input file
-   virtual TFile* GetHistInputFile() const = 0;
+   virtual TDirectory* GetHistInputFile() const = 0;
+
+   /// Write the objects meant to be merged using the output file
+   virtual void WriteHistObjects( TDirectory* output ) = 0;
 
 }; // class ISCycleBaseHist
 

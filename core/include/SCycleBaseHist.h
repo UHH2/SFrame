@@ -31,7 +31,6 @@
 class TDirectory;
 class TH1;
 class TList;
-class TFile;
 
 /**
  *   @short Histogramming part of SCycleBase
@@ -59,7 +58,8 @@ public:
 
    /// Function placing a ROOT object in the output file
    template< class T > T* Book( const T& histo,
-                                const char* directory = 0 ) throw( SError );
+                                const char* directory = 0,
+                                Bool_t inFile = kFALSE ) throw( SError );
    /// Function searching for a ROOT object in the output file
    template< class T > T* Retrieve( const char* name,
                                     const char* directory = 0,
@@ -70,16 +70,20 @@ public:
                                   const char* directory = 0 ) throw( SError );
    /// Function for persistifying a ROOT object to the output
    void WriteObj( const TObject& obj,
-                  const char* directory = 0 ) throw( SError );
+                  const char* directory = 0,
+                  Bool_t inFile = kFALSE ) throw( SError );
 
    /// Function searching for 1-dimensional histograms in the output file
    TH1* Hist( const char* name, const char* dir = 0 ) throw( SError );
 
 protected:
    /// Set the current input file
-   virtual void SetHistInputFile( TFile* file );
+   virtual void SetHistInputFile( TDirectory* file );
    /// Get the currently set input file
-   virtual TFile* GetHistInputFile() const;
+   virtual TDirectory* GetHistInputFile() const;
+
+   /// Write the objects meant to be merged using the output file
+   virtual void WriteHistObjects( TDirectory* output );
 
 private:
    /// Function creating a temporary directory in memory
@@ -88,10 +92,12 @@ private:
 #ifndef __MAKECINT__
    /// Map used by the Hist function
    std::map< std::pair< std::string, std::string >, TH1* > m_histoMap;
+   /// List of objects to be merged using the output file
+   TList m_fileOutput;
 #endif // __MAKECINT__
 
-   TList* m_output; ///< PROOF output list
-   TFile* m_input; ///< Currently open input file
+   TList* m_proofOutput; ///< PROOF output list
+   TDirectory* m_inputFile; ///< Currently open input file
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseHist, 0 );

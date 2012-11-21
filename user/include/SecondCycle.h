@@ -30,7 +30,6 @@ class SecondCycle : public SCycleBase {
 
 public:
    SecondCycle();
-   ~SecondCycle();
 
    virtual void BeginCycle() throw( SError );
    virtual void EndCycle() throw( SError );

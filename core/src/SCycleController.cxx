@@ -889,6 +889,8 @@ void SCycleController::WriteCycleOutput( TList* olist,
 
       if( dynamic_cast< SCycleOutput* >( olist->At( i ) ) ) {
          olist->At( i )->Write();
+         m_logger << DEBUG << "Written object: " << olist->At( i )->GetName()
+                  << SLogger::endmsg;
       } else if( dynamic_cast< TProofOutputFile* >( olist->At( i ) ) ) {
          TProofOutputFile* pfile = dynamic_cast< TProofOutputFile* >( olist->At( i ) );
          filesToMerge.push_back( pfile->GetOutputFileName() );
@@ -905,9 +907,6 @@ void SCycleController::WriteCycleOutput( TList* olist,
          olist->At( i )->Write();
          */
       }
-      m_logger << DEBUG << "Written object: " << olist->At( i )->GetName()
-               << SLogger::endmsg;
-
    }
 
    //
@@ -946,10 +945,20 @@ void SCycleController::WriteCycleOutput( TList* olist,
       SFileMerger merger;
       for( std::vector< TString >::const_iterator mfile = filesToMerge.begin();
            mfile != filesToMerge.end(); ++mfile ) {
-         merger.AddInput( *mfile );
+         if( ! merger.AddFile( *mfile ) ) {
+            REPORT_ERROR( "Failed to add file \"" << *mfile
+                          << "\" to the merger" );
+            continue;
+         }
       }
-      merger.SetOutput( filename );
-      merger.Merge();
+      if( ! merger.OutputFile( filename, "UPDATE" ) ) {
+         REPORT_ERROR( "Failed to specify \"" << filename << "\" as the output "
+                       << "file name for the merging" );
+      } else {
+         if( ! merger.Merge() ) {
+            REPORT_ERROR( "Failed to execute the file merging" );
+         }
+      }
 
       // Remove the temporary files:
       for( std::vector< TString >::const_iterator mfile = filesToMerge.begin();

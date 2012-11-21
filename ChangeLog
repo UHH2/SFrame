@@ -1,4 +1,27 @@
 2012.11.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Made a number of changes to make it possible to merge histograms
+	  and other objects in-file on PROOF, and not only in-memory.
+	* Updated SFileMerger to handle regular TObject objects as well,
+	  not just TTree-s. Tried to use TFileMerger once more, but gave
+	  up after some failed attempts. Should re-visit this later on
+	  again.
+	* In any case, SFileMerger now has pretty much the same interface
+	  as TFileMerger. It just does slightly different things...
+	* The Book(...) and WriteObj(...) functions now have one more
+	  optional parameter. This controls whether the object created
+	  should be merged in memory, or in file when running on PROOF.
+	  The default choice is in-memory merging (the previous
+	  implementation).
+	* Updated the code to use the in-file merging correctly in
+	  SCycleBaseExec and SCycleController.
+	* Moved some DEBUG messages to VERBOSE in SCycleBaseNTuple,
+	  which were printed too often now that DeclareVariable(...)
+	  handles metadata trees as well.
+	* Updated the example cycles to make use of the new in-file
+	  histogram merging functionality.
+	* Tagging as SFrame-03-06-08
+
+2012.11.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* SCycleBaseNTuple::DeclareVariable(...) will now add variables
 	  to metadata output trees as well if the user asks explicitly
 	  for such a tree by name.

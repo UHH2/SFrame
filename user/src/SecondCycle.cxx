@@ -19,15 +19,13 @@
 
 ClassImp( SecondCycle );
 
-SecondCycle::SecondCycle() {
+SecondCycle::SecondCycle()
+   : SCycleBase() {
 
    SetLogName( GetName() );
 
-   DeclareProperty( "FirstCycleTreeString", m_FirstCycleTreeName );
-}
-
-SecondCycle::~SecondCycle() {
-
+   DeclareProperty( "FirstCycleTreeString",
+                    m_FirstCycleTreeName = "FirstCycleTree" );
 }
 
 void SecondCycle::BeginCycle() throw( SError ) {
@@ -50,12 +48,13 @@ void SecondCycle::EndInputData( const SInputData& ) throw( SError ) {
    return;
 }
 
-void SecondCycle::BeginInputFile( const SInputData& inputData ) throw( SError ) {
+void SecondCycle::BeginInputFile( const SInputData& ) throw( SError ) {
 
    //
    // Connect the input variables:
    //
-   ConnectVariable( m_FirstCycleTreeName.c_str(), "example_variable", m_example_variable );
+   ConnectVariable( m_FirstCycleTreeName.c_str(), "example_variable",
+                    m_example_variable );
    ConnectVariable( m_FirstCycleTreeName.c_str(), "El_p_T", m_El_p_T );
    ConnectVariable( m_FirstCycleTreeName.c_str(), "El", m_El );
 
@@ -64,26 +63,32 @@ void SecondCycle::BeginInputFile( const SInputData& inputData ) throw( SError ) 
    //
    TH1* hist = Retrieve< TH1 >( "El_p_T_hist" );
    if( ! hist ) {
-      throw SError( "Coulnd't find histogram with name El_p_T_hist in the input",
-                    SError::SkipCycle );
+      throw SError( "Coulnd't find histogram with name El_p_T_hist in the "
+                    "input", SError::SkipCycle );
    }
    hist->Print(); // Show that we succeeded
    TGraph* graph = Retrieve< TGraph >( "MyGraph", "graph_dir" );
    if( ! graph ) {
-      throw SError( "Couldn't find graph with name \"graph_dir/MyGraph\" in the input",
-                    SError::SkipCycle );
+      throw SError( "Couldn't find graph with name \"graph_dir/MyGraph\" in the"
+                    " input", SError::SkipCycle );
    }
    graph->Print(); // Show that we succeeded
 
    return;
 }
 
-void SecondCycle::ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) {
+void SecondCycle::ExecuteEvent( const SInputData&,
+                                Double_t weight ) throw( SError ) {
 
    // Loop over the simple vector:
    for( std::vector< double >::const_iterator it = m_El_p_T->begin();
         it != m_El_p_T->end(); ++it ) {
-      Book( TH1F( "electron_pt", "Electron p_{T}", 50, 0.0, 100000.0 ) )->Fill( *it, weight );
+      // Ask the histogram to be merged in file. This will produce a warning,
+      // as there's no output file used in the merging. This is meant as
+      // a double-check that things are working correctly in this case as
+      // well.
+      Book( TH1F( "electron_pt", "Electron p_{T}", 50, 0.0, 100000.0 ),
+            0, kTRUE )->Fill( *it, weight );
    }
 
    // Loop over the electron objects:

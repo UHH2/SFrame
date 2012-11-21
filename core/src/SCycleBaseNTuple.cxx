@@ -145,8 +145,7 @@ TTree* SCycleBaseNTuple::GetInputMetadataTree( const char* name ) const throw( S
       delete array;
    }
 
-   m_logger << DEBUG << "Looking for input metadata tree with name: "
-            << tname << SLogger::endmsg;
+   REPORT_VERBOSE( "Looking for input metadata tree with name: " << tname );
 
    //
    // Look for such a metadata tree:
@@ -194,8 +193,7 @@ TTree* SCycleBaseNTuple::GetOutputMetadataTree( const char* name ) const throw( 
       delete array;
    }
 
-   m_logger << DEBUG << "Looking for output metadata tree with name: "
-            << tname << SLogger::endmsg;
+   REPORT_VERBOSE( "Looking for output metadata tree with name: " << tname );
 
    //
    // Look for such a metadata tree:

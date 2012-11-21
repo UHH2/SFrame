@@ -138,7 +138,9 @@ void FirstCycle::BeginInputData( const SInputData& ) throw( SError ) {
    //
    // Declare the output histograms:
    //
-   Book( TH1F( "El_p_T_hist", "Electron p_{T}", 100, 0.0,
+   Book( TH1F( "El_p_T_hist_file", "Electron p_{T}, merged 'in file'",
+               100, 0.0, 150000.0 ), 0, kTRUE );
+   Book( TH1F( "El_p_T_hist", "Electron p_{T}, merged 'in memory'", 100, 0.0,
                150000.0 ) );
 
    // Reserve two entries in the vector:
@@ -162,7 +164,6 @@ void FirstCycle::EndInputData( const SInputData& ) throw( SError ) {
 void FirstCycle::BeginMasterInputData( const SInputData& ) throw( SError ) {
 
    return;
-
 }
 
 void FirstCycle::EndMasterInputData( const SInputData& ) throw( SError ) {
@@ -175,7 +176,6 @@ void FirstCycle::EndMasterInputData( const SInputData& ) throw( SError ) {
             << SLogger::endmsg;
 
    return;
-
 }
 
 void FirstCycle::ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) {
@@ -197,8 +197,9 @@ void FirstCycle::ExecuteEvent( const SInputData&, Double_t weight ) throw( SErro
       // Fill a simple vector:
       m_o_El_p_T.push_back( ( *m_El_p_T )[ i ] );
 
-      // Fill the example histogram:
+      // Fill the example histogram(s):
       Hist( "El_p_T_hist" )->Fill( ( *m_El_p_T )[ i ], weight );
+      Hist( "El_p_T_hist_file" )->Fill( ( *m_El_p_T )[ i ], weight );
 
       // Fill a vector of objects:
       m_o_El.push_back( SParticle( ( * m_El_p_T )[ i ],

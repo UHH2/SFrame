@@ -18,7 +18,6 @@
 #include <TDirectory.h>
 #include <TH1.h>
 #include <TList.h>
-#include <TFile.h>
 
 // Local inlcude(s):
 #include "../include/SCycleBaseHist.h"
@@ -32,21 +31,22 @@ ClassImp( SCycleBaseHist )
  * The constructor initialises the base class and the member variables.
  */
 SCycleBaseHist::SCycleBaseHist()
-   : SCycleBaseBase(), m_histoMap(), m_output( 0 ), m_input( 0 ) {
+   : SCycleBaseBase(), m_histoMap(), m_fileOutput(),
+     m_proofOutput( 0 ), m_inputFile( 0 ) {
 
    REPORT_VERBOSE( "SCycleBaseHist constructed" );
 }
 
 void SCycleBaseHist::SetHistOutput( TList* output ) {
 
-   m_output = output;
+   m_proofOutput = output;
    m_histoMap.clear();
    return;
 }
 
 TList* SCycleBaseHist::GetHistOutput() const {
 
-   return m_output;
+   return m_proofOutput;
 }
 
 /**
@@ -65,18 +65,31 @@ TList* SCycleBaseHist::GetHistOutput() const {
  *
  * @param obj       Constant reference to the object to be written out
  * @param directory Optional directory name in which to save the object
+ * @param inFile    If set to <code>kTRUE</code>, the object will be merged
+ *                  using the output file, and not in memory
  */
 void SCycleBaseHist::WriteObj( const TObject& obj,
-                               const char* directory ) throw( SError ) {
+                               const char* directory,
+                               Bool_t inFile ) throw( SError ) {
 
+   // Put the object into our temporary directory in memory:
    GetTempDir()->cd();
 
+   // Construct a full path name for the object:
    const TString path = ( directory ? directory + TString( "/" ) : "" ) +
       TString( obj.GetName() );
-   SCycleOutput* out = dynamic_cast< SCycleOutput* >( m_output->FindObject( path ) );
+
+   // Decide which TList to store the object in:
+   TList* output = ( inFile ? &m_fileOutput : m_proofOutput );
+
+   // Check if the object was already added:
+   SCycleOutput* out =
+      dynamic_cast< SCycleOutput* >( output->FindObject( path ) );
+
+   // If not, add it now:
    if( ! out ) {
       out = new SCycleOutput( obj.Clone(), path, directory );
-      m_output->TList::AddLast( out );
+      output->TList::AddLast( out );
    }
 
    gROOT->cd(); // So that the temporary objects would be created
@@ -131,15 +144,73 @@ TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) throw( SError ) {
    return result;
 }
 
-void SCycleBaseHist::SetHistInputFile( TFile* file ) {
+void SCycleBaseHist::SetHistInputFile( TDirectory* file ) {
 
-   m_input = file;
+   m_inputFile = file;
    return;
 }
 
-TFile* SCycleBaseHist::GetHistInputFile() const {
+TDirectory* SCycleBaseHist::GetHistInputFile() const {
 
-   return m_input;
+   return m_inputFile;
+}
+
+/**
+ * This is a tricky little function. The code will not always use an output
+ * file when running on PROOF. So, if the user requested some histograms
+ * or objects to be merged using an output file, but an output file is not
+ * available, we still have to try to merge them in memory at least. After
+ * printing some warning messages.
+ *
+ * @param output The output file to write the objects to. If set to a null
+ *               pointer, the objects are added to the PROOF output instead.
+ */
+void SCycleBaseHist::WriteHistObjects( TDirectory* output ) {
+
+   // Return right away if we don't have objects designated for in-file
+   // merging:
+   if( ! m_fileOutput.GetSize() ) return;
+
+   // If the objects are added to the output file:
+   if( output ) {
+
+      // Remember which directory we were in:
+      TDirectory* currDir = gDirectory;
+      // Go to the output file's directory:
+      output->cd();
+
+      // Write out each object to the file:
+      for( Int_t i = 0; i < m_fileOutput.GetSize(); ++i ) {
+         m_fileOutput.At( i )->Write();
+      }
+
+      // Remove the in-memory objects:
+      m_fileOutput.SetOwner( kTRUE );
+      m_fileOutput.Clear();
+
+      // Change back to the old directory:
+      currDir->cd();
+   }
+   // If the objects have to be merged in memory after all:
+   else {
+
+      // Print a WARNING message, as this is probably not what the user
+      // wanted:
+      m_logger << WARNING << "Objects designated to be merged in-file will be"
+               << SLogger::endmsg;
+      m_logger << WARNING << "merged in-memory instead!" << SLogger::endmsg;
+
+      // Add each object to the PROOF output list instead:
+      for( Int_t i = 0; i < m_fileOutput.GetSize(); ++i ) {
+         m_proofOutput->TList::AddLast( m_fileOutput.At( i ) );
+      }
+
+      // Make out private list forget about the objects:
+      m_fileOutput.SetOwner( kFALSE );
+      m_fileOutput.Clear();
+   }
+
+   return;
 }
 
 /**

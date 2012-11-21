@@ -1,4 +1,8 @@
 2012.11.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated the example cycles to make use of the new in-file
+	  histogram merging functionality.
+
+2012.11.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Updated the FirstCycle example to make use of the new feature
 	  that allows us to create branches in output metadata trees
 	  using DeclareVariable(...).
