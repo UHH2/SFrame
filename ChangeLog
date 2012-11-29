@@ -1,4 +1,8 @@
 2012.11.29 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * The new code seems to work fine with the patched version of ROOT 5.34.03 on
+     the NYU cluster, so let's tag it as SFrame-03-06-09
+
+2012.11.29 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* The code seems to be working now.
 	* The output file opening and closing is now handled by
 	  SCycleBaseNTuple, and not SCycleBaseExec.
