@@ -24,6 +24,7 @@
 
 // Local include(s):
 #include "ISCycleBaseHist.h"
+#include "ISCycleBaseNTuple.h"
 #include "SCycleBaseBase.h"
 #include "SError.h"
 
@@ -45,6 +46,7 @@ class TList;
  * @version $Revision$
  */
 class SCycleBaseHist : public virtual ISCycleBaseHist,
+                       public virtual ISCycleBaseNTuple,
                        public virtual SCycleBaseBase {
 
 public:
@@ -83,7 +85,7 @@ protected:
    virtual TDirectory* GetHistInputFile() const;
 
    /// Write the objects meant to be merged using the output file
-   virtual void WriteHistObjects( TDirectory* output );
+   virtual void WriteHistObjects();
 
 private:
    /// Function creating a temporary directory in memory

@@ -1,3 +1,12 @@
+2012.11.29 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Intermediate check-in. I have to test the code's behaviour on Linux as
+     well.
+   * Re-arranged a bit how output files are handled during the event processing.
+     This will make it possible to handle in-file histogram merging, and empty
+     TTrees more elegantly.
+   * Made some documentation updates here and there.
+   * Not tagging yet.
+
 2012.11.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Made a number of changes to make it possible to merge histograms
 	  and other objects in-file on PROOF, and not only in-memory.

@@ -4,7 +4,7 @@
    @author Stefan Ask <Stefan.Ask@cern.ch> - Manchester
    @author David Berge <David.Berge@cern.ch> - CERN
    @author Johannes Haller <Johannes.Haller@cern.ch> - Hamburg
-   @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+   @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
 
    @section SFrameCoreInto Introduction
 
@@ -39,10 +39,8 @@
    this documentation are (in BASH on lxplus):
 
    <code>
-     > svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame
-
-     > cd SFrame
-
+     > svn co https://sframe.svn.sourceforge.net/svnroot/sframe/SFrame/trunk SFrame<br/>
+     > cd SFrame<br/>
      > doxygen
    </code>
 

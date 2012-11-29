@@ -330,12 +330,17 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName, const char* branch
  * Example:
  *
  * <code>
- *   Double_t m_var1;
- *   DeclareVariable( m_var1, "var1" );
- *   ...
- *   std::vector< int > m_var2;
- *   DeclareVariable( m_var2, "var2", "MyTree" );
+ *   Double_t m_var1;<br/>
+ *   DeclareVariable( m_var1, "var1" );<br/>
+ *   ...<br/>
+ *   std::vector< int > m_var2;<br/>
+ *   DeclareVariable( m_var2, "var2", "MyTree" );<br/>
  * </code>
+ *
+ * @param obj The object to write to the output ntuple
+ * @param name The name of the branch to create from the object
+ * @param treeName Optional TTree name, needed if multiple output trees are used
+ * @returns The branch that was just created
  */
 template < class T >
 TBranch* SCycleBaseNTuple::DeclareVariable( T& obj, const char* name,

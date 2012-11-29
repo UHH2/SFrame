@@ -26,7 +26,7 @@
 // Forward declaration(s):
 class TTree;
 class TList;
-class TFile;
+class TDirectory;
 class SInputData;
 
 /**
@@ -50,21 +50,29 @@ public:
    virtual void SetNTupleOutput( TList* output ) = 0;
    /// Get the PROOF output list
    virtual TList* GetNTupleOutput() const = 0;
+   /// Set the object list used for NTuple input
+   virtual void SetNTupleInput( TList* input ) = 0;
+   /// Get the object list used for NTuple input
+   virtual TList* GetNTupleInput() const = 0;
 
 protected:
+   /// Function creating an output file on demand
+   virtual TDirectory* GetOutputFile() throw( SError ) = 0;
+   /// Function closing a potentially open output file
+   virtual void CloseOutputFile() throw( SError ) = 0;
    /// Create the output trees
    virtual void CreateOutputTrees( const SInputData& id,
-                                   std::vector< TTree* >& outTrees,
-                                   TFile* outputFile = 0 ) throw( SError ) = 0;
+                                   std::vector< TTree* >& outTrees ) throw( SError ) = 0;
    /// Save all the created output trees in the output
-   virtual void SaveOutputTrees( TDirectory* output ) throw( SError ) = 0;
+   virtual void SaveOutputTrees() throw( SError ) = 0;
    /// Load the input trees
    virtual void LoadInputTrees( const SInputData& id, TTree* main_tree,
-                                TFile*& inputFile ) throw( SError ) = 0;
+                                TDirectory*& inputFile ) throw( SError ) = 0;
    /// Read in the event from the "normal" trees
    virtual void GetEvent( Long64_t entry ) throw( SError ) = 0;
    /// Calculate the weight of the current event
-   virtual Double_t CalculateWeight( const SInputData& inputData, Long64_t entry ) = 0;
+   virtual Double_t CalculateWeight( const SInputData& inputData,
+                                     Long64_t entry ) = 0;
    /// Forget about the internally cached TTree pointers
    virtual void ClearCachedTrees() = 0;
 

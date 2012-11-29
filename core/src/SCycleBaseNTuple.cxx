@@ -27,6 +27,8 @@
 #include <TFriendElement.h>
 #include <TVirtualIndex.h>
 #include <TTreeFormula.h>
+#include <TProofOutputFile.h>
+#include <TSystem.h>
 
 // Local include(s):
 #include "../include/SCycleBaseNTuple.h"
@@ -34,7 +36,10 @@
 #include "../include/SCycleConfig.h"
 #include "../include/SCycleOutput.h"
 #include "../include/STreeType.h"
+#include "../include/SConstants.h"
+#include "../include/SOutputFile.h"
 
+/// A simple definition used in calculating floating point differences
 static const Double_t EPSILON = 1e-15;
 
 #ifndef DOXYGEN_IGNORE
@@ -45,14 +50,17 @@ ClassImp( SCycleBaseNTuple )
  * The constructor is only initialising the base class.
  */
 SCycleBaseNTuple::SCycleBaseNTuple()
-   : SCycleBaseBase(), m_inputTrees(), m_inputBranches(),
-     m_outputTrees(), m_metaInputTrees(), m_outputVarPointers(), m_output( 0 ) {
+   : SCycleBaseBase(), m_inputTrees(), m_inputBranches(), m_inputVarPointers(),
+     m_outputFile( 0 ),
+     m_outputTrees(), m_metaInputTrees(), m_outputVarPointers(),
+     m_input( 0 ), m_output( 0 ) {
 
    REPORT_VERBOSE( "SCycleBaseNTuple constructed" );
 }
 
 /**
- * Another one of the "I don't do anything" destructors.
+ * The destructor has to make sure that the objects created on the heap for the
+ * input variables, are deleted.
  */
 SCycleBaseNTuple::~SCycleBaseNTuple() {
 
@@ -71,6 +79,17 @@ TList* SCycleBaseNTuple::GetNTupleOutput() const {
    return m_output;
 }
 
+void SCycleBaseNTuple::SetNTupleInput( TList* input ) {
+
+   m_input = input;
+   return;
+}
+
+TList* SCycleBaseNTuple::GetNTupleInput() const {
+
+   return m_input;
+}
+
 /**
  * This function can be used to retrieve both input and output metadata trees.
  * Input metadata trees are TTree-s that don't desribe event level information.
@@ -82,7 +101,8 @@ TList* SCycleBaseNTuple::GetNTupleOutput() const {
  * @param name Name of the requested metadata tree
  * @returns The pointer to the requested metadata tree
  */
-TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const throw( SError ) {
+TTree* SCycleBaseNTuple::
+GetMetadataTree( const char* name ) const throw( SError ) {
 
    // The result tree:
    TTree* result = 0;
@@ -93,9 +113,11 @@ TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const throw( SError
       return result;
    } catch( const SError& error ) {
       if( error.request() <= SError::SkipFile ) {
-         REPORT_VERBOSE( "Input metadata tree with name \"" << name << "\" not found" );
+         REPORT_VERBOSE( "Input metadata tree with name \"" << name
+                         << "\" not found" );
       } else {
-         REPORT_ERROR( "Exception message caught with message: " << error.what() );
+         REPORT_ERROR( "Exception message caught with message: "
+                       << error.what() );
          throw;
       }
    }
@@ -106,9 +128,11 @@ TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const throw( SError
       return result;
    } catch( const SError& error ) {
       if( error.request() <= SError::SkipFile ) {
-         REPORT_VERBOSE( "Output metadata tree with name \"" << name << "\" not found" );
+         REPORT_VERBOSE( "Output metadata tree with name \"" << name
+                         << "\" not found" );
       } else {
-         REPORT_ERROR( "Exception message caught with message: " << error.what() );
+         REPORT_ERROR( "Exception message caught with message: "
+                       << error.what() );
          throw;
       }
    }
@@ -131,7 +155,8 @@ TTree* SCycleBaseNTuple::GetMetadataTree( const char* name ) const throw( SError
  * @param name Name of the requested input metadata tree
  * @returns The pointer to the requested metadata tree
  */
-TTree* SCycleBaseNTuple::GetInputMetadataTree( const char* name ) const throw( SError ) {
+TTree* SCycleBaseNTuple::
+GetInputMetadataTree( const char* name ) const throw( SError ) {
 
    //
    // Strip off the directory name from the given tree name:
@@ -179,7 +204,8 @@ TTree* SCycleBaseNTuple::GetInputMetadataTree( const char* name ) const throw( S
  * @param name Name of the requested output metadata tree
  * @returns The pointer to the requested metadata tree
  */
-TTree* SCycleBaseNTuple::GetOutputMetadataTree( const char* name ) const throw( SError ) {
+TTree* SCycleBaseNTuple::
+GetOutputMetadataTree( const char* name ) const throw( SError ) {
 
    //
    // Strip off the directory name from the given tree name:
@@ -224,7 +250,8 @@ TTree* SCycleBaseNTuple::GetOutputMetadataTree( const char* name ) const throw( 
  * the tree with a given name among the input trees, or throws an exception
  * if such tree doesn't exist.
  */
-TTree* SCycleBaseNTuple::GetInputTree( const char* treeName ) const throw( SError ) {
+TTree* SCycleBaseNTuple::
+GetInputTree( const char* treeName ) const throw( SError ) {
 
    //
    // Look for such input tree:
@@ -251,7 +278,16 @@ TTree* SCycleBaseNTuple::GetInputTree( const char* treeName ) const throw( SErro
    return 0;
 }
 
-TTree* SCycleBaseNTuple::GetOutputTree( const char* treeName ) const throw( SError ) {
+/**
+ * This function can be used to get direct access to one of the output trees
+ * of the cycle. This has to be used for instance to pass a TTree to a
+ * D3PDReader object.
+ *
+ * @param treeName Name of the TTree to look for
+ * @return The pointer to the TTree if successful
+ */
+TTree* SCycleBaseNTuple::
+GetOutputTree( const char* treeName ) const throw( SError ) {
 
    //
    // Look for such output tree:
@@ -279,6 +315,129 @@ TTree* SCycleBaseNTuple::GetOutputTree( const char* treeName ) const throw( SErr
 }
 
 /**
+ * This function is used to create/access an output file on demand. For output
+ * trees it can actually be known from the configuration whether an output file
+ * is needed by the job, but for the in-file histogram merging, this is only
+ * discovered at runtime.
+ *
+ * @return A pointer to the output file's directory if successful, a null
+ *         pointer if not
+ */
+TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
+
+   // Return right away if we already have an output file opened:
+   if( m_outputFile ) return m_outputFile;
+
+   TProofOutputFile* proofFile = 0;
+   char* tempDirName = 0;
+
+   TNamed* out =
+      dynamic_cast< TNamed* >( m_input->FindObject( SFrame::ProofOutputName ) );
+   if( out ) {
+      // The path name to use for the file:
+      const char* path = gSystem->BaseName( TUrl( out->GetTitle() ).GetFile() );
+      proofFile = new TProofOutputFile( path );
+      proofFile->SetOutputFileName( out->GetTitle() );
+      tempDirName = 0;
+      m_output->Add( proofFile );
+   } else {
+      m_logger << DEBUG << "No PROOF output file specified in configuration -> "
+               << "Running in LOCAL mode" << SLogger::endmsg;
+      proofFile = 0;
+      // Use a more or less POSIX method for creating a unique file name:
+      tempDirName = new char[ 300 ];
+      if( gSystem->Getenv( "SFRAME_TEMP_DIR" ) ) {
+         // Honor the user's preference for the temporary directory
+         // location:
+         sprintf( tempDirName, "%s/%s",
+                  gSystem->Getenv( "SFRAME_TEMP_DIR" ),
+                  SFrame::ProofOutputDirName );
+      } else {
+         sprintf( tempDirName, "%s", SFrame::ProofOutputDirName );
+      }
+      if( ! mkdtemp( tempDirName ) ) {
+         REPORT_FATAL( "Couldn't create temporary directory name from "
+                       << "template: " << SFrame::ProofOutputDirName );
+         throw SError( "Couldn't create temporary directory for output file",
+                       SError::SkipCycle );
+         return 0;
+      }
+      m_output->Add( new SOutputFile( "SFrameOutputFile",
+                                      TString( tempDirName ) + "/" +
+                                      SFrame::ProofOutputFileName ) );
+   }
+
+   if( proofFile ) {
+      if( ! ( m_outputFile = proofFile->OpenFile( "RECREATE" ) ) ) {
+         m_logger << WARNING << "Couldn't open output file: "
+                  << proofFile->GetDir() << "/" << proofFile->GetFileName()
+                  << SLogger::endmsg;
+         m_logger << WARNING << "Saving the ntuples to memory"
+                  << SLogger::endmsg;
+      } else {
+         m_logger << DEBUG << "PROOF temp file opened with name: "
+                  << m_outputFile->GetName() << SLogger::endmsg;
+      }
+   } else {
+      if( ! tempDirName ) {
+         REPORT_FATAL( "No temporary directory name? There's some serious "
+                       "error in the code!" );
+         throw SError( "Internal code inconsistency detected",
+                       SError::SkipCycle );
+         return 0;
+      }
+
+      // Open an intermediate file in this temporary directory:
+      if( ! ( m_outputFile = TFile::Open( TString( tempDirName ) + "/" +
+                                          SFrame::ProofOutputFileName,
+                                          "RECREATE" ) ) ) {
+         m_logger << WARNING << "Couldn't open output file: "
+                  << tempDirName << "/" << SFrame::ProofOutputFileName
+                  << SLogger::endmsg;
+         m_logger << WARNING << "Saving the ntuples to memory"
+                  << SLogger::endmsg;
+      } else {
+         m_logger << DEBUG << "LOCAL temp file opened with name: "
+                  << tempDirName << "/" << SFrame::ProofOutputFileName
+                  << SLogger::endmsg;
+      }
+   }
+
+   if( tempDirName ) delete[] tempDirName;
+
+   // Return the directory of the output file:
+   return m_outputFile;
+}
+
+/**
+ * This function is called at the end of processing an input data block, to
+ * save all the output trees, and close the output file properly.
+ */
+void SCycleBaseNTuple::CloseOutputFile() throw( SError ) {
+
+   // We only need to do anything if the output file has been made:
+   if( m_outputFile ) {
+
+      m_logger << DEBUG << "Closing output file: " << m_outputFile->GetName()
+               << SLogger::endmsg;
+
+      // Save all the output trees into the output file. Memory-kept TTrees
+      // don't need this.
+      this->SaveOutputTrees();
+
+      // Close the output file and reset the variables:
+      m_outputFile->SaveSelf( kTRUE );
+      m_outputFile->Close();
+      delete m_outputFile;
+      m_outputFile = 0;
+      m_outputTrees.clear();
+
+   }
+
+   return;
+}
+
+/**
  * Function called first when starting to process an InputData object.
  * It opens the output file and creates the output trees defined in the
  * cycle configuration in it. Note, that the created trees are empty,
@@ -289,9 +448,9 @@ TTree* SCycleBaseNTuple::GetOutputTree( const char* treeName ) const throw( SErr
  * @param iD       The input data that we're handling at the moment
  * @param outTrees The collection of output trees that will be created
  */
-void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
-                                          std::vector< TTree* >& outTrees,
-                                          TFile* outputFile ) throw( SError ) {
+void SCycleBaseNTuple::
+CreateOutputTrees( const SInputData& iD,
+                   std::vector< TTree* >& outTrees ) throw( SError ) {
 
    // sanity checks
    if( outTrees.size() ) {
@@ -306,9 +465,11 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
    // Clear the vector of output variable pointers:
    m_outputVarPointers.clear();
 
-   const std::vector< STree >* sOutTree = iD.GetTrees( STreeType::OutputSimpleTree );
+   // Access all the regular output trees:
+   const std::vector< STree >* sOutTree =
+      iD.GetTrees( STreeType::OutputSimpleTree );
 
-   // Open output file / create output trees
+   // Make sure we're in a generic directory as a start:
    gROOT->cd();
 
    //
@@ -321,36 +482,69 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
       for( std::vector< STree >::const_iterator st = sOutTree->begin();
            st != sOutTree->end(); ++st ) {
 
+         //
+         // Split the name into the name of the tree and the name of the
+         // directory:
+         //
+         TString tname( st->treeName ), dirname( "" );
+         if( tname.Contains( "/" ) ) {
+            REPORT_VERBOSE( "Tokenizing the metadata tree name: " << tname );
+            TObjArray* array = tname.Tokenize( "/" );
+            TObjString* real_name =
+            dynamic_cast< TObjString* >( array->Last() );
+            tname = real_name->GetString();
+            if( array->GetSize() > 1 ) {
+               for( Int_t i = 0; i < array->GetSize() - 1; ++i ) {
+                  TObjString* dirletname =
+                  dynamic_cast< TObjString* >( array->At( i ) );
+                  if( ! dirletname ) continue;
+                  if( dirletname->GetString() == "" ) continue;
+                  if( dirletname->GetString() == tname ) break;
+                  dirname += ( dirname == "" ? dirletname->GetString() :
+                               "/" + dirletname->GetString() );
+               }
+            }
+            delete array;
+         }
+
          m_logger << DEBUG << "Creating output event tree with name: "
-                  << st->treeName << SLogger::endmsg;
+                  << tname << " in directory: \"" << dirname << "\""
+                  << SLogger::endmsg;
 
-         TTree* tree = new TTree( st->treeName.Data(), TString( "Format: User" ) +
+         // Create the output TTree:
+         TTree* tree = new TTree( tname,
+                                  TString( "Format: User" ) +
                                   ", data type: " + iD.GetType() );
-
          tree->SetAutoSave( autoSave );
          TTree::SetBranchStyle( branchStyle );
 
+         // Store the pointer:
          outTrees.push_back( tree );
          m_outputTrees.push_back( tree );
 
-         if( outputFile ) {
-            tree->SetDirectory( outputFile );
+         // Make sure that an output file is available:
+         GetOutputFile();
+
+         // Add it to the output file if available:
+         if( m_outputFile ) {
+            tree->SetDirectory( MakeSubDirectory( dirname, m_outputFile ) );
             REPORT_VERBOSE( "Attached TTree \"" << st->treeName.Data()
-                            << "\" to file: " << outputFile->GetName() );
+                            << "\" to file: " << m_outputFile->GetName() );
          } else {
-            SCycleOutput* out = new SCycleOutput( tree, st->treeName );
+            SCycleOutput* out = new SCycleOutput( tree, tname, dirname );
             m_output->Add( out );
-            REPORT_VERBOSE( "Keeping TTree \"" << st->treeName.Data()
+            REPORT_VERBOSE( "Keeping TTree \"" << tname
                             << "\" in memory" );
          }
       }
    }
 
    //
-   // Create the metadata output trees. These don't have to be reported back to the
-   // caller, since the user will be responsible for filling them.
+   // Create the metadata output trees. These don't have to be reported back to
+   // the caller, since the user will be responsible for filling them.
    //
-   const std::vector< STree >* sMetaTrees = iD.GetTrees( STreeType::OutputMetaTree );
+   const std::vector< STree >* sMetaTrees =
+      iD.GetTrees( STreeType::OutputMetaTree );
    if( sMetaTrees ) {
       for( std::vector< STree >::const_iterator mt = sMetaTrees->begin();
            mt != sMetaTrees->end(); ++mt ) {
@@ -363,35 +557,44 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
          if( tname.Contains( "/" ) ) {
             REPORT_VERBOSE( "Tokenizing the metadata tree name: " << tname );
             TObjArray* array = tname.Tokenize( "/" );
-            TObjString* real_name = dynamic_cast< TObjString* >( array->Last() );
+            TObjString* real_name =
+               dynamic_cast< TObjString* >( array->Last() );
             tname = real_name->GetString();
             if( array->GetSize() > 1 ) {
                for( Int_t i = 0; i < array->GetSize() - 1; ++i ) {
-                  TObjString* dirletname = dynamic_cast< TObjString* >( array->At( i ) );
+                  TObjString* dirletname =
+                     dynamic_cast< TObjString* >( array->At( i ) );
                   if( ! dirletname ) continue;
                   if( dirletname->GetString() == "" ) continue;
                   if( dirletname->GetString() == tname ) break;
-                  dirname += ( dirname == "" ? dirletname->GetString() : "/" + dirletname->GetString() );
+                  dirname += ( dirname == "" ? dirletname->GetString() :
+                               "/" + dirletname->GetString() );
                }
             }
             delete array;
          }
 
          m_logger << DEBUG << "Creating output metadata tree with name: "
-                  << tname  << " in directory: " << dirname << SLogger::endmsg;
+                  << tname  << " in directory: \"" << dirname << "\""
+                  << SLogger::endmsg;
 
+         // Create the metadata tree:
          TTree* tree = new TTree( tname, TString( "Format: User" ) +
                                   ", data type: " + iD.GetType() );
-
          tree->SetAutoSave( autoSave );
          TTree::SetBranchStyle( branchStyle );
 
+         // Remember its pointer:
          m_metaOutputTrees.push_back( tree );
 
-         if( outputFile ) {
-            tree->SetDirectory( MakeSubDirectory( dirname, outputFile ) );
+         // Make sure that an output file is available:
+         GetOutputFile();
+
+         // Add it to the output file if available:
+         if( m_outputFile ) {
+            tree->SetDirectory( MakeSubDirectory( dirname, m_outputFile ) );
             REPORT_VERBOSE( "Attached TTree \"" << mt->treeName
-                            << "\" to file: " << outputFile->GetName() );
+                            << "\" to file: " << m_outputFile->GetName() );
          } else {
             SCycleOutput* out = new SCycleOutput( tree, tname, dirname );
             m_output->Add( out );
@@ -407,12 +610,10 @@ void SCycleBaseNTuple::CreateOutputTrees( const SInputData& iD,
 /**
  * This function is used to save all the output trees into the output file when
  * the cycle finishes processing the events from the InputData. It also
- * deletes the TTree objects, so it should really only be called by the framework
- * at the end of processing.
- *
- * @param output The directory where the trees have to be written (Usually a TFile)
+ * deletes the TTree objects, so it should really only be called by the
+ * framework at the end of processing.
  */
-void SCycleBaseNTuple::SaveOutputTrees( TDirectory* /*output*/ ) throw( SError ) {
+void SCycleBaseNTuple::SaveOutputTrees() throw( SError ) {
 
    // Remember which directory we were in:
    TDirectory* savedir = gDirectory;
@@ -446,29 +647,32 @@ void SCycleBaseNTuple::SaveOutputTrees( TDirectory* /*output*/ ) throw( SError )
 }
 
 /**
- * Function called first for each new input file. It opens the file, and accesses
- * the trees defined in the cycle configuration. It also starts the book-keeping
- * for the EventView input trees, if such things are defined.
+ * Function called first for each new input file. It opens the file, and
+ * accesses the trees defined in the cycle configuration. It also starts the
+ * book-keeping for the EventView input trees, if such things are defined.
  *
  * <strong>The function is used internally by the framework!</strong>
  *
  * @param iD       The input data that we're handling at the moment
- * @param filename The full name of the input file
- * @param file     Pointer to the input file that the function opens
+ * @param main_tree Pointer to the main input TTree
+ * @param inputFile Pointer to the input file created by the function (output)
  */
-void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
-                                       TTree* main_tree,
-                                       TFile*& inputFile ) throw( SError ) {
+void SCycleBaseNTuple::
+LoadInputTrees( const SInputData& iD,
+                TTree* main_tree,
+                TDirectory*& inputFile ) throw( SError ) {
 
    REPORT_VERBOSE( "Loading/accessing the event-level input trees" );
 
    //
    // Initialize some variables:
    //
-   const std::vector< STree >* sInTree = iD.GetTrees( STreeType::InputSimpleTree );
-   const std::vector< STree >* sMetaTree = iD.GetTrees( STreeType::InputMetaTree );
+   const std::vector< STree >* sInTree =
+      iD.GetTrees( STreeType::InputSimpleTree );
+   const std::vector< STree >* sMetaTree =
+      iD.GetTrees( STreeType::InputMetaTree );
    Bool_t firstPassed = kFALSE;
-   Int_t nEvents = 0;
+   Long64_t nEvents = 0;
    m_inputTrees.clear();
    m_inputBranches.clear();
    DeleteInputVariables();
@@ -501,15 +705,17 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
    // Handle the regular input trees:
    //
    if( sInTree ) {
-      for( std::vector< STree >::const_iterator st = sInTree->begin(); st != sInTree->end();
-           ++st ) {
+      std::vector< STree >::const_iterator st_itr = sInTree->begin();
+      std::vector< STree >::const_iterator st_end = sInTree->end();
+      for( ; st_itr != st_end; ++st_itr ) {
 
-         REPORT_VERBOSE( "Now trying to access TTree: " << st->treeName );
+         REPORT_VERBOSE( "Now trying to access TTree: " << st_itr->treeName );
 
-         TTree* tree = dynamic_cast< TTree* >( inputFile->Get( st->treeName ) );
+         TTree* tree =
+            dynamic_cast< TTree* >( inputFile->Get( st_itr->treeName ) );
          if( ! tree ) {
             SError error( SError::SkipFile );
-            error << "Tree " << st->treeName << " doesn't exist in File "
+            error << "Tree " << st_itr->treeName << " doesn't exist in File "
                   << inputFile->GetName();
             throw error;
          }
@@ -524,8 +730,8 @@ void SCycleBaseNTuple::LoadInputTrees( const SInputData& iD,
             TIter nextf( flist );
             TFriendElement* fe = 0;
             while( ( fe = ( TFriendElement* ) nextf() ) ) {
-               m_logger << DEBUG << "Remove friend " << fe->GetName() << " from tree " 
-                        << tree->GetName() << SLogger::endmsg;
+               m_logger << DEBUG << "Remove friend " << fe->GetName()
+                        << " from tree " << tree->GetName() << SLogger::endmsg;
                flist->Remove( fe );
                delete fe;
                fe = 0;
@@ -621,47 +827,60 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,
    Double_t weight = 0.;
    Double_t totlum = 0.;
 
+   // Data events always have a weight of 1.0:
    if( inputData.GetType() == "data" ) {
-      REPORT_VERBOSE( "Data" );
-      weight = 1.;
-      return weight;
+      return 1.0;
    }
 
-   //iterate over vector of input data and addup the weight for the type of this input data
-   for( std::vector< SInputData >::const_iterator iD = GetConfig().GetInputData().begin();
-        iD != GetConfig().GetInputData().end(); ++iD ) {
+   // Iterate over vector of input data and addup the weight for the type of
+   // this input data:
+   std::vector< SInputData >::const_iterator id_itr =
+      GetConfig().GetInputData().begin();
+   std::vector< SInputData >::const_iterator id_end =
+      GetConfig().GetInputData().end();
+   for( ; id_itr != id_end; ++id_itr ) {
 
-      if( ( iD->GetType() == type ) && ( iD->GetVersion() == version ) ) {
+      if( ( id_itr->GetType() == type ) &&
+          ( id_itr->GetVersion() == version ) ) {
 
-         const std::vector< SGeneratorCut >& sgencuts = iD->GetSGeneratorCuts();
+         const std::vector< SGeneratorCut >& sgencuts =
+            id_itr->GetSGeneratorCuts();
          Bool_t inside = kTRUE;
 
-         for( std::vector< SGeneratorCut >::const_iterator sgc = sgencuts.begin();
-              sgc != sgencuts.end(); ++sgc ) {
-			 
-            // loop over the trees 
-            for( std::vector< TTree* >::const_iterator it = m_inputTrees.begin();
-                 it != m_inputTrees.end(); ++it ) {
+         std::vector< SGeneratorCut >::const_iterator gc_itr = sgencuts.begin();
+         std::vector< SGeneratorCut >::const_iterator gc_end = sgencuts.end();
+         for( ; gc_itr != gc_end; ++gc_itr ) {
+
+            // loop over the trees
+            std::vector< TTree* >::const_iterator tree_itr =
+               m_inputTrees.begin();
+            std::vector< TTree* >::const_iterator tree_end =
+               m_inputTrees.end();
+            for( ; tree_itr != tree_end; ++tree_itr ) {
 
                // consider the one with the correct name
-               if( ( *it )->GetName() == sgc->GetTreeName() ) {
-                  // check for this entry, if Formula is true	
-                  TString teststring = sgc->GetFormula();
-                  TTreeFormula f( "testFormula", teststring.Data(), *it );
-                  // if true for all cuts, then add the Lumi of this input data to totlum
-                  if( ! f.EvalInstance( entry ) ) inside = kFALSE;
+               if( ( *tree_itr )->GetName() == gc_itr->GetTreeName() ) {
+                  // check for this entry, if Formula is true
+                  TTreeFormula f( "testFormula", gc_itr->GetFormula().Data(),
+                                  *tree_itr );
+                  // if true for all cuts, then add the Lumi of this input data
+                  // to totlum
+                  if( ! f.EvalInstance( static_cast< Int_t >( entry ) ) ) {
+                     inside = kFALSE;
+                  }
                   break;
                }
 
             }
          }
-         if( inside ) totlum += iD->GetScaledLumi();
+         if( inside ) totlum += id_itr->GetScaledLumi();
       }
    }
 
-   if( totlum > EPSILON ) 
+   if( totlum > EPSILON ) {
       weight = ( GetConfig().GetTargetLumi() / totlum );
-  
+   }
+
    return weight;
 }
 
@@ -827,6 +1046,7 @@ TDirectory*
 SCycleBaseNTuple::MakeSubDirectory( const TString& path,
                                     TDirectory* dir ) const throw( SError ) {
 
+   // Return the parent directory if the path name is empty:
    if( ! path.Length() ) return dir;
 
    TDirectory* result = 0;

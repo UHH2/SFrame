@@ -47,7 +47,7 @@ protected:
    virtual TDirectory* GetHistInputFile() const = 0;
 
    /// Write the objects meant to be merged using the output file
-   virtual void WriteHistObjects( TDirectory* output ) = 0;
+   virtual void WriteHistObjects() = 0;
 
 }; // class ISCycleBaseHist
 

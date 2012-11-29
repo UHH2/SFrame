@@ -107,8 +107,30 @@
 #  define CXXUTILS_FPCOMPARE_VOLATILE
 #endif
 
+/**
+ * @short Namespace for the utility functions taken from the ATLAS offline code
+ *
+ *        I stole this code from the ATLAS offline code. This was written
+ *        by Scott Snyder.
+ *
+ *   @see plug-ins/include/FPCompare.h
+ *
+ * $Revision$
+ * $Date$
+ */
 namespace CxxUtils {
 
+   /**
+    * @short Namespace for the safe comparison functions
+    *
+    *        The functions in this namespace can be used to implement "safe"
+    *        comparisons between floating point numbers in all circumstances.
+    *
+    *   @see plug-ins/include/FPCompare.h
+    *
+    * $Revision$
+    * $Date$
+    */
    namespace fpcompare {
 
       /**
@@ -233,6 +255,18 @@ namespace CxxUtils {
 
    } // namespace fpcompare
 
+   /**
+    * @short Namespace for the safe comparison functionals
+    *
+    *        The function objects in this namespace can be used to implement
+    *        "safe" comparisons between floating point numbers in all
+    *        circumstances.
+    *
+    *   @see plug-ins/include/FPCompare.h
+    *
+    * $Revision$
+    * $Date$
+    */
    namespace fpcompare_fn {
 
       /**

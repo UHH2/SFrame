@@ -30,7 +30,6 @@
 // Forward declaration(s):
 class TTree;
 class SInputData;
-class TFile;
 class TList;
 
 /**
@@ -130,7 +129,8 @@ public:
     * time it is called, all the input variables are filled with the
     * contents of the actual event.
     */
-   virtual void ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) = 0;
+   virtual void ExecuteEvent( const SInputData&,
+                              Double_t weight ) throw( SError ) = 0;
 
 private:
    /// Function for reading the cycle configuration on the worker nodes
@@ -154,10 +154,9 @@ private:
    TTree*                m_inputTree; ///< TTree used to load all input trees
    SInputData*           m_inputData; ///< Pointer to the currently active ID
    std::vector< TTree* > m_outputTrees; ///< List of all the event-level output TTree-s
-   TFile*                m_outputFile; ///< Pointer to the active temporary output file
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBaseExec, 0 );
+   ClassDef( SCycleBaseExec, 0 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SCycleBaseExec

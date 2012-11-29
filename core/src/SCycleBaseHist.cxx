@@ -161,15 +161,15 @@ TDirectory* SCycleBaseHist::GetHistInputFile() const {
  * or objects to be merged using an output file, but an output file is not
  * available, we still have to try to merge them in memory at least. After
  * printing some warning messages.
- *
- * @param output The output file to write the objects to. If set to a null
- *               pointer, the objects are added to the PROOF output instead.
  */
-void SCycleBaseHist::WriteHistObjects( TDirectory* output ) {
+void SCycleBaseHist::WriteHistObjects() {
 
    // Return right away if we don't have objects designated for in-file
    // merging:
    if( ! m_fileOutput.GetSize() ) return;
+
+   // Access the output file pointer:
+   TDirectory* output = GetOutputFile();
 
    // If the objects are added to the output file:
    if( output ) {

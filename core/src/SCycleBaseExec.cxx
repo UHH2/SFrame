@@ -74,95 +74,28 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
 
    try {
 
+      // Read the cycle/input data configuration:
       this->ReadConfig();
 
       //
-      // Configure the base classes to write to the TSelector output object:
+      // Configure the base classes:
       //
       this->SetHistOutput( fOutput );
+      this->SetNTupleInput( fInput );
       this->SetNTupleOutput( fOutput );
       this->SetConfInput( fInput );
 
       m_outputTrees.clear();
 
       //
-      // Open a PROOF output file for the ntuple(s):
+      // Create the output tree(s) if necessary:
       //
       if( m_inputData->GetTrees( STreeType::OutputSimpleTree ) ||
           m_inputData->GetTrees( STreeType::OutputMetaTree ) ) {
-
-         TProofOutputFile* proofFile = 0;
-         char* tempDirName = 0;
-
-         TNamed* out =
-            dynamic_cast< TNamed* >( fInput->FindObject( SFrame::ProofOutputName ) );
-         if( out ) {
-            proofFile =
-               new TProofOutputFile( gSystem->BaseName( TUrl( out->GetTitle() ).GetFile() ) );
-            proofFile->SetOutputFileName( out->GetTitle() );
-            tempDirName = 0;
-            fOutput->Add( proofFile );
-         } else {
-            m_logger << DEBUG << "No PROOF output file specified in configuration -> "
-                     << "Running in LOCAL mode" << SLogger::endmsg;
-            proofFile = 0;
-            // Use a more or less POSIX method for creating a unique file name:
-            tempDirName = new char[ 300 ];
-            if( gSystem->Getenv( "SFRAME_TEMP_DIR" ) ) {
-               // Honor the user's preference for the temporary directory
-               // location:
-               sprintf( tempDirName, "%s/%s",
-                        gSystem->Getenv( "SFRAME_TEMP_DIR" ),
-                        SFrame::ProofOutputDirName );
-            } else {
-               sprintf( tempDirName, "%s", SFrame::ProofOutputDirName );
-            }
-            if( ! mkdtemp( tempDirName ) ) {
-               REPORT_FATAL( "Couldn't create temporary directory name from template: "
-                             << SFrame::ProofOutputDirName );
-               return;
-            }
-            fOutput->Add( new SOutputFile( "SFrameOutputFile", TString( tempDirName ) +
-                                           "/" +  SFrame::ProofOutputFileName ) );
-         }
-
-         if( proofFile ) {
-            if( ! ( m_outputFile = proofFile->OpenFile( "RECREATE" ) ) ) {
-               m_logger << WARNING << "Couldn't open output file: "
-                        << proofFile->GetDir() << "/" << proofFile->GetFileName()
-                        << SLogger::endmsg;
-               m_logger << WARNING << "Saving the ntuples to memory" << SLogger::endmsg;
-            } else {
-               m_logger << DEBUG << "PROOF temp file opened with name: "
-                        << m_outputFile->GetName() << SLogger::endmsg;
-            }
-         } else {
-            if( ! tempDirName ) {
-               REPORT_FATAL( "No temporary directory name? There's some serious error "
-                             "in the code!" );
-               return;
-            }
-
-            // Open an intermediate file in this temporary directory:
-            if( ! ( m_outputFile = TFile::Open( TString( tempDirName ) + "/" +
-                                                SFrame::ProofOutputFileName , "RECREATE" ) ) ) {
-               m_logger << WARNING << "Couldn't open output file: "
-                        << tempDirName << "/" << SFrame::ProofOutputFileName << SLogger::endmsg;
-               m_logger << WARNING << "Saving the ntuples to memory" << SLogger::endmsg;
-            } else {
-               m_logger << DEBUG << "LOCAL temp file opened with name: "
-                        << tempDirName << "/" << SFrame::ProofOutputFileName << SLogger::endmsg;
-            }
-         }
-
-         this->CreateOutputTrees( *m_inputData, m_outputTrees, m_outputFile );
-
-         if( tempDirName ) delete[] tempDirName;
-
-      } else {
-         m_outputFile = 0;
+         this->CreateOutputTrees( *m_inputData, m_outputTrees );
       }
 
+      // Let the user code initialize itself:
       this->BeginInputData( *m_inputData );
 
    } catch( const SError& error ) {
@@ -201,7 +134,7 @@ Bool_t SCycleBaseExec::Notify() {
       return kTRUE;
    }
 
-   TFile* inputFile = 0;
+   TDirectory* inputFile = 0;
    try {
 
       this->LoadInputTrees( *m_inputData, m_inputTree, inputFile );
@@ -220,8 +153,8 @@ Bool_t SCycleBaseExec::Notify() {
       m_inputTree->SetCacheLearnEntries( GetConfig().GetCacheLearnEntries() );
    } else {
       // If it's set to a negative number, add all the branches to the cache.
-      // Otherwise (it's 0) trust that the user already added all the necessary branches
-      // inside BeginInputFile(...).
+      // Otherwise (it's 0) trust that the user already added all the necessary
+      // branches inside BeginInputFile(...).
       if( GetConfig().GetCacheLearnEntries() < 0 ) {
          m_inputTree->AddBranchToCache( "*", kTRUE );
       }
@@ -267,15 +200,16 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
 
    if( ! skipEvent ) {
       int nbytes = 0;
-      for( std::vector< TTree* >::iterator tree = m_outputTrees.begin();
-           tree != m_outputTrees.end(); ++tree ) {
-         nbytes = ( *tree )->Fill();
+      std::vector< TTree* >::iterator tree_itr = m_outputTrees.begin();
+      std::vector< TTree* >::iterator tree_end = m_outputTrees.end();
+      for( ; tree_itr != tree_end; ++tree_itr ) {
+         nbytes = ( *tree_itr )->Fill();
          if( nbytes < 0 ) {
             REPORT_ERROR( "Write error occured in tree \""
-                          << ( *tree )->GetName() << "\"" );
+                          << ( *tree_itr )->GetName() << "\"" );
          } else if( nbytes == 0 ) {
             m_logger << WARNING << "No data written to tree \""
-                     << ( *tree )->GetName() << "\"" << SLogger::endmsg;
+                     << ( *tree_itr )->GetName() << "\"" << SLogger::endmsg;
          }
       }
    } else {
@@ -284,12 +218,14 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
 
    ++m_nProcessedEvents;
    if( ! ( m_nProcessedEvents % 1000 ) ) {
-      // Only print these messages in local mode in INFO level. In PROOF mode they're
-      // only needed for debugging.
-      m_logger << ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ? INFO : DEBUG )
+      // Only print these messages in local mode in INFO level. In PROOF mode
+      // they're only needed for debugging.
+      m_logger << ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ? INFO :
+                    DEBUG )
                << "Processing entry: " << entry << " ("
                << ( m_nProcessedEvents - 1 ) << " / "
-               << ( m_inputData->GetNEventsMax() < 0 ? m_inputData->GetEventsTotal() :
+               << ( m_inputData->GetNEventsMax() < 0 ?
+                    m_inputData->GetEventsTotal() :
                     m_inputData->GetNEventsMax() )
                << " events processed so far)" << SLogger::endmsg;
    }
@@ -315,34 +251,18 @@ void SCycleBaseExec::SlaveTerminate() {
    // Write the objects that are meant to be merged in-file, into
    // the output file:
    //
-   this->WriteHistObjects( m_outputFile );
+   this->WriteHistObjects();
 
    //
    // Write the node statistics to the output:
    //
    SCycleStatistics* stat = new SCycleStatistics( SFrame::RunStatisticsName,
-                                                  m_nProcessedEvents, m_nSkippedEvents );
+                                                  m_nProcessedEvents,
+                                                  m_nSkippedEvents );
    fOutput->Add( stat );
 
-   //
    // Close the output file:
-   //
-   if( m_outputFile ) {
-
-      m_logger << DEBUG << "Closing output file: " << m_outputFile->GetName()
-               << SLogger::endmsg;
-
-      // Save all the output trees into the output file:
-      this->SaveOutputTrees( m_outputFile );
-
-      // Close the output file and reset the variables:
-      m_outputFile->SaveSelf( kTRUE );
-      m_outputFile->Close();
-      delete m_outputFile;
-      m_outputFile = 0;
-      m_outputTrees.clear();
-
-   }
+   this->CloseOutputFile();
 
    // Reset the ntuple handling component:
    this->ClearCachedTrees();
@@ -381,7 +301,8 @@ void SCycleBaseExec::ReadConfig() throw( SError ) {
       dynamic_cast< SCycleConfig* >( fInput->FindObject( SFrame::CycleConfigName ) );
    if( ! config ) {
       REPORT_FATAL( "Couldn't retrieve the cycle configuration" );
-      throw SError( "Couldn't find cycle configuration object", SError::SkipCycle );
+      throw SError( "Couldn't find cycle configuration object",
+                    SError::SkipCycle );
       return;
    }
    this->SetConfig( *config );
@@ -403,6 +324,10 @@ void SCycleBaseExec::ReadConfig() throw( SError ) {
    return;
 }
 
+/**
+ * I just implemented this function to get rid of a warning seen with some
+ * compilers about this class hiding TObject's ExecuteEvent function...
+ */
 void SCycleBaseExec::ExecuteEvent( Int_t /*event*/, Int_t /*px*/,
                                    Int_t /*py*/ ) {
 
