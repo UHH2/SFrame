@@ -1,4 +1,17 @@
 2012.11.29 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* The code seems to be working now.
+	* The output file opening and closing is now handled by
+	  SCycleBaseNTuple, and not SCycleBaseExec.
+	* SCycleBaseHist can request an output file to be created on
+	  demand, it can not only work with in-file histogram merging
+	  in case the user also writes an output TTree.
+	* Empty output trees are no longer written to the output file
+	  on the PROOF workers. This avoids the problem of TFileMerger
+	  creating empty merged trees when it receives an empty TTree
+	  as its first input.
+	* Have to run some larger tests first, will tag after that.
+
+2012.11.29 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Intermediate check-in. I have to test the code's behaviour on Linux as
      well.
    * Re-arranged a bit how output files are handled during the event processing.

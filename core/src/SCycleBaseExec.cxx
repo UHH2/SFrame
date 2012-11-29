@@ -51,9 +51,10 @@ void SCycleBaseExec::Begin( TTree* ) {
    try {
 
       //
-      // Configure the base classes to write to the TSelector output object:
+      // Configure the base classes:
       //
       this->SetHistOutput( fOutput );
+      this->SetNTupleInput( fInput );
       this->SetNTupleOutput( fOutput );
       this->SetConfInput( fInput );
 

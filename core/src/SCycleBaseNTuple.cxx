@@ -328,14 +328,19 @@ TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
    // Return right away if we already have an output file opened:
    if( m_outputFile ) return m_outputFile;
 
+   // A possible PROOF file that is created:
    TProofOutputFile* proofFile = 0;
+
+   // Path name of the temporary directory used in LOCAL mode:
    char* tempDirName = 0;
 
+   // Decide what kind of output file to open:
    TNamed* out =
       dynamic_cast< TNamed* >( m_input->FindObject( SFrame::ProofOutputName ) );
    if( out ) {
       // The path name to use for the file:
-      const char* path = gSystem->BaseName( TUrl( out->GetTitle() ).GetFile() );
+      const TString path =
+         gSystem->BaseName( TUrl( out->GetTitle() ).GetFile() );
       proofFile = new TProofOutputFile( path );
       proofFile->SetOutputFileName( out->GetTitle() );
       tempDirName = 0;
@@ -367,6 +372,7 @@ TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
                                       SFrame::ProofOutputFileName ) );
    }
 
+   // Now actually open the file:
    if( proofFile ) {
       if( ! ( m_outputFile = proofFile->OpenFile( "RECREATE" ) ) ) {
          m_logger << WARNING << "Couldn't open output file: "
@@ -403,6 +409,7 @@ TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
       }
    }
 
+   // Free up the possibly allocated memory:
    if( tempDirName ) delete[] tempDirName;
 
    // Return the directory of the output file:
@@ -431,6 +438,7 @@ void SCycleBaseNTuple::CloseOutputFile() throw( SError ) {
       delete m_outputFile;
       m_outputFile = 0;
       m_outputTrees.clear();
+      m_metaOutputTrees.clear();
 
    }
 
@@ -618,13 +626,23 @@ void SCycleBaseNTuple::SaveOutputTrees() throw( SError ) {
    // Remember which directory we were in:
    TDirectory* savedir = gDirectory;
 
+   // Flag stating whether we're running using PROOF:
+   const Bool_t isProof = m_input->FindObject( SFrame::ProofOutputName );
+
    // Save each regular output tree:
    for( std::vector< TTree* >::iterator tree = m_outputTrees.begin();
         tree != m_outputTrees.end(); ++tree ) {
-      TDirectory* dir = ( *tree )->GetDirectory();
-      if( dir ) dir->cd();
-      ( *tree )->Write();
-      ( *tree )->AutoSave();
+      // Only save the tree if it has entries, or we're not on PROOF:
+      if( ( *tree )->GetEntries() || ( ! isProof ) ) {
+         TDirectory* dir = ( *tree )->GetDirectory();
+         if( dir ) dir->cd();
+         ( *tree )->Write();
+         ( *tree )->AutoSave();
+      } else {
+         m_logger << INFO << "Not saving TTree \"" << ( *tree )->GetName()
+                  << "\", because it is empty" << SLogger::endmsg;
+      }
+      // Delete the tree:
       ( *tree )->SetDirectory( 0 );
       delete ( *tree );
    }
@@ -632,10 +650,17 @@ void SCycleBaseNTuple::SaveOutputTrees() throw( SError ) {
    // Save each metadata output tree:
    for( std::vector< TTree* >::iterator tree = m_metaOutputTrees.begin();
         tree != m_metaOutputTrees.end(); ++tree ) {
-      TDirectory* dir = ( *tree )->GetDirectory();
-      if( dir ) dir->cd();
-      ( *tree )->Write();
-      ( *tree )->AutoSave();
+      // Only save the tree if it has entries, or we're not on PROOF:
+      if( ( *tree )->GetEntries() || ( ! isProof ) ) {
+         TDirectory* dir = ( *tree )->GetDirectory();
+         if( dir ) dir->cd();
+         ( *tree )->Write();
+         ( *tree )->AutoSave();
+      } else {
+         m_logger << INFO << "Not saving TTree \"" << ( *tree )->GetName()
+                  << "\", because it is empty" << SLogger::endmsg;
+      }
+      // Delete the tree:
       ( *tree )->SetDirectory( 0 );
       delete ( *tree );
    }
