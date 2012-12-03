@@ -1,3 +1,7 @@
+2012.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Enabled keyword expansion for the Cintex source files. Should've been done
+     ages ago...
+
 2012.04.12 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Updated BUILD.sh not to compile the code when running on PROOF-Lite
 

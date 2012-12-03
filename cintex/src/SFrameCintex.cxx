@@ -19,8 +19,9 @@
 
 /// Enable the Cintex library
 /**
- * Function used for enabling the Cintex library. Since the Cintex.h header is available
- * in all ROOT releases since at least 5.20, relying on this header shouldn't be a problem.
+ * Function used for enabling the Cintex library. Since the Cintex.h header is
+ * available in all ROOT releases since at least 5.20, relying on this header
+ * shouldn't be a problem.
  *
  * @returns A dummy value, just for technical reasons
  */
@@ -32,7 +33,8 @@ Int_t EnableCintex() {
    ROOT::Cintex::Cintex::Enable();
 
    // Let the user know what we just did:
-   logger << INFO << "Usage of the Cintex library is now enabled" << SLogger::endmsg;
+   logger << INFO << "Usage of the Cintex library is now enabled"
+          << SLogger::endmsg;
    return 0;
 }
 

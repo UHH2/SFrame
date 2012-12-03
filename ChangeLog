@@ -1,4 +1,9 @@
 2012.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Enabled keyword expansion for the Cintex source files. Should've been done
+     ages ago...
+   * Not tagging for this
+
+2012.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * File merging on PROOF with TProofOutputFile is now configured to always
      download the files-to-be-merged before the merging starts. This should
      provide better performance on clusters with slower networks. Should not
