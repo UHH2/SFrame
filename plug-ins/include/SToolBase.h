@@ -71,7 +71,8 @@ protected:
 
    /// Function placing a ROOT object in the output file
    template< class T > T* Book( const T& histo,
-                                const char* directory = 0 ) throw( SError );
+                                const char* directory = 0,
+                                Bool_t inFile = kFALSE ) throw( SError );
    /// Function searching for a ROOT object in the output file
    template< class T > T* Retrieve( const char* name,
                                     const char* directory = 0,

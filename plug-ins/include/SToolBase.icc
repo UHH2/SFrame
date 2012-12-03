@@ -32,15 +32,16 @@ typename SToolBaseT< Type >::ParentType* SToolBaseT< Type >::GetParent() const {
    // Print a warning if somebody tries to do something with the tool without
    // giving it a valid parent:
    if( ! m_parent ) {
-      REPORT_ERROR( "No parent has been specified for the tool. The code is probably "
-                    "going to crash!" );
+      REPORT_ERROR( "No parent has been specified for the tool. The code is "
+                    "probably going to crash!" );
    }
 
    return m_parent;
 }
 
 template< class Type >
-void SToolBaseT< Type >::SetParent( typename SToolBaseT< Type >::ParentType* parent ) {
+void SToolBaseT< Type >::
+SetParent( typename SToolBaseT< Type >::ParentType* parent ) {
 
    m_parent = parent;
    return;
@@ -48,9 +49,11 @@ void SToolBaseT< Type >::SetParent( typename SToolBaseT< Type >::ParentType* par
 
 template< class Type >
 template< class T >
-T* SToolBaseT< Type >::Book( const T& histo, const char* directory ) throw( SError ) {
+T* SToolBaseT< Type >::Book( const T& histo,
+                             const char* directory,
+                             Bool_t inFile ) throw( SError ) {
 
-   return GetParent()->template Book( histo, directory );
+   return GetParent()->template Book( histo, directory, inFile );
 }
 
 template< class Type >
@@ -64,8 +67,9 @@ T* SToolBaseT< Type >::Retrieve( const char* name,
 
 template< class Type >
 template< class T >
-std::vector< T* > SToolBaseT< Type >::RetrieveAll( const char* name,
-                                                   const char* directory ) throw( SError ) {
+std::vector< T* >
+SToolBaseT< Type >::RetrieveAll( const char* name,
+                                 const char* directory ) throw( SError ) {
 
    return GetParent()->template RetrieveAll< T >( name, directory );
 }
@@ -86,46 +90,54 @@ TH1* SToolBaseT< Type >::Hist( const char* name, const char* dir ) {
 
 template< class Type >
 template< typename T >
-bool SToolBaseT< Type >::ConnectVariable( const char* treeName, const char* branchName,
+bool SToolBaseT< Type >::ConnectVariable( const char* treeName,
+                                          const char* branchName,
                                           T& variable ) throw ( SError ) {
 
-   return GetParent()->template ConnectVariable( treeName, branchName, variable );
+   return GetParent()->template ConnectVariable( treeName, branchName,
+                                                 variable );
 }
 
 template< class Type >
 template< typename T >
-TBranch* SToolBaseT< Type >::DeclareVariable( T& obj, const char* name,
-                                              const char* treeName ) throw( SError ) {
+TBranch*
+SToolBaseT< Type >::DeclareVariable( T& obj, const char* name,
+                                     const char* treeName ) throw( SError ) {
 
    return GetParent()->template DeclareVariable( obj, name, treeName );
 }
 
 template< class Type >
-TTree* SToolBaseT< Type >::GetMetadataTree( const char* name ) const throw( SError ) {
+TTree* SToolBaseT< Type >::
+GetMetadataTree( const char* name ) const throw( SError ) {
 
    return GetParent()->GetMetadataTree( name );
 }
 
 template< class Type >
-TTree* SToolBaseT< Type >::GetInputMetadataTree( const char* name ) const throw( SError ) {
+TTree* SToolBaseT< Type >::
+GetInputMetadataTree( const char* name ) const throw( SError ) {
 
    return GetParent()->GetInputMetadataTree( name );
 }
 
 template< class Type >
-TTree* SToolBaseT< Type >::GetOutputMetadataTree( const char* name ) const throw( SError ) {
+TTree* SToolBaseT< Type >::
+GetOutputMetadataTree( const char* name ) const throw( SError ) {
 
    return GetParent()->GetOutputMetadataTree( name );
 }
 
 template< class Type >
-TTree* SToolBaseT< Type >::GetInputTree( const char* treeName ) const throw( SError ) {
+TTree* SToolBaseT< Type >::
+GetInputTree( const char* treeName ) const throw( SError ) {
 
    return GetParent()->GetInputTree( treeName );
 }
 
 template< class Type >
-TTree* SToolBaseT< Type >::GetOutputTree( const char* treeName ) const throw( SError ) {
+TTree* SToolBaseT< Type >::
+GetOutputTree( const char* treeName ) const throw( SError ) {
 
    return GetParent()->GetOutputTree( treeName );
 }

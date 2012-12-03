@@ -341,7 +341,11 @@ TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
       // The path name to use for the file:
       const TString path =
          gSystem->BaseName( TUrl( out->GetTitle() ).GetFile() );
-      proofFile = new TProofOutputFile( path );
+      // This is not the main signature of the TProofOutputFile constructor
+      // anymore, but is being kept for backwards compatibility. To avoid using
+      // conditional compilation, let's use it for now. If it gets dropped,
+      // we'll have to put in some #if statements around here.
+      proofFile = new TProofOutputFile( path, "LOCAL" );
       proofFile->SetOutputFileName( out->GetTitle() );
       tempDirName = 0;
       m_output->Add( proofFile );

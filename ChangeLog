@@ -1,3 +1,13 @@
+2012.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * File merging on PROOF with TProofOutputFile is now configured to always
+     download the files-to-be-merged before the merging starts. This should
+     provide better performance on clusters with slower networks. Should not
+     be an issue on quick networks either, so I didn't make this a configurable
+     option.
+   * Added the new extra "inFile" option to SToolBase::Book(...). It was just
+     an oversight now to put the option in so far.
+   * Tagging as SFrame-03-06-10
+
 2012.11.29 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * The new code seems to work fine with the patched version of ROOT 5.34.03 on
      the NYU cluster, so let's tag it as SFrame-03-06-09

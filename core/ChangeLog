@@ -1,3 +1,10 @@
+2012.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * File merging on PROOF with TProofOutputFile is now configured to always
+     download the files-to-be-merged before the merging starts. This should
+     provide better performance on clusters with slower networks. Should not
+     be an issue on quick networks either, so I didn't make this a configurable
+     option.
+
 2012.11.29 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* The code seems to be working now.
 	* The output file opening and closing is now handled by
