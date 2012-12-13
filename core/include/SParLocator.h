@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -35,8 +35,8 @@
  *
  *          This is another part of the SFrame code that probably doesn't work
  *          on Windows, as I had to use standard POSIX code for locating the
- *          package files. Somehow I couldn't find any ROOT functions for listing
- *          all the files in a given directory. Very strange...
+ *          package files. Somehow I couldn't find any ROOT functions for
+ *          listing all the files in a given directory. Very strange...
  *
  * @version $Revision$
  */

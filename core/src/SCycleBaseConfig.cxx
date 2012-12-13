@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -127,7 +127,8 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
             mode = SCycleConfig::PROOF;
          else {
             m_logger << WARNING << "Running mode (\"" << curAttr->GetValue()
-                     << "\") not recognised. Running locally!" << SLogger::endmsg;
+                     << "\") not recognised. Running locally!"
+                     << SLogger::endmsg;
          }
          m_config.SetRunMode( mode );
       } else if( curAttr->GetName() == TString( "ProofServer" ) ) {
@@ -624,7 +625,8 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
       std::string name = "", stringValue = "";
       TListIter userAttributes( userNode->GetAttributes() );
       TXMLAttr* attribute = 0;
-      while( ( attribute = dynamic_cast< TXMLAttr* >( userAttributes() ) ) != 0 ) {
+      while( ( attribute = dynamic_cast< TXMLAttr* >( userAttributes() ) ) !=
+             0 ) {
          if( attribute->GetName() == TString( "Name" ) )
             name = attribute->GetValue();
          if( attribute->GetName() == TString( "Value" ) )
@@ -736,14 +738,16 @@ SetProperty( const std::string& name,
 
 /**
  * This function simply uses TSystem to do the environment variable expansion in
- * path names. One can use either "$SOMETHING" or "$(SOMETHING)" in the path names.
- * (The latter is also Win32 compatible, not that it matters for SFrame...)
+ * path names. One can use either "$SOMETHING" or "$(SOMETHING)" in the path
+ * names. (The latter is also Win32 compatible, not that it matters for
+ * SFrame...)
  *
  * Note that now the expansion is only done if the property begins with ":exp:".
- * If it does, then these 5 characters are removed from the beginning of the string,
- * and the rest of the string is given to TSystem for expansion.
+ * If it does, then these 5 characters are removed from the beginning of the
+ * string, and the rest of the string is given to TSystem for expansion.
  *
- * @param value The property that you want expanded based on the environment settings
+ * @param value The property that you want expanded based on the environment
+ *              settings
  * @returns The path name that was expanded to be a real file name
  */
 std::string SCycleBaseConfig::DecodeEnvVar( const std::string& value ) const { 
@@ -769,9 +773,16 @@ std::string SCycleBaseConfig::DecodeEnvVar( const std::string& value ) const {
 /**
  * This function is used in InitializeUserConfig to translate the value(s)
  * given in the XML configuration to boolean values.
+ *
+ * Any capitalization of "true" and "false", and numerical values are all
+ * acceptable.
+ *
+ * @param value The string to be interpreted as a boolean value
+ * @returns A boolean value made from the string
  */
 bool SCycleBaseConfig::ToBool( const std::string& value ) throw( SError ) {
 
+   // The decoding is done using TString:
    TString tvalue( value );
    if( tvalue.IsAlpha() ) {
       if( tvalue.Contains( "true", TString::kIgnoreCase ) ) {
@@ -783,10 +794,13 @@ bool SCycleBaseConfig::ToBool( const std::string& value ) throw( SError ) {
       return tvalue.Atoi();
    }
 
+   // Report the decoding problem:
+   REPORT_ERROR( "Can't translate \"" << value << "\" to boolean value" );
    SError error( SError::SkipCycle );
-   error << "Can't translate \"" << value << "\" to boolean";
+   error << "Can't translate \"" << value << "\" to boolean value";
    throw error;
 
+   // This is just here for completeness...
    return false;
 }
 

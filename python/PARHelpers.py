@@ -1,4 +1,24 @@
 # $Id$
+##########################################################################
+# Project: SFrame - ROOT-based analysis framework for ATLAS              #
+#                                                                        #
+# author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester    #
+# author David Berge      <David.Berge@cern.ch>          - CERN          #
+# author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg       #
+# author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen  #
+#                                                                        #
+##########################################################################
+
+## @package PARHelpers
+#    @short Functions for creating a PAR file from an SFrame package
+#
+# This package collects the functions used by sframe_parMaker.py
+# to create PAR packages out of SFrame packages during compilation.
+# It is possible to use the functions directly, by just doing:
+#
+# <code>
+#  >>> import PARHelpers
+# </code>
 
 # Import the needed module(s):
 import os.path

@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -22,8 +22,6 @@
 class TH1;
 class TObject;
 class TBranch;
-template< class T > class SInputVariables;
-template< class T > class SOutputVariables;
 
 /**
  *   @short Base class for tools that can be used during the analysis
@@ -39,10 +37,6 @@ template< class T > class SOutputVariables;
 template< class Type >
 class SToolBaseT {
 
-   /// To enable the usage of the protected functions for SInputVariables
-   friend class SInputVariables< SToolBaseT< SCycleBase > >;
-   /// To enable the usage of the protected functions for SOutputVariables
-   friend class SOutputVariables< SToolBaseT< SCycleBase > >;
    /// To enable the instantiation of SToolBaseT< SToolBase > tools
    friend class SToolBaseT< SToolBaseT< SCycleBase > >;
 
@@ -63,20 +57,16 @@ public:
    void SetParent( ParentType* parent );
 
 protected:
-   /////////////////////////////////////////////////////////////
-   //                                                         //
-   //         Functions inherited from SCycleBaseHist         //
-   //                                                         //
-   /////////////////////////////////////////////////////////////
-
+   /// @name Function inherited from SCycleBaseHist
+   //@{
    /// Function placing a ROOT object in the output file
    template< class T > T* Book( const T& histo,
                                 const char* directory = 0,
                                 Bool_t inFile = kFALSE ) throw( SError );
    /// Function searching for a ROOT object in the output file
-   template< class T > T* Retrieve( const char* name,
-                                    const char* directory = 0,
-                                    Bool_t outputOnly = kFALSE ) throw( SError );
+   template< class T > T*
+   Retrieve( const char* name, const char* directory = 0,
+             Bool_t outputOnly = kFALSE ) throw( SError );
    /// Function retrieving all ROOT objects of this name from the input file
    template< class T >
    std::vector< T* > RetrieveAll( const char* name,
@@ -86,13 +76,11 @@ protected:
                   const char* directory = 0 ) throw( SError );
    /// Function searching for 1-dimensional histograms in the output file
    TH1* Hist( const char* name, const char* dir = 0 );
+   //@}
 
-   /////////////////////////////////////////////////////////////
-   //                                                         //
-   //        Functions inherited from SCycleBaseNTuple        //
-   //                                                         //
-   /////////////////////////////////////////////////////////////
-
+public:
+   /// @name Functions inherited from SCycleBaseNTuple
+   //@{
    /// Connect an input variable
    template< typename T >
    bool ConnectVariable( const char* treeName, const char* branchName,
@@ -104,20 +92,20 @@ protected:
    /// Access one of the metadata trees
    virtual TTree* GetMetadataTree( const char* name ) const throw( SError );
    /// Access one of the input metadata trees
-   virtual TTree* GetInputMetadataTree( const char* name ) const throw( SError );
+   virtual TTree*
+   GetInputMetadataTree( const char* name ) const throw( SError );
    /// Access one of the output metadata trees
-   virtual TTree* GetOutputMetadataTree( const char* name ) const throw( SError );
+   virtual TTree*
+   GetOutputMetadataTree( const char* name ) const throw( SError );
    /// Access one of the input trees
    virtual TTree* GetInputTree( const char* treeName ) const throw( SError );
    /// Access one of the output trees
    virtual TTree* GetOutputTree( const char* treeName ) const throw( SError );
+   //@}
 
-   /////////////////////////////////////////////////////////////
-   //                                                         //
-   //        Functions inherited from SCycleBaseConfig        //
-   //                                                         //
-   /////////////////////////////////////////////////////////////
-
+protected:
+   /// @name Functions inherited from SCycleBaseConfig
+   //@{
    /// Declare a property
    template< typename T >
    void DeclareProperty( const std::string& name, T& value );
@@ -125,17 +113,11 @@ protected:
    void AddConfigObject( TObject* object );
    /// Get a configuration object on the PROOF nodes
    TObject* GetConfigObject( const char* name ) const;
-
-   /////////////////////////////////////////////////////////////
-   //                                                         //
-   //               The class's own functions                 //
-   //                                                         //
-   /////////////////////////////////////////////////////////////
+   //@}
 
    /// Set the name under which the tool's log messages should appear
    void SetLogName( const char* name );
 
-protected:
    mutable SLogger m_logger; ///< Logger object for the tool
 
 private:

@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -21,6 +21,7 @@ extern "C" {
 // Local include(s):
 #include "../include/SLogWriter.h"
 
+// Initialize the static member(s):
 SLogWriter* SLogWriter::m_instance = 0;
 
 /**
@@ -39,10 +40,18 @@ SLogWriter* SLogWriter::Instance() {
 }
 
 /**
- * This is also one of the "don't do anything" destructors.
+ * The destructor makes it in principle possible to delete the singleton object
+ * during the execution of the code, but I don't think that this should ever be
+ * done.
+ *
+ * Still, if the user deletes the object, the code should be able to re-create
+ * it when needed.
  */
 SLogWriter::~SLogWriter() {
 
+   // Reset the instance pointer, so the object would be properly re-created
+   // when it's needed:
+   m_instance = 0;
 }
 
 /**
@@ -62,8 +71,8 @@ void SLogWriter::Write( SMsgType type, const std::string& line ) const {
    // Print the output in colours only if it's printed to the console. If it's
    // redirected to a logfile, then produce simple black on while output.
    if( isatty( STDOUT_FILENO ) ) {
-      std::cout << m_colorMap.find( type )->second << " (" << stype->second << ")  "
-                << line << "\033[0m" << std::endl;
+      std::cout << m_colorMap.find( type )->second << " (" << stype->second
+                << ")  " << line << "\033[0m" << std::endl;
    } else {
       std::cout << " (" << stype->second << ")  " << line << std::endl;
    }
@@ -97,7 +106,7 @@ SMsgType SLogWriter::GetMinType() const {
 
 /**
  * The constructor takes care of filling the two std::map-s that are
- * used for generating the nice colured output.
+ * used for generating the nice, coloured output.
  */
 SLogWriter::SLogWriter()
    : m_minType( INFO ) {

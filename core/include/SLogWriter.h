@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -39,7 +39,7 @@ class SLogWriter {
 public:
    /// Function for accessing the single object
    static SLogWriter* Instance();
-   /// Default destructor
+   /// Destructor
    ~SLogWriter();
 
    /// Function writing a message to the output
@@ -55,10 +55,14 @@ protected:
    SLogWriter();
 
 private:
+   /// Single instance, used in the singleton implementation
    static SLogWriter* m_instance;
 
+   /// Message type -> type name association
    std::map< SMsgType, std::string > m_typeMap;
+   /// Message type -> message color association
    std::map< SMsgType, std::string > m_colorMap;
+   /// Minimum type of messages that are still printed
    SMsgType                          m_minType;
 
 }; // class SLogWriter

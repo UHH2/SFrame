@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -38,9 +38,6 @@
 #include "../include/STreeType.h"
 #include "../include/SConstants.h"
 #include "../include/SOutputFile.h"
-
-/// A simple definition used in calculating floating point differences
-static const Double_t EPSILON = 1e-15;
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseNTuple )
@@ -249,6 +246,9 @@ GetOutputMetadataTree( const char* name ) const throw( SError ) {
  * Function used by a few of the variable handling functions. It finds
  * the tree with a given name among the input trees, or throws an exception
  * if such tree doesn't exist.
+ *
+ * @param treeName Name of the input TTree to look for
+ * @returns A pointer to the requested input tree if successful
  */
 TTree* SCycleBaseNTuple::
 GetInputTree( const char* treeName ) const throw( SError ) {
@@ -443,7 +443,6 @@ void SCycleBaseNTuple::CloseOutputFile() throw( SError ) {
       m_outputFile = 0;
       m_outputTrees.clear();
       m_metaOutputTrees.clear();
-
    }
 
    return;
@@ -847,7 +846,7 @@ void SCycleBaseNTuple::GetEvent( Long64_t entry ) throw( SError ) {
  * @param entry     The event number
  */
 Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,
-                                            Long64_t entry ) {
+                                            Long64_t entry ) const {
 
    // the type of this input data
    const TString& type    = inputData.GetType();
@@ -906,7 +905,8 @@ Double_t SCycleBaseNTuple::CalculateWeight( const SInputData& inputData,
       }
    }
 
-   if( totlum > EPSILON ) {
+   // Check that the total luminosity is not zero:
+   if( totlum > 1e-15 ) {
       weight = ( GetConfig().GetTargetLumi() / totlum );
    }
 
@@ -933,21 +933,30 @@ void SCycleBaseNTuple::ClearCachedTrees() {
 
 /**
  * This is a tricky one. In SCycleBaseNTuple::DeclareVariable(...) the function
- * automatically detects the type of the variable to be put into the output tree.
- * Since ROOT uses a different naming scheme for the primitives than C++'s typeid
- * call, the typeid names have to be translated for ROOT. This is the function
- * doing that.
+ * automatically detects the type of the variable to be put into the output
+ * tree. Since ROOT uses a different naming scheme for the primitives than C++'s
+ * typeid call, the typeid names have to be translated for ROOT. This is the
+ * function doing that.
  *
- * Note: The translation is probably only valid on various UNIX systems, probably
- * doesn't work on Windows. (Did anyone ever try SFrame on Windows anyway???)
+ * @warning The translation is probably only valid on various UNIX systems,
+ *          probably doesn't work on Windows. (Did anyone ever try SFrame on
+ *          Windows anyway???)
+ *
+ * @param typeid_type Primitive type name in the "typeid" format
+ * @returns The primitive type name in ROOT's format
  */
-const char* SCycleBaseNTuple::RootType( const char* typeid_type ) throw( SError ) {
+const char*
+SCycleBaseNTuple::RootType( const char* typeid_type ) throw( SError ) {
 
+   // Check that we received a reasonable input:
    if( strlen( typeid_type ) != 1 ) {
-      throw SError( "SCycleBaseNTuple::RootType received complex object description",
-                    SError::StopExecution );
+      SLogger m_logger( "SCycleBaseNTuple" );
+      REPORT_ERROR( "Received a complex object description: " << typeid_type );
+      throw SError( "SCycleBaseNTuple::RootType received complex object "
+                    "description", SError::StopExecution );
    }
 
+   // Do the hard-coded translation:
    switch( typeid_type[ 0 ] ) {
 
    case 'c':
@@ -986,8 +995,11 @@ const char* SCycleBaseNTuple::RootType( const char* typeid_type ) throw( SError 
 
    }
 
-   throw SError( "Unknown primitive type encountered: " + TString( typeid_type ),
-                 SError::StopExecution );
+   // This is a pretty surprising turn of events:
+   SLogger m_logger( "SCycleBaseNTuple" );
+   REPORT_ERROR( "Unknown primitive type encountered: " << typeid_type );
+   throw SError( "Unknown primitive type encountered: " +
+                 TString( typeid_type ), SError::StopExecution );
    return "";
 }
 
@@ -996,10 +1008,15 @@ const char* SCycleBaseNTuple::RootType( const char* typeid_type ) throw( SError 
  * the correct type of primitive to the branches. ROOT can have some trouble
  * identifying such code problems...
  *
- * Note: The implementation might be platform specific!
+ * @warning The implementation might be platform specific!
+ *
+ * @param root_type ROOT primitive type name
+ * @returns The typeid type name for the ROOT primitive type
  */
-const char* SCycleBaseNTuple::TypeidType( const char* root_type ) throw( SError ) {
+const char*
+SCycleBaseNTuple::TypeidType( const char* root_type ) throw( SError ) {
 
+   // Do the hard-coded translation:
    if( ! strcmp( root_type, "Char_t" ) ) {
       return "c";
    } else if( ! strcmp( root_type, "UChar_t" ) ) {
@@ -1024,25 +1041,32 @@ const char* SCycleBaseNTuple::TypeidType( const char* root_type ) throw( SError 
       return "b";
    }
 
-   throw SError( "Unknown ROOT primitive type encountered: " + TString( root_type ),
-                 SError::StopExecution );
+   // This is a pretty surprising turn of events:
+   SLogger m_logger( "SCycleBaseNTuple" );
+   REPORT_ERROR( "Unknown ROOT primitive type encountered: " << root_type );
+   throw SError( "Unknown ROOT primitive type encountered: " +
+                 TString( root_type ), SError::StopExecution );
    return "";
 }
 
 /**
  * Helper function filling the list of input branches. It is called by the main
  * variable handling functions, not directly by the user.
+ *
+ * @param br The branch to remember
  */
 void SCycleBaseNTuple::RegisterInputBranch( TBranch* br ) throw( SError ) {
 
+   // This is a bit slow, but still not the worst part of the code...
    if( std::find( m_inputBranches.begin(), m_inputBranches.end(), br ) !=
        m_inputBranches.end() ) {
-      m_logger << DEBUG << "Branch '" << br->GetName() << "' already registered!"
-               << SLogger::endmsg;
+      m_logger << DEBUG << "Branch '" << br->GetName()
+               << "' already registered!" << SLogger::endmsg;
    } else {
       m_inputBranches.push_back( br );
    }
 
+   // Return gracefully:
    return;
 }
 
@@ -1096,14 +1120,19 @@ SCycleBaseNTuple::MakeSubDirectory( const TString& path,
       TDirectory* tempDir = 0;
       for( Int_t i = 0; i < directories->GetSize(); ++i ) {
 
-         TObjString* path_element = dynamic_cast< TObjString* >( directories->At( i ) );
+         TObjString* path_element =
+            dynamic_cast< TObjString* >( directories->At( i ) );
          if( ! path_element ) continue;
          if( path_element->GetString() == "" ) continue;
 
          REPORT_VERBOSE( "Accessing directory: " << path_element->GetString() );
-         if( ! ( tempDir = result->GetDirectory( path_element->GetString() ) ) ) {
+         tempDir = result->GetDirectory( path_element->GetString() );
+         if( ! tempDir ) {
             REPORT_VERBOSE( "Directory doesn't exist, creating it..." );
-            if( ! ( tempDir = result->mkdir( path_element->GetString(), "dummy title" ) ) ) {
+            tempDir = result->mkdir( path_element->GetString(), "dummy title" );
+            if( ! tempDir ) {
+               REPORT_ERROR( "Couldn't create directory: " << path
+                             << " in the output file!" );
                SError error( SError::SkipInputData );
                error << "Couldn't create directory: " << path
                      << " in the output file!";
@@ -1119,5 +1148,6 @@ SCycleBaseNTuple::MakeSubDirectory( const TString& path,
 
    }
 
+   // Return the created directory:
    return result;
 }

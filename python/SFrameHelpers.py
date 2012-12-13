@@ -1,16 +1,7 @@
 # $Id$
-###########################################################################
-# @Project: SFrame - ROOT-based analysis framework for ATLAS              #
-#                                                                         #
-# @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester    #
-# @author David Berge      <David.Berge@cern.ch>          - CERN          #
-# @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg       #
-# @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen #
-#                                                                         #
-###########################################################################
-
-## @package SFrameHelpers
-#    @short Collection of SFrame related python functions
+##
+# @package SFrameHelpers
+# @short Collection of SFrame related python functions
 #
 # This package is a collection of python functions useful for SFrame.
 # They can either be used from an interactive python session by
@@ -21,6 +12,11 @@
 # </code>
 #
 # or using the script(s) shipped with SFrame.
+#
+# @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+# @author David Berge      <David.Berge@cern.ch>          - CERN
+# @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+# @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
 
 # Import base module(s):
 import os.path
@@ -30,7 +26,7 @@ import time
 import ROOT
 
 ##
-# @short Function creating <In ... /> configuration nodes
+# @short Function creating <In /> configuration nodes for MC input
 #
 # The function checks the specified input files and writes the XML nodes
 # with their information to the specified output file. Their luminosity
@@ -40,7 +36,11 @@ import ROOT
 # @param files        List of input files
 # @param output       Name of the output file
 # @param tree         Name of the main TTree in the files
-# @param prefix       Prefix to be put before the file paths. E.g. root://mymachine/
+# @param prefix       Prefix to be put before the file paths.
+#                     E.g. root://mymachine/
+# @param real_filenames Boolean flag specifying if the file names are good as
+#                       they are (no absolute path name lookup needed)
+# @returns <code>0</code> if successful, something else if not
 def CreateInput( crossSection, files, output, tree, prefix, real_filenames ):
 
   # Turn off ROOT error messages:
@@ -116,7 +116,7 @@ def CreateInput( crossSection, files, output, tree, prefix, real_filenames ):
   return 0
 
 ##
-# @short Function creating <In ... /> configuration nodes
+# @short Function creating <In /> configuration nodes for data input
 #
 # The function checks the specified input files and writes the XML nodes
 # with their information to the specified output file. It assumes that the
@@ -127,7 +127,11 @@ def CreateInput( crossSection, files, output, tree, prefix, real_filenames ):
 # @param files        List of input files
 # @param output       Name of the output file
 # @param tree         Name of the main TTree in the files
-# @param prefix       Prefix to be put before the file paths. E.g. root://mymachine/
+# @param prefix       Prefix to be put before the file paths.
+#                     E.g. root://mymachine/
+# @param real_filenames Boolean flag specifying if the file names are good as
+#                       they are (no absolute path name lookup needed)
+# @returns <code>0</code> if successful, something else if not
 def CreateDataInput( files, output, tree, prefix, real_filenames ):
 
   # Turn off ROOT error messages:

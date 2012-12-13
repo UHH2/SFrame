@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -27,23 +27,24 @@ class TH1;
 /**
  *  @short Ligh-weight 1-dimensional histogram class
  *
- *         In many cases the TH1* histograms of ROOT can be unnecessarily "heavy". Those
- *         objects take quite a lot of memory, and are not the quickest. However they
- *         also provide a lot of functionality in return.
+ *         In many cases the TH1* histograms of ROOT can be unnecessarily
+ *         "heavy". Those objects take quite a lot of memory, and are not the
+ *         quickest. However they also provide a lot of functionality in return.
  *
- *         This class can be used when you just want to see some simple distribution.
- *         It only provides the very basic features. The created histograms can only have
- *         evenly sized bins for instance.
+ *         This class can be used when you just want to see some simple
+ *         distribution. It only provides the very basic features. The created
+ *         histograms can only have evenly sized bins for instance.
  *
- *         But for convenience when such an object is written out to a file, it is written
- *         out as an appropriate TH1 histogram, with the same contents as the object has
- *         in memory. So in principle changing one's code to use SH1D histograms instead
- *         of TH1D histograms in the cycle, should not be visible in the output file.
+ *         But for convenience when such an object is written out to a file, it
+ *         is written out as an appropriate TH1 histogram, with the same
+ *         contents as the object has in memory. So in principle changing one's
+ *         code to use SH1D histograms instead of TH1D histograms in the cycle,
+ *         should not be visible in the output file.
  *
- *         When creating the objects in the default mode (with statistical uncertainty
- *         computation enabled), they give about a 50% speed increase over using TH1.
- *         But when the statistical uncertainty computation is turned off, the speed
- *         increase is >200%.
+ *         When creating the objects in the default mode (with statistical
+ *         uncertainty computation enabled), they give about a 50% speed
+ *         increase over using TH1. But when the statistical uncertainty
+ *         computation is turned off, the speed increase is >200%.
  *
  * @version $Revision$
  */
@@ -115,7 +116,7 @@ private:
    const Bool_t m_computeErrors;
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SH1, 1 );
+   ClassDef( SH1, 1 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SH1
@@ -135,9 +136,9 @@ typedef SH1< Double_t > SH1D;
 typedef SH1< Int_t >    SH1I;
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SH1F );
-ClassImp( SH1D );
-ClassImp( SH1I );
+ClassImp( SH1F )
+ClassImp( SH1D )
+ClassImp( SH1I )
 #endif // DOXYGEN_IGNORE
 
 #endif // SFRAME_PLUGINS_SH1_H

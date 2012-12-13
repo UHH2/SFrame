@@ -7,24 +7,37 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
 #ifndef SFRAME_PLUGINS_SOutputVariables_ICC
 #define SFRAME_PLUGINS_SOutputVariables_ICC
 
+/**
+ * @param parent Pointer to the parent cycle
+ */
 template< class ParentType >
 SOutputVariables< ParentType >::SOutputVariables( ParentType* parent )
    : m_parent( parent ) {
 
 }
 
+/**
+ * Function that can be used to declare a new variable for an output TTree.
+ *
+ * @see SCycleBaseNTuple::DeclareVariable
+ *
+ * @param obj The object to write to the output ntuple
+ * @param name The name of the branch to create from the object
+ * @param treeName Optional TTree name, needed if multiple output trees are used
+ * @returns The branch that was just created
+ */
 template< class ParentType >
 template< typename T >
-TBranch*
-SOutputVariables< ParentType >::DeclareVariable( T& obj, const char* name,
-                                                 const char* treeName ) throw( SError ) {
+TBranch* SOutputVariables< ParentType >::
+DeclareVariable( T& obj, const char* name,
+                 const char* treeName ) throw( SError ) {
 
    return m_parent->template DeclareVariable( obj, name, treeName );
 }

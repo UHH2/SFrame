@@ -5,7 +5,7 @@
  # @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester    #
  # @author David Berge      <David.Berge@cern.ch>          - CERN          #
  # @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg       #
- # @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen #
+ # @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen  #
  #                                                                         #
  # Top level Makefile for compiling all the SFrame code                    #
  #                                                                         #

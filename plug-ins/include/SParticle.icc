@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -34,7 +34,6 @@ SParticle::SParticle( const ROOT::Math::LorentzVector< Geom >& parent )
    this->SetEta( parent.Eta() );
    this->SetPhi( parent.Phi() );
    this->SetE( parent.E() );
-
 }
 
 /**
@@ -49,7 +48,8 @@ SParticle::SParticle( const ROOT::Math::LorentzVector< Geom >& parent )
  * @param rh The LorentzVector on the right-hand side of the equation sign
  */
 template< class Geom > 
-SParticle& SParticle::operator= ( const ROOT::Math::LorentzVector< Geom >& rh ) {
+SParticle&
+SParticle::operator= ( const ROOT::Math::LorentzVector< Geom >& rh ) {
 
    this->SetPt( rh.Pt() );
    this->SetEta( rh.Eta() );
@@ -57,7 +57,6 @@ SParticle& SParticle::operator= ( const ROOT::Math::LorentzVector< Geom >& rh ) 
    this->SetE( rh.E() );
 
    return *this;
-
 }
 
 #endif // SFRAME_PLUGINS_SParticle_ICC

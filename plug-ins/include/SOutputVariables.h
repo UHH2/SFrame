@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -24,9 +24,9 @@ class TBranch;
  *  @short  Base class for classes holding output variables
  *
  *          This class can be used to serve as a base class for classes whose
- *          only purpose is to collect output variables. This can make it simpler
- *          to fill the variables of an output ntuple with multiple separate code
- *          pieces.
+ *          only purpose is to collect output variables. This can make it
+ *          simpler to fill the variables of an output ntuple with multiple
+ *          separate code pieces.
  *
  *          I should note however that when using SToolBase as the basis of the
  *          code pieces calculating the output variables, one can just fill the

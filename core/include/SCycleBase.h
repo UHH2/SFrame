@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -53,13 +53,9 @@ class SCycleBase : public ISCycleBase,
 public:
    /// Default constructor
    SCycleBase();
-   /// Default destructor
-   virtual ~SCycleBase();
-
-   //   virtual const char* GetName() const { return TSelector::GetName(); }
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBase, 0 );
+   ClassDef( SCycleBase, 0 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SCycleBase

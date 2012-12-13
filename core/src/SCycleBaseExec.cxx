@@ -6,29 +6,22 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
-// System include(s):
-#include <cstdlib>
-
 // ROOT include(s):
 #include <TTree.h>
-#include <TFile.h>
-#include <TProofOutputFile.h>
 #include <TSystem.h>
-#include <TTreeCache.h>
 
 // Local include(s):
 #include "../include/SCycleBaseExec.h"
 #include "../include/SInputData.h"
 #include "../include/SCycleConfig.h"
-#include "../include/SConstants.h"
 #include "../include/SCycleStatistics.h"
-#include "../include/SOutputFile.h"
 #include "../include/SLogWriter.h"
 #include "../include/STreeType.h"
+#include "../include/SConstants.h"
 
 #ifndef DOXYGEN_IGNORE
 ClassImp( SCycleBaseExec )
@@ -44,6 +37,12 @@ SCycleBaseExec::SCycleBaseExec()
    REPORT_VERBOSE( "SCycleBaseExec constructed" );
 }
 
+/**
+ * This function is called by ROOT/PROOF when the processing of a job (input
+ * data) starts on the PROOF master. In LOCAL mode it is just called before
+ * all the other functions before starting to process the events of the current
+ * input data.
+ */
 void SCycleBaseExec::Begin( TTree* ) {
 
    REPORT_VERBOSE( "Running initialization on master" );
@@ -58,7 +57,9 @@ void SCycleBaseExec::Begin( TTree* ) {
       this->SetNTupleOutput( fOutput );
       this->SetConfInput( fInput );
 
+      // Make sure the configuration is available for the cycle:
       this->ReadConfig();
+      // Let the user initialize his/her code:
       this->BeginMasterInputData( *m_inputData );
 
    } catch( const SError& error ) {
@@ -69,6 +70,11 @@ void SCycleBaseExec::Begin( TTree* ) {
    return;
 }
 
+/**
+ * This function is called by ROOT/PROOF when the processing of a job (input
+ * data) starts on the PROOF worker. In LOCAL mode it is called after
+ * <code>Begin(...)</code>, before the event processing would start.
+ */
 void SCycleBaseExec::SlaveBegin( TTree* ) {
 
    REPORT_VERBOSE( "Running initialization on slave" );
@@ -104,10 +110,12 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
       throw;
    }
 
+   // Reset the internal variable(s):
    m_nProcessedEvents = 0;
    m_nSkippedEvents = 0;
    m_firstInit = kTRUE;
 
+   // Print what just happened:
    m_logger << INFO << "Initialised InputData \"" << m_inputData->GetType()
             << "\" (Version:" << m_inputData->GetVersion()
             << ") on worker node" << SLogger::endmsg;
@@ -115,6 +123,15 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
    return;
 }
 
+/**
+ * This function is called by ROOT/PROOF when a new file is opened by the
+ * analysis. But the code doesn't try to connect to the input file at this
+ * point just yet, it only stores the pointer to the main TTree of the input
+ * file, and only goes through with the initialization of the file in
+ * <code>Notify()</code>.
+ *
+ * @param main_tree The main event-level TTree of the input files
+ */
 void SCycleBaseExec::Init( TTree* main_tree ) {
 
    REPORT_VERBOSE( "Caching the pointer to the main input tree" );
@@ -123,6 +140,15 @@ void SCycleBaseExec::Init( TTree* main_tree ) {
    return;
 }
 
+/**
+ * This function is called by ROOT/PROOF when a new input file should be
+ * connected to. The code accesses all the input TTrees of the newly opened
+ * input file at this point, and lets the user code connect to the input
+ * file's objects.
+ *
+ * @returns <code>kTRUE</code> if everything went fine, <code>kFALSE</code>
+ *          if there was some problem
+ */
 Bool_t SCycleBaseExec::Notify() {
 
    REPORT_VERBOSE( "Accessing a new input file" );
@@ -135,6 +161,7 @@ Bool_t SCycleBaseExec::Notify() {
       return kTRUE;
    }
 
+   // Connect to all objects of the input file:
    TDirectory* inputFile = 0;
    try {
 
@@ -173,11 +200,22 @@ Bool_t SCycleBaseExec::Notify() {
    }
 #endif // ROOT_VERSION...
 
+   // Return gracefully:
    return kTRUE;
 }
 
+/**
+ * This function is called by ROOT/PROOF to process one particular event in the
+ * analysis code. The cycle makes sure that the current event is loaded from the
+ * input file, and lets the cycle's execution function run.
+ *
+ * @param entry The entry that should be processed from the input TTree(s)
+ * @returns <code>kTRUE</code> if everything went correctly, or
+ *          <code>kFALSE</code> if there was a problem
+ */
 Bool_t SCycleBaseExec::Process( Long64_t entry ) {
 
+   // Execute the analysis code, looking out for any thrown exceptions:
    Bool_t skipEvent = kFALSE;
    try {
 
@@ -199,6 +237,8 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
       }
    }
 
+   // Write a new event to the output TTree(s) if the event doesn't have to be
+   // skipped:
    if( ! skipEvent ) {
       int nbytes = 0;
       std::vector< TTree* >::iterator tree_itr = m_outputTrees.begin();
@@ -231,9 +271,16 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
                << " events processed so far)" << SLogger::endmsg;
    }
 
+   // Return gracefully:
    return kTRUE;
 }
 
+/**
+ * This function is called by ROOT/PROOF on the worker nodes when the event
+ * processing finished. The code first lets the user code do any final
+ * operations by calling <code>EndInputData(...)</code>, then makes sure that
+ * all output information is properly stored, to end up in the correct place.
+ */
 void SCycleBaseExec::SlaveTerminate() {
 
    REPORT_VERBOSE( "Running finalization on slave" );
@@ -272,9 +319,16 @@ void SCycleBaseExec::SlaveTerminate() {
             << "\" (Version:" << m_inputData->GetVersion()
             << ") on worker node" << SLogger::endmsg;
 
+   // Return gracefully:
    return;
 }
 
+/**
+ * This function is called by ROOT/PROOF on the master node after all events
+ * have been processed. The code just calls the user's
+ * <code>EndMasterInputData(...)</code> function, and doesn't do anything else
+ * in addition itself.
+ */
 void SCycleBaseExec::Terminate() {
 
    REPORT_VERBOSE( "Running finalization on the master" );
@@ -286,6 +340,7 @@ void SCycleBaseExec::Terminate() {
       throw;
    }
 
+   // Return gracefully:
    return;
 }
 
@@ -298,30 +353,33 @@ void SCycleBaseExec::ReadConfig() throw( SError ) {
    //
    // Read the overall cycle configuration:
    //
-   SCycleConfig* config =
-      dynamic_cast< SCycleConfig* >( fInput->FindObject( SFrame::CycleConfigName ) );
+   TObject* tobj = fInput->FindObject( SFrame::CycleConfigName );
+   SCycleConfig* config = dynamic_cast< SCycleConfig* >( tobj );
    if( ! config ) {
       REPORT_FATAL( "Couldn't retrieve the cycle configuration" );
       throw SError( "Couldn't find cycle configuration object",
                     SError::SkipCycle );
       return;
    }
+
+   // Configure this object:
    this->SetConfig( *config );
    SLogWriter::Instance()->SetMinType( config->GetMsgLevel() );
 
    //
    // Read which InputData we're processing at the moment:
    //
-   m_inputData =
-      dynamic_cast< SInputData* >( fInput->FindObject( SFrame::CurrentInputDataName ) );
+   tobj = fInput->FindObject( SFrame::CurrentInputDataName );
+   m_inputData = dynamic_cast< SInputData* >( tobj );
    if( ! m_inputData ) {
       REPORT_FATAL( "Couldn't retrieve the input data definition currently "
-                    << "being processed" );
+                    "being processed" );
       throw SError( "Couldn't find current input data configuration object",
                     SError::SkipCycle );
       return;
    }
 
+   // Return gracefully:
    return;
 }
 
@@ -333,6 +391,5 @@ void SCycleBaseExec::ExecuteEvent( Int_t /*event*/, Int_t /*px*/,
                                    Int_t /*py*/ ) {
 
    REPORT_ERROR( "This function should never get called!" );
-
    return;
 }

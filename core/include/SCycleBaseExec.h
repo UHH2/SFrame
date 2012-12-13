@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -59,15 +59,25 @@ public:
    //                                                                       //
    ///////////////////////////////////////////////////////////////////////////
 
+   /// @name Re-implemented TSelector functions
+   //@{
+   /// Function called by ROOT/PROOF before event processing, on the client
    virtual void   Begin( TTree* );
+   /// Function called by ROOT/PROOF before event processing, on the worker(s)
    virtual void   SlaveBegin( TTree* );
+   /// Function called by ROOT/PROOF when a new file is opened
    virtual void   Init( TTree* main_tree );
+   /// Function called by ROOT/PROOF when a new file is opened
    virtual Bool_t Notify();
+   /// Function called by ROOT/PROOF to process one event in the user code
    virtual Bool_t Process( Long64_t entry );
+   /// Function called by ROOT/PROOF after event processing, on the worker(s)
    virtual void   SlaveTerminate();
+   /// Function called by ROOT/PROOF after event processing, on the client
    virtual void   Terminate();
    /// Function declaring the version of the selector
    virtual Int_t  Version() const { return 2; }
+   //@}
 
    ///////////////////////////////////////////////////////////////////////////
    //                                                                       //
@@ -76,6 +86,8 @@ public:
    //                                                                       //
    ///////////////////////////////////////////////////////////////////////////
 
+   /// @name Functions that are mandatory to be implemented in user code
+   //@{
    /// Initialisation called at the beginning of a full cycle
    /**
     * Analysis-wide configurations, like the setup of some reconstruction
@@ -88,7 +100,6 @@ public:
     * could be a good place to print some statistics about the running.
     */
    virtual void EndCycle() throw( SError ) = 0;
-
    /// Initialisation called on the worker nodes for each input data type
    /**
     * This is the place to declare the output variables for the output
@@ -102,7 +113,24 @@ public:
     * efficiency histograms by hand.
     */
    virtual void EndInputData  ( const SInputData& ) throw( SError ) = 0;
+   /// Initialisation called for each input file
+   /**
+    * This is the place to connect the input variables to the branches
+    * of the input tree(s).
+    */
+   virtual void BeginInputFile( const SInputData& ) throw( SError ) = 0;
+   /// Function called for every event
+   /**
+    * This is the function where the main analysis should be done. By the
+    * time it is called, all the input variables are filled with the
+    * contents of the actual event.
+    */
+   virtual void ExecuteEvent( const SInputData&,
+                              Double_t weight ) throw( SError ) = 0;
+   //@}
 
+   /// @name Functions that are optional to be implemented is user code
+   //@{
    /// Initialisation called on the client machine for each input data type
    /**
     * This function is mostly a placeholder for now. There is not much one
@@ -115,22 +143,7 @@ public:
     * can do here yet...
     */
    virtual void EndMasterInputData( const SInputData& ) throw( SError ) {}
-
-   /// Initialisation called for each input file
-   /**
-    * This is the place to connect the input variables to the branches
-    * of the input tree(s).
-    */
-   virtual void BeginInputFile( const SInputData& ) throw( SError ) = 0;
-
-   /// Function called for every event
-   /**
-    * This is the function where the main analysis should be done. By the
-    * time it is called, all the input variables are filled with the
-    * contents of the actual event.
-    */
-   virtual void ExecuteEvent( const SInputData&,
-                              Double_t weight ) throw( SError ) = 0;
+   //@}
 
 private:
    /// Function for reading the cycle configuration on the worker nodes
@@ -143,17 +156,13 @@ private:
    /// The number of already skipped events
    Long64_t m_nSkippedEvents;
 
-   // variable used for the case of multiple InputData objects with
-   // the same type, that are written to the same output file
-   Bool_t m_keepOutputFile;
-   Bool_t m_firstInputDataOfMany;
-
    /// Flag specifying if this is the first initialization of input variables
    Bool_t m_firstInit;
 
    TTree*                m_inputTree; ///< TTree used to load all input trees
    SInputData*           m_inputData; ///< Pointer to the currently active ID
-   std::vector< TTree* > m_outputTrees; ///< List of all the event-level output TTree-s
+   /// List of all the event-level output TTree-s
+   std::vector< TTree* > m_outputTrees;
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseExec, 0 )

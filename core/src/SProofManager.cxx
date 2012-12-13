@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -26,8 +26,8 @@
 SProofManager* SProofManager::m_instance = 0;
 
 /**
- * The destructor cleans up the open connections by calling the Cleanup() function
- * internally.
+ * The destructor cleans up the open connections by calling the Cleanup()
+ * function internally.
  */
 SProofManager::~SProofManager() {
 
@@ -50,12 +50,23 @@ SProofManager* SProofManager::Instance() {
 
 /**
  * This function can be used basically in the same way as one would use
- * TProof::Open(...).
+ * <code>TProof::Open(...)</code>.
  *
  * The function first looks at its internal cache to see if the connection
  * is already open, and if it is, it just returns the cached TProof object.
- * If the connection is not yet available, it creates it using TProof::Open(...),
- * and adds the created object to its internal cache.
+ * If the connection is not yet available, it creates it using
+ * <code>TProof::Open(...)</code>, and adds the created object to its internal
+ * cache.
+ *
+ * It is possible to trigger special actions/configurations by placing special
+ * strings into the URL field. The extra tokens always have to be given with a
+ * semicolon separator after the PROOF server name. The following options are
+ * recognised:
+ *
+ *  - "<server>;MemProfMaster": Profile the memory usage of the PROOF master
+ *    process using Valgrind
+ *  - "<server>;MemProfWorkers": Profile the memory usage of the PROOF worker
+ *    processes using Valgrind.
  *
  * @param url   Name of the PROOF server
  * @param param Additional parameters given to TProof::Open(...)
@@ -162,9 +173,10 @@ TProof* SProofManager::Open( const TString& url,
 }
 
 /**
- * This function is used to decide if a given PROOF server has already been configured
- * (packages uploaded, compiled and loaded). This helps avoid having to wait while
- * packages load multiple times in a job that runs many separately configured cycles.
+ * This function is used to decide if a given PROOF server has already been
+ * configured (packages uploaded, compiled and loaded). This helps avoid having
+ * to wait while packages load multiple times in a job that runs many separately
+ * configured cycles.
  *
  * @param url   Name of the PROOF server
  * @param param Additional parameters given to TProof::Open(...)
@@ -222,13 +234,13 @@ void SProofManager::SetConfigured( const TString& url,
 }
 
 /**
- * This function can be used to clean up the PROOF connections. Even if it's only called
- * at the termination of the sframe_main program, it's still very much needed. PROOF has
- * the habit of producing a crash at the very last moment in the application if the user
- * doesn't delete its objects properly.
+ * This function can be used to clean up the PROOF connections. Even if it's
+ * only called at the termination of the sframe_main program, it's still very
+ * much needed. PROOF has the habit of producing a crash at the very last moment
+ * in the application if the user doesn't delete its objects properly.
  *
- * The function first retrieves and prints all the worker logs from all the connections,
- * then it does the cleanup.
+ * The function first retrieves and prints all the worker logs from all the
+ * connections, then it does the cleanup.
  */
 void SProofManager::Cleanup() {
 
@@ -248,8 +260,8 @@ void SProofManager::Cleanup() {
 }
 
 /**
- * The constructor just initializes the member variables, and doesn't do anything
- * in addition.
+ * The constructor just initializes the member variables, and doesn't do
+ * anything in addition.
  */
 SProofManager::SProofManager()
    : m_connections(), m_logger( "SProofManager" ) {
@@ -299,23 +311,27 @@ void SProofManager::PrintWorkerLogs() const {
          //
          // Access the log of a single node:
          //
-         TProofLogElem* element = dynamic_cast< TProofLogElem* >( logList->At( i ) );
+         TProofLogElem* element =
+            dynamic_cast< TProofLogElem* >( logList->At( i ) );
          if( ! element ) {
             REPORT_ERROR( "Log element not recognised!" );
             continue;
          }
 
          //
-         // Find "the name" of the node. TProofLogElem objects only know that they
-         // came from node "0.2" for instance. This small loop matches these
-         // identifiers to the proper node names in the slaveInfos list.
+         // Find "the name" of the node. TProofLogElem objects only know that
+         // they came from node "0.2" for instance. This small loop matches
+         // these identifiers to the proper node names in the slaveInfos list.
          //
-         // If the identifier is not found in the list, then it has to be the master:
+         // If the identifier is not found in the list, then it has to be the
+         // master...
+         //
          TString nodeName = server->second.first->GetMaster();
          for( Int_t i = 0; i < slaveInfos->GetSize(); ++i ) {
 
             // Access the TSlaveInfo object:
-            TSlaveInfo* info = dynamic_cast< TSlaveInfo* >( slaveInfos->At( i ) );
+            TSlaveInfo* info =
+               dynamic_cast< TSlaveInfo* >( slaveInfos->At( i ) );
             if( ! info ) {
                REPORT_ERROR( "Couldn't use a TSlaveInfo object!" );
                continue;
@@ -329,17 +345,19 @@ void SProofManager::PrintWorkerLogs() const {
 
          //
          // Print the log. Note that we don't need to redirect the log lines
-         // to m_logger. The log lines of the nodes will already be formatted, so
-         // printing them through SLogger would just look ugly.
+         // to m_logger. The log lines of the nodes will already be formatted,
+         // so printing them through SLogger would just look ugly.
          //
-         m_logger << INFO << "=================================================="
+         m_logger << INFO
+                  << "=================================================="
                   << SLogger::endmsg;
          m_logger << INFO << "Output from node: " << nodeName << " ("
                   << element->GetName() << ")" << SLogger::endmsg;
 
          element->GetMacro()->Print();
 
-         m_logger << INFO << "=================================================="
+         m_logger << INFO
+                  << "=================================================="
                   << SLogger::endmsg;
 
       }

@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -15,7 +15,7 @@
 #define SFRAME_CORE_SCycleBaseBase_H
 
 // ROOT include(s):
-#include <TObject.h>
+#include <Rtypes.h>
 
 // Local include(s):
 #include "SLogger.h"
@@ -53,8 +53,11 @@ protected:
     */
    mutable SLogger m_logger;
 
+   // We do need ClassDef for the cycle ingredients not inheriting from TObject!
+   // If we wouldn't have this, it wouldn't be possible to make CINT ignore some
+   // of the member variables in the derived classes.
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBaseBase, 0 );
+   ClassDef( SCycleBaseBase, 0 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SCycleBaseBase
@@ -64,7 +67,7 @@ protected:
  *
  *          This is the ROOT base class for writing analysis code.
  *          For more documentation, go to:
- *          http://root.cern.ch/root/html520/TSelector.html
+ *          http://root.cern.ch/root/html534/TSelector.html
  */
 
 #endif // SFRAME_CORE_SCycleBaseBase_H

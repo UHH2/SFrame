@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -31,13 +31,11 @@
 #include "../include/STreeTypeDecoder.h"
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SDataSet );
-ClassImp( SFile );
-ClassImp( STree );
-ClassImp( SInputData );
+ClassImp( SDataSet )
+ClassImp( SFile )
+ClassImp( STree )
+ClassImp( SInputData )
 #endif // DOXYGEN_IGNORE
-
-using namespace std;
 
 // Define the constants:
 const Int_t STree::INPUT_TREE  = 0x1;
@@ -196,9 +194,9 @@ SInputData::SInputData( const char* name )
  * SInputData object. So I just copy the pointer to the TDSet object, and let
  * all the SInputData instances use the same TDSet.
  *
- * Unfortunately this results in a small memory leak. But since the only solution
- * I see right now is to use Boost (which is not available on all supported platforms
- * by default), I chose to accept this leak for now...
+ * Unfortunately this results in a small memory leak. But since the only
+ * solution I see right now is to use Boost (which is not available on all
+ * supported platforms by default), I chose to accept this leak for now...
  */
 SInputData::~SInputData() {
 
@@ -224,7 +222,7 @@ void SInputData::AddSFileIn( const SFile& sfile ) {
  * SFrame in this input data. Now there can be any number of types of TTrees,
  * which makes adding new functionality quite a bit easier.
  *
- * @param type  Type of the TTree. See the definitions in the STreeType namespace
+ * @param type Type of the TTree. See the definitions in the STreeType namespace
  * @param stree The STree object to add for the specified type
  */
 void SInputData::AddTree( Int_t type, const STree& stree ) {
@@ -234,8 +232,8 @@ void SInputData::AddTree( Int_t type, const STree& stree ) {
 }
 
 /**
- * This adds a new dataset to the input data, taking care of adding the luminosity
- * of the dataset to the total.
+ * This adds a new dataset to the input data, taking care of adding the
+ * luminosity of the dataset to the total.
  *
  * @param dset The dataset to be added to the input data
  */
@@ -248,38 +246,43 @@ void SInputData::AddDataSet( const SDataSet& dset ) {
 
 /**
  * This function takes care of investigating all the input files defined in the
- * configuration, and checking how many events they each contain. This information
- * is used at run time to calculate the correct weights of the events.
+ * configuration, and checking how many events they each contain. This
+ * information is used at run time to calculate the correct weights of the
+ * events.
  *
- * The function is smart enough to load already gathered information from a cache file
- * if it exists. The feature has to be enabled by setting Cacheable="1" in the declaration
- * of the InputData block in the configuration XML.
+ * The function is smart enough to load already gathered information from a
+ * cache file if it exists. The feature has to be enabled by setting
+ * Cacheable="1" in the declaration of the InputData block in the configuration
+ * XML.
+ *
+ * @param pserver Name of the PROOF server to use in the validation
  */
 void SInputData::ValidateInput( const char* pserver ) throw( SError ) {
 
    // Check that the user only specified one type of input:
    if( GetSFileIn().size() && GetDataSets().size() ) {
-      m_logger << ERROR << "You cannot use PROOF datasets AND regular input files in the"
-               << SLogger::endmsg;
-      m_logger << ERROR << "same InputData at the moment. Please only use one type!"
-               << SLogger::endmsg;
+      REPORT_ERROR( "You cannot use PROOF datasets AND regular input files "
+                    "in the" );
+      REPORT_ERROR( "same InputData at the moment. Please only use one type!" );
       throw SError( "Trying to use datasets and files in the same ID",
                     SError::SkipInputData );
    }
 
    // Check that the user did specify some kind of input:
    if( ( ! GetSFileIn().size() ) && ( ! GetDataSets().size() ) ) {
-      m_logger << ERROR << "You need to define at least one file or one dataset as input"
-               << SLogger::endmsg;
+      REPORT_ERROR( "You need to define at least one file or one dataset as "
+                    "input" );
       throw SError( "Missing input specification", SError::SkipInputData );
    }
 
    // Check that the configuration makes sense:
-   if( GetSkipValid() && ( ( GetNEventsMax() > 0 ) || ( GetNEventsSkip() > 0 ) ) ) {
-      m_logger << WARNING << "The input file validation can not be skipped when running on "
-               << "a subset of events\n"
+   if( GetSkipValid() && ( ( GetNEventsMax() > 0 ) ||
+                           ( GetNEventsSkip() > 0 ) ) ) {
+      m_logger << WARNING << "The input file validation can not be skipped "
+               << "when running on a subset of events\n"
                << "Turning on the InputData validation for InputData\n"
-               << "   Type: " << GetType() << ", Version: " << GetVersion() << SLogger::endmsg;
+               << "   Type: " << GetType() << ", Version: " << GetVersion()
+               << SLogger::endmsg;
       SetSkipValid( kFALSE );
    }
 
@@ -295,8 +298,7 @@ void SInputData::ValidateInput( const char* pserver ) throw( SError ) {
       ValidateInputFiles();
    } else if( GetDataSets().size() ) {
       if( ! pserver ) {
-         m_logger << ERROR << "PROOF server not specified. Can't validate datasets!"
-                  << SLogger::endmsg;
+         REPORT_ERROR( "PROOF server not specified. Can't validate datasets!" );
          throw SError( "Can't validate PROOF datasets without server name",
                        SError::SkipInputData );
       }
@@ -304,18 +306,17 @@ void SInputData::ValidateInput( const char* pserver ) throw( SError ) {
    }
 
    return;
-
 }
 
 /**
- * This function has a slightly different interface than all the other functions.
- * Unforunately I wasn't able to come up with any better ideas on how to signal it to
- * the user when a particular tree type is not available. Which is a pretty normal
- * condition.
+ * This function has a slightly different interface than all the other
+ * functions. Unforunately I wasn't able to come up with any better ideas on how
+ * to signal it to the user when a particular tree type is not available. Which
+ * is a pretty normal condition.
  *
- * So now this function returns a null-pointer when there are no trees of the requested
- * type, and returns a pointer to an actual vector when there is at least one
- * such tree.
+ * So now this function returns a null-pointer when there are no trees of the
+ * requested type, and returns a pointer to an actual vector when there is at
+ * least one such tree.
  *
  * @param type Type of the tree(s)
  * @returns null-pointer if requested trees don't exist, pointer to valid vector
@@ -331,13 +332,22 @@ const std::vector< STree >* SInputData::GetTrees( Int_t type ) const {
    }
 }
 
+/**
+ * @returns <code>kTRUE</code> if there is/are (a) input tree(s) defined,
+ *          <code>kFALSE</code> if not
+ */
 Bool_t SInputData::HasInputTrees() const {
 
-   for( std::map< Int_t, std::vector< STree > >::const_iterator trees = m_trees.begin();
-        trees != m_trees.end(); ++trees ) {
-      for( std::vector< STree >::const_iterator st = trees->second.begin();
-           st != trees->second.end(); ++st ) {
-         if( ( st->type & STree::INPUT_TREE ) && ( st->type & STree::EVENT_TREE ) ) {
+   std::map< Int_t, std::vector< STree > >::const_iterator tree_itr =
+      m_trees.begin();
+   std::map< Int_t, std::vector< STree > >::const_iterator tree_end =
+      m_trees.end();
+   for( ; tree_itr != tree_end; ++tree_itr ) {
+      std::vector< STree >::const_iterator st_itr = tree_itr->second.begin();
+      std::vector< STree >::const_iterator st_end = tree_itr->second.end();
+      for( ; st_itr != st_end; ++st_itr ) {
+         if( ( st_itr->type & STree::INPUT_TREE ) &&
+             ( st_itr->type & STree::EVENT_TREE ) ) {
             return kTRUE;
          }
       }
@@ -346,27 +356,40 @@ Bool_t SInputData::HasInputTrees() const {
    return kFALSE;
 }
 
+/**
+ * @returns The currently available dataset pointer
+ */
 TDSet* SInputData::GetDSet() const {
 
    return m_dset;
 }
 
+/**
+ * @returns The total luminosiy available from the input data
+ */
 Double_t SInputData::GetTotalLumi() const { 
   
    Double_t return_lumi = 0.;
    // use the given luminosity for this InputData in case it is specified
-   if( m_totalLumiGiven ) return_lumi = m_totalLumiGiven;
-   // otherwise use the sum of all files
-   else return_lumi = m_totalLumiSum;
-  
+   if( m_totalLumiGiven ) {
+      return_lumi = m_totalLumiGiven;
+   }
+   // otherwise use the sum of all files/datasets
+   else {
+      return_lumi = m_totalLumiSum;
+   }
+
    // make sure that the lumi is not zero
-   if( ! return_lumi ) 
-      m_logger << FATAL << "total luminosity for "<< GetType() << " is ZERO!"
-               << SLogger::endmsg;
+   if( ! return_lumi ) {
+      REPORT_ERROR( "Total luminosity for "<< GetType() << " is ZERO!" );
+   }
 
    return return_lumi;
 }
 
+/**
+ * @returns The luminosity that should be used in the luminosity weighting
+ */
 Double_t SInputData::GetScaledLumi() const { 
   
    Double_t scaled_lumi = 0.;
@@ -403,7 +426,6 @@ SInputData& SInputData::operator= ( const SInputData& parent ) {
    this->m_dset = parent.m_dset;
 
    return *this;
-
 }
 
 /**
@@ -414,12 +436,17 @@ SInputData& SInputData::operator= ( const SInputData& parent ) {
  * </code>
  *
  * possible.
+ *
+ * @returns <code>kTRUE</code> if the two input data are identical,
+ *          <code>kFALSE</code> if they are not
  */
 Bool_t SInputData::operator== ( const SInputData& rh ) const {
 
-   if( ( this->m_type == rh.m_type ) && ( this->m_version == rh.m_version ) &&
+   if( ( this->m_type == rh.m_type ) &&
+       ( this->m_version == rh.m_version ) &&
        ( this->m_totalLumiGiven == rh.m_totalLumiGiven ) &&
-       ( this->m_gencuts == rh.m_gencuts ) && ( this->m_sfileIn == rh.m_sfileIn ) &&
+       ( this->m_gencuts == rh.m_gencuts ) &&
+       ( this->m_sfileIn == rh.m_sfileIn ) &&
        ( this->m_trees == rh.m_trees ) &&
        ( this->m_dataSets == rh.m_dataSets ) &&
        ( this->m_totalLumiSum == rh.m_totalLumiSum ) &&
@@ -433,7 +460,6 @@ Bool_t SInputData::operator== ( const SInputData& rh ) const {
    } else {
       return kFALSE;
    }
-
 }
 
 /**
@@ -444,11 +470,13 @@ Bool_t SInputData::operator== ( const SInputData& rh ) const {
  * </code>
  *
  * possible.
+ *
+ * @returns <code>kTRUE</code> if the two input data are different,
+ *          <code>kFALSE</code> if they are not
  */
 Bool_t SInputData::operator!= ( const SInputData& rh ) const {
 
    return ( ! ( *this == rh ) );
-
 }
 
 /**
@@ -458,40 +486,54 @@ Bool_t SInputData::operator!= ( const SInputData& rh ) const {
  */
 void SInputData::Print( const Option_t* ) const {
 
-   m_logger << INFO << " ---------------------------------------------------------" << endl;
-   m_logger << " Type               : " << GetType() << endl;
-   m_logger << " Version            : " << GetVersion() << endl;
-   m_logger << " Total luminosity   : " << GetTotalLumi() << "pb-1" << endl;
-   m_logger << " NEventsMax         : " << GetNEventsMax() << endl;
-   m_logger << " NEventsSkip        : " << GetNEventsSkip() << endl;
-   m_logger << " Cacheable          : " << ( GetCacheable() ? "Yes" : "No" ) << endl;
-   m_logger << " Skip validation    : " << ( GetSkipValid() ? "Yes" : "No" ) << endl;
+   m_logger << INFO
+            << " ---------------------------------------------------------"
+            << std::endl;
+   m_logger << " Type               : " << GetType() << std::endl;
+   m_logger << " Version            : " << GetVersion() << std::endl;
+   m_logger << " Total luminosity   : " << GetTotalLumi() << "pb-1"
+            << std::endl;
+   m_logger << " NEventsMax         : " << GetNEventsMax() << std::endl;
+   m_logger << " NEventsSkip        : " << GetNEventsSkip() << std::endl;
+   m_logger << " Cacheable          : " << ( GetCacheable() ? "Yes" : "No" )
+            << std::endl;
+   m_logger << " Skip validation    : " << ( GetSkipValid() ? "Yes" : "No" )
+            << std::endl;
 
-   for( vector< SGeneratorCut >::const_iterator gc = m_gencuts.begin();
-        gc != m_gencuts.end(); ++gc )
-      m_logger << " Generator cut      : '" << gc->GetTreeName() << "' (tree) | '"
-               << gc->GetFormula() << "' (formula)" << endl;
+   for( std::vector< SGeneratorCut >::const_iterator gc = m_gencuts.begin();
+        gc != m_gencuts.end(); ++gc ) {
+      m_logger << " Generator cut      : '" << gc->GetTreeName()
+               << "' (tree) | '" << gc->GetFormula() << "' (formula)"
+               << std::endl;
+   }
 
-   for( vector< SDataSet >::const_iterator ds = m_dataSets.begin();
-        ds != m_dataSets.end(); ++ds )
-      m_logger << " Data Set           : '" << ds->name << "' (name) | '" << ds->lumi
-               << "' (lumi)" << endl;
-   for( vector< SFile >::const_iterator f = m_sfileIn.begin(); f != m_sfileIn.end();
-        ++f )
-      m_logger << " Input File         : '" << f->file << "' (file) | '" << f->lumi
-               << "' (lumi)" << endl;
+   for( std::vector< SDataSet >::const_iterator ds = m_dataSets.begin();
+        ds != m_dataSets.end(); ++ds ) {
+      m_logger << " Data Set           : '" << ds->name << "' (name) | '"
+               << ds->lumi << "' (lumi)" << std::endl;
+   }
+   for( std::vector< SFile >::const_iterator f = m_sfileIn.begin();
+        f != m_sfileIn.end(); ++f ) {
+      m_logger << " Input File         : '" << f->file << "' (file) | '"
+               << f->lumi << "' (lumi)" << std::endl;
+   }
 
-   for( std::map< Int_t, std::vector< STree > >::const_iterator trees = m_trees.begin();
-        trees != m_trees.end(); ++trees ) {
-      for( std::vector< STree >::const_iterator tree = trees->second.begin();
-           tree != trees->second.end(); ++tree ) {
-         m_logger << " Tree               : '" << tree->treeName << "' (name) | '"
-                  << STreeTypeDecoder::Instance()->GetName( trees->first )
-                  << "' (type)" << endl;
+   std::map< Int_t, std::vector< STree > >::const_iterator tree_itr =
+      m_trees.begin();
+   std::map< Int_t, std::vector< STree > >::const_iterator tree_end =
+      m_trees.end();
+   for( ; tree_itr != tree_end; ++tree_itr ) {
+      for( std::vector< STree >::const_iterator tree = tree_itr->second.begin();
+           tree != tree_itr->second.end(); ++tree ) {
+         m_logger << " Tree               : '" << tree->treeName
+                  << "' (name) | '"
+                  << STreeTypeDecoder::Instance()->GetName( tree_itr->first )
+                  << "' (type)" << std::endl;
       }
    }
 
-   m_logger << " ---------------------------------------------------------" << SLogger::endmsg;
+   m_logger << " ---------------------------------------------------------"
+            << SLogger::endmsg;
 
    return;
 }
@@ -572,6 +614,10 @@ TString SInputData::GetStringConfig() const {
    return result;
 }
 
+/**
+ * This function looks at all the specified input files to make sure that they
+ * exist, and to extract information about the trees inside of them.
+ */
 void SInputData::ValidateInputFiles() throw( SError ) {
 
    //
@@ -580,10 +626,12 @@ void SInputData::ValidateInputFiles() throw( SError ) {
    TFile* cachefile = 0;
    TFileCollection* filecoll = 0;
    if( m_cacheable && ( ! m_skipValid ) ) {
-      // The filename is hardcoded, since this is the only place where it's needed:
-      cachefile = TFile::Open( ".sframe." + GetType() + "." + GetVersion() + ".idcache.root",
-                               "UPDATE" );
-      m_logger << DEBUG << "Opened: " << cachefile->GetName() << SLogger::endmsg;
+      // The filename is hardcoded, since this is the only place where it's
+      // needed:
+      cachefile = TFile::Open( ".sframe." + GetType() + "." + GetVersion() +
+                               ".idcache.root", "UPDATE" );
+      m_logger << DEBUG << "Opened: " << cachefile->GetName()
+               << SLogger::endmsg;
       // Try to access the ID information:
       filecoll = ( TFileCollection* ) cachefile->Get( "IDCache" );
       if( ! filecoll ) {
@@ -594,24 +642,28 @@ void SInputData::ValidateInputFiles() throw( SError ) {
          cachefile->Append( filecoll );
       } else {
          // The cache already exists:
-         m_logger << DEBUG << "Existing TFileCollection found" << SLogger::endmsg;
+         m_logger << DEBUG << "Existing TFileCollection found"
+                  << SLogger::endmsg;
       }
    }
 
-   // Flag showing if the cache will have to be saved at the end of the function:
+   // Flag showing if the cache will have to be saved at the end of the
+   // function:
    Bool_t cacheUpdated = kFALSE;
    Int_t  fileInfoInDataset = 0;
 
    //
    // Loop over all the specified input files:
    //
-   for( std::vector< SFile >::iterator sf = m_sfileIn.begin(); sf != m_sfileIn.end(); ++sf ) {
+   std::vector< SFile >::iterator sf_itr = m_sfileIn.begin();
+   std::vector< SFile >::iterator sf_end = m_sfileIn.end();
+   for( ; sf_itr != sf_end; ++sf_itr ) {
 
       //
-      // Try to load the file's information from the cache. This is *much* faster than
-      // querying the file itself...
+      // Try to load the file's information from the cache. This is *much*
+      // faster than querying the file itself...
       //
-      if( m_cacheable && LoadInfoOnFile( sf, filecoll ) ) {
+      if( m_cacheable && LoadInfoOnFile( sf_itr.operator->(), filecoll ) ) {
          ++fileInfoInDataset;
          continue;
       }
@@ -619,13 +671,15 @@ void SInputData::ValidateInputFiles() throw( SError ) {
       //
       // Open the physical file:
       //
-      TFile* file = TFile::Open( sf->file.Data() );
+      TFile* file = TFile::Open( sf_itr->file.Data(), "READ" );
       if( ! file || file->IsZombie() ) {
-         m_logger << WARNING << "Couldn't open file: " << sf->file.Data() << SLogger::endmsg;
-         m_logger << WARNING << "Removing it from the input file list" << SLogger::endmsg;
+         m_logger << WARNING << "Couldn't open file: " << sf_itr->file.Data()
+                  << SLogger::endmsg;
+         m_logger << WARNING << "Removing it from the input file list"
+                  << SLogger::endmsg;
          // Erasing the file from the file list is a bit tricky actually:
-         sf = m_sfileIn.erase( sf );
-         --sf;
+         sf_itr = m_sfileIn.erase( sf_itr );
+         --sf_itr;
          continue;
       }
 
@@ -640,7 +694,7 @@ void SInputData::ValidateInputFiles() throw( SError ) {
          //
          TFileInfo* fileinfo = 0;
          if( m_cacheable ) {
-            fileinfo = AccessFileInfo( sf, filecoll );
+            fileinfo = AccessFileInfo( sf_itr.operator->(), filecoll );
          }
 
          //
@@ -649,42 +703,54 @@ void SInputData::ValidateInputFiles() throw( SError ) {
          Bool_t firstPassed = kFALSE;
          Long64_t entries = 0;
          Int_t numberOfBranches = 0;
-         // try to load all the input trees
-         for( std::map< Int_t, std::vector< STree > >::const_iterator trees = m_trees.begin();
-              trees != m_trees.end(); ++trees ) {
+         // Try to find all the input trees in the file info:
+         std::map< Int_t, std::vector< STree > >::const_iterator trees_itr =
+            m_trees.begin();
+         std::map< Int_t, std::vector< STree > >::const_iterator trees_end =
+            m_trees.end();
+         for( ; trees_itr != trees_end; ++trees_itr ) {
 
             m_logger << DEBUG << "Investigating \""
-                     << STreeTypeDecoder::Instance()->GetName( trees->first )
+                     << STreeTypeDecoder::Instance()->GetName( trees_itr->first )
                      << "\" types" << SLogger::endmsg;
-            for( std::vector< STree >::const_iterator st = trees->second.begin();
-                 st != trees->second.end(); ++st ) {
+
+            std::vector< STree >::const_iterator st_itr =
+               trees_itr->second.begin();
+            std::vector< STree >::const_iterator st_end =
+               trees_itr->second.end();
+            for( ; st_itr != st_end; ++st_itr ) {
 
                // Only check the existence of input trees:
-               if( ! ( st->type & STree::INPUT_TREE ) ) continue;
+               if( ! ( st_itr->type & STree::INPUT_TREE ) ) continue;
 
                // Try to access the input tree:
-               TTree* tree = dynamic_cast< TTree* >( file->Get( st->treeName ) );
+               TTree* tree =
+                  dynamic_cast< TTree* >( file->Get( st_itr->treeName ) );
                if( ! tree ) {
-                  m_logger << WARNING << "Couldn't find tree " << st->treeName
-                           << " in file " << sf->file << SLogger::endmsg;
-                  m_logger << WARNING << "Removing file from the input file list"
+                  m_logger << WARNING << "Couldn't find tree "
+                           << st_itr->treeName << " in file " << sf_itr->file
+                           << SLogger::endmsg;
+                  m_logger << WARNING
+                           << "Removing file from the input file list"
                            << SLogger::endmsg;
                   throw SError( SError::SkipFile );
                }
 
                // Remember how many branches there are in total in the input:
-               Int_t branchesThisTree = tree->GetNbranches();
-               m_logger << DEBUG << branchesThisTree << " branches in tree " << tree->GetName() 
-                        << SLogger::endmsg;
+               const Int_t branchesThisTree = tree->GetNbranches();
+               m_logger << DEBUG << branchesThisTree << " branches in tree "
+                        << tree->GetName() << SLogger::endmsg;
                numberOfBranches += branchesThisTree;
 
                // Check how many events are there in the input:
-               if( st->type & STree::EVENT_TREE ) {
+               if( st_itr->type & STree::EVENT_TREE ) {
                   if( firstPassed && ( tree->GetEntriesFast() != entries ) ) {
-                     m_logger << WARNING << "Conflict in number of entries - Tree "
-                              << tree->GetName() << " has " << tree->GetEntriesFast()
-                              << " entries, NOT " << entries << SLogger::endmsg;
-                     m_logger << WARNING << "Removing " << sf->file
+                     m_logger << WARNING
+                              << "Conflict in number of entries - Tree "
+                              << tree->GetName() << " has "
+                              << tree->GetEntriesFast() << " entries, NOT "
+                              << entries << SLogger::endmsg;
+                     m_logger << WARNING << "Removing " << sf_itr->file
                               << " from the input file list" << SLogger::endmsg;
                      throw SError( SError::SkipFile );
                   } else if( ! firstPassed ) {
@@ -697,37 +763,38 @@ void SInputData::ValidateInputFiles() throw( SError ) {
                // Save the information about this tree into the cache:
                //
                if( m_cacheable ) {
-                  TFileInfoMeta* tree_info = new TFileInfoMeta( tree->GetName(), "TTree",
-                                                                tree->GetEntriesFast() );
+                  TFileInfoMeta* tree_info =
+                     new TFileInfoMeta( tree->GetName(), "TTree",
+                                        tree->GetEntriesFast() );
                   tree_info->SetName( tree->GetName() );
                   tree_info->SetTitle( "Meta data info for a TTree" );
                   if( ! fileinfo->AddMetaData( tree_info ) ) {
-                     m_logger << ERROR << "There was a problem caching meta-data for TTree: "
-                              << tree->GetName() << SLogger::endmsg;
+                     REPORT_ERROR( "There was a problem caching meta-data for "
+                                   "TTree: " << tree->GetName() );
                   } else {
-                     m_logger << VERBOSE << "Meta-data cached for TTree: " << tree->GetName()
-                              << SLogger::endmsg;
+                     REPORT_VERBOSE( "Meta-data cached for TTree: "
+                                     << tree->GetName() );
                   }
                }
             }
          }
 
          // Update the ID information:
-         sf->events = entries;
+         sf_itr->events = entries;
          AddEvents( entries );
 
          m_logger << DEBUG << numberOfBranches << " branches in total in file "
                   << file->GetName() << SLogger::endmsg;
 
       } catch( const SError& ) {
-         m_totalLumiSum -= sf->lumi;
-         sf = m_sfileIn.erase( sf );
-         --sf;
+         m_totalLumiSum -= sf_itr->lumi;
+         sf_itr = m_sfileIn.erase( sf_itr );
+         --sf_itr;
       }
 
       // Close the input file:
       file->Close();
-      if( file ) delete file;
+      delete file;
    }
 
    //
@@ -740,10 +807,10 @@ void SInputData::ValidateInputFiles() throw( SError ) {
       // Take care of the TFileCollection object:
       //
       if( cacheUpdated ) {
-         m_logger << VERBOSE << "Writing file collection object to cache" << SLogger::endmsg;
+         REPORT_VERBOSE( "Writing file collection object to cache" );
          cachefile->cd();
          if( filecoll->Update() == -1 ) {
-            m_logger << ERROR << "Failed to update the cached information" << SLogger::endmsg;
+            REPORT_ERROR( "Failed to update the cached information" );
          }
          filecoll->Write();
 
@@ -758,15 +825,18 @@ void SInputData::ValidateInputFiles() throw( SError ) {
          m_dset = AccessDataSet( cachefile );
          if( ! m_dset ) {
             throw SError( "There was a logical error in the cache handling.\n"
-                          " Id Type: " + GetType() + ", Version: " + GetVersion(),
-                          SError::StopExecution );
+                          " Id Type: " + GetType() + ", Version: " +
+                          GetVersion(), SError::StopExecution );
          }
 
-         // Check if the current configuration is likely to be described by this dataset:
+         // Check if the current configuration is likely to be described by this
+         // dataset:
          if( fileInfoInDataset == m_dset->GetListOfElements()->GetSize() ) {
-            m_logger << DEBUG << "The loaded dataset is up to date" << SLogger::endmsg;
+            m_logger << DEBUG << "The loaded dataset is up to date"
+                     << SLogger::endmsg;
          } else {
-            m_logger << DEBUG << "The dataset has to be updated" << SLogger::endmsg;
+            m_logger << DEBUG << "The dataset has to be updated"
+                     << SLogger::endmsg;
             delete m_dset;
             m_dset = MakeDataSet();
             cachefile->cd();
@@ -784,8 +854,8 @@ void SInputData::ValidateInputFiles() throw( SError ) {
    }
 
    //
-   // Check that the specified maximum number of events and the number of events to
-   // skip, make sense:
+   // Check that the specified maximum number of events and the number of events
+   // to skip, make sense:
    //
    if( GetNEventsSkip() + GetNEventsMax() > GetEventsTotal() ) {
       if( GetNEventsSkip() >= GetEventsTotal() ) {
@@ -806,25 +876,33 @@ void SInputData::ValidateInputFiles() throw( SError ) {
    return;
 }
 
+/**
+ * This function is used to collect information about each file in the specified
+ * input PQ2 dataset(s).
+ *
+ * @param pserver The PROOF server to use in the validation
+ */
 void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
 
    // Connect to the PROOF server:
    TProof* server = SProofManager::Instance()->Open( pserver );
 
-   // Check the number of defined datasets. It's only possible to use multiple datasets
-   // in a single InputData starting from ROOT 5.27/02. In previous releases only the
-   // first one can be used.
+   // Check the number of defined datasets. It's only possible to use multiple
+   // datasets in a single InputData starting from ROOT 5.27/02. In previous
+   // releases only the first one can be used.
    if( ( ROOT_VERSION_CODE < ROOT_VERSION( 5, 27, 02 ) ) &&
-       // The special PROOF branch of the ROOT development code can also be used:
+       // The special PROOF branch of the ROOT development code can also be
+       // used:
        ( strcmp( gROOT->GetVersion(), "5.26/00-proof" ) ) &&
        ( m_dataSets.size() > 1 ) ) {
 
       m_logger << WARNING << "You're currently using ROOT version: "
                << gROOT->GetVersion() << "\n"
                << "This version doesn't yet support defining multiple\n"
-               << "datasets per InputData. Only the first one is going to be used!"
-               << SLogger::endmsg;
-      m_logger << WARNING << "To use multiple datasets, upgrate to at least ROOT 5.27/02"
+               << "datasets per InputData. Only the first one is going to be"
+               << "used!" << SLogger::endmsg;
+      m_logger << WARNING
+               << "To use multiple datasets, upgrate to at least ROOT 5.27/02"
                << SLogger::endmsg;
       m_dataSets.resize( 1 );
       m_totalLumiSum = m_dataSets.front().lumi;
@@ -833,18 +911,19 @@ void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
    //
    // Loop over the specified datasets:
    //
-   for( std::vector< SDataSet >::iterator ds = m_dataSets.begin();
-        ds != m_dataSets.end(); ++ds ) {
+   std::vector< SDataSet >::iterator ds_itr = m_dataSets.begin();
+   std::vector< SDataSet >::iterator ds_end = m_dataSets.end();
+   for( ; ds_itr != ds_end; ++ds_itr ) {
 
       try {
 
          //
          // Check if the dataset exists on the server:
          //
-         TFileCollection* filecoll = server->GetDataSet( ds->name );
+         TFileCollection* filecoll = server->GetDataSet( ds_itr->name );
          if( ! filecoll ) {
-            m_logger << ERROR << "Dataset \"" << ds->name << "\" doesn't exist on server: "
-                     << pserver << SLogger::endmsg;
+            REPORT_ERROR( "Dataset \"" << ds_itr->name
+                          << "\" doesn't exist on server: " << pserver );
             throw SError( SError::SkipFile );
          }
 
@@ -853,39 +932,48 @@ void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
          //
          Bool_t firstPassed = kFALSE;
          Long64_t entries = 0;
-         for( std::map< Int_t, std::vector< STree > >::const_iterator trees = m_trees.begin();
-              trees != m_trees.end(); ++trees ) {
+         std::map< Int_t, std::vector< STree > >::const_iterator trees_itr =
+            m_trees.begin();
+         std::map< Int_t, std::vector< STree > >::const_iterator trees_end =
+            m_trees.end();
+         for( ; trees_itr != trees_end; ++trees_itr ) {
 
             m_logger << DEBUG << "Investigating \""
-                     << STreeTypeDecoder::Instance()->GetName( trees->first )
+                     << STreeTypeDecoder::Instance()->GetName( trees_itr->first )
                      << "\" types" << SLogger::endmsg;
-            for( std::vector< STree >::const_iterator st = trees->second.begin();
-                 st != trees->second.end(); ++st ) {
+
+            std::vector< STree >::const_iterator st_itr =
+               trees_itr->second.begin();
+            std::vector< STree >::const_iterator st_end =
+               trees_itr->second.end();
+            for( ; st_itr != st_end; ++st_itr ) {
 
                // Only check the existence of input trees:
-               if( ! ( st->type & STree::INPUT_TREE ) ) continue;
+               if( ! ( st_itr->type & STree::INPUT_TREE ) ) continue;
 
                // Don't check for trees in sub-directories:
-               if( st->treeName.Contains( "/" ) ) continue;
+               if( st_itr->treeName.Contains( "/" ) ) continue;
 
                // Try to access information on the input tree:
-               Long64_t tree_entries = filecoll->GetTotalEntries( "/" + st->treeName );
+               const Long64_t tree_entries =
+                  filecoll->GetTotalEntries( "/" + st_itr->treeName );
                if( tree_entries == -1 ) {
-                  m_logger << ERROR << "Couldn't find tree " << st->treeName << " in dataset "
-                           << ds->name << SLogger::endmsg;
-                  m_logger << ERROR << "Removing dataset from the input list"
-                           << SLogger::endmsg;
+                  REPORT_ERROR( "Couldn't find tree " << st_itr->treeName
+                                << " in dataset " << ds_itr->name );
+                  REPORT_ERROR( "Removing dataset from the input list" );
                   throw SError( SError::SkipFile );
                }
 
                // Check how many events are there in the input:
-               if( st->type & STree::EVENT_TREE ) {
+               if( st_itr->type & STree::EVENT_TREE ) {
                   if( firstPassed && ( tree_entries != entries ) ) {
-                     m_logger << WARNING << "Conflict in number of entries - Tree "
-                              << st->treeName << " has " << tree_entries
+                     m_logger << WARNING
+                              << "Conflict in number of entries - Tree "
+                              << st_itr->treeName << " has " << tree_entries
                               << " entries, NOT " << entries << SLogger::endmsg;
-                     m_logger << WARNING << "Removing " << ds->name
-                              << " from the input dataset list" << SLogger::endmsg;
+                     m_logger << WARNING << "Removing " << ds_itr->name
+                              << " from the input dataset list"
+                              << SLogger::endmsg;
                      throw SError( SError::SkipFile );
                   } else if( ! firstPassed ) {
                      firstPassed = kTRUE;
@@ -896,13 +984,13 @@ void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
          }
 
          // Update the ID information:
-         ds->events = entries;
+         ds_itr->events = entries;
          AddEvents( entries );
 
       } catch( const SError& ) {
-         m_totalLumiSum -= ds->lumi;
-         ds = m_dataSets.erase( ds );
-         --ds;
+         m_totalLumiSum -= ds_itr->lumi;
+         ds_itr = m_dataSets.erase( ds_itr );
+         --ds_itr;
       }
 
    }
@@ -917,48 +1005,65 @@ void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
    return;
 }
 
-Bool_t SInputData::LoadInfoOnFile( std::vector< SFile >::iterator& file_itr,
-                                   TFileCollection* filecoll ) {
+/**
+ * This function is used internally to load information on a given
+ * file that will be used as input. It only accesses information coming from
+ * the metadata about the input files.
+ *
+ * @param file The file that should be checked
+ * @param filecoll The metadata that is available about the input files
+ * @returns <code>kTRUE</code> if all information is available, and could be
+ *          loaded; <code>kFALSE</code> if not.
+ */
+Bool_t SInputData::LoadInfoOnFile( SFile* file, TFileCollection* filecoll ) {
 
    // Retrieve the information about this specific file:
-   TFileInfo* fileinfo = ( TFileInfo* ) filecoll->GetList()->FindObject( file_itr->file );
+   TObject* tinfo = filecoll->GetList()->FindObject( file->file );
+   TFileInfo* fileinfo = dynamic_cast< TFileInfo* >( tinfo );
    if( ! fileinfo ) {
-      m_logger << VERBOSE << "File unknown: " << file_itr->file << SLogger::endmsg;
+      REPORT_VERBOSE( "File unknown: " << file->file );
       return kFALSE;
    }
 
-   m_logger << DEBUG << "Information found for: " << file_itr->file << SLogger::endmsg;
+   m_logger << DEBUG << "Information found for: " << file->file
+            << SLogger::endmsg;
 
-   Bool_t firstPassed = kFALSE; // Flag showing if we already know the number of entries
-   Long64_t entries = 0; // Number of entries in the file
+   // Flag showing if we already know the number of entries:
+   Bool_t firstPassed = kFALSE;
+   // Number of entries in the file:
+   Long64_t entries = 0;
 
    //
    // Check that information is available on all the input trees in the cache:
    //
-   for( std::map< Int_t, std::vector< STree > >::const_iterator trees = m_trees.begin();
-        trees != m_trees.end(); ++trees ) {
-      for( std::vector< STree >::const_iterator st = trees->second.begin();
-           st != trees->second.end(); ++st ) {
+   std::map< Int_t, std::vector< STree > >::const_iterator trees_itr =
+      m_trees.begin();
+   std::map< Int_t, std::vector< STree > >::const_iterator trees_end =
+      m_trees.end();
+   for( ; trees_itr != trees_end; ++trees_itr ) {
+      std::vector< STree >::const_iterator st_itr = trees_itr->second.begin();
+      std::vector< STree >::const_iterator st_end = trees_itr->second.end();
+      for( ; st_itr != st_end; ++st_itr ) {
 
          // Only check the existence of input trees:
-         if( ! ( st->type & STree::INPUT_TREE ) ) continue;
+         if( ! ( st_itr->type & STree::INPUT_TREE ) ) continue;
 
          // Get the tree information:
-         TFileInfoMeta* tree_info = fileinfo->GetMetaData( st->treeName );
+         TFileInfoMeta* tree_info = fileinfo->GetMetaData( st_itr->treeName );
          if( ! tree_info ) {
-            m_logger << DEBUG << "No description found for: " << st->treeName
-                     << SLogger::endmsg;
+            m_logger << DEBUG << "No description found for: "
+                     << st_itr->treeName << SLogger::endmsg;
             return kFALSE;
          }
 
          // Check how many events are there in the input:
-         if( st->type & STree::EVENT_TREE ) {
+         if( st_itr->type & STree::EVENT_TREE ) {
             if( ! firstPassed ) {
                firstPassed = kTRUE;
                entries = tree_info->GetEntries();
             } else if( entries != tree_info->GetEntries() ) {
                m_logger << WARNING << "Inconsistent cached data for: "
-                        << file_itr->file << " -> Checking the file again..."
+                        << file->file << " -> Checking the file again..."
                         << SLogger::endmsg;
                return kFALSE;
             }
@@ -969,48 +1074,80 @@ Bool_t SInputData::LoadInfoOnFile( std::vector< SFile >::iterator& file_itr,
    //
    // Update the ID with this information:
    //
-   file_itr->events = entries;
+   file->events = entries;
    AddEvents( entries );
 
+   // Everything was successful:
    return kTRUE;
 }
 
-TFileInfo* SInputData::AccessFileInfo( std::vector< SFile >::iterator& file_itr,
+/**
+ * This function is just used internally to access the metadata object
+ * describing a given input file. If such metadata doesn't exist yet, the
+ * function creates the metadata object.
+ *
+ * @param file The file to access the metadata about
+ * @param filecoll Object holding metadata about all the known input files
+ * @returns A pointer to the metadata describing the requested input file
+ */
+TFileInfo* SInputData::AccessFileInfo( SFile* file,
                                        TFileCollection* filecoll ) {
 
-   TFileInfo* result = 0;
+   // Try to access the metadata object:
+   TObject* tresult = filecoll->GetList()->FindObject( file->file );
+   TFileInfo* result = dynamic_cast< TFileInfo* >( tresult );
 
    // Check if we know anything about this file already:
-   if( ( result = ( TFileInfo* ) filecoll->GetList()->FindObject( file_itr->file ) ) ) {
-      m_logger << DEBUG << "Updating information for " << file_itr->file << SLogger::endmsg;
+   if( result ) {
+      m_logger << DEBUG << "Updating information for " << file->file
+               << SLogger::endmsg;
    } else {
       // One has to be very verbose in naming the object, otherwise the stupid
       // ROOT container will not be able to find it afterwards...
-      m_logger << DEBUG << "Creating information for " << file_itr->file << SLogger::endmsg;
-      result = new TFileInfo( file_itr->file );
-      result->SetName( file_itr->file );
-      result->SetTitle( "Description for: " + file_itr->file );
+      m_logger << DEBUG << "Creating information for " << file->file
+               << SLogger::endmsg;
+      result = new TFileInfo( file->file );
+      result->SetName( file->file );
+      result->SetTitle( "Description for: " + file->file );
       filecoll->Add( result );
    }
 
+   // Return the requested object:
    return result;
 }
 
-TDSet* SInputData::MakeDataSet() throw( SError ) {
+/**
+ * This function is used to make a validated dataset object out of the specified
+ * input files. This dataset is then used to process the file using PROOF.
+ *
+ * It can also be persistified into a metadata cache file to speed up the
+ * subsequent processing of the same input files.
+ *
+ * @returns A validated dataset made from the input files
+ */
+TDSet* SInputData::MakeDataSet() const throw( SError ) {
 
    // Find the name of the "main" TTree in the files:
    const char* treeName = 0;
-   for( std::map< Int_t, std::vector< STree > >::const_iterator trees = m_trees.begin();
-        trees != m_trees.end(); ++trees ) {
-      for( std::vector< STree >::const_iterator st = trees->second.begin();
-           st != trees->second.end(); ++st ) {
-         if( ( st->type & STree::INPUT_TREE ) && ( st->type & STree::EVENT_TREE ) ) {
-            treeName = st->treeName.Data();
+   std::map< Int_t, std::vector< STree > >::const_iterator trees_itr =
+      m_trees.begin();
+   std::map< Int_t, std::vector< STree > >::const_iterator trees_end =
+      m_trees.end();
+   for( ; trees_itr != trees_end; ++trees_itr ) {
+      std::vector< STree >::const_iterator st_itr = trees_itr->second.begin();
+      std::vector< STree >::const_iterator st_end = trees_itr->second.end();
+      for( ; st_itr != st_end; ++st_itr ) {
+         if( ( st_itr->type & STree::INPUT_TREE ) &&
+             ( st_itr->type & STree::EVENT_TREE ) ) {
+            treeName = st_itr->treeName.Data();
          }
       }
    }
    if( ! treeName ) {
-      throw SError( "Can't determine input TTree name!", SError::SkipInputData );
+      REPORT_ERROR( "Can't determine input TTree name for InputData with type: "
+                    << GetType() << ", version: " << GetVersion() );
+      throw SError( "Can't determine input TTree name!",
+                    SError::SkipInputData );
    }
 
    // Create a TChain that will be the basis of the dataset:
@@ -1023,14 +1160,23 @@ TDSet* SInputData::MakeDataSet() throw( SError ) {
    // Create the dataset:
    TDSet* result = new TDSet( chain );
    result->SetName( "DSetCache" );
-   result->SetTitle( "Cached dataset for ID Type: " + GetType() + ", Version: " +
-                     GetVersion() );
+   result->SetTitle( "Cached dataset for ID Type: " + GetType() +
+                     ", Version: " + GetVersion() );
    result->Validate();
 
+   // Return the object:
    return result;
 }
 
-TDSet* SInputData::AccessDataSet( TDirectory* dir ) {
+/**
+ * This is a very trivial function for hard-coding in a single place how
+ * the dataset information is stored by SFrame in the metadata cache files.
+ *
+ * @param dir Directory in which to look for the dataset object
+ * @returns The dataset object pointer if it could be found, or a null pointer
+ *          if not
+ */
+TDSet* SInputData::AccessDataSet( TDirectory* dir ) const {
 
    return dynamic_cast< TDSet* >( dir->Get( "DSetCache" ) );
 }

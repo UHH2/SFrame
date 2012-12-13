@@ -1,4 +1,14 @@
 // $Id$
+/***************************************************************************
+ * @Project: SFrame - ROOT-based analysis framework for ATLAS
+ * @Package: Core
+ *
+ * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
+ * @author David Berge      <David.Berge@cern.ch>          - CERN
+ * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
+ *
+ ***************************************************************************/
 
 // System include(s):
 #include <ctime>
@@ -18,6 +28,9 @@
 ClassImp( SCycleConfig )
 #endif // DOXYGEN_IGNORE
 
+/**
+ * @param name The name of the object
+ */
 SCycleConfig::SCycleConfig( const char* name )
    : TNamed( name, "SFrame cycle configuration" ),
      m_cycleName( "Unknown" ), m_mode( LOCAL ),
@@ -29,184 +42,285 @@ SCycleConfig::SCycleConfig( const char* name )
 
 }
 
+/**
+ * @returns The name of the cycle class
+ */
 const TString& SCycleConfig::GetCycleName() const {
 
    return m_cycleName;
 }
 
+/**
+ * @param name The name of the cycle class
+ */
 void SCycleConfig::SetCycleName( const TString& name ) {
 
    m_cycleName = name;
    return;
 }
 
+/**
+ * @returns The running mode of the cycle
+ */
 SCycleConfig::RunMode SCycleConfig::GetRunMode() const {
 
    return m_mode;
 }
 
+/**
+ * @param mode The running mode of the cycle
+ */
 void SCycleConfig::SetRunMode( SCycleConfig::RunMode mode ) {
 
    m_mode = mode;
    return;
 }
 
+/**
+ * @returns The name of the PROOF server to use in PROOF mode
+ */
 const TString& SCycleConfig::GetProofServer() const {
 
    return m_server;
 }
 
+/**
+ * @param server The name of the PROOF server to use in PROOF mode
+ */
 void SCycleConfig::SetProofServer( const TString& server ) {
 
    m_server = server;
    return;
 }
 
-const Int_t& SCycleConfig::GetProofNodes() const {
+/**
+ * @returns The number of PROOF nodes to use for the cycle
+ */
+Int_t SCycleConfig::GetProofNodes() const {
 
    return m_nodes;
 }
 
-void SCycleConfig::SetProofNodes( const Int_t nodes ) {
+/**
+ * @param nodes The number of PROOF nodes to use for the cycle
+ */
+void SCycleConfig::SetProofNodes( Int_t nodes ) {
 
    m_nodes = nodes;
    return;
 }
 
+/**
+ * @returns The directory to use for storing merged ntuples from PROOF
+ */
 const TString& SCycleConfig::GetProofWorkDir() const {
 
    return m_workdir;
 }
 
+/**
+ * @param workdir The directory to use for storing merged ntuples from PROOF
+ */
 void SCycleConfig::SetProofWorkDir( const TString& workdir ) {
 
    m_workdir = workdir;
    return;
 }
 
+/**
+ * @returns All the cycle properties
+ */
 const SCycleConfig::property_type& SCycleConfig::GetProperties() const {
 
    return m_properties;
 }
 
-void SCycleConfig::SetProperty( const std::string& name, const std::string& value ) {
+/**
+ * @param name  The name of the property to set
+ * @param value The value of the property to set
+ */
+void SCycleConfig::SetProperty( const std::string& name,
+                                const std::string& value ) {
 
    m_properties.push_back( std::make_pair( name, value ) );
    return;
 }
 
+/**
+ * @returns All the input data blocks of the cycle
+ */
 const SCycleConfig::id_type& SCycleConfig::GetInputData() const {
 
    return m_inputData;
 }
 
+/**
+ * @param id A new input data block for the cycle
+ */
 void SCycleConfig::AddInputData( const SInputData& id ) {
 
    m_inputData.push_back( id );
    return;
 }
 
+/**
+ * @param outDir The directory name to put the output file(s) in
+ */
 void SCycleConfig::SetOutputDirectory( const TString& outDir ) {
 
    m_outputDirectory = outDir;
    return;
 }
 
+/**
+ * @returns The directory name to put the output file(s) in
+ */
 const TString& SCycleConfig::GetOutputDirectory() const {
 
    return m_outputDirectory;
 }
 
+/**
+ * @param postFix The post-fix to put at the end of the output file name(s)
+ */
 void SCycleConfig::SetPostFix( const TString& postFix ) {
 
    m_postFix = postFix;
    return;
 }
 
+/**
+ * @returns The post-fix to put at the end of the output file name(s)
+ */
 const TString& SCycleConfig::GetPostFix() const {
 
    return m_postFix;
 }
 
+/**
+ * @param level The minimum level of printed messages
+ */
 void SCycleConfig::SetMsgLevel( SMsgType level ) {
 
    m_msgLevel = level;
    return;
 }
 
+/**
+ * @returns The minimum level of printed messages
+ */
 SMsgType SCycleConfig::GetMsgLevel() const {
 
    return m_msgLevel;
 }
 
+/**
+ * @param status <code>kTRUE</code> if TTreeCache should be used,
+ *               <code>kFALSE</code> if not
+ */
 void SCycleConfig::SetUseTreeCache( Bool_t status ) {
 
    m_useTreeCache = status;
    return;
 }
 
+/**
+ * @returns <code>kTRUE</code> if TTreeCache should be used,
+ *          <code>kFALSE</code> if not
+ */
 Bool_t SCycleConfig::GetUseTreeCache() const {
 
    return m_useTreeCache;
 }
 
+/**
+ * @param size The size of the TTreeCache in bytes
+ */
 void SCycleConfig::SetCacheSize( Long64_t size ) {
 
    m_cacheSize = size;
    return;
 }
 
+/**
+ * @returns The size of the TTreeCache in bytes
+ */
 Long64_t SCycleConfig::GetCacheSize() const {
 
    return m_cacheSize;
 }
 
+/**
+ * @param entries The number of events used to learn input tree access pattern
+ */
 void SCycleConfig::SetCacheLearnEntries( Int_t entries ) {
 
    m_cacheLearnEntries = entries;
    return;
 }
 
+/**
+ * @returns The number of events used to learn input tree access pattern
+ */
 Int_t SCycleConfig::GetCacheLearnEntries() const {
 
    return m_cacheLearnEntries;
 }
 
+/**
+ * @param flag <code>kTRUE</code> if PROOF workers are only allowed to process
+ *             files local to them, <code>kFALSE</code> if not
+ */
 void SCycleConfig::SetProcessOnlyLocal( Bool_t flag ) {
 
    m_processOnlyLocal = flag;
    return;
 }
 
+/**
+ * @returns <code>kTRUE</code> if PROOF workers are only allowed to process
+ *          files local to them, <code>kFALSE</code> if not
+ */
 Bool_t SCycleConfig::GetProcessOnlyLocal() const {
 
    return m_processOnlyLocal;
 }
 
+/**
+ * This function is used at the initialization stage to print the configuration
+ * of the cycle in a nice way.
+ */
 void SCycleConfig::PrintConfig() const {
 
    SLogger logger( "SCycleConfig" );
-   logger << INFO << "==========================================================="
+   logger << INFO
+          << "==========================================================="
           << SLogger::endmsg;
-   logger << INFO << "                    Cycle configuration" << SLogger::endmsg;
+   logger << INFO << "                    Cycle configuration"
+          << SLogger::endmsg;
    logger << INFO << "  - Running mode: "
           << ( m_mode == LOCAL ? "LOCAL" : "PROOF" ) << SLogger::endmsg;
    if( m_mode == PROOF ) {
       logger << INFO << "  - PROOF server: " << m_server << SLogger::endmsg;
       logger << INFO << "  - PROOF nodes: " << m_nodes << SLogger::endmsg;
    }
-   logger << INFO << "  - Target luminosity: " << m_targetLumi << SLogger::endmsg;
-   logger << INFO << "  - Output directory: " << m_outputDirectory << SLogger::endmsg;
+   logger << INFO << "  - Target luminosity: " << m_targetLumi
+          << SLogger::endmsg;
+   logger << INFO << "  - Output directory: " << m_outputDirectory
+          << SLogger::endmsg;
    logger << INFO << "  - Post-fix: " << m_postFix << SLogger::endmsg;
    if( m_useTreeCache ) {
-      logger << INFO << "  - Using TTreeCache with size: " << m_cacheSize << SLogger::endmsg;
+      logger << INFO << "  - Using TTreeCache with size: " << m_cacheSize
+             << SLogger::endmsg;
       if( m_cacheLearnEntries > 0 ) {
-         logger << INFO << "                 learn entries: " << m_cacheLearnEntries
-                << SLogger::endmsg;
+         logger << INFO << "                 learn entries: "
+                << m_cacheLearnEntries << SLogger::endmsg;
       } else if( m_cacheLearnEntries < 0 ) {
-         logger << INFO << "    All branches added to the cache" << SLogger::endmsg;
+         logger << INFO << "    All branches added to the cache"
+                << SLogger::endmsg;
       } else {
-         logger << INFO << "    The user is expected to choose branches to cache"
+         logger << INFO
+                << "    The user is expected to choose branches to cache"
                 << SLogger::endmsg;
       }
    }
@@ -215,17 +329,22 @@ void SCycleConfig::PrintConfig() const {
              << SLogger::endmsg;
    }
 
-   for( id_type::const_iterator id = m_inputData.begin(); id != m_inputData.end();
-        ++id ) {
+   for( id_type::const_iterator id = m_inputData.begin();
+        id != m_inputData.end(); ++id ) {
       id->Print();
    }
 
-   logger << INFO << "==========================================================="
+   logger << INFO
+          << "==========================================================="
           << SLogger::endmsg;
 
    return;
 }
 
+/**
+ * After the re-arranging the objects with the same type will end up
+ * beside each other.
+ */
 void SCycleConfig::ArrangeInputData() throw ( SError ) {
 
    // multimap to hold all type strings of InputData objects; will be
@@ -258,7 +377,8 @@ void SCycleConfig::ArrangeInputData() throw ( SError ) {
                 << " but will be repositioned and instead processed as number "
                 << ( index + 1 ) << SLogger::endmsg;         
       }
-      tmpInput.push_back( m_inputData[ help1->second ] );
+      const size_t i = static_cast< size_t >( help1->second );
+      tmpInput.push_back( m_inputData[ i ] );
    }
 
    // Sanity check
@@ -277,9 +397,16 @@ void SCycleConfig::ArrangeInputData() throw ( SError ) {
    return;
 }
 
+/**
+ * Some information about the input is gathered automatically from the
+ * input files, and not from the XML configuration. This information is
+ * needed for the correct event weight calculation. This function should
+ * be called by SCycleController...
+ */
 void SCycleConfig::ValidateInput() {
 
-   for( id_type::iterator id = m_inputData.begin(); id != m_inputData.end(); ++id ) {
+   for( id_type::iterator id = m_inputData.begin(); id != m_inputData.end();
+        ++id ) {
       id->ValidateInput( m_server );
    }
 
@@ -395,6 +522,10 @@ TString SCycleConfig::GetStringConfig( const SInputData* id ) const {
    return result;
 }
 
+/**
+ * The function just resets all configuration options in the object to
+ * meaningful defaults.
+ */
 void SCycleConfig::ClearConfig() {
 
    m_mode = LOCAL;

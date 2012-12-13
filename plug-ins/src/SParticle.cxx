@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -14,7 +14,7 @@
 #include "../include/SParticle.h"
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SParticle );
+ClassImp( SParticle )
 #endif // DOXYGEN_IGNORE
 
 /**
@@ -52,12 +52,5 @@ SParticle::SParticle( Double32_t pt, Double32_t eta, Double32_t phi,
 SParticle::SParticle( const SParticle& parent )
    : ROOT::Math::LorentzVector< ROOT::Math::PtEtaPhiE4D< Double32_t > >( parent ),
      TObject() {
-
-}
-
-/**
- * The destructor doesn't have to do anything.
- */
-SParticle::~SParticle() {
 
 }

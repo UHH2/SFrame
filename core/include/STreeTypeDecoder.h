@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -23,22 +23,25 @@
 /**
  *   @short Helper class for translating between tree type codes and names
  *
- *          In the new design of handling trees by SFrame, any kind of new type of
- *          input and output trees can be defined by the SFrame extension libraries.
- *          For instance now the base library doesn't need to know about persistent
- *          trees, SFrameARA is able to define those on its own.
+ *          In the new design of handling trees by SFrame, any kind of new type
+ *          of input and output trees can be defined by the SFrame extension
+ *          libraries. For instance now the base library doesn't need to know
+ *          about persistent trees, SFrameARA is able to define those on its
+ *          own.
  *
- *          The code now uses integer tree types to describe a tree to the framework.
- *          The constants declaring these tree types should all be in the STreeType
- *          namespace. To make the code able to display information about the known
- *          tree types in a nice way, it uses this "decoder" class to know what kind
- *          of tree it's handling at the moment.
+ *          The code now uses integer tree types to describe a tree to the
+ *          framework. The constants declaring these tree types should all be in
+ *          the STreeType namespace. To make the code able to display
+ *          information about the known tree types in a nice way, it uses this
+ *          "decoder" class to know what kind of tree it's handling at the
+ *          moment.
  *
- *          The class is implemented as a singleton, as really only one such dictionary
- *          is needed for the process. The singleton instance knows on its own about
- *          the tree types that can be handled by plain SFrame. Extension libraries
- *          should use the AddType(...) function to teach new tree types to the
- *          dictionary. (For an example see the SFrameARA implementation.)
+ *          The class is implemented as a singleton, as really only one such
+ *          dictionary is needed for the process. The singleton instance knows
+ *          on its own about the tree types that can be handled by plain SFrame.
+ *          Extension libraries should use the AddType(...) function to teach
+ *          new tree types to the dictionary. (For an example see the SFrameARA
+ *          implementation.)
  *
  * @version $Revision$
  */

@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -32,8 +32,6 @@ class SGeneratorCut : public TObject {
 public:
    /// Constructor specifying a tree name and a formula
    SGeneratorCut( const TString& treename = "", const TString& formula = "" );
-   /// Default destructor
-	virtual ~SGeneratorCut();
 
    /// Get the name of the tree
    /**
@@ -52,7 +50,7 @@ public:
     * acceptable:
     *
     * <code>
-    *   "MissingEt>10000"
+    *   "MissingEt>10000"<br/>
     *   "Mu_p_T[0]>20000"
     * </code>
     */
@@ -70,7 +68,7 @@ private:
    TString m_formula;
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SGeneratorCut, 1 );
+   ClassDef( SGeneratorCut, 1 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SGeneratorCut

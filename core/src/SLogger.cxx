@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -20,10 +20,8 @@
 // Local include(s):
 #include "../include/SLogger.h"
 
-using namespace std;
-
 /// Hard-coded maximum length of the source names
-static const string::size_type MAXIMUM_SOURCE_NAME_LENGTH = 18;
+static const std::string::size_type MAXIMUM_SOURCE_NAME_LENGTH = 18;
 
 /**
  * Many classes in SFrame inherit from TObject. It makes it quite easy to
@@ -34,13 +32,13 @@ static const string::size_type MAXIMUM_SOURCE_NAME_LENGTH = 18;
  * the correct name of the user analysis cycle, even though the user doesn't
  * have to set anything for this.
  *
- * @param source Pointer to the object that will print the messages (usually "this")
+ * @param source Pointer to the object that will print the messages
+ *               (usually "this")
  */
 SLogger::SLogger( const TObject* source )
    : m_objSource( source ), m_strSource( "" ), m_activeType( INFO ) {
 
    m_logWriter = SLogWriter::Instance();
-
 }
 
 /**
@@ -50,11 +48,10 @@ SLogger::SLogger( const TObject* source )
  *
  * @param source Name of the component sending the messages
  */
-SLogger::SLogger( const string& source )
+SLogger::SLogger( const std::string& source )
    : m_objSource( 0 ), m_strSource( source ), m_activeType( INFO ) {
 
    m_logWriter = SLogWriter::Instance();
-
 }
 
 /**
@@ -66,35 +63,34 @@ SLogger::SLogger( const string& source )
  */
 SLogger::SLogger( const SLogger& parent )
    : std::basic_ios< SLogger::char_type, SLogger::traits_type >(),
-     ostringstream() {
+     std::ostringstream() {
 
    *this = parent;
-
 }
 
 /**
- * The destructor is literally not doing anything...
+ * @param source The source object of the messages
  */
-SLogger::~SLogger() {
-
-}
-
 void SLogger::SetSource( const TObject* source ) {
 
    m_objSource = source;
    m_strSource = "";
    return;
-
 }
 
+/**
+ * @param source The simple string source of the messages
+ */
 void SLogger::SetSource( const std::string& source ) {
 
    m_objSource = 0;
    m_strSource = source;
    return;
-
 }
 
+/**
+ * @returns The string that should be printed as the source of the log messages
+ */
 const char* SLogger::GetSource() const {
 
    if( m_objSource ) {
@@ -118,7 +114,6 @@ SLogger& SLogger::operator= ( const SLogger& parent ) {
    m_logWriter = SLogWriter::Instance();
 
    return *this;
-
 }
 
 /**
@@ -132,21 +127,17 @@ SLogger& SLogger::operator= ( const SLogger& parent ) {
  * @param type The type of the message to send
  * @param message The text of the message
  */
-void SLogger::Send( const SMsgType type, const string& message ) const {
+void SLogger::Send( const SMsgType type, const std::string& message ) const {
 
+   // Bail right away if we don't need to print the message:
    if( type < m_logWriter->GetMinType() ) return;
 
-   string::size_type previous_pos = 0, current_pos = 0;
+   std::string::size_type previous_pos = 0, current_pos = 0;
 
    //
    // Make sure the source name is no longer than MAXIMUM_SOURCE_NAME_LENGTH:
    //
-   string source_name;
-   if( m_objSource ) {
-      source_name = m_objSource->GetName();
-   } else {
-      source_name = m_strSource;
-   }
+   std::string source_name( GetSource() );
    if( source_name.size() > MAXIMUM_SOURCE_NAME_LENGTH ) {
       source_name = source_name.substr( 0, MAXIMUM_SOURCE_NAME_LENGTH - 3 );
       source_name += "...";
@@ -158,12 +149,13 @@ void SLogger::Send( const SMsgType type, const string& message ) const {
    for( ; ; ) {
 
       current_pos = message.find( '\n', previous_pos );
-      string line = message.substr( previous_pos, current_pos - previous_pos );
+      std::string line = message.substr( previous_pos, current_pos -
+                                         previous_pos );
 
-      ostringstream message_to_send;
+      std::ostringstream message_to_send;
       // I have to call the modifiers like this, otherwise g++ get's confused
       // with the operators...
-      message_to_send.setf( ios::adjustfield, ios::left );
+      message_to_send.setf( std::ios::adjustfield, std::ios::left );
       message_to_send.width( MAXIMUM_SOURCE_NAME_LENGTH );
       message_to_send << source_name << " : " << line;
       m_logWriter->Write( type, message_to_send.str() );
@@ -174,7 +166,6 @@ void SLogger::Send( const SMsgType type, const string& message ) const {
    }
 
    return;
-
 }
 
 /**
@@ -196,7 +187,6 @@ void SLogger::Send() {
    this->str( "" );
 
    return;
-
 }
 
 /**
@@ -212,5 +202,4 @@ SLogger& SLogger::endmsg( SLogger& logger ) {
 
    logger.Send();
    return logger;
-
 }

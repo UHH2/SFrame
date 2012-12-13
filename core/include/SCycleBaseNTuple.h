@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -84,9 +84,11 @@ public:
    /// Access one of the metadata trees
    virtual TTree* GetMetadataTree( const char* name ) const throw( SError );
    /// Access one of the input metadata trees
-   virtual TTree* GetInputMetadataTree( const char* name ) const throw( SError );
+   virtual TTree*
+   GetInputMetadataTree( const char* name ) const throw( SError );
    /// Access one of the output metadata trees
-   virtual TTree* GetOutputMetadataTree( const char* name ) const throw( SError );
+   virtual TTree*
+   GetOutputMetadataTree( const char* name ) const throw( SError );
    /// Access one of the input trees
    virtual TTree* GetInputTree( const char* treeName ) const throw( SError );
    /// Access one of the output trees
@@ -114,7 +116,8 @@ protected:
    /// Read in the event from the "normal" trees
    void GetEvent( Long64_t entry ) throw( SError );
    /// Calculate the weight of the current event
-   Double_t CalculateWeight( const SInputData& inputData, Long64_t entry );
+   Double_t CalculateWeight( const SInputData& inputData,
+                             Long64_t entry ) const;
    /// Forget about the internally cached TTree pointers
    void ClearCachedTrees();
 

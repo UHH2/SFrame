@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -20,12 +20,18 @@ SToolBaseT< Type >::SToolBaseT()
 
 }
 
+/**
+ * @param parent Pointer to the parent object of this tool
+ */
 template< class Type >
 SToolBaseT< Type >::SToolBaseT( ParentType* parent )
    : m_logger( "SToolBase" ), m_parent( parent ) {
 
 }
 
+/**
+ * @returns The pointer to the tool's parent object
+ */
 template< class Type >
 typename SToolBaseT< Type >::ParentType* SToolBaseT< Type >::GetParent() const {
 
@@ -39,6 +45,9 @@ typename SToolBaseT< Type >::ParentType* SToolBaseT< Type >::GetParent() const {
    return m_parent;
 }
 
+/**
+ * @param parent Pointer to the parent object of this tool
+ */
 template< class Type >
 void SToolBaseT< Type >::
 SetParent( typename SToolBaseT< Type >::ParentType* parent ) {
@@ -47,6 +56,9 @@ SetParent( typename SToolBaseT< Type >::ParentType* parent ) {
    return;
 }
 
+/**
+ * @see SCycleBaseHist::Book
+ */
 template< class Type >
 template< class T >
 T* SToolBaseT< Type >::Book( const T& histo,
@@ -56,6 +68,9 @@ T* SToolBaseT< Type >::Book( const T& histo,
    return GetParent()->template Book( histo, directory, inFile );
 }
 
+/**
+ * @see SCycleBaseHist::Retrieve
+ */
 template< class Type >
 template< class T >
 T* SToolBaseT< Type >::Retrieve( const char* name,
@@ -65,6 +80,9 @@ T* SToolBaseT< Type >::Retrieve( const char* name,
    return GetParent()->template Retrieve< T >( name, directory, outputOnly );
 }
 
+/**
+ * @see SCycleBaseHist::RetrieveAll
+ */
 template< class Type >
 template< class T >
 std::vector< T* >
@@ -74,6 +92,9 @@ SToolBaseT< Type >::RetrieveAll( const char* name,
    return GetParent()->template RetrieveAll< T >( name, directory );
 }
 
+/**
+ * @see SCycleBaseHist::WriteObj
+ */
 template< class Type >
 void SToolBaseT< Type >::WriteObj( const TObject& obj,
                                    const char* directory ) throw( SError ) {
@@ -82,12 +103,18 @@ void SToolBaseT< Type >::WriteObj( const TObject& obj,
    return;
 }
 
+/**
+ * @see SCycleBaseHist::Hist
+ */
 template< class Type >
 TH1* SToolBaseT< Type >::Hist( const char* name, const char* dir ) {
 
    return GetParent()->Hist( name, dir );
 }
 
+/**
+ * @see SCycleBaseNTuple::ConnectVariable
+ */
 template< class Type >
 template< typename T >
 bool SToolBaseT< Type >::ConnectVariable( const char* treeName,
@@ -98,6 +125,9 @@ bool SToolBaseT< Type >::ConnectVariable( const char* treeName,
                                                  variable );
 }
 
+/**
+ * @see SCycleBaseNTuple::DeclareVariable
+ */
 template< class Type >
 template< typename T >
 TBranch*
@@ -107,6 +137,9 @@ SToolBaseT< Type >::DeclareVariable( T& obj, const char* name,
    return GetParent()->template DeclareVariable( obj, name, treeName );
 }
 
+/**
+ * @see SCycleBaseNTuple::GetMetadataTree
+ */
 template< class Type >
 TTree* SToolBaseT< Type >::
 GetMetadataTree( const char* name ) const throw( SError ) {
@@ -114,6 +147,9 @@ GetMetadataTree( const char* name ) const throw( SError ) {
    return GetParent()->GetMetadataTree( name );
 }
 
+/**
+ * @see SCycleBaseNTuple::GetInputMetadataTree
+ */
 template< class Type >
 TTree* SToolBaseT< Type >::
 GetInputMetadataTree( const char* name ) const throw( SError ) {
@@ -121,6 +157,9 @@ GetInputMetadataTree( const char* name ) const throw( SError ) {
    return GetParent()->GetInputMetadataTree( name );
 }
 
+/**
+ * @see SCycleBaseNTuple::GetOutputMetadataTree
+ */
 template< class Type >
 TTree* SToolBaseT< Type >::
 GetOutputMetadataTree( const char* name ) const throw( SError ) {
@@ -128,6 +167,9 @@ GetOutputMetadataTree( const char* name ) const throw( SError ) {
    return GetParent()->GetOutputMetadataTree( name );
 }
 
+/**
+ * @see SCycleBaseNTuple::GetInputTree
+ */
 template< class Type >
 TTree* SToolBaseT< Type >::
 GetInputTree( const char* treeName ) const throw( SError ) {
@@ -135,6 +177,9 @@ GetInputTree( const char* treeName ) const throw( SError ) {
    return GetParent()->GetInputTree( treeName );
 }
 
+/**
+ * @see SCycleBaseNTuple::GetOutputTree
+ */
 template< class Type >
 TTree* SToolBaseT< Type >::
 GetOutputTree( const char* treeName ) const throw( SError ) {
@@ -142,6 +187,9 @@ GetOutputTree( const char* treeName ) const throw( SError ) {
    return GetParent()->GetOutputTree( treeName );
 }
 
+/**
+ * @see SCycleBaseConfig::DeclareProperty
+ */
 template< class Type >
 template< typename T >
 void SToolBaseT< Type >::DeclareProperty( const std::string& name, T& value ) {
@@ -150,6 +198,9 @@ void SToolBaseT< Type >::DeclareProperty( const std::string& name, T& value ) {
    return;
 }
 
+/**
+ * @see SCycleBaseConfig::AddConfigObject
+ */
 template< class Type >
 void SToolBaseT< Type >::AddConfigObject( TObject* object ) {
 
@@ -157,12 +208,18 @@ void SToolBaseT< Type >::AddConfigObject( TObject* object ) {
    return;
 }
 
+/**
+ * @see SCycleBaseConfig::GetConfigObject
+ */
 template< class Type >
 TObject* SToolBaseT< Type >::GetConfigObject( const char* name ) const {
 
    return GetParent()->GetConfigObject( name );
 }
 
+/**
+ * @param name The name of the tool instance
+ */
 template< class Type >
 void SToolBaseT< Type >::SetLogName( const char* name ) {
 

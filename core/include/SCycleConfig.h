@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -76,9 +76,9 @@ public:
    void SetProofServer( const TString& server );
 
    /// Get the number of parallel nodes
-   const Int_t& GetProofNodes() const;
+   Int_t GetProofNodes() const;
    /// Set the number of parallel nodes
-   void SetProofNodes( const Int_t nodes );
+   void SetProofNodes( Int_t nodes );
 
    /// Get the path to the PROOF working directory
    const TString& GetProofWorkDir() const;
@@ -150,18 +150,8 @@ public:
    /// Print the configuration to the screen
    void PrintConfig() const;
    /// Re-arrange the input data objects
-   /**
-    * After the re-arranging the objects with the same type will end up
-    * beside each other.
-    */
    void ArrangeInputData() throw ( SError );
    /// Fill the input data objects with information from the files
-   /**
-    * Some information about the input is gathered automatically from the
-    * input files, and not from the XML configuration. This information is
-    * needed for the correct event weight calculation. This function should
-    * be called by SCycleController...
-    */
    void ValidateInput();
 
    /// Get the cycle configuration as a TString object
@@ -174,21 +164,27 @@ private:
    TString       m_cycleName; ///< Name of the cycle holding this configuration
    RunMode       m_mode; ///< Running mode for the cycle
    TString       m_server; ///< Name of the PROOF server to use
-   TString       m_workdir; ///< PROOF work directory, used for handling ntuple output
-   Int_t         m_nodes; ///< Number of nodes to use on the specified PROOF farm
+   /// PROOF work directory, used for handling ntuple output
+   TString       m_workdir;
+   /// Number of nodes to use on the specified PROOF farm
+   Int_t         m_nodes;
    property_type m_properties; ///< All the properties defined for the cycle
    id_type       m_inputData; ///< All SInputData objects defined for the cycle
    Double_t      m_targetLumi; ///< Luminosity to scale all MC samples to
-   TString       m_outputDirectory; ///< Output directory for the output ROOT file
-   TString       m_postFix; ///< Postfix to be added at the end of the created ROOT file's name
+   /// Output directory for the output ROOT file
+   TString       m_outputDirectory;
+   /// Postfix to be added at the end of the created ROOT file's name
+   TString       m_postFix;
    SMsgType      m_msgLevel; ///< Message level to be used by the cycle
    Bool_t        m_useTreeCache; ///< Switch for turning on TTreeCache usage
    Long64_t      m_cacheSize; ///< Size of the used TTreeCache in bytes
-   Int_t         m_cacheLearnEntries; ///< Number of entries used for learning the TTree access pattern
-   Bool_t        m_processOnlyLocal; ///< Flag for only processing local files on the PROOF workers
+   /// Number of entries used for learning the TTree access pattern
+   Int_t         m_cacheLearnEntries;
+   /// Flag for only processing local files on the PROOF workers
+   Bool_t        m_processOnlyLocal;
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleConfig, 1 );
+   ClassDef( SCycleConfig, 1 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SCycleConfig

@@ -7,9 +7,12 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
+
+#ifndef SFRAME_CORE_SProofManager_H
+#define SFRAME_CORE_SProofManager_H
 
 // STL include(s):
 #include <map>
@@ -34,9 +37,9 @@ class TProof;
  *          happens, it's just easier to keep the connections open.
  *
  *          The Open(...) function can be user pretty similarly to
- *          TProof::Open(...). The advantage of this function is that it remembers
- *          which connections are already open, and it also deletes them when
- *          instructed (or when deleted).
+ *          TProof::Open(...). The advantage of this function is that it
+ *          remembers which connections are already open, and it also deletes
+ *          them when instructed (or when deleted).
  *
  * @version $Revision$
  */
@@ -54,7 +57,8 @@ public:
    static SProofManager* Instance();
 
    /// Function to open/access a PROOF connection
-   TProof* Open( const TString& url, const TString& param = "" ) throw( SError );
+   TProof* Open( const TString& url,
+                 const TString& param = "" ) throw( SError );
    /// Function to check if a PROOF server connection is configured already
    Bool_t IsConfigured( const TString& url, const TString& param = "" ) const;
    /// Set a given PROOF server to "configured" state
@@ -78,3 +82,5 @@ private:
    mutable SLogger m_logger;
 
 }; // class SProofManager
+
+#endif // SFRAME_CORE_SProofManager_H

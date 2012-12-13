@@ -7,15 +7,12 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
 #ifndef SFRAME_PLUGINS_SH1_ICC
 #define SFRAME_PLUGINS_SH1_ICC
-
-// System include(s):
-//#include <cstring>
 
 // ROOT include(s):
 #include <TCollection.h>
@@ -26,8 +23,8 @@
 #include "core/include/SLogger.h"
 
 /**
- * This constructor is needed for the dictionary generation. There has to be a constructor
- * that expects no parameters.
+ * This constructor is needed for the dictionary generation. There has to be a
+ * constructor that expects no parameters.
  */
 template< typename Type >
 SH1< Type >::SH1()
@@ -37,47 +34,51 @@ SH1< Type >::SH1()
 }
 
 /**
- * It's kind of a fancy copy constructor. The idea here is that one should be able to
- * initialise let's say an SH1<double> object from an SH1<int> object. This is also
- * why I can't use memcpy to copy the contents of the arrays. (The sizes of the arrays
- * could be different in memory...)
+ * It's kind of a fancy copy constructor. The idea here is that one should be
+ * able to initialise let's say an SH1<double> object from an SH1<int> object.
+ * This is also why I can't use memcpy to copy the contents of the arrays. (The
+ * sizes of the arrays could be different in memory...)
  *
  * @param parent The parent that should be copied
  */
 template< typename Type >
 template< typename T >
 SH1< Type >::SH1( const SH1< T >& parent )
-   : TNamed( parent ), m_arraySize( parent.m_arraySize ), m_content( 0 ), m_errors( 0 ),
-     m_entries( parent.m_entries ), m_bins( parent.m_bins ), m_low( parent.m_low ),
-     m_high( parent.m_high ), m_computeErrors( parent.m_computeErrors ) {
+   : TNamed( parent ), m_arraySize( parent.m_arraySize ), m_content( 0 ),
+     m_errors( 0 ), m_entries( parent.m_entries ), m_bins( parent.m_bins ),
+     m_low( parent.m_low ), m_high( parent.m_high ),
+     m_computeErrors( parent.m_computeErrors ) {
 
    m_content = new Type[ m_arraySize ];
    if( m_computeErrors ) m_errors = new Type[ m_arraySize ];
    for( Int_t i = 0; i < m_arraySize; ++i ) {
       m_content[ i ] = static_cast< Type >( parent.m_content[ i ] );
-      if( m_computeErrors ) m_errors[ i ] = static_cast< Type >( parent.m_errors[ i ] );
+      if( m_computeErrors ) m_errors[ i ] =
+         static_cast< Type >( parent.m_errors[ i ] );
    }
 }
 
 /**
- * This is the standard TH1-like constructor. It defines all basic properties of the
- * histogram. It has one extra parameter compared to TH1, "computeErrors". When set to
- * false (the default is true), the histogram doesn't calculate the statistical
- * uncertainties for the bins. This can result in serious speed improvements.
+ * This is the standard TH1-like constructor. It defines all basic properties of
+ * the histogram. It has one extra parameter compared to TH1, "computeErrors".
+ * When set to false (the default is true), the histogram doesn't calculate the
+ * statistical uncertainties for the bins. This can result in serious speed
+ * improvements.
  *
  * @param name The name of the histogram
  * @param title The title of the histogram
  * @param bins The number of bins that the histogram should have
  * @param low The lower edge of the X axis
  * @param high The higher edge of the X axis
- * @param computeErrors Flag for turning on/off the statistical uncertainty calculation
+ * @param computeErrors Flag for turning on/off the statistical uncertainty
+ *                      calculation
  */
 template< typename Type >
 SH1< Type >::SH1( const char* name, const char* title, Int_t bins,
                   Double_t low, Double_t high, Bool_t computeErrors )
-   : TNamed( name, title ), m_arraySize( bins + 2 ), m_content( 0 ), m_errors( 0 ),
-     m_entries( 0 ), m_bins( bins ), m_low( low ), m_high( high ),
-     m_computeErrors( computeErrors ) {
+   : TNamed( name, title ), m_arraySize( bins + 2 ), m_content( 0 ),
+     m_errors( 0 ), m_entries( 0 ), m_bins( bins ), m_low( low ),
+     m_high( high ), m_computeErrors( computeErrors ) {
 
    m_content = new Type[ m_arraySize ];
    memset( m_content, 0, m_arraySize * sizeof( Type ) );
@@ -88,8 +89,8 @@ SH1< Type >::SH1( const char* name, const char* title, Int_t bins,
 }
 
 /**
- * The destructor has to delete all the internal buffers that were created on the
- * heap.
+ * The destructor has to delete all the internal buffers that were created on
+ * the heap.
  */
 template< typename Type >
 SH1< Type >::~SH1() {
@@ -101,13 +102,13 @@ SH1< Type >::~SH1() {
 }
 
 /**
- * This is the main function for filling the histogram with entries. It fills the
- * appropriate bin with the specified weight, and if error calculation was requested,
- * it calculates the new uncertainty of the bin.
+ * This is the main function for filling the histogram with entries. It fills
+ * the appropriate bin with the specified weight, and if error calculation was
+ * requested, it calculates the new uncertainty of the bin.
  *
- * Unlike TH1, this class doesn't handle it silently when it receives a NaN value
- * as input. In this case it throws an exception to stop the execution. User code
- * should really just not pass NaN values to histograms...
+ * Unlike TH1, this class doesn't handle it silently when it receives a NaN
+ * value as input. In this case it throws an exception to stop the execution.
+ * User code should really just not pass NaN values to histograms...
  *
  * @param pos The position at which a bin should be filled
  * @param weight The amount with which the bin should be filled
@@ -117,7 +118,8 @@ void SH1< Type >::Fill( Double_t pos, Type weight ) throw( SError ) {
 
    // Check if the given parameters make sense:
    if( TMath::IsNaN( pos ) || TMath::IsNaN( weight ) ) {
-      SLogger m_logger( this ); // The name of the variable is like this on purpose
+      // The name of the variable is like this on purpose:
+      SLogger m_logger( this );
       REPORT_FATAL( "Fill( pos = " << pos << ", weight = " << weight
                     << " ): NaN received. Aborting..." );
       SError error( SError::StopExecution );
@@ -125,8 +127,11 @@ void SH1< Type >::Fill( Double_t pos, Type weight ) throw( SError ) {
       throw error;
    }
 
-   Int_t bin;
-   m_content[ bin = FindBin( pos ) ] += weight;
+   // Find which bin this event belongs in:
+   const Int_t bin = FindBin( pos );
+
+   // Update the histogram contents:
+   m_content[ bin ] += weight;
    if( m_computeErrors ) m_errors[ bin ] += weight * weight;
    ++m_entries;
 
@@ -144,9 +149,9 @@ Int_t SH1< Type >::GetNBins() const {
 
 /**
  * This function can be used to find which bin corresponds to a certain position
- * on the axis. It follows the ROOT histograms' internal binning, so the arrays have
- * a size of "GetNBins()+2", the regular bin numbers go from 1 to GetNBins(), the
- * underflow bin is 0, and the overflow bin is "GetNBins()+1".
+ * on the axis. It follows the ROOT histograms' internal binning, so the arrays
+ * have a size of "GetNBins()+2", the regular bin numbers go from 1 to
+ * GetNBins(), the underflow bin is 0, and the overflow bin is "GetNBins()+1".
  *
  * @param pos The position on the X axis that should be associated to a bin
  * @returns The bin number corresponding to the specified axis position
@@ -154,15 +159,19 @@ Int_t SH1< Type >::GetNBins() const {
 template< typename Type >
 Int_t SH1< Type >::FindBin( Double_t pos ) const {
 
+   // Handle under- and overflows:
    if( pos < m_low ) return 0;
    if( pos > m_high ) return ( m_bins + 1 );
 
-   return static_cast< Int_t >( ( pos - m_low ) / ( ( m_high - m_low ) / m_bins ) + 1 );
+   // Calculate the bin position rather simply:
+   return static_cast< Int_t >( ( pos - m_low ) /
+                                ( ( m_high - m_low ) / m_bins ) + 1 );
 }
 
 /**
- * This function gets the contents of a given bin directly. It's not checked if the
- * specified bin is in the correct range!
+ * This function gets the contents of a given bin directly.
+ *
+ * @warning It's not checked if the specified bin is in the correct range!
  *
  * @param bin The bin that should be investigated
  * @returns The content of the specified bin
@@ -174,9 +183,10 @@ Type SH1< Type >::GetBinContent( Int_t bin ) const {
 }
 
 /**
- * This function sets the contents of a given bin directly. It's not checked if the
- * specified bin is in the correct range! Also note, that when using this function,
- * you're on your own with calculating the uncertainties of the bin.
+ * This function sets the contents of a given bin directly.
+ *
+ * @warning It's not checked if the specified bin is in the correct range!
+ * @warning You should take care of updating bin uncertainties as well
  *
  * @param bin The bin that should be accessed
  * @param content The new content of the bin
@@ -189,8 +199,9 @@ void SH1< Type >::SetBinContent( Int_t bin, Type content ) {
 }
 
 /**
- * This function gets the uncertainty of a given bin directly. It's not
- * checked if the specified bin is in the correct range!
+ * This function gets the uncertainty of a given bin directly.
+ *
+ * @warning It's not checked if the specified bin is in the correct range!
  *
  * @param bin The bin that should be investigated
  * @returns The uncertinty of the bin
@@ -203,8 +214,9 @@ Type SH1< Type >::GetBinError( Int_t bin ) const {
 }
 
 /**
- * This function sets the uncertainty of a given bin directly. It's not
- * checked if the specified bin is in the correct range!
+ * This function sets the uncertainty of a given bin directly.
+ *
+ * @warning It's not checked if the specified bin is in the correct range!
  *
  * @param bin The bin that should be accessed
  * @param error The new uncertainty of the bin
@@ -242,44 +254,52 @@ void SH1< Type >::SetEntries( Int_t entries ) {
  * object. This is useful when you have to use some functionality of TH1 that's
  * not available in SH1. (Like fitting, division, etc.)
  *
- * Note that the caller is responsible for deleting the created histogram later on.
+ * Note that the caller is responsible for deleting the created histogram later
+ * on.
  *
  * @returns A pointer to the newly created TH1 histogram object
  */
 template< typename Type >
 TH1* SH1< Type >::ToHist() const {
 
+   // Decide what type of histogram to create:
    TH1* hist = 0;
-   if( ! strcmp( typeid( Type ).name(), "f" ) ) {
+   const char* type = typeid( Type ).name();
+   if( ! strcmp( type, "f" ) ) {
       hist = new TH1F( GetName(), GetTitle(), GetNBins(), m_low, m_high );
-   } else if( ! strcmp( typeid( Type ).name(), "d" ) ) {
+   } else if( ! strcmp( type, "d" ) ) {
       hist = new TH1D( GetName(), GetTitle(), GetNBins(), m_low, m_high );
-   } else if( ! strcmp( typeid( Type ).name(), "i" ) ) {
+   } else if( ! strcmp( type, "i" ) ) {
       hist = new TH1I( GetName(), GetTitle(), GetNBins(), m_low, m_high );
    } else {
-      SLogger logger( this->ClassName() );
-      logger << ERROR << "ToHist(): Can't find appropriate TH1 histogram type!"
-             << SLogger::endmsg;
+      SLogger m_logger( this->ClassName() );
+      REPORT_ERROR( "ToHist(): Can't find appropriate TH1 histogram type!" );
       return 0;
    }
 
+   // Fill up the newly created histogram:
    for( Int_t i = 0; i < m_arraySize; ++i ) {
       hist->SetBinContent( i, GetBinContent( i ) );
       hist->SetBinError( i, GetBinError( i ) );
    }
    hist->SetEntries( GetEntries() );
 
+   // Finally, return it:
    return hist;
 }
 
 /**
  * This function takes care of correctly merging the separate histogram objects
  * created on the PROOF worker nodes.
+ *
+ * @param coll A collection of objects to merge into this one
+ * @returns A positive number if successful, 0 if unsuccessful with the merging
  */
 template< typename Type >
 Int_t SH1< Type >::Merge( TCollection* coll ) {
 
-   SLogger m_logger( this->ClassName() ); // The name of the variable is like this on purpose...
+   // The name of the variable is like this on purpose:
+   SLogger m_logger( this->ClassName() );
 
    //
    // Return right away if the input is flawed:
@@ -324,23 +344,42 @@ Int_t SH1< Type >::Merge( TCollection* coll ) {
  * The default TObject::Write(...) function is overwritten here in order to
  * not write an instance of this object to the output file, but instead a
  * TH1 object.
+ *
+ * @see http://root.cern.ch/root/html534/TObject.html#TObject:Write@1
+ *
+ * @param name The name under which to write the object
+ * @param option Option deciding how to handle multiple objects with the same
+ *               name
+ * @param bufsize Size of the buffer used in writing to the file
+ * @returns The number of bytes written, or 0 if there was an error
  */
 template< typename Type >
-Int_t SH1< Type >::Write( const char* name, Int_t option, Int_t bufsize ) const {
+Int_t SH1< Type >::Write( const char* name, Int_t option,
+                          Int_t bufsize ) const {
 
+   // Create a ROOT histogram out of this object:
    TH1* hist = ToHist();
    if( ! hist ) return 0;
 
-   hist->Write( name, option, bufsize );
+   // Write the ROOT histogram out, and remember its result:
+   const Int_t result = hist->Write( name, option, bufsize );
    delete hist;
 
-   return 1;
+   // Return the result:
+   return result;
 }
 
+/**
+ * Override for the non-const version of the TObject::Write(...) function.
+ *
+ * @see The constant version of this function
+ */
 template< typename Type >
 Int_t SH1< Type >::Write( const char* name, Int_t option, Int_t bufsize ) {
 
-   return const_cast< const SH1< Type >* >( this )->Write( name, option, bufsize );
+   // Let the constant version of the function do the heavy lifting:
+   return const_cast< const SH1< Type >* >( this )->Write( name, option,
+                                                           bufsize );
 }
 
 #endif // SFRAME_PLUGINS_SH1_ICC

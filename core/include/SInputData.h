@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -78,7 +78,7 @@ public:
    Long64_t events;
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SDataSet, 1 );
+   ClassDef( SDataSet, 1 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SDataSet
@@ -133,7 +133,7 @@ public:
    Long64_t events;
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SFile, 1 );
+   ClassDef( SFile, 1 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SFile
@@ -184,7 +184,7 @@ public:
    Int_t type;
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( STree, 1 );
+   ClassDef( STree, 1 )
 #endif // DOXYGEN_IGNORE
 
 }; // class STree
@@ -208,62 +208,68 @@ public:
    virtual ~SInputData();
 
    /// Set the name of the input data type
-   void SetType         ( const TString& type )          { m_type = type; }
+   void SetType         ( const TString& type )    { m_type = type; }
    /// Set the "version" of the input data
-   void SetVersion      ( const TString& version )       { m_version = version; }
+   void SetVersion      ( const TString& version ) { m_version = version; }
    /// Set the total luminosity of the input data
-   void SetTotalLumi    ( Double_t lumi )                { m_totalLumiGiven = lumi; }
+   void SetTotalLumi    ( Double_t lumi )          { m_totalLumiGiven = lumi; }
    /// Set the maximal number of events to process from the input data
-   void SetNEventsMax   ( Long64_t nevents )             { m_neventsmax = nevents; }
+   void SetNEventsMax   ( Long64_t nevents )       { m_neventsmax = nevents; }
    /// Set the number of events to skip at the beginning of the input data
-   void SetNEventsSkip  ( Long64_t nevents )             { m_neventsskip = nevents; }
+   void SetNEventsSkip  ( Long64_t nevents )       { m_neventsskip = nevents; }
 
    /// Set whether the file properties can be cached
-   void SetCacheable( Bool_t flag = kTRUE )              { m_cacheable = flag; }
+   void SetCacheable( Bool_t flag = kTRUE )        { m_cacheable = flag; }
    /// Get whether the file properties can be caches
-   Bool_t GetCacheable() const                           { return m_cacheable; }
+   Bool_t GetCacheable() const                     { return m_cacheable; }
 
    /// Set whether the file/dataset validation can be skipped
-   void SetSkipValid( Bool_t flag = kTRUE )              { m_skipValid = flag; }
+   void SetSkipValid( Bool_t flag = kTRUE )        { m_skipValid = flag; }
    /// Get whether the file/dataset validation can be skipped
-   Bool_t GetSkipValid() const                           { return m_skipValid; }
+   Bool_t GetSkipValid() const                     { return m_skipValid; }
 
    /// Set the current entry which is being read from the input
-   void SetEventTreeEntry( Long64_t entry )              { m_entry = entry; }
+   void SetEventTreeEntry( Long64_t entry )        { m_entry = entry; }
    /// Get the current entry which is being read from the input
-   Long64_t GetEventTreeEntry() const                    { return m_entry; }
+   Long64_t GetEventTreeEntry() const              { return m_entry; }
 
    /// Add a new generator cut to the input data
-   void AddGenCut ( const SGeneratorCut& gencuts ) { m_gencuts.push_back( gencuts ); }
+   void AddGenCut( const SGeneratorCut& gencuts ) {
+      m_gencuts.push_back( gencuts );
+   }
    /// Add a new input file to the input data
    void AddSFileIn( const SFile& sfile );
    /// Add a new tree to the input data
-   void AddTree   ( Int_t type, const STree& stree );
+   void AddTree( Int_t type, const STree& stree );
    /// Add a new dataset to the input data
    void AddDataSet( const SDataSet& dset );
 
    /// Add some number of events to the input data
-   void AddEvents       ( Long64_t events )              { m_eventsTotal += events; }
+   void AddEvents( Long64_t events ) { m_eventsTotal += events; }
 
    /// Collect information about the input files (needed before running)
    void ValidateInput( const char* pserver = 0 ) throw( SError );
 
    /// Get the name of the input data type
-   const TString&                       GetType() const           { return m_type; }
+   const TString& GetType() const { return m_type; }
    /// Get the version of the input data type
-   const TString&                       GetVersion() const        { return m_version; }
+   const TString& GetVersion() const { return m_version; }
    /// Get all the defined generator cuts
-   const std::vector< SGeneratorCut >&  GetSGeneratorCuts() const { return m_gencuts; }
+   const std::vector< SGeneratorCut >& GetSGeneratorCuts() const {
+      return m_gencuts;
+   }
    /// Get all the defined input files
-   const std::vector< SFile >&          GetSFileIn() const        { return m_sfileIn; }
+   const std::vector< SFile >& GetSFileIn() const { return m_sfileIn; }
    /// Get all the defined input files
-   std::vector< SFile >&                GetSFileIn()              { return m_sfileIn; }
+   std::vector< SFile >& GetSFileIn() { return m_sfileIn; }
    /// Get all the defined trees of a given type
-   const std::vector< STree >*          GetTrees( Int_t type ) const;
+   const std::vector< STree >* GetTrees( Int_t type ) const;
    /// Get all the defined trees
-   const std::map< Int_t, std::vector< STree > >& GetTrees() const { return m_trees; }
+   const std::map< Int_t, std::vector< STree > >& GetTrees() const {
+      return m_trees;
+   }
    /// Get all the defined input datasets
-   const std::vector< SDataSet >&       GetDataSets() const       { return m_dataSets; }
+   const std::vector< SDataSet >& GetDataSets() const { return m_dataSets; }
 
    /// Simple function answering whether there are any input trees in the configuration
    Bool_t HasInputTrees() const;
@@ -272,15 +278,15 @@ public:
    TDSet* GetDSet() const;
 
    /// Get the total luminosity of the input data
-   Double_t                             GetTotalLumi() const;
+   Double_t GetTotalLumi() const;
    /// Get the total luminosity scaled to the number of events to process
-   Double_t                             GetScaledLumi() const;
+   Double_t GetScaledLumi() const;
    /// Get the total number of events in the input data files
-   Long64_t                             GetEventsTotal() const    { return m_eventsTotal; }
+   Long64_t GetEventsTotal() const { return m_eventsTotal; }
    /// Get the maximal number of events to process from the input data
-   Long64_t                             GetNEventsMax() const     { return m_neventsmax; }
+   Long64_t GetNEventsMax() const  { return m_neventsmax; }
    /// Get the number of events to skip at the beginning of the input data
-   Long64_t                             GetNEventsSkip() const    { return m_neventsskip; }
+   Long64_t GetNEventsSkip() const { return m_neventsskip; }
 
    /// Assignment operator
    SInputData& operator=  ( const SInputData& parent );
@@ -296,36 +302,41 @@ public:
    TString GetStringConfig() const;
 
 private:
+   /// This function validates the input when files are specified
    void ValidateInputFiles() throw( SError );
+   /// This function validates the input when PQ2 datasets are specified
    void ValidateInputDataSets( const char* pserver ) throw( SError );
-   Bool_t LoadInfoOnFile( std::vector< SFile >::iterator& file_itr,
-                          TFileCollection* filecoll );
-   TFileInfo* AccessFileInfo( std::vector< SFile >::iterator& file_itr,
-                              TFileCollection* filecoll );
-   TDSet* MakeDataSet() throw( SError );
-   TDSet* AccessDataSet( TDirectory* dir );
+   /// Function loading all information about a given input file
+   Bool_t LoadInfoOnFile( SFile* file, TFileCollection* filecoll );
+   /// Function accessing the metadata about a given input file
+   TFileInfo* AccessFileInfo( SFile* file, TFileCollection* filecoll );
+   /// Function creating a new dataset object for this input data object
+   TDSet* MakeDataSet() const throw( SError );
+   /// Function trying to access the dataset object in a given directory
+   TDSet* AccessDataSet( TDirectory* dir ) const;
 
-   TString                      m_type; ///< Type of the input data
-   TString                      m_version; ///< Version of the input data
-   Double_t                     m_totalLumiGiven; ///< The total specified luminosity
+   TString m_type; ///< Type of the input data
+   TString m_version; ///< Version of the input data
+   Double_t m_totalLumiGiven; ///< The total specified luminosity
    std::vector< SGeneratorCut > m_gencuts; ///< The specified generator cuts
-   std::vector< SFile >         m_sfileIn; ///< The specified input files
-   std::map< Int_t, std::vector< STree > > m_trees; ///< The specified TTree-s to handle
-   std::vector< SDataSet >      m_dataSets; ///< The specified input PROOF datasets
-   Double_t                     m_totalLumiSum; ///< The total luminosity from files/datasets
-   Long64_t                     m_eventsTotal; ///< The total number of events in the input
-   Long64_t                     m_neventsmax; ///< The maximum number of events to process
-   Long64_t                     m_neventsskip; ///< The number of events to skip
-   Bool_t                       m_cacheable; ///< Flag showing whether to cache the ID info
-   Bool_t                       m_skipValid; ///< Flag showing whether to skip the ID validation
-   Long64_t                     m_entry; ///< Current entry read from the input
+   std::vector< SFile > m_sfileIn; ///< The specified input files
+   /// The specified TTree-s to handle
+   std::map< Int_t, std::vector< STree > > m_trees;
+   std::vector< SDataSet > m_dataSets; ///< The specified input PROOF datasets
+   Double_t m_totalLumiSum; ///< The total luminosity from files/datasets
+   Long64_t m_eventsTotal; ///< The total number of events in the input
+   Long64_t m_neventsmax; ///< The maximum number of events to process
+   Long64_t m_neventsskip; ///< The number of events to skip
+   Bool_t m_cacheable; ///< Flag showing whether to cache the ID info
+   Bool_t m_skipValid; ///< Flag showing whether to skip the ID validation
+   Long64_t m_entry; ///< Current entry read from the input
 
-   TDSet*                       m_dset; //! Transient dataset representation of input files
+   TDSet* m_dset; //! Transient dataset representation of input files
 
-   mutable SLogger              m_logger; //! Transient logger object
+   mutable SLogger m_logger; //! Transient logger object
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SInputData, 1 );
+   ClassDef( SInputData, 1 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SInputData

@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -62,7 +62,9 @@ public:
     * The file name from which this configuration should be read
     * is specified with this function.
     */
-   virtual void SetConfig( const TString& xmlConfigFile ) { m_xmlConfigFile = xmlConfigFile; }
+   virtual void SetConfig( const TString& xmlConfigFile ) {
+      m_xmlConfigFile = xmlConfigFile;
+   }
 
    /// Add one analysis cycle to the end of all existing cycles
    void AddAnalysisCycle( ISCycleBase* cycleAlg );
@@ -73,8 +75,11 @@ public:
 private:
    /// Delete all analysis cycle objects from memory
    void DeleteAllAnalysisCycles();
-   void InitProof( const TString& server, const Int_t& nodes);
+   /// "Historic" function initializing the PROOF connection
+   void InitProof( const TString& server, Int_t nodes);
+   /// "Historic" function, closing the current PROOF connection
    void ShutDownProof();
+   /// Function creating/updating the output file of the last cycle
    void WriteCycleOutput( TList* olist, const TString& filename,
                           const TString& config,
                           Bool_t update ) const;
@@ -84,13 +89,14 @@ private:
    /// Packages that have to be loaded on the PROOF cluster
    std::vector< TString > m_parPackages;
 
-   UInt_t  m_curCycle;
+   UInt_t  m_curCycle; ///< Index of the current cycle in the list
+   /// Status flag showing if the object is initialized
    Bool_t  m_isInitialized;
-   TString m_xmlConfigFile;
+   TString m_xmlConfigFile; ///< Name of the configuration file read
 
-   TProof* m_proof;
+   TProof* m_proof; ///< Pointer to the currently used PROOF object
 
-   mutable SLogger m_logger;
+   mutable SLogger m_logger; ///< Message logger object
 
 }; // class SCycleController
 

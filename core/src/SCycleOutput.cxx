@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -31,7 +31,7 @@
 #include "../include/SLogger.h"
 
 #ifndef DOXYGEN_IGNORE
-ClassImp( SCycleOutput );
+ClassImp( SCycleOutput )
 #endif // DOXYGEN_IGNORE
 
 /**
@@ -41,6 +41,7 @@ ClassImp( SCycleOutput );
  * @param object Pointer to the object that should be wrapped
  * @param name Name of this object. The SCycleBase* classes should
  *             make sure that this is unique
+ * @param path The directory under which the object will be stored in the output
  */
 SCycleOutput::SCycleOutput( TObject* object, const char* name,
                             const char* path )
@@ -129,7 +130,8 @@ Int_t SCycleOutput::Merge( TCollection* coll ) {
       if( ! mobj ) continue;
       if( strcmp( mobj->ClassName(), this->GetObject()->ClassName() ) ) {
          REPORT_ERROR( "Trying to merge \"" << mobj->ClassName()
-                       << "\" object into \"" << this->GetObject()->ClassName() );
+                       << "\" object into \""
+                       << this->GetObject()->ClassName() );
          continue;
       }
 
@@ -144,7 +146,8 @@ Int_t SCycleOutput::Merge( TCollection* coll ) {
    // Stop if the list is empty:
    //
    if( list.IsEmpty() ) {
-      m_logger << WARNING << "No suitable object found for merging" << SLogger::endmsg;
+      m_logger << WARNING << "No suitable object found for merging"
+               << SLogger::endmsg;
       return 0;
    }
 
@@ -152,7 +155,8 @@ Int_t SCycleOutput::Merge( TCollection* coll ) {
    // Make sure that my object supports merging:
    //
    TMethodCall mergeMethod;
-   mergeMethod.InitWithPrototype( this->GetObject()->IsA(), "Merge", "TCollection*" );
+   mergeMethod.InitWithPrototype( this->GetObject()->IsA(), "Merge",
+                                  "TCollection*" );
    if( ! mergeMethod.IsValid() ) {
       REPORT_ERROR( "Object type \"" << this->GetObject()->ClassName()
                     << "\" doesn't support merging" );
@@ -168,11 +172,10 @@ Int_t SCycleOutput::Merge( TCollection* coll ) {
    //
    // A little feedback of what we've done:
    //
-   m_logger << DEBUG << "Merged objects of type \"" << this->GetObject()->ClassName()
-            << "\"" << SLogger::endmsg;
+   m_logger << DEBUG << "Merged objects of type \""
+            << this->GetObject()->ClassName() << "\"" << SLogger::endmsg;
 
    return 1;
-
 }
 
 /**
@@ -204,8 +207,9 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
    TObject* original_obj;
    if( ( original_obj = outDir->Get( m_object->GetName() ) ) ) {
 
-      m_logger << DEBUG << "Merging object \"" << m_object->GetName() << "\" under \""
-               << m_path << "\" with already existing object..." << SLogger::endmsg;
+      m_logger << DEBUG << "Merging object \"" << m_object->GetName()
+               << "\" under \"" << m_path
+               << "\" with already existing object..." << SLogger::endmsg;
 
       //
       // Check that it's the same type as the object that we want to save:
@@ -221,7 +225,8 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
       // Try to merge the new object into the old one:
       //
       TMethodCall mergeMethod;
-      mergeMethod.InitWithPrototype( original_obj->IsA(), "Merge", "TCollection*" );
+      mergeMethod.InitWithPrototype( original_obj->IsA(), "Merge",
+                                     "TCollection*" );
       if( ! mergeMethod.IsValid() ) {
          REPORT_ERROR( "Object type \"" << original_obj->ClassName()
                        << "\" doesn't support merging" );
@@ -229,7 +234,8 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
       }
 
       //
-      // Remember the key of this object, to be able to remove it after the merging:
+      // Remember the key of this object, to be able to remove it after the
+      // merging:
       //
       TKey* oldKey = outDir->GetKey( m_object->GetName() );
 
@@ -249,7 +255,6 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
 
       // Return gracefully:
       return 1;
-
    }
 
    //
@@ -273,13 +278,13 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
                    <<"\" to: " << outDir->GetPath() );
 
    return ret;
-
 }
 
 Int_t SCycleOutput::Write( const char* name, Int_t option,
                            Int_t bufsize ) {
 
-   return const_cast< const SCycleOutput* >( this )->Write( name, option, bufsize );
+   return const_cast< const SCycleOutput* >( this )->Write( name, option,
+                                                            bufsize );
 }
 
 /**
@@ -288,7 +293,8 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
  * @param path Directory name with slashes. (e.g. "my/directory")
  * @returns Pointer to the created directory
  */
-TDirectory* SCycleOutput::MakeDirectory( const TString& path ) const throw( SError ) {
+TDirectory*
+SCycleOutput::MakeDirectory( const TString& path ) const throw( SError ) {
 
    if( ! path.Length() ) return gDirectory;
 
@@ -310,14 +316,16 @@ TDirectory* SCycleOutput::MakeDirectory( const TString& path ) const throw( SErr
       TDirectory* tempDir = 0;
       for( Int_t i = 0; i < directories->GetSize(); ++i ) {
 
-         TObjString* path_element = dynamic_cast< TObjString* >( directories->At( i ) );
+         TObjString* path_element =
+            dynamic_cast< TObjString* >( directories->At( i ) );
          if( ! path_element ) continue;
          if( path_element->GetString() == "" ) continue;
 
          REPORT_VERBOSE( "Accessing directory: " << path_element->GetString() );
          if( ! ( tempDir = dir->GetDirectory( path_element->GetString() ) ) ) {
             REPORT_VERBOSE( "Directory doesn't exist, creating it..." );
-            if( ! ( tempDir = dir->mkdir( path_element->GetString(), "dummy title" ) ) ) {
+            if( ! ( tempDir = dir->mkdir( path_element->GetString(),
+                                          "dummy title" ) ) ) {
                SError error( SError::SkipInputData );
                error << "Couldn't create directory: " << path
                      << " in the output file!";
@@ -330,9 +338,7 @@ TDirectory* SCycleOutput::MakeDirectory( const TString& path ) const throw( SErr
 
       // Delete the object created by TString::Tokenize(...):
       delete directories;
-
    }
 
    return dir;
-
 }

@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -44,6 +44,7 @@ class SInputData;
 class ISCycleBaseNTuple {
 
 public:
+   /// Virtual destructor, needed to make vtable happy...
    virtual ~ISCycleBaseNTuple() {}
 
    /// Set the PROOF output list
@@ -61,8 +62,9 @@ protected:
    /// Function closing a potentially open output file
    virtual void CloseOutputFile() throw( SError ) = 0;
    /// Create the output trees
-   virtual void CreateOutputTrees( const SInputData& id,
-                                   std::vector< TTree* >& outTrees ) throw( SError ) = 0;
+   virtual void
+   CreateOutputTrees( const SInputData& id,
+                      std::vector< TTree* >& outTrees ) throw( SError ) = 0;
    /// Save all the created output trees in the output
    virtual void SaveOutputTrees() throw( SError ) = 0;
    /// Load the input trees
@@ -72,7 +74,7 @@ protected:
    virtual void GetEvent( Long64_t entry ) throw( SError ) = 0;
    /// Calculate the weight of the current event
    virtual Double_t CalculateWeight( const SInputData& inputData,
-                                     Long64_t entry ) = 0;
+                                     Long64_t entry ) const = 0;
    /// Forget about the internally cached TTree pointers
    virtual void ClearCachedTrees() = 0;
 

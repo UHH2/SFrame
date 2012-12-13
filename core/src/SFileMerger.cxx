@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -16,6 +16,7 @@
 
 // ROOT include(s):
 #include <TObject.h>
+#include <TString.h>
 #include <TFile.h>
 #include <TList.h>
 #include <TTree.h>
@@ -179,8 +180,8 @@ void SFileMerger::CloseFiles() {
 
 /**
  * This recursive function is taking care about merging all the TTree-s from one
- * directory into the TTree-s of the output directory. If it finds a directory on
- * the input, it calls itself for that directory.
+ * directory into the TTree-s of the output directory. If it finds a directory
+ * on the input, it calls itself for that directory.
  *
  * The result should be that all TTree-s from all the sub-directories should get
  * merged into the output.

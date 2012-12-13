@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -78,11 +78,13 @@ public:
    /// Declare a <strong>bool</strong> property
    void DeclareProperty( const std::string& name, bool& value );
    /// Declare a <strong>std::vector<std::string></strong> property
-   void DeclareProperty( const std::string& name, std::vector< std::string >& value );
+   void DeclareProperty( const std::string& name,
+                         std::vector< std::string >& value );
    /// Declare a <strong>std::vector<int></strong> property
    void DeclareProperty( const std::string& name, std::vector< int >& value );
    /// Declare a <strong>std::vector<double></strong> property
-   void DeclareProperty( const std::string& name, std::vector< double >& value );
+   void DeclareProperty( const std::string& name,
+                         std::vector< double >& value );
    /// Declare a <strong>std::vector<bool></strong> property
    void DeclareProperty( const std::string& name, std::vector< bool >& value );
 
@@ -146,7 +148,7 @@ private:
    TList* m_input;
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SCycleBaseConfig, 0 );
+   ClassDef( SCycleBaseConfig, 0 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SCycleBaseConfig

@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -25,6 +25,9 @@
 /// Local map to translate between ROOT and SFrame message levels
 static std::map< int, SMsgType > msgLevelMap;
 
+/// Function setting up the usage of SLogger for the ROOT messages
+Int_t SetSErrorHandler();
+
 /**
  * This function is the "SFrame version" of DefaultErrorHandler defined in the
  * TError.h header. By calling
@@ -33,8 +36,8 @@ static std::map< int, SMsgType > msgLevelMap;
  * SetErrorHandler( SErrorHandler )
  * </code>
  *
- * somewhere at the beginning of the application, we can channel all ROOT messages
- * through our own message logging facility.
+ * somewhere at the beginning of the application, we can channel all ROOT
+ * messages through our own message logging facility.
  *
  * @param level ROOT message level
  * @param abort Flag telling that the process should abort execution
@@ -78,16 +81,18 @@ void SErrorHandler( int level, Bool_t abort, const char* location,
    }
 
    return;
-
 }
 
 /**
- * The following code makes sure that <code>SetErrorHandler(SErrorHandler)</code>
- * is called when loading the SFrameCore library. This way all ROOT messages get
- * printed using SLogger on the PROOF workers from the moment the SFrame libraries
- * are loaded. (This is one of the first things that the workers do...)
+ * The following code makes sure that
+ * <code>SetErrorHandler(SErrorHandler)</code> is called when loading the
+ * SFrameCore library. This way all ROOT messages get printed using SLogger on
+ * the PROOF workers from the moment the SFrame libraries are loaded. (This is
+ * one of the first things that the workers do...)
  *
  * I "stole" the idea for this kind of code from RooFit actually...
+ *
+ * @returns A dummy integer value
  */
 Int_t SetSErrorHandler() {
 
@@ -96,10 +101,10 @@ Int_t SetSErrorHandler() {
 
    // Report this feat:
    SLogger logger( "SetSErrorHandler" );
-   logger << DEBUG << "Redirected ROOT messages to SFrame's logger" << SLogger::endmsg;
+   logger << DEBUG << "Redirected ROOT messages to SFrame's logger"
+          << SLogger::endmsg;
 
    return 0;
-
 }
 
 // Call the function:

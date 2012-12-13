@@ -6,13 +6,9 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
-
-// STL include(s):
-#include <vector>
-#include <string>
 
 // ROOT include(s):
 #include <TDirectory.h>
@@ -136,7 +132,8 @@ TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) throw( SError ) {
       result = it->second;
    } else {
       REPORT_VERBOSE( "Hist(): Using Retrieve for name \""
-                      << name << "\" and dir \"" << ( dir ? dir : "" ) << "\"" );
+                      << name << "\" and dir \"" << ( dir ? dir : "" )
+                      << "\"" );
       result = Retrieve< TH1 >( name, dir ); // This line can throw an exception...
       m_histoMap[ this_pair ] = result;
    }

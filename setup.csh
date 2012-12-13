@@ -6,7 +6,7 @@
 # @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester    #
 # @author David Berge      <David.Berge@cern.ch>          - CERN          #
 # @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg       #
-# @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen #
+# @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen  #
 #                                                                         #
 # Script that has to be sourced before compiling/running SFrame.          #
 #                                                                         #
@@ -18,8 +18,8 @@ echo "Setting up environment for compiling/running SFrame"
 # speficy the SFRAME base directory, i.e. the directory in which this file lives
 setenv SFRAME_DIR ${PWD}
 
-# Modify to describe your directory structure. Default is to use the a structure where
-# all directories are below the SFrame base directory specified above
+# Modify to describe your directory structure. Default is to use the a structure
+# where all directories are below the SFrame base directory specified above
 setenv SFRAME_BIN_PATH ${SFRAME_DIR}/bin
 setenv SFRAME_LIB_PATH ${SFRAME_DIR}/lib
 

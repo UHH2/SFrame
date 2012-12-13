@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -29,83 +29,28 @@
 #include "core/include/ISCycleBaseHist.h"
 #include "core/include/SLogger.h"
 
-/**
- * @short Summation operator for vectors
- *
- * In order to be able to express the summation of primitive types and
- * vectors in the same way, the easiest was to overload the + operator.
- */
-template< class Type >
-std::vector< Type > operator+( const std::vector< Type >& left,
-                               const std::vector< Type >& right ) {
+namespace {
 
-   // Create the result vector:
-   std::vector< Type > result;
+   /**
+    * @short Summation operator for vectors
+    *
+    * In order to be able to express the summation of primitive types and
+    * vectors in the same way, the easiest was to overload the + operator.
+    *
+    * @param left The first vector used in the summation
+    * @param right The second vector used in the summation
+    * @returns A vector containing the sums of the elements of the provided
+    *          vectors
+    */
+   template< class Type >
+   std::vector< Type > operator+( const std::vector< Type >& left,
+                                  const std::vector< Type >& right ) {
 
-   // Check that the summation can be performed:
-   if( left.size() != right.size() ) {
-      const char* type_name = typeid( left ).name();
-      int status;
-      char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
-      if( status ) {
-         SError error( SError::StopExecution );
-         error << "Couldn't demangle type name: " << type_name;
-         throw error;
-      }
-      SLogger m_logger( real_type_name ); // Name given like this on purpose...
-      REPORT_ERROR( "Couldn't perform summation on type: " << real_type_name );
-      REPORT_ERROR( "The results will not be correct!" );
-      ::free( real_type_name );
-      return result;
-   }
+      // Create the result vector:
+      std::vector< Type > result;
 
-   // Peform the summation:
-   result.resize( left.size() );
-   for( typename std::vector< Type >::size_type i = 0; i < left.size(); ++i ) {
-      result[ i ] = left[ i ] + right[ i ];
-   }
-
-   return result;
-}
-
-/**
- * @short Summation operator for maps
- *
- * In order to be able to use std::maps in the SSummedVar class, a summation for
- * map types has to exist as well.
- */
-template< class KeyType, class ValueType >
-std::map< KeyType, ValueType > operator+( const std::map< KeyType, ValueType >& left,
-                                          const std::map< KeyType, ValueType >& right ) {
-
-   // Create the result map:
-   std::map< KeyType, ValueType > result;
-
-   // Check that the summation can be performed:
-   if( left.size() != right.size() ) {
-      const char* type_name = typeid( left ).name();
-      int status;
-      char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
-      if( status ) {
-         SError error( SError::StopExecution );
-         error << "Couldn't demangle type name: " << type_name;
-         throw error;
-      }
-      SLogger m_logger( real_type_name ); // Name given like this on purpose...
-      REPORT_ERROR( "Couldn't perform summation on type: " << real_type_name );
-      REPORT_ERROR( "The results will not be correct!" );
-      ::free( real_type_name );
-      return result;
-   }
-
-   // Perform the summation:
-   typename std::map< KeyType, ValueType >::const_iterator left_itr = left.begin();
-   typename std::map< KeyType, ValueType >::const_iterator left_end = left.end();
-   typename std::map< KeyType, ValueType >::const_iterator right_itr = right.begin();
-   typename std::map< KeyType, ValueType >::const_iterator right_end = right.end();
-   for( ; left_itr != left_end && right_itr != right_end; ++left_itr, ++right_itr ) {
-      // Check that we have the corresponding elements selected:
-      if( left_itr->first != right_itr->first ) {
+      // Check that the summation can be performed:
+      if( left.size() != right.size() ) {
          const char* type_name = typeid( left ).name();
          int status;
          char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
@@ -114,18 +59,99 @@ std::map< KeyType, ValueType > operator+( const std::map< KeyType, ValueType >& 
             error << "Couldn't demangle type name: " << type_name;
             throw error;
          }
+         // Name given like this on purpose:
          SLogger m_logger( real_type_name );
-         REPORT_ERROR( "Couldn't perform summation on type: " << real_type_name );
+         REPORT_ERROR( "Couldn't perform summation on type: "
+                       << real_type_name );
          REPORT_ERROR( "The results will not be correct!" );
          ::free( real_type_name );
          return result;
       }
-      // Add the two values:
-      result[ left_itr->first ] = left_itr->second + right_itr->second;
+
+      // Peform the summation:
+      result.resize( left.size() );
+      for( typename std::vector< Type >::size_type i = 0; i < left.size();
+           ++i ) {
+         result[ i ] = left[ i ] + right[ i ];
+      }
+
+      return result;
    }
 
-   return result;
-}
+   /**
+    * @short Summation operator for maps
+    *
+    * In order to be able to use std::maps in the SSummedVar class, a summation
+    * for map types has to exist as well.
+    *
+    * @param left The first map to be used in the summation
+    * @param right The second map to be used in the summation
+    * @returns A map holding the summed contents of the input maps
+    */
+   template< class KeyType, class ValueType >
+   std::map< KeyType, ValueType >
+   operator+( const std::map< KeyType, ValueType >& left,
+              const std::map< KeyType, ValueType >& right ) {
+
+      // Create the result map:
+      std::map< KeyType, ValueType > result;
+
+      // Check that the summation can be performed:
+      if( left.size() != right.size() ) {
+         const char* type_name = typeid( left ).name();
+         int status;
+         char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
+         if( status ) {
+            SError error( SError::StopExecution );
+            error << "Couldn't demangle type name: " << type_name;
+            throw error;
+         }
+         // Name given like this on purpose:
+         SLogger m_logger( real_type_name );
+         REPORT_ERROR( "Couldn't perform summation on type: "
+                       << real_type_name );
+         REPORT_ERROR( "The results will not be correct!" );
+         ::free( real_type_name );
+         return result;
+      }
+
+      // Perform the summation:
+      typename std::map< KeyType, ValueType >::const_iterator left_itr =
+         left.begin();
+      typename std::map< KeyType, ValueType >::const_iterator left_end =
+         left.end();
+      typename std::map< KeyType, ValueType >::const_iterator right_itr =
+         right.begin();
+      typename std::map< KeyType, ValueType >::const_iterator right_end =
+         right.end();
+      for( ; left_itr != left_end && right_itr != right_end;
+           ++left_itr, ++right_itr ) {
+         // Check that we have the corresponding elements selected:
+         if( left_itr->first != right_itr->first ) {
+            const char* type_name = typeid( left ).name();
+            int status;
+            char* real_type_name = abi::__cxa_demangle( type_name, 0, 0,
+                                                        &status );
+            if( status ) {
+               SError error( SError::StopExecution );
+               error << "Couldn't demangle type name: " << type_name;
+               throw error;
+            }
+            SLogger m_logger( real_type_name );
+            REPORT_ERROR( "Couldn't perform summation on type: "
+                          << real_type_name );
+            REPORT_ERROR( "The results will not be correct!" );
+            ::free( real_type_name );
+            return result;
+         }
+         // Add the two values:
+         result[ left_itr->first ] = left_itr->second + right_itr->second;
+      }
+
+      return result;
+   }
+
+} // private namespace
 
 ////////////////////////////////////////////////////////////////////
 //                                                                //
@@ -133,6 +159,14 @@ std::map< KeyType, ValueType > operator+( const std::map< KeyType, ValueType >& 
 //                                                                //
 ////////////////////////////////////////////////////////////////////
 
+/**
+ * Main constructor, creating a "summed variable" with a given name an title.
+ *
+ * @warning Users should not use this class directly
+ *
+ * @param name The unique name given for this merge-able object
+ * @param title The title given for the merge-able object
+ */
 template< class Type >
 ProofSummedVar< Type >::ProofSummedVar( const char* name,
                                         const char* title )
@@ -144,6 +178,10 @@ ProofSummedVar< Type >::ProofSummedVar( const char* name,
  * This function adds up the values of the variables from the worker nodes.
  * It doesn't do anything fancy, just makes sure that the summation can be
  * done, then does it.
+ *
+ * @param coll A collection of object to merge with this object
+ * @returns A positive number when successful, 0 when unsuccessful with the
+ *          merge
  */
 template< class Type >
 Int_t ProofSummedVar< Type >::Merge( TCollection* coll ) {
@@ -166,7 +204,8 @@ Int_t ProofSummedVar< Type >::Merge( TCollection* coll ) {
       //
       // See if it is an SCycleOutput object itself:
       //
-      ProofSummedVar< Type >* pobj = dynamic_cast< ProofSummedVar< Type >* >( obj );
+      ProofSummedVar< Type >* pobj =
+         dynamic_cast< ProofSummedVar< Type >* >( obj );
       if( ! pobj ) {
          REPORT_ERROR( "Trying to merge \"" << obj->ClassName()
                        << "\" object into \"" << this->ClassName() << "\"" );
@@ -194,6 +233,14 @@ Int_t ProofSummedVar< Type >::Merge( TCollection* coll ) {
 //                                                                //
 ////////////////////////////////////////////////////////////////////
 
+/**
+ * The user has to give an explicit, unique name for all the summed variables.
+ * In addition, for the summed variable to work, it has to communicate with a
+ * cycle object, which serves as the parent of this object.
+ *
+ * @param name The unique name of this summed object
+ * @param parent The parent cycle of this summed object
+ */
 template< class Type >
 SSummedVar< Type >::SSummedVar( const char* name, ISCycleBaseHist* parent )
    : m_objName( name ), m_parent( parent ), m_object( 0 ) {
@@ -261,9 +308,11 @@ const Type* SSummedVar< Type >::GetPointer() const {
 }
 
 /**
- * Other functions of this class should never try to directly access the m_object
- * member, but use this function instead. It makes sure that a proper instance of
- * the underlying helper object is created and registered.
+ * Other functions of this class should never try to directly access the
+ * m_object member, but use this function instead. It makes sure that a proper
+ * instance of the underlying helper object is created and registered.
+ *
+ * @returns The helper object that should be used by the object currently
  */
 template< class Type >
 ProofSummedVar< Type >* SSummedVar< Type >::GetObject() const throw( SError ) {
@@ -271,13 +320,14 @@ ProofSummedVar< Type >* SSummedVar< Type >::GetObject() const throw( SError ) {
    //
    // Try to get an already existing object from the output list:
    //
+   TObject* tobj = m_parent->GetHistOutput()->FindObject( m_objName );
    ProofSummedVar< Type >* pobj =
-      dynamic_cast< ProofSummedVar< Type >* >( m_parent->GetHistOutput()->FindObject( m_objName ) );
+      dynamic_cast< ProofSummedVar< Type >* >( tobj );
 
    if( pobj ) {
       //
-      // Check if we have this object cached already. If it's a different object, then
-      // we delete the cached one.
+      // Check if we have this object cached already. If it's a different
+      // object, then we delete the cached one.
       //
       if( m_object ) {
          if( m_object != pobj ) {
@@ -289,8 +339,8 @@ ProofSummedVar< Type >* SSummedVar< Type >::GetObject() const throw( SError ) {
       }
    } else {
       //
-      // Construct a logger with a meaningful source. It has to be this compilated
-      // since SSummedVar does not inherit from TObject.
+      // Construct a logger with a meaningful source. It has to be this
+      // compilated since SSummedVar does not inherit from TObject.
       //
       const char* type_name = typeid( *this ).name();
       int status;
@@ -308,12 +358,12 @@ ProofSummedVar< Type >* SSummedVar< Type >::GetObject() const throw( SError ) {
       //
       REPORT_VERBOSE( "Creating new object with name \""
                       << m_objName << "\"" );
-      m_object = new ProofSummedVar< Type >( m_objName, "Internal SFrame object" );
+      m_object = new ProofSummedVar< Type >( m_objName,
+                                             "Internal SFrame object" );
       m_parent->GetHistOutput()->Add( m_object );
    }
 
    return m_object;
-
 }
 
 #endif // SFRAME_PLUGINS_SSummedVar_ICC

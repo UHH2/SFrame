@@ -7,13 +7,16 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
 #ifndef SFRAME_PLUGINS_SInputVariables_ICC
 #define SFRAME_PLUGINS_SInputVariables_ICC
 
+/**
+ * @param parent Pointer to the parent cycle
+ */
 template< class ParentType >
 SInputVariables< ParentType >::SInputVariables( ParentType* parent )
    : m_parent( parent ) {
@@ -21,16 +24,26 @@ SInputVariables< ParentType >::SInputVariables( ParentType* parent )
 }
 
 /**
- * Only one such function is needed, even though there are 3 different specializations
- * of this function in SCycleBaseNTuple. But the specialization step only happens at
- * SCycleBaseNTuple, GCC would actually just get confused (rightfully so) if we defined
- * multiple specializations for <strong>this</strong> particular function.
+ * Only one such function is needed, even though there are 3 different
+ * specializations of this function in SCycleBaseNTuple. But the specialization
+ * step only happens at SCycleBaseNTuple, GCC would actually just get confused
+ * (rightfully so) if we defined multiple specializations for
+ * <strong>this</strong> particular function.
+ *
+ * @see SCycleBaseNTuple::ConnectVariable
+ *
+ * @param treeName Name of the TTree in the input file
+ * @param branchName Name of the branch in the TTree
+ * @param variable The variable that should be connected to the branch
+ * @returns <code>true</code> if the connection was made successfully,
+ *          <code>false</code> otherwise
  */
 template< class ParentType >
 template< typename T >
-bool SInputVariables< ParentType >::ConnectVariable( const char* treeName,
-                                                     const char* branchName,
-                                                     T& variable ) throw ( SError ) {
+bool SInputVariables< ParentType >::
+ConnectVariable( const char* treeName,
+                 const char* branchName,
+                 T& variable ) throw ( SError ) {
 
    return m_parent->template ConnectVariable( treeName, branchName, variable );
 }

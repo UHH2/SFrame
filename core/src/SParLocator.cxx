@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -45,7 +45,8 @@ TString SParLocator::Locate( const TString& parName ) {
    // If the full path name is defined in the configuration, don't bother
    // looking for the file:
    if( parName.Contains( "/" ) ) {
-      m_logger << DEBUG << "Treating received file name as full path name..." << SLogger::endmsg;
+      m_logger << DEBUG << "Treating received file name as full path name..."
+               << SLogger::endmsg;
       return parName;
    }
 
@@ -63,7 +64,8 @@ TString SParLocator::Locate( const TString& parName ) {
       struct dirent* file;
       while( ( file = ::readdir( d ) ) != NULL ) {
          if( parName == file->d_name ) {
-            m_logger << DEBUG << parName << " found in directory: " << *dir << SLogger::endmsg;
+            m_logger << DEBUG << parName << " found in directory: " << *dir
+                     << SLogger::endmsg;
             ::closedir( d );
             return ( *dir + "/" + parName );
          }
@@ -72,9 +74,8 @@ TString SParLocator::Locate( const TString& parName ) {
 
    }
 
-   m_logger << ERROR << parName << " couldn't be found" << SLogger::endmsg;
+   REPORT_ERROR( parName << " couldn't be found" );
    return "";
-
 }
 
 /**
@@ -97,15 +98,16 @@ void SParLocator::ReadParDirs() {
    //
    for( Int_t i = 0; i < par_array->GetSize(); ++i ) {
 
-      TObjString* path_element = dynamic_cast< TObjString* >( par_array->At( i ) );
+      TObjString* path_element =
+         dynamic_cast< TObjString* >( par_array->At( i ) );
       if( ! path_element ) continue;
 
       if( path_element->GetString() != "" ) {
          m_parDirs.push_back( path_element->GetString() );
       }
-
    }
 
+   // Clean up after the tokenization:
    delete par_array;
 
    //
@@ -114,10 +116,10 @@ void SParLocator::ReadParDirs() {
    if( ! m_parDirs.size() ) {
       m_logger << WARNING << "No directories set in the " << PAR_PATH_NAME
                << " environment variable" << SLogger::endmsg;
-      m_logger << WARNING << "Only the local directory will be searched!" << SLogger::endmsg;
+      m_logger << WARNING << "Only the local directory will be searched!"
+               << SLogger::endmsg;
       m_parDirs.push_back( "./" );
    }
 
    return;
-
 }

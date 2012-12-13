@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -51,8 +51,6 @@ public:
    SLogger( const std::string& source );
    /// Copy constructor
    SLogger( const SLogger& parent );
-   /// Default destructor
-   virtual ~SLogger();
 
    /// Set the source name using a TObject parent
    void SetSource( const TObject* source );
@@ -83,6 +81,9 @@ public:
     * SLogger was designed to give all the features that std::ostream
     * objects usually provide. This operator handles all kinds of
     * arguments and passes it on to the std::ostringstream base class.
+    *
+    * @param arg Any type of argument that std::ostream can handle
+    * @returns This same object
     */
    template < class T > SLogger& operator<< ( T arg ) {
       if( m_activeType >= m_logWriter->GetMinType() ) {
@@ -95,12 +96,13 @@ public:
    void Send( SMsgType type, const std::string& message ) const;
 
 private:
+   /// Internal function for sending the message to the console
    void Send();
 
-   const TObject* m_objSource;
-   std::string    m_strSource;
-   SLogWriter*    m_logWriter;
-   SMsgType       m_activeType;
+   const TObject* m_objSource; ///< Object from which messages are coming
+   std::string    m_strSource; ///< Name of the object sending the messages
+   SLogWriter*    m_logWriter; ///< Pointer to the log writer object
+   SMsgType       m_activeType; ///< Currently active message type
 
 }; // class SLogger
 
@@ -175,9 +177,9 @@ inline SLogger& SLogger::operator<< ( SMsgType type ) {
  * hand serious warnings (ERROR, FATAL) or VERBOSE messages should be as precise
  * as possible.
  *
- * So I stole the idea from Athena (what a surprise...) to have a few macros which
- * produce messages with a common formatting. This macro provides the prefix for
- * all the messages.
+ * So I stole the idea from Athena (what a surprise...) to have a few macros
+ * which produce messages with a common formatting. This macro provides the
+ * prefix for all the messages.
  */
 #define SLOGGER_REPORT_PREFIX \
    __FILE__ << ":" << __LINE__ << " (" << SLOGGER_FNAME << "): "
@@ -186,8 +188,8 @@ inline SLogger& SLogger::operator<< ( SMsgType type ) {
 /**
  * This macro is very similar to the REPORT_MESSAGE macros of Athena. It prints
  * a nicely formatted output that specifies both the exact function name where
- * the message was printed, and also the filename:line combination. It can be used
- * like a regular function inside cycles:
+ * the message was printed, and also the filename:line combination. It can be
+ * used like a regular function inside cycles:
  *
  * <code>
  *   REPORT_VERBOSE( "This is a verbose message with a number: " << number );
@@ -200,8 +202,8 @@ inline SLogger& SLogger::operator<< ( SMsgType type ) {
 /**
  * This macro is very similar to the REPORT_MESSAGE macros of Athena. It prints
  * a nicely formatted output that specifies both the exact function name where
- * the message was printed, and also the filename:line combination. It can be used
- * like a regular function inside cycles:
+ * the message was printed, and also the filename:line combination. It can be
+ * used like a regular function inside cycles:
  *
  * <code>
  *   REPORT_ERROR( "A serious error message" );
@@ -214,8 +216,8 @@ inline SLogger& SLogger::operator<< ( SMsgType type ) {
 /**
  * This macro is very similar to the REPORT_MESSAGE macros of Athena. It prints
  * a nicely formatted output that specifies both the exact function name where
- * the message was printed, and also the filename:line combination. It can be used
- * like a regular function inside cycles:
+ * the message was printed, and also the filename:line combination. It can be
+ * used like a regular function inside cycles:
  *
  * <code>
  *   REPORT_FATAL( "A very serious error message" );

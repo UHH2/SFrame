@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -15,8 +15,8 @@
 #define SFRAME_PLUGINS_SParticle_H
 
 // STL include(s):
-#include <vector> // This include is only here to be able to generate a dictionary
-                  // for std::vector< SParticle >.
+#include <vector> // This include is only here to be able to generate a
+                  // dictionary for std::vector< SParticle >.
 
 // ROOT include(s):
 #include "Rtypes.h"
@@ -34,7 +34,7 @@
  *          for instance things like
  *
  *          <code>
- *            SParticle p1( ... ), p2( ... );
+ *            SParticle p1( ... ), p2( ... );<br/>
  *            SParticle p3 = p1 + p2;
  *          </code>
  *
@@ -61,16 +61,15 @@ public:
    /// Copy constructor
    SParticle( const SParticle& parent );
    /// Generic copy constructor
-   template< class Geom > SParticle( const ROOT::Math::LorentzVector< Geom >& parent );
-   /// Default destructor
-   virtual ~SParticle();
+   template< class Geom >
+   SParticle( const ROOT::Math::LorentzVector< Geom >& parent );
 
    /// Generic copy operator
    template< class Geom >
    SParticle& operator= ( const ROOT::Math::LorentzVector< Geom >& rh );
 
 #ifndef DOXYGEN_IGNORE
-   ClassDef( SParticle, 1 );
+   ClassDef( SParticle, 1 )
 #endif // DOXYGEN_IGNORE
 
 }; // class SParticle

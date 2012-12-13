@@ -6,7 +6,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  * With the current implementation of SFrame, it's sufficient to link
  * this file only against the core SFrame library, if your analysis
@@ -28,18 +28,21 @@
 #include "../include/SLogger.h"
 
 // Global logging object
-static SLogger g_logger( "sframe_main" );
+static SLogger m_logger( "sframe_main" );
 
 // Declaration of function printing the usage of the executable
 void usage( char** argv );
 
 int main( int argc, char** argv ) {
 
+   // Check if the application received the expected single configuration file
+   // name:
    if( ( argc != 2 ) || ( argc == 2 && std::string( argv[ 1 ] ) == "-h" ) ) {
       usage( argv );
       return 1;
    }
 
+   // A convenience variable:
    const char* filename = argv[ 1 ];
 
    // Set ROOT into batch mode. This is how PROOF knows not to create
@@ -53,36 +56,37 @@ int main( int argc, char** argv ) {
       my_analysis.ExecuteAllCycles();
 
    } catch( const SError& error ) {
-
-      g_logger << FATAL << "SError exception caught" << SLogger::endmsg;
-      g_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
-      g_logger << FATAL << "--> Stopping execution" << SLogger::endmsg;
-      return 1;
-
+      REPORT_FATAL( "SError exception caught" );
+      REPORT_FATAL( "Message: " << error.what() );
+      REPORT_FATAL( "--> Stopping execution" );
+      return 255;
    } catch( const std::exception& error ) {
-
-      g_logger << FATAL << "STD exception caught" << SLogger::endmsg;
-      g_logger << FATAL << "Message: " << error.what() << SLogger::endmsg;
-      g_logger << FATAL << "--> Stopping execution" << SLogger::endmsg;
-      return 1;
-
+      REPORT_FATAL( "STD exception caught" );
+      REPORT_FATAL( "Message: " << error.what() );
+      REPORT_FATAL( "--> Stopping execution" );
+      return 254;
    } catch( ... ) {
-
-      g_logger << FATAL << "Some unknown exception caught" << SLogger::endmsg;
-      g_logger << FATAL << "--> Stopping execution" << SLogger::endmsg;
-      return 1;
-
+      REPORT_FATAL( "Some unknown exception caught" );
+      REPORT_FATAL( "--> Stopping execution" );
+      return 253;
    }
 
+   // Return gracefully:
    return 0;
 }
 
+/**
+ * This little function is used to print some basic usage information about
+ * the executable.
+ *
+ * @param argv All the command line arguments received by the application
+ */
 void usage( char** argv ) {
 
-   g_logger << INFO << SLogger::endmsg;
-   g_logger << INFO << "Main executable to run an SFrame-based cycle analysis."
+   m_logger << INFO << SLogger::endmsg;
+   m_logger << INFO << "Main executable to run an SFrame-based cycle analysis."
             << SLogger::endmsg;
-   g_logger << INFO << "\n\tUsage: " << argv[ 0 ] << " \'xml filename\'"
+   m_logger << INFO << "\n\tUsage: " << argv[ 0 ] << " \'xml filename\'"
             << std::endl << SLogger::endmsg;
 
    return;

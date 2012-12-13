@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -34,12 +34,13 @@
  *   TH1D* hist = Book( TH1D( "hist", "Histogram", 100, 0.0, 100.0 ) );
  * </code>
  *
- * @warning The function returns a pointer to the created object in
- *          the file. It is a good practice to keep the pointer to
+ * @warning The function returns a pointer to the created object.
+ *          It is a good practice to keep the pointer to
  *          the object, as SCycleBaseHist::Book and
  *          SCycleBaseHist::Retrieve are quite slow.
  *
  * @see SCycleBaseHist::Retrieve
+ * @see SCycleBaseHist::Hist
  *
  * @param histo The object (usually histogram) to put into the output
  * @param directory Optional directory name where the object should end up

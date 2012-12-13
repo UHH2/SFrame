@@ -7,7 +7,7 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
@@ -26,7 +26,7 @@
  *@code
  *    bool compare (IParticle* a, IParticle* b)
  *    { return a->pt() > b->pt(); }
- @endcode
+ *@endcode
  *
  * then you should replace the comparison with a call to one of the
  * functions in this file:
@@ -34,7 +34,7 @@
  *@code
  *    bool compare (IParticle* a, IParticle* b)
  *    { return CxxUtils::fpcompare::greater (a->pt(), b->pt()); }
- @endcode
+ *@endcode
  *
  * Longer explanation:
  *
@@ -42,7 +42,7 @@
  *
  *@code
  *    a->pt() > b->pt()
- @endcode
+ *@endcode
  *
  * is compiled (on x86) into a sequence like this:
  *
@@ -87,7 +87,6 @@
 #define SFRAME_PLUGINS_FPCOMPARE_H
 
 // STL include(s):
-//#include <cmath>
 #include <functional>
 
 // Decide whether we need to use volatile or not.

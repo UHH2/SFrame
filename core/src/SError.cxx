@@ -6,14 +6,12 @@
  * @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
  * @author David Berge      <David.Berge@cern.ch>          - CERN
  * @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
- * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
+ * @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
  *
  ***************************************************************************/
 
 // Local include(s):
 #include "../include/SError.h"
-
-using namespace std;
 
 /**
  * This constructor is used most often in the code. You just specify
@@ -24,7 +22,7 @@ using namespace std;
  * @param severity The action request of the exception
  */
 SError::SError( Severity severity ) throw()
-   : exception(), ostringstream(), m_severity( severity ) {
+   : std::exception(), std::ostringstream(), m_severity( severity ) {
 
 }
 
@@ -41,10 +39,9 @@ SError::SError( Severity severity ) throw()
  * @param severity    The action request of the exception
  */
 SError::SError( const char* description, Severity severity ) throw()
-   : exception(), ostringstream(), m_severity( severity ) {
+   : std::exception(), std::ostringstream(), m_severity( severity ) {
 
    this->str( description );
-
 }
 
 /**
@@ -56,42 +53,56 @@ SError::SError( const char* description, Severity severity ) throw()
  */
 SError::SError( const SError& parent ) throw()
    : std::basic_ios< SError::char_type, SError::traits_type >(),
-     exception(),
-     ostringstream(), m_severity( parent.m_severity ) {
+     std::exception(), std::ostringstream(), m_severity( parent.m_severity ) {
 
    this->str( parent.str() );
-
 }
 
 /**
- * Another "I don't do anything" destructor.
+ * Even though the destructor doesn't do anything, it is still mandatory to
+ * define it explicitly. Otherwise the compiler would make a destructor that
+ * doesn't declare that it may throw (an) exception(s), and this is an
+ * error on most compilers.
  */
 SError::~SError() throw() {
 
 }
 
+/**
+ * @param description The description that should be associated with this
+ *                    exception
+ */
 void SError::SetDescription( const char* description ) throw() {
 
    this->str( description );
    return;
-
 }
 
+/**
+ * @param severity The action that should be taken as the effect of this
+ *                 exception
+ */
 void SError::SetSeverity( Severity severity ) throw() {
 
    m_severity = severity;
    return;
-
 }
 
+/**
+ * This function is re-implemented from std::exception, to give an explanation
+ * of the reason why this exception was thrown.
+ *
+ * @returns An explanation about the exception
+ */
 const char* SError::what() const throw() {
 
    return this->str().c_str();
-
 }
 
+/**
+ * @returns The action that should be taken because of this exception
+ */
 SError::Severity SError::request() const throw() {
 
    return m_severity;
-
 }

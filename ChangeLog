@@ -1,3 +1,10 @@
+2012.12.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Updated the documentation of practically all the files.
+   * Modified the source text formatting a bit for it to fit into 80 column
+     editors.
+   * There should be no functionality changes at this point.
+   * Tagging as SFrame-03-06-11
+
 2012.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Enabled keyword expansion for the Cintex source files. Should've been done
      ages ago...
