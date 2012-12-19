@@ -1,3 +1,8 @@
+2012.12.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * SFileMerger now also respects the $SFRAME_TEMP_DIR environment variable if
+     it is set. This avoids problems in case the user has a too small default
+     temporary directory. (Usually /tmp on linux.)
+
 2012.12.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Updated the documentation of practically all the files.
    * Modified the source text formatting a bit for it to fit into 80 column

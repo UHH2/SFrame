@@ -55,7 +55,9 @@ Bool_t SFileMerger::AddFile( const TString& fileName ) throw( SError ) {
    TUUID uuid;
    const TString localName =
       TString::Format( "%s/SFRAMEMERGE-%s.root",
-                       gSystem->TempDirectory(), uuid.AsString() );
+                       ( gSystem->Getenv( "SFRAME_TEMP_DIR" ) ?
+                         gSystem->Getenv( "SFRAME_TEMP_DIR" ) :
+                         gSystem->TempDirectory() ), uuid.AsString() );
    if( ! TFile::Cp( fileName, localName, kTRUE ) ) {
       REPORT_ERROR( "Couldn't create local copy of: " << fileName );
       throw SError( "Couldn't create local copy of: " + fileName,
