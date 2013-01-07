@@ -1,3 +1,9 @@
+2013.01.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Discovered that if all the input files from an InputData block would be
+     unaccessible, the code crashed. This is now fixed, the code just reports
+     the appropriate ERROR and WARNING messages, and finishes gracefully.
+     (Stating that it processed 0 events.)
+
 2012.12.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * SFileMerger now also respects the $SFRAME_TEMP_DIR environment variable if
      it is set. This avoids problems in case the user has a too small default

@@ -679,6 +679,8 @@ void SInputData::ValidateInputFiles() throw( SError ) {
                   << SLogger::endmsg;
          // Erasing the file from the file list is a bit tricky actually:
          sf_itr = m_sfileIn.erase( sf_itr );
+         // Exit at this point if there are no more files in the dataset:
+         if( ! m_sfileIn.size() ) break;
          --sf_itr;
          continue;
       }
