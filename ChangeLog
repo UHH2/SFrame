@@ -1,3 +1,8 @@
+2013.01.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Found another way in which the code can crash if none of the input files
+     can be used. It is fixed now.
+   * Tagging as SFrame-03-06-14
+
 2013.01.07 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Discovered that if all the input files from an InputData block would be
      unaccessible, the code crashed. This is now fixed, the code just reports

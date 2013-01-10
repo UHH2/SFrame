@@ -791,6 +791,8 @@ void SInputData::ValidateInputFiles() throw( SError ) {
       } catch( const SError& ) {
          m_totalLumiSum -= sf_itr->lumi;
          sf_itr = m_sfileIn.erase( sf_itr );
+         // Exit at this point if there are no more files in the dataset:
+         if( ! m_sfileIn.size() ) break;
          --sf_itr;
       }
 
