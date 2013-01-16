@@ -1,3 +1,10 @@
+2013.01.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * PROOF-Lite (at least in ROOT 5.34.04) doesn't seem to like relative path
+     names to the input files anymore. In order not to have to always use
+     absolute path names for the input files just to use PROOF-Lite, the code
+     now makes sure that all path names are absolute when passing them to ROOT.
+   * Tagging as SFrame-03-06-15
+
 2013.01.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Found another way in which the code can crash if none of the input files
      can be used. It is fixed now.

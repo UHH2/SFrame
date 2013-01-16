@@ -23,6 +23,7 @@
 #include <TDSet.h>
 #include <TProof.h>
 #include <TROOT.h>
+#include <TSystem.h>
 
 // Local include(s):
 #include "../include/SInputData.h"
@@ -658,6 +659,17 @@ void SInputData::ValidateInputFiles() throw( SError ) {
    std::vector< SFile >::iterator sf_itr = m_sfileIn.begin();
    std::vector< SFile >::iterator sf_end = m_sfileIn.end();
    for( ; sf_itr != sf_end; ++sf_itr ) {
+
+      //
+      // If it's a local file, then turn it into a full path name. This makes
+      // PROOF-Lite much easier to use, as one can use a relative path in the
+      // configuration file to define the input of the job. (Which in this case
+      // would be the output of a pervious job.)
+      //
+      if( ( ! sf_itr->file.Contains( "://" ) ) &&
+          ( sf_itr->file[ 0 ] != '/' ) ) {
+         sf_itr->file = gSystem->pwd() + ( "/" + sf_itr->file );
+      }
 
       //
       // Try to load the file's information from the cache. This is *much*
