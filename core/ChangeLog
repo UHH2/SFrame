@@ -1,3 +1,10 @@
+2013.01.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Cycles no longer continue when they detect a TTree write failure. This can
+     happen sometimes on the grid when the worker node runs out of free space.
+     Until now the job would print ERROR messages in this case, but would
+     continue to run, usually ending up with a quite empty output file, and
+     the grid job marked successful.
+
 2013.01.16 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * PROOF-Lite (at least in ROOT 5.34.04) doesn't seem to like relative path
      names to the input files anymore. In order not to have to always use

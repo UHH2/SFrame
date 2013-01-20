@@ -248,6 +248,9 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
          if( nbytes < 0 ) {
             REPORT_ERROR( "Write error occured in tree \""
                           << ( *tree_itr )->GetName() << "\"" );
+            // Stop the execution, as this is a serious problem:
+            throw SError( "TTree write error occured",
+                          SError::StopExecution );
          } else if( nbytes == 0 ) {
             m_logger << WARNING << "No data written to tree \""
                      << ( *tree_itr )->GetName() << "\"" << SLogger::endmsg;
