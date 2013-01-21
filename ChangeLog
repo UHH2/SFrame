@@ -1,4 +1,11 @@
 2013.01.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Found a bug in the code that makes absolute path names from relative ones.
+     DCache file names usually start with "dcache:/". (Only a single slash.)
+     The code now looks for just ":/" in a file name to decide whether it should
+     make it an absolute path name.
+   * Tagging as SFrame-03-06-18
+
+2013.01.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Added a new property to SInputData, which controls whether files belonging
      to this input data object should be "looked up" during dataset validation.
      Turning this look-up off makes the code not try to check where a given file

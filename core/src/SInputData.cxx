@@ -670,7 +670,7 @@ void SInputData::ValidateInputFiles() throw( SError ) {
       // configuration file to define the input of the job. (Which in this case
       // would be the output of a pervious job.)
       //
-      if( ( ! sf_itr->file.Contains( "://" ) ) &&
+      if( ( ! sf_itr->file.Contains( ":/" ) ) &&
           ( sf_itr->file[ 0 ] != '/' ) ) {
          sf_itr->file = gSystem->pwd() + ( "/" + sf_itr->file );
       }
