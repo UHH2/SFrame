@@ -643,17 +643,17 @@ void SCycleController::ExecuteNextCycle() throw( SError ) {
          // Configure the usage of TTreeCache on the cluster:
          if( config.GetUseTreeCache() ) {
             m_proof->SetParameter( "PROOF_UseTreeCache", ( Int_t ) 1 );
-         } /*else {
-            m_proof->SetParameter( "PROOF_UseTreeCache", ( Int_t ) 0 );
-         }*/
+         }
          m_proof->SetParameter( "PROOF_CacheSize", config.GetCacheSize() );
          // Configure whether the workers are allowed to read each others'
          // files:
          if( config.GetProcessOnlyLocal() ) {
             m_proof->SetParameter( "PROOF_ForceLocal", ( Int_t ) 1 );
-         } /*else {
-            m_proof->SetParameter( "PROOF_ForceLocal", ( Int_t ) 0 );
-         }*/
+         }
+         // Turn off file lookup if the configuration asks for this feature:
+         if( inputData.GetSkipLookup() ) {
+            m_proof->SetParameter( "PROOF_LookupOpt", "none" );
+         }
 
          // Add the "input objects" to PROOF:
          m_proof->AddInput( &config );

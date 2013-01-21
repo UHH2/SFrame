@@ -181,8 +181,8 @@ SInputData::SInputData( const char* name )
    : TNamed( name, "SFrame input data object" ), m_type( "unknown" ),
      m_version( 0 ), m_totalLumiGiven( 0 ), m_totalLumiSum( 0 ),
      m_eventsTotal( 0 ), m_neventsmax( -1 ), m_neventsskip( 0 ),
-     m_cacheable( kFALSE ), m_skipValid( kFALSE ), m_entry( 0 ),
-     m_dset( 0 ), m_logger( "SInputData" ) {
+     m_cacheable( kFALSE ), m_skipValid( kFALSE ), m_skipLookup( kFALSE ),
+     m_entry( 0 ), m_dset( 0 ), m_logger( "SInputData" ) {
 
    REPORT_VERBOSE( "In constructor" );
 }
@@ -500,6 +500,8 @@ void SInputData::Print( const Option_t* ) const {
             << std::endl;
    m_logger << " Skip validation    : " << ( GetSkipValid() ? "Yes" : "No" )
             << std::endl;
+   m_logger << " Skip file lookup   : " << ( GetSkipLookup() ? "Yes" : "No" )
+            << std::endl;
 
    for( std::vector< SGeneratorCut >::const_iterator gc = m_gencuts.begin();
         gc != m_gencuts.end(); ++gc ) {
@@ -563,8 +565,10 @@ TString SInputData::GetStringConfig() const {
                               m_neventsskip );
    result += TString::Format( "               Cacheable=\"%s\"\n",
                               ( m_cacheable ? "True" : "False" ) );
-   result += TString::Format( "               SkipValid=\"%s\">\n\n",
+   result += TString::Format( "               SkipValid=\"%s\"\n",
                               ( m_skipValid ? "True" : "False" ) );
+   result += TString::Format( "               SkipLookup=\"%s\">\n\n",
+                              ( m_skipLookup ? "True" : "False" ) );
 
    // Add all the input files:
    std::vector< SFile >::const_iterator f_itr = m_sfileIn.begin();
@@ -1166,22 +1170,43 @@ TDSet* SInputData::MakeDataSet() const throw( SError ) {
                     SError::SkipInputData );
    }
 
-   // Create a TChain that will be the basis of the dataset:
-   TChain chain( treeName );
-   for( std::vector< SFile >::const_iterator file = GetSFileIn().begin();
-        file != GetSFileIn().end(); ++file ) {
-      chain.Add( file->file );
+   // The dataset is created in two different ways depending on whether we
+   // want (mostly XRootD) files to be looked up by ROOT, or their locations
+   // should be taken as they were specified in the configuration.
+   if( GetSkipLookup() ) {
+      // Create the dataset:
+      TDSet* result = new TDSet( "DSetCache", treeName );
+      std::vector< SFile >::const_iterator file_itr = GetSFileIn().begin();
+      std::vector< SFile >::const_iterator file_end = GetSFileIn().end();
+      for( ; file_itr != file_end; ++file_itr ) {
+         result->Add( file_itr->file );
+      }
+      result->SetTitle( "Cached dataset for ID Type: " + GetType() +
+                        ", Version: " + GetVersion() );
+      result->SetLookedUp();
+      result->Validate();
+
+      // Return the object:
+      return result;
+   } else {
+      // Create a TChain that will be the basis of the dataset:
+      TChain chain( treeName );
+      std::vector< SFile >::const_iterator file_itr = GetSFileIn().begin();
+      std::vector< SFile >::const_iterator file_end = GetSFileIn().end();
+      for( ; file_itr != file_end; ++file_itr ) {
+         chain.Add( file_itr->file );
+      }
+
+      // Create the dataset:
+      TDSet* result = new TDSet( chain );
+      result->SetName( "DSetCache" );
+      result->SetTitle( "Cached dataset for ID Type: " + GetType() +
+                        ", Version: " + GetVersion() );
+      result->Validate();
+
+      // Return the object:
+      return result;
    }
-
-   // Create the dataset:
-   TDSet* result = new TDSet( chain );
-   result->SetName( "DSetCache" );
-   result->SetTitle( "Cached dataset for ID Type: " + GetType() +
-                     ", Version: " + GetVersion() );
-   result->Validate();
-
-   // Return the object:
-   return result;
 }
 
 /**

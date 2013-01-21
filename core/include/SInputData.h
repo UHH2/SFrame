@@ -228,6 +228,11 @@ public:
    /// Get whether the file/dataset validation can be skipped
    Bool_t GetSkipValid() const                     { return m_skipValid; }
 
+   /// Set whether the file lookup during dataset validation can be skipped
+   void SetSkipLookup( Bool_t flag = kTRUE )       { m_skipLookup = flag; }
+   /// Get whether the file lookup during dataset validation can be skipped
+   Bool_t GetSkipLookup() const                    { return m_skipLookup; }
+
    /// Set the current entry which is being read from the input
    void SetEventTreeEntry( Long64_t entry )        { m_entry = entry; }
    /// Get the current entry which is being read from the input
@@ -329,6 +334,8 @@ private:
    Long64_t m_neventsskip; ///< The number of events to skip
    Bool_t m_cacheable; ///< Flag showing whether to cache the ID info
    Bool_t m_skipValid; ///< Flag showing whether to skip the ID validation
+   /// Flag showing whether to skip the file lookup during dataset validation
+   Bool_t m_skipLookup;
    Long64_t m_entry; ///< Current entry read from the input
 
    TDSet* m_dset; //! Transient dataset representation of input files

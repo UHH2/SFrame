@@ -1,3 +1,18 @@
+2013.01.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Added a new property to SInputData, which controls whether files belonging
+     to this input data object should be "looked up" during dataset validation.
+     Turning this look-up off makes the code not try to check where a given file
+     is located in an XRootD storage. (Most notably EOS.) This can come in very
+     handy with some storage systems.
+   * Updated all the code to print/respect this new configuration option.
+   * Updated SCycleBaseConfig to read this new configuration option from the XML
+     files.
+   * Added the new SkipLookup property of InputData blocks to the JobConfig.dtd
+     file.
+   * Added an example usage of SkipLookup to FirstCycle_config.xml, together
+     with a short description of this property left in the comments.
+   * Tagging as SFrame-03-06-17
+
 2013.01.20 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Cycles no longer continue when they detect a TTree write failure. This can
      happen sometimes on the grid when the worker node runs out of free space.

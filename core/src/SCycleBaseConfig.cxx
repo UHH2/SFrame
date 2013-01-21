@@ -448,6 +448,8 @@ SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
          inputData.SetCacheable( ToBool( curAttr->GetValue() ) );
       } else if( curAttr->GetName() == TString( "SkipValid" ) ) {
          inputData.SetSkipValid( ToBool( curAttr->GetValue() ) );
+      } else if( curAttr->GetName() == TString( "SkipLookup" ) ) {
+         inputData.SetSkipLookup( ToBool( curAttr->GetValue() ) );
       }
    }
 

@@ -60,6 +60,7 @@
         NEventsSkip          CDATA            "0"
         Cacheable            (True|False)     "False"
         SkipValid            (True|False)     "False"
+        SkipLookup           (True|False)     "False"
 >
 
 <!ELEMENT GeneratorCut EMPTY>

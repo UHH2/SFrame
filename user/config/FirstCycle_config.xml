@@ -113,12 +113,17 @@
     <!--            start. It just assumes that all the specified files are there,-->
     <!--            and they all contain all the necessary input trees. Can only  -->
     <!--            be used when NEventsMax="-1" and NEventsSkip="0".             -->
+    <!-- SkipLookup: When set to "True" (the default is "False"), the code will   -->
+    <!--             not try to look up the physical location of the specified    -->
+    <!--             files. This is most useful with XRootD storage systems, most -->
+    <!--             notably EOS. Here you have to force SFrame/PROOF to use the  -->
+    <!--             file names exactly as specified in the configuration file.   -->
     <!--                                                                          -->
     <!-- Some run-time checking is done on these parameters that they would make  -->
     <!-- sense, but in general be careful when using them.                        -->
 
     <InputData Type="MC" Version="Zee_1" Lumi="0." NEventsMax="2000" NEventsSkip="3000"
-               Cacheable="True" SkipValid="False" >
+               Cacheable="True" SkipValid="False" SkipLookup="True" >
 
       <!-- List of cuts that have been applied on generator level, needed for -->
       <!-- the weighting.                                                     -->

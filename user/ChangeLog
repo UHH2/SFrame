@@ -1,3 +1,9 @@
+2013.01.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Added the new SkipLookup property of InputData blocks to the JobConfig.dtd
+     file.
+   * Added an example usage of SkipLookup to FirstCycle_config.xml, together
+     with a short description of this property left in the comments.
+
 2012.11.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Updated the example cycles to make use of the new in-file
 	  histogram merging functionality.
