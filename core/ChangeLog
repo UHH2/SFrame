@@ -1,3 +1,8 @@
+2013.02.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Made the print macros in SLogger.h a bit more robust. Had some problems
+     with using output operators designed for std::ostream instead of SLogger
+     when using these macros. (clang 4.2 started complaining about these.)
+
 2013.01.21 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Found a bug in the code that makes absolute path names from relative ones.
      DCache file names usually start with "dcache:/". (Only a single slash.)
