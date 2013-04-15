@@ -1,3 +1,9 @@
+2013.04.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Adding a fix proposed by Mike Hance. With this fix the cache files made
+     will finally store the full names of the metadata trees. (Including
+     possible directory names.) Previously just the tree's name was saved,
+     making the cache fail on reading.
+
 2013.02.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Made the print macros in SLogger.h a bit more robust. Had some problems
      with using output operators designed for std::ostream instead of SLogger

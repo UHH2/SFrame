@@ -757,7 +757,7 @@ void SInputData::ValidateInputFiles() throw( SError ) {
                // Remember how many branches there are in total in the input:
                const Int_t branchesThisTree = tree->GetNbranches();
                m_logger << DEBUG << branchesThisTree << " branches in tree "
-                        << tree->GetName() << SLogger::endmsg;
+                        << st_itr->treeName << SLogger::endmsg;
                numberOfBranches += branchesThisTree;
 
                // Check how many events are there in the input:
@@ -765,7 +765,7 @@ void SInputData::ValidateInputFiles() throw( SError ) {
                   if( firstPassed && ( tree->GetEntriesFast() != entries ) ) {
                      m_logger << WARNING
                               << "Conflict in number of entries - Tree "
-                              << tree->GetName() << " has "
+                              << st_itr->treeName << " has "
                               << tree->GetEntriesFast() << " entries, NOT "
                               << entries << SLogger::endmsg;
                      m_logger << WARNING << "Removing " << sf_itr->file
@@ -782,16 +782,16 @@ void SInputData::ValidateInputFiles() throw( SError ) {
                //
                if( m_cacheable ) {
                   TFileInfoMeta* tree_info =
-                     new TFileInfoMeta( tree->GetName(), "TTree",
+                     new TFileInfoMeta( st_itr->treeName, "TTree",
                                         tree->GetEntriesFast() );
-                  tree_info->SetName( tree->GetName() );
+                  tree_info->SetName( st_itr->treeName );
                   tree_info->SetTitle( "Meta data info for a TTree" );
                   if( ! fileinfo->AddMetaData( tree_info ) ) {
                      REPORT_ERROR( "There was a problem caching meta-data for "
-                                   "TTree: " << tree->GetName() );
+                                   "TTree: " << st_itr->treeName );
                   } else {
                      REPORT_VERBOSE( "Meta-data cached for TTree: "
-                                     << tree->GetName() );
+                                     << st_itr->treeName );
                   }
                }
             }
