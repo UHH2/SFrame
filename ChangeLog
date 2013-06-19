@@ -1,3 +1,11 @@
+2013.06.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * SCycleController.cxx now opens the output file for writing with
+     TFile::Open(...) rather than just creating a TFile on the stack. This makes
+     it possible to use output directories on XRootD/EOS. So far the code was
+     silently failing when trying to use such an output directory in the XML
+     configuration...
+   * Tagging as SFrame-03-06-21
+
 2013.04.15 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Adding a fix proposed by Mike Hance. With this fix the cache files made
      will finally store the full names of the metadata trees. (Including

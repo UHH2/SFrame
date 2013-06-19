@@ -955,7 +955,8 @@ void SCycleController::WriteCycleOutput( TList* olist,
    //
    // Open the output file:
    //
-   TFile outputFile( filename , ( update ? "UPDATE" : "RECREATE" ) );
+   TFile* outputFile = TFile::Open( filename,
+                                    ( update ? "UPDATE" : "RECREATE" ) );
 
    //
    // List of files holding TTrees:
@@ -967,7 +968,7 @@ void SCycleController::WriteCycleOutput( TList* olist,
    //
    for( Int_t i = 0; i < olist->GetSize(); ++i ) {
 
-      outputFile.cd();
+      outputFile->cd();
 
       if( dynamic_cast< SCycleOutput* >( olist->At( i ) ) ) {
          olist->At( i )->Write();
@@ -998,9 +999,9 @@ void SCycleController::WriteCycleOutput( TList* olist,
    if( ! update ) {
       // Make a directory for all SFrame related metadata. Might want to
       // add other metadata types as well to the output files later on.
-      TDirectory* sframeDir = outputFile.GetDirectory( "SFrame" );
+      TDirectory* sframeDir = outputFile->GetDirectory( "SFrame" );
       if( ! sframeDir ) {
-         sframeDir = outputFile.mkdir( "SFrame" );
+         sframeDir = outputFile->mkdir( "SFrame" );
       }
       sframeDir->cd();
 
@@ -1013,8 +1014,9 @@ void SCycleController::WriteCycleOutput( TList* olist,
    //
    // Write and close the output file:
    //
-   outputFile.Write();
-   outputFile.Close();
+   outputFile->Write();
+   outputFile->Close();
+   delete outputFile;
 
    //
    // Merge the TTree contents of the temporary files into our output file:
