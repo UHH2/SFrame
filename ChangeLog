@@ -1,3 +1,9 @@
+2013.08.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Adding $CPPEXPFLAGS to the compilation commands. This should
+	  make the compilation against SLC5 ROOT on an SL(C)6 system
+	  succeed.
+	* Tagging as SFrame-03-06-22
+
 2013.06.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * SCycleController.cxx now opens the output file for writing with
      TFile::Open(...) rather than just creating a TFile on the stack. This makes

@@ -70,7 +70,7 @@ endif
 # Some compilation options
 VPATH    += $(OBJDIR) $(SRCDIR)
 INCLUDES += -I$(SFRAME_DIR) -I./
-CXXFLAGS += -Wall -Wno-overloaded-virtual -Wno-unused $(USERCXXFLAGS)
+CXXFLAGS += -Wall -Wno-overloaded-virtual -Wno-unused $(USERCXXFLAGS) $(CPPEXPFLAGS)
 
 # Set the locations of some files
 DICTHEAD  = $(SRCDIR)/$(LIBRARY)_Dict.h
