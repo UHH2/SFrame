@@ -34,7 +34,8 @@ include $(SFRAME_DIR)/Makefile.common
 $(SFRAME_BIN_PATH)/sframe_main: sframe_main.o $(SHLIBFILE)
 	@echo "Linking " $@
 	@$(LD) $(LDFLAGS) $(OBJDIR)/sframe_main.o -L$(SFRAME_LIB_PATH) -lSFrameCore \
-		$(ROOTLIBS) -lTreePlayer -lXMLParser -lPyROOT -lProof -lProofPlayer -lutil -lpcre -o $@
+		$(ROOTLIBS) -lTreePlayer -lXMLParser -lPyROOT -lProof -lProofPlayer \
+		-lutil -o $@
 
 sframe_main.o: app/sframe_main.cxx include/SCycleController.h \
                include/SError.h include/SLogger.h

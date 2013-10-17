@@ -359,7 +359,7 @@ void SCycleConfig::ArrangeInputData() throw ( SError ) {
    // loop over InputData vector and copy the type names into the
    // multimap, remembering the position in the vector
    for( ; be != en; ++be,++index ) {
-      inputDataHelper.insert( std::make_pair( be->GetType(), index ) );
+      inputDataHelper.insert( std::make_pair( be->GetType().Data(), index ) );
    }
 
    std::multimap< std::string, int >::iterator help1 = inputDataHelper.begin();

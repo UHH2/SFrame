@@ -1,3 +1,13 @@
+2013.10.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixed the compilation of SCycleConfig in C++11 mode with GCC.
+	  Apparently in this mode the language is more strict about automatic
+	  type conversions.
+	* Removed libpcre.so from the list of libraries that sframe_main is
+	  linked against. It was left here from an earlier version of the code,
+	  back when the core library was using TPRegexp. It's not doing that
+	  these days.
+	* Thanks to Jochen Ott for pointint both of these issues out.
+
 2013.06.19 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * SCycleController.cxx now opens the output file for writing with
      TFile::Open(...) rather than just creating a TFile on the stack. This makes
