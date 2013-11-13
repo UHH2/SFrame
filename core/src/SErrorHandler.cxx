@@ -19,8 +19,8 @@
 #include <TError.h>
 
 // Local include(s):
-#include "core/include/SErrorHandler.h"
-#include "core/include/SLogger.h"
+#include "../include/SErrorHandler.h"
+#include "../include/SLogger.h"
 
 /// Local map to translate between ROOT and SFrame message levels
 static std::map< int, SMsgType > msgLevelMap;

@@ -350,7 +350,8 @@ TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
       tempDirName = 0;
       m_output->Add( proofFile );
    } else {
-      m_logger << DEBUG << "No PROOF output file specified in configuration -> "
+      m_logger << ::DEBUG
+               << "No PROOF output file specified in configuration -> "
                << "Running in LOCAL mode" << SLogger::endmsg;
       proofFile = 0;
       // Use a more or less POSIX method for creating a unique file name:
@@ -379,13 +380,13 @@ TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
    // Now actually open the file:
    if( proofFile ) {
       if( ! ( m_outputFile = proofFile->OpenFile( "RECREATE" ) ) ) {
-         m_logger << WARNING << "Couldn't open output file: "
+         m_logger << ::WARNING << "Couldn't open output file: "
                   << proofFile->GetDir() << "/" << proofFile->GetFileName()
                   << SLogger::endmsg;
-         m_logger << WARNING << "Saving the ntuples to memory"
+         m_logger << ::WARNING << "Saving the ntuples to memory"
                   << SLogger::endmsg;
       } else {
-         m_logger << DEBUG << "PROOF temp file opened with name: "
+         m_logger << ::DEBUG << "PROOF temp file opened with name: "
                   << m_outputFile->GetName() << SLogger::endmsg;
       }
    } else {
@@ -401,13 +402,13 @@ TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
       if( ! ( m_outputFile = TFile::Open( TString( tempDirName ) + "/" +
                                           SFrame::ProofOutputFileName,
                                           "RECREATE" ) ) ) {
-         m_logger << WARNING << "Couldn't open output file: "
+         m_logger << ::WARNING << "Couldn't open output file: "
                   << tempDirName << "/" << SFrame::ProofOutputFileName
                   << SLogger::endmsg;
-         m_logger << WARNING << "Saving the ntuples to memory"
+         m_logger << ::WARNING << "Saving the ntuples to memory"
                   << SLogger::endmsg;
       } else {
-         m_logger << DEBUG << "LOCAL temp file opened with name: "
+         m_logger << ::DEBUG << "LOCAL temp file opened with name: "
                   << tempDirName << "/" << SFrame::ProofOutputFileName
                   << SLogger::endmsg;
       }
@@ -429,7 +430,7 @@ void SCycleBaseNTuple::CloseOutputFile() throw( SError ) {
    // We only need to do anything if the output file has been made:
    if( m_outputFile ) {
 
-      m_logger << DEBUG << "Closing output file: " << m_outputFile->GetName()
+      m_logger << ::DEBUG << "Closing output file: " << m_outputFile->GetName()
                << SLogger::endmsg;
 
       // Save all the output trees into the output file. Memory-kept TTrees
@@ -465,7 +466,7 @@ CreateOutputTrees( const SInputData& iD,
 
    // sanity checks
    if( outTrees.size() ) {
-      m_logger << WARNING << "Vector of output trees is not empty in "
+      m_logger << ::WARNING << "Vector of output trees is not empty in "
                << "\"CreateOutputTrees\"!"  << SLogger::endmsg;
    }
 
@@ -487,7 +488,6 @@ CreateOutputTrees( const SInputData& iD,
    // Create all the regular output trees, but don't create any branches in them
    // just yet.
    //
-   const Int_t branchStyle = 1;
    const Int_t autoSave = 10000000;
    if( sOutTree ) {
       for( std::vector< STree >::const_iterator st = sOutTree->begin();
@@ -518,7 +518,7 @@ CreateOutputTrees( const SInputData& iD,
             delete array;
          }
 
-         m_logger << DEBUG << "Creating output event tree with name: "
+         m_logger << ::DEBUG << "Creating output event tree with name: "
                   << tname << " in directory: \"" << dirname << "\""
                   << SLogger::endmsg;
 
@@ -527,7 +527,6 @@ CreateOutputTrees( const SInputData& iD,
                                   TString( "Format: User" ) +
                                   ", data type: " + iD.GetType() );
          tree->SetAutoSave( autoSave );
-         TTree::SetBranchStyle( branchStyle );
 
          // Store the pointer:
          outTrees.push_back( tree );
@@ -585,7 +584,7 @@ CreateOutputTrees( const SInputData& iD,
             delete array;
          }
 
-         m_logger << DEBUG << "Creating output metadata tree with name: "
+         m_logger << ::DEBUG << "Creating output metadata tree with name: "
                   << tname  << " in directory: \"" << dirname << "\""
                   << SLogger::endmsg;
 
@@ -593,7 +592,6 @@ CreateOutputTrees( const SInputData& iD,
          TTree* tree = new TTree( tname, TString( "Format: User" ) +
                                   ", data type: " + iD.GetType() );
          tree->SetAutoSave( autoSave );
-         TTree::SetBranchStyle( branchStyle );
 
          // Remember its pointer:
          m_metaOutputTrees.push_back( tree );
@@ -642,7 +640,7 @@ void SCycleBaseNTuple::SaveOutputTrees() throw( SError ) {
          ( *tree )->Write();
          ( *tree )->AutoSave();
       } else {
-         m_logger << INFO << "Not saving TTree \"" << ( *tree )->GetName()
+         m_logger << ::INFO << "Not saving TTree \"" << ( *tree )->GetName()
                   << "\", because it is empty" << SLogger::endmsg;
       }
       // Delete the tree:
@@ -660,7 +658,7 @@ void SCycleBaseNTuple::SaveOutputTrees() throw( SError ) {
          ( *tree )->Write();
          ( *tree )->AutoSave();
       } else {
-         m_logger << INFO << "Not saving TTree \"" << ( *tree )->GetName()
+         m_logger << ::INFO << "Not saving TTree \"" << ( *tree )->GetName()
                   << "\", because it is empty" << SLogger::endmsg;
       }
       // Delete the tree:
@@ -769,7 +767,7 @@ LoadInputTrees( const SInputData& iD,
          bool deleteIndex = true; // can be made configurable
          if( deleteIndex ) {
             if( tree->GetTreeIndex() ) {
-               m_logger << DEBUG << "Delete index from tree " 
+               m_logger << ::DEBUG << "Delete index from tree "
                         << tree->GetName() << SLogger::endmsg;
                tree->SetTreeIndex( 0 );
                delete tree->GetTreeIndex();
@@ -1060,7 +1058,7 @@ void SCycleBaseNTuple::RegisterInputBranch( TBranch* br ) throw( SError ) {
    // This is a bit slow, but still not the worst part of the code...
    if( std::find( m_inputBranches.begin(), m_inputBranches.end(), br ) !=
        m_inputBranches.end() ) {
-      m_logger << DEBUG << "Branch '" << br->GetName()
+      m_logger << ::DEBUG << "Branch '" << br->GetName()
                << "' already registered!" << SLogger::endmsg;
    } else {
       m_inputBranches.push_back( br );

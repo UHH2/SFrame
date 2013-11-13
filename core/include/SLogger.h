@@ -195,8 +195,8 @@ inline SLogger& SLogger::operator<< ( SMsgType type ) {
  *   REPORT_VERBOSE( "This is a verbose message with a number: " << number );
  * </code>
  */
-#define REPORT_VERBOSE( MESSAGE )                           \
-   m_logger << VERBOSE << SLOGGER_REPORT_PREFIX << MESSAGE; \
+#define REPORT_VERBOSE( MESSAGE )                             \
+   m_logger << ::VERBOSE << SLOGGER_REPORT_PREFIX << MESSAGE; \
    m_logger << SLogger::endmsg
 
 /// Convenience macro for reporting ERROR messages in the code
@@ -210,8 +210,8 @@ inline SLogger& SLogger::operator<< ( SMsgType type ) {
  *   REPORT_ERROR( "A serious error message" );
  * </code>
  */
-#define REPORT_ERROR( MESSAGE )                           \
-   m_logger << ERROR << SLOGGER_REPORT_PREFIX << MESSAGE; \
+#define REPORT_ERROR( MESSAGE )                             \
+   m_logger << ::ERROR << SLOGGER_REPORT_PREFIX << MESSAGE; \
    m_logger << SLogger::endmsg
 
 /// Convenience macro for reporting FATAL messages in the code
@@ -225,8 +225,8 @@ inline SLogger& SLogger::operator<< ( SMsgType type ) {
  *   REPORT_FATAL( "A very serious error message" );
  * </code>
  */
-#define REPORT_FATAL( MESSAGE )                           \
-   m_logger << FATAL << SLOGGER_REPORT_PREFIX << MESSAGE; \
+#define REPORT_FATAL( MESSAGE )                             \
+   m_logger << ::FATAL << SLOGGER_REPORT_PREFIX << MESSAGE; \
    m_logger << SLogger::endmsg
 
 #endif // SFRAME_CORE_SLogger_H

@@ -233,7 +233,7 @@ SCycleBaseHist::RetrieveAll( const char* name,
       // If the requestested directory doesn't exist that's not necessariy an
       // error condition:
       if( ! dir ) {
-         m_logger << DEBUG << "Directory \"" << directory
+         m_logger << ::DEBUG << "Directory \"" << directory
                   << "\" doesn't exist in the input file" << SLogger::endmsg;
          return result;
       }

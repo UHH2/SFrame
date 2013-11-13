@@ -1,3 +1,14 @@
+2013.11.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * DeclareVariable<...>(...) no longer uses cxxabi.h to declare branches
+     to ROOT. The type names reported by clang 5.0 on MacOS X Mavericks are
+     not recognised by ROOT.
+   * Put explicit "::" in front of the message level enumeration values in the
+     header/icc files to avoid clashes with the same sort of enumeration values
+     coming from the RooFit code. (RooFit::MsgLevel)
+   * Still seeing some issues with clang 5.0 and PROOF-Lite mode that will need
+     following up.
+   * Tagging as SFrame-03-06-24
+
 2013.10.17 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Fixed the compilation of SCycleConfig in C++11 mode with GCC.
 	  Apparently in this mode the language is more strict about automatic

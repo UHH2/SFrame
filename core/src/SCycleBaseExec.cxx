@@ -116,7 +116,7 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
    m_firstInit = kTRUE;
 
    // Print what just happened:
-   m_logger << INFO << "Initialised InputData \"" << m_inputData->GetType()
+   m_logger << ::INFO << "Initialised InputData \"" << m_inputData->GetType()
             << "\" (Version:" << m_inputData->GetVersion()
             << ") on worker node" << SLogger::endmsg;
 
@@ -195,7 +195,7 @@ Bool_t SCycleBaseExec::Notify() {
    // doesn't try to use a cache in this case.
    if( GetConfig().GetUseTreeCache() &&
        ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ) ) {
-      m_logger << WARNING << "Can't use a TTreeCache in LOCAL mode, sorry..."
+      m_logger << ::WARNING << "Can't use a TTreeCache in LOCAL mode, sorry..."
                << SLogger::endmsg;
    }
 #endif // ROOT_VERSION...
@@ -252,7 +252,7 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
             throw SError( "TTree write error occured",
                           SError::StopExecution );
          } else if( nbytes == 0 ) {
-            m_logger << WARNING << "No data written to tree \""
+            m_logger << ::WARNING << "No data written to tree \""
                      << ( *tree_itr )->GetName() << "\"" << SLogger::endmsg;
          }
       }
@@ -264,8 +264,8 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
    if( ! ( m_nProcessedEvents % 1000 ) ) {
       // Only print these messages in local mode in INFO level. In PROOF mode
       // they're only needed for debugging.
-      m_logger << ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ? INFO :
-                    DEBUG )
+      m_logger << ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ? ::INFO :
+                    ::DEBUG )
                << "Processing entry: " << entry << " ("
                << ( m_nProcessedEvents - 1 ) << " / "
                << ( m_inputData->GetNEventsMax() < 0 ?
@@ -318,7 +318,7 @@ void SCycleBaseExec::SlaveTerminate() {
    // Reset the ntuple handling component:
    this->ClearCachedTrees();
 
-   m_logger << INFO << "Terminated InputData \"" << m_inputData->GetType()
+   m_logger << ::INFO << "Terminated InputData \"" << m_inputData->GetType()
             << "\" (Version:" << m_inputData->GetVersion()
             << ") on worker node" << SLogger::endmsg;
 

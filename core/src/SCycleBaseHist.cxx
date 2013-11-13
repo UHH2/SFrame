@@ -193,9 +193,9 @@ void SCycleBaseHist::WriteHistObjects() {
 
       // Print a WARNING message, as this is probably not what the user
       // wanted:
-      m_logger << WARNING << "Objects designated to be merged in-file will be"
+      m_logger << ::WARNING << "Objects designated to be merged in-file will be"
                << SLogger::endmsg;
-      m_logger << WARNING << "merged in-memory instead!" << SLogger::endmsg;
+      m_logger << ::WARNING << "merged in-memory instead!" << SLogger::endmsg;
 
       // Add each object to the PROOF output list instead:
       for( Int_t i = 0; i < m_fileOutput.GetSize(); ++i ) {

@@ -16,8 +16,6 @@
 
 // System include(s):
 #include <string.h>
-#include <cxxabi.h>
-#include <cstdlib>
 
 // STL include(s):
 #include <sstream>
@@ -163,7 +161,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName,
    tree->AddBranchToCache( br, kTRUE );
 #endif // ROOT_VERSION...
    this->RegisterInputBranch( br );
-   m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
+   m_logger << ::DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
 
    return true;
@@ -232,7 +230,7 @@ ConnectVariable( const char* treeName, const char* branchName,
    tree->AddBranchToCache( br, kTRUE );
 #endif // ROOT_VERSION...
    this->RegisterInputBranch( br );
-   m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
+   m_logger << ::DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
 
    return true;
@@ -313,7 +311,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName,
    tree->AddBranchToCache( br, kTRUE );
 #endif // ROOT_VERSION...
    this->RegisterInputBranch( br );
-   m_logger << DEBUG << "Connected branch \"" << branchName << "\" in tree \""
+   m_logger << ::DEBUG << "Connected branch \"" << branchName << "\" in tree \""
             << treeName << "\"" << SLogger::endmsg;
 
    return true;
@@ -411,7 +409,7 @@ DeclareVariable( T& obj, const char* name,
       //
       // This branch doesn't exist yet. We have to (try to) create it.
       //
-      m_logger << DEBUG << "Creating new output branch with name: " << name
+      m_logger << ::DEBUG << "Creating new output branch with name: " << name
                << SLogger::endmsg;
 
       // First of all, lets figure out what kind of object we're dealing with
@@ -435,17 +433,6 @@ DeclareVariable( T& obj, const char* name,
          //
          REPORT_VERBOSE( "The supplied variable is an object" );
 
-         int status;
-         char* real_type_name = abi::__cxa_demangle( type_name, 0, 0, &status );
-         if( status ) {
-            SError error( SError::StopExecution );
-            error << "Couldn't demangle type name: " << type_name;
-            throw error;
-         }
-
-         REPORT_VERBOSE( "Mangled name of object: " << type_name );
-         REPORT_VERBOSE( "De-mangled name of object: " << real_type_name );
-
          //
          // Then try to add the object to the TTree. We have to do it in such a
          // weird way, since the "pointer" variable is going to disappear at the
@@ -455,12 +442,9 @@ DeclareVariable( T& obj, const char* name,
          // lists don't move their elements around. (vectors are allowed to do
          // that. This one I've just read... :-))
          //
-         T* pointer = &obj;
-         m_outputVarPointers.push_back( pointer );
-         branch = tree->Bronch( name, real_type_name,
-                                &m_outputVarPointers.back() );
-
-         free( real_type_name );
+         m_outputVarPointers.push_back( &obj );
+         T** pointer = reinterpret_cast< T** >( &m_outputVarPointers.back() );
+         branch = tree->Branch( name, pointer );
       }
 
       if( ! branch ) {
@@ -472,9 +456,10 @@ DeclareVariable( T& obj, const char* name,
       REPORT_VERBOSE( "Successfully added branch" );
 
    } else {
-      m_logger << WARNING << "A branch with the name \"" << name
+      m_logger << ::WARNING << "A branch with the name \"" << name
                << "\" already exists" << SLogger::endmsg;
-      m_logger << WARNING << "New object not added to tree!" << SLogger::endmsg;
+      m_logger << ::WARNING << "New object not added to tree!"
+               << SLogger::endmsg;
    }
 
    return branch;

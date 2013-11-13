@@ -126,7 +126,7 @@ void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
          else if( curAttr->GetValue() == TString( "PROOF" ) )
             mode = SCycleConfig::PROOF;
          else {
-            m_logger << WARNING << "Running mode (\"" << curAttr->GetValue()
+            m_logger << ::WARNING << "Running mode (\"" << curAttr->GetValue()
                      << "\") not recognised. Running locally!"
                      << SLogger::endmsg;
          }
@@ -453,7 +453,7 @@ SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
       }
    }
 
-   m_logger << INFO << "Reading SInputData: " << inputData.GetType()
+   m_logger << ::INFO << "Reading SInputData: " << inputData.GetType()
             << " - " << inputData.GetVersion() << SLogger::endmsg;
 
    // Access the tree type decoder:
@@ -596,7 +596,7 @@ SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
       } else {
          // Unknown field notification. It's not an ERROR anymore, as this
          // function may actually find XML nodes that it doesn't recognise.
-         m_logger << DEBUG << "Unknown field: " << child->GetNodeName()
+         m_logger << ::DEBUG << "Unknown field: " << child->GetNodeName()
                   << SLogger::endmsg;
       }
       child = child->GetNextNode();
@@ -634,7 +634,7 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
          if( attribute->GetName() == TString( "Value" ) )
             stringValue = DecodeEnvVar( attribute->GetValue() );
       }
-      m_logger << DEBUG << "Found user property with name \"" << name
+      m_logger << ::DEBUG << "Found user property with name \"" << name
                << "\" and value \"" << stringValue << "\"" << SLogger::endmsg;
 
       this->SetProperty( name, stringValue );
@@ -664,9 +664,9 @@ SetProperty( const std::string& name,
    // XML doesn't guarantee in which order the properties are getting
    // read, so print explicitly what's happening.
    if( ! m_configuredPrefs.insert( name ).second ) {
-      m_logger << WARNING << "Property \"" << name
+      m_logger << ::WARNING << "Property \"" << name
                << "\" is getting set multiple times" << SLogger::endmsg;
-      m_logger << WARNING << "Now taking value: " << stringValue
+      m_logger << ::WARNING << "Now taking value: " << stringValue
                << SLogger::endmsg;
    }
 
@@ -731,7 +731,7 @@ SetProperty( const std::string& name,
    // If it hasn't been requested by the analysis cycle, issue a warning.
    // It might mean a typo somewhere...
    else {
-      m_logger << WARNING << "User property not found: " << name << std::endl
+      m_logger << ::WARNING << "User property not found: " << name << std::endl
                << "  Value not set!" << SLogger::endmsg;
    }
 
