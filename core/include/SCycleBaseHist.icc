@@ -17,7 +17,7 @@
 // ROOT include(s):
 #include <TROOT.h>
 #include <TH1.h>
-#include <TList.h>
+#include <TSelectorList.h>
 #include <TDirectory.h>
 #include <TKey.h>
 
@@ -69,7 +69,15 @@ T* SCycleBaseHist::Book( const T& histo,
    // If not, add it now:
    if( ! out ) {
       out = new SCycleOutput( histo.Clone(), path, directory );
+#if ROOT_VERSION_CODE < ROOT_VERSION( 5, 34, 12 )
       output->TList::AddLast( out );
+#else
+      if( inFile ) {
+         m_fileOutput.AddLast( out );
+      } else {
+         m_proofOutput->THashList::AddLast( out );
+      }
+#endif // ROOT_VERSION
       REPORT_VERBOSE( "Added new object with name \"" << histo.GetName()
                       << "\" in directory \"" << ( directory ? directory : "" )
                       << "\"" );

@@ -26,6 +26,7 @@
 // Forward declaration(s):
 class TTree;
 class TList;
+class TSelectorList;
 class TDirectory;
 class SInputData;
 
@@ -48,9 +49,9 @@ public:
    virtual ~ISCycleBaseNTuple() {}
 
    /// Set the PROOF output list
-   virtual void SetNTupleOutput( TList* output ) = 0;
+   virtual void SetNTupleOutput( TSelectorList* output ) = 0;
    /// Get the PROOF output list
-   virtual TList* GetNTupleOutput() const = 0;
+   virtual TSelectorList* GetNTupleOutput() const = 0;
    /// Set the object list used for NTuple input
    virtual void SetNTupleInput( TList* input ) = 0;
    /// Get the object list used for NTuple input

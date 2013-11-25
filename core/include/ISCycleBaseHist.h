@@ -15,7 +15,7 @@
 #define SFRAME_CORE_ISCycleBaseHist_H
 
 // Forward declaration(s):
-class TList;
+class TSelectorList;
 class TDirectory;
 
 /**
@@ -36,9 +36,9 @@ public:
    virtual ~ISCycleBaseHist() {}
 
    /// Set the PROOF output list
-   virtual void SetHistOutput( TList* output ) = 0;
+   virtual void SetHistOutput( TSelectorList* output ) = 0;
    /// Get the PROOF output list
-   virtual TList* GetHistOutput() const = 0;
+   virtual TSelectorList* GetHistOutput() const = 0;
 
 protected:
    /// Set the current input file

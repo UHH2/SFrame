@@ -14,6 +14,7 @@
 #include <TDirectory.h>
 #include <TH1.h>
 #include <TList.h>
+#include <TSelectorList.h>
 
 // Local inlcude(s):
 #include "../include/SCycleBaseHist.h"
@@ -33,14 +34,14 @@ SCycleBaseHist::SCycleBaseHist()
    REPORT_VERBOSE( "SCycleBaseHist constructed" );
 }
 
-void SCycleBaseHist::SetHistOutput( TList* output ) {
+void SCycleBaseHist::SetHistOutput( TSelectorList* output ) {
 
    m_proofOutput = output;
    m_histoMap.clear();
    return;
 }
 
-TList* SCycleBaseHist::GetHistOutput() const {
+TSelectorList* SCycleBaseHist::GetHistOutput() const {
 
    return m_proofOutput;
 }
@@ -85,7 +86,15 @@ void SCycleBaseHist::WriteObj( const TObject& obj,
    // If not, add it now:
    if( ! out ) {
       out = new SCycleOutput( obj.Clone(), path, directory );
+#if ROOT_VERSION_CODE < ROOT_VERSION( 5, 34, 12 )
       output->TList::AddLast( out );
+#else
+      if( inFile ) {
+         m_fileOutput.AddLast( out );
+      } else {
+         m_proofOutput->THashList::AddLast( out );
+      }
+#endif // ROOT_VERSION
    }
 
    gROOT->cd(); // So that the temporary objects would be created

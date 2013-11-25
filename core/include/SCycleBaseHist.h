@@ -21,6 +21,7 @@
 // ROOT include(s):
 #include <TObject.h>
 #include <TString.h>
+#include <TList.h>
 
 // Local include(s):
 #include "ISCycleBaseHist.h"
@@ -31,7 +32,7 @@
 // Forward declaration(s):
 class TDirectory;
 class TH1;
-class TList;
+class TSelectorList;
 
 /**
  *   @short Histogramming part of SCycleBase
@@ -54,9 +55,9 @@ public:
    SCycleBaseHist();
 
    /// Set which list should be used for the histogramming output
-   virtual void SetHistOutput( TList* output );
+   virtual void SetHistOutput( TSelectorList* output );
    /// Check which list should be used for the histogramming output
-   virtual TList* GetHistOutput() const;
+   virtual TSelectorList* GetHistOutput() const;
 
    /// Function placing a ROOT object in the output file
    template< class T > T* Book( const T& histo,
@@ -98,7 +99,7 @@ private:
    TList m_fileOutput;
 #endif // __MAKECINT__
 
-   TList* m_proofOutput; ///< PROOF output list
+   TSelectorList* m_proofOutput; ///< PROOF output list
    TDirectory* m_inputFile; ///< Currently open input file
 
 #ifndef DOXYGEN_IGNORE

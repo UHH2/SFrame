@@ -24,6 +24,7 @@
 #include <TBranch.h>
 #include <TROOT.h>
 #include <TList.h>
+#include <TSelectorList.h>
 #include <TFriendElement.h>
 #include <TVirtualIndex.h>
 #include <TTreeFormula.h>
@@ -65,13 +66,13 @@ SCycleBaseNTuple::~SCycleBaseNTuple() {
    REPORT_VERBOSE( "SCycleBaseNTuple destructed" );
 }
 
-void SCycleBaseNTuple::SetNTupleOutput( TList* output ) {
+void SCycleBaseNTuple::SetNTupleOutput( TSelectorList* output ) {
 
    m_output = output;
    return;
 }
 
-TList* SCycleBaseNTuple::GetNTupleOutput() const {
+TSelectorList* SCycleBaseNTuple::GetNTupleOutput() const {
 
    return m_output;
 }

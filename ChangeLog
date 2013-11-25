@@ -1,3 +1,14 @@
+2013.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* In ROOT v5-34-12 TSelectorList now inherits from THashList, and
+	  not TList.
+	* For this reason the SCycleBaseHist::Book(...) and
+	  SCycleBaseHist::WriteObj(...) functions have been updated to take this
+	  into account.
+	* At the same time, changed the type of the output list from TList to
+	  TSelectorList in SCycleBaseNTuple and SCycleBaseHist. This should make
+	  it easier to react to such changes in the future.
+	* Tagging as SFrame-03-06-25
+
 2013.11.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * DeclareVariable<...>(...) no longer uses cxxabi.h to declare branches
      to ROOT. The type names reported by clang 5.0 on MacOS X Mavericks are

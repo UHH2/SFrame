@@ -55,9 +55,9 @@ public:
    virtual ~SCycleBaseNTuple();
 
    /// Set the object list used for NTuple output
-   virtual void SetNTupleOutput( TList* output );
+   virtual void SetNTupleOutput( TSelectorList* output );
    /// Get the object list used for NTuple output
-   virtual TList* GetNTupleOutput() const;
+   virtual TSelectorList* GetNTupleOutput() const;
    /// Set the object list used for NTuple input
    virtual void SetNTupleInput( TList* input );
    /// Get the object list used for NTuple input
@@ -164,7 +164,7 @@ private:
    std::list< void* > m_outputVarPointers;
 
    TList* m_input; ///< Pointer to the input object list
-   TList* m_output; ///< Pointer to the output object list
+   TSelectorList* m_output; ///< Pointer to the output object list
 
 #ifndef DOXYGEN_IGNORE
    ClassDef( SCycleBaseNTuple, 0 )
