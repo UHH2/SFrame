@@ -23,7 +23,7 @@
 
 // ROOT include(s):
 #include <TCollection.h>
-#include <TList.h>
+#include <TSelectorList.h>
 
 // SFrame include(s):
 #include "core/include/ISCycleBaseHist.h"

@@ -1,3 +1,7 @@
+2013.11.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixing SSummedVar after the changes made in ISCycleBaseHist.
+	* Tagging as SFrame-03-06-26
+
 2013.11.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* In ROOT v5-34-12 TSelectorList now inherits from THashList, and
 	  not TList.

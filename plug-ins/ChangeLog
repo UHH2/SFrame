@@ -1,3 +1,6 @@
+2013.11.26 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Fixing SSummedVar after the changes made in ISCycleBaseHist.
+
 2012.12.13 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Updated the documentation of practically all the files.
    * Modified the source text formatting a bit for it to fit into 80 column
