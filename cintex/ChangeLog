@@ -1,3 +1,8 @@
+2013.12.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Making the PROOF files aware of the ROOTPROOFLIBDIR environment variable,
+     which can be used to specify a common library directory that should be
+     searched for libraries on a PROOF cluster with a shared filesystem.
+
 2012.12.03 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Enabled keyword expansion for the Cintex source files. Should've been done
      ages ago...

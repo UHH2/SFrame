@@ -25,4 +25,9 @@ if [ "x$ROOTPROOFLITE" != "x" ]; then
     exit 0
 fi
 
+if [ "x$ROOTPROOFLIBDIR" != "x" ]; then
+    echo "Running on PROOF with central library directory; skipping build"
+    exit 0
+fi
+
 make default

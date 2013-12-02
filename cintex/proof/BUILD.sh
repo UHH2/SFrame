@@ -6,7 +6,7 @@
 #* @author Stefan Ask       <Stefan.Ask@cern.ch>           - Manchester
 #* @author David Berge      <David.Berge@cern.ch>          - CERN
 #* @author Johannes Haller  <Johannes.Haller@cern.ch>      - Hamburg
-#* @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - NYU/Debrecen
+#* @author A. Krasznahorkay <Attila.Krasznahorkay@cern.ch> - CERN/Debrecen
 #*
 #***************************************************************************
 
@@ -22,6 +22,11 @@ fi
 
 if [ "x$ROOTPROOFLITE" != "x" ]; then
     echo "Running on PROOF-Lite, skipping build"
+    exit 0
+fi
+
+if [ "x$ROOTPROOFLIBDIR" != "x" ]; then
+    echo "Running on PROOF with central library directory; skipping build"
     exit 0
 fi
 
