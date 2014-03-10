@@ -1,3 +1,10 @@
+2014.03.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+   * Trying to fix yet another issue with missing input files. This time the
+     issue was reported by Christoph Wasicki.
+   * SInputData::ValidateInputFiles() now tries to keep the iterators and the
+     summed luminosity correct when non-existent input files are removed.
+   * Tagging as SFrame-03-06-28
+
 2013.12.02 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Making the PROOF files aware of the ROOTPROOFLIBDIR environment variable,
      which can be used to specify a common library directory that should be

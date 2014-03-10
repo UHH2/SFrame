@@ -695,6 +695,8 @@ void SInputData::ValidateInputFiles() throw( SError ) {
                   << SLogger::endmsg;
          // Erasing the file from the file list is a bit tricky actually:
          sf_itr = m_sfileIn.erase( sf_itr );
+         sf_end = m_sfileIn.end();
+         m_totalLumiSum -= sf_itr->lumi;
          // Exit at this point if there are no more files in the dataset:
          if( ! m_sfileIn.size() ) break;
          --sf_itr;
@@ -807,6 +809,7 @@ void SInputData::ValidateInputFiles() throw( SError ) {
       } catch( const SError& ) {
          m_totalLumiSum -= sf_itr->lumi;
          sf_itr = m_sfileIn.erase( sf_itr );
+         sf_end = m_sfileIn.end();
          // Exit at this point if there are no more files in the dataset:
          if( ! m_sfileIn.size() ) break;
          --sf_itr;
