@@ -81,6 +81,7 @@ SKIPCPPLIST = $(DICTFILE)
 SKIPHLIST   = $(DICTHEAD) $(DICTLDEF)
 LIBFILE   = $(SFRAME_LIB_PATH)/lib$(LIBRARY).a
 SHLIBFILE = $(SFRAME_LIB_PATH)/lib$(LIBRARY).$(DllSuf)
+PCMFILE   = $(SFRAME_LIB_PATH)/$(LIBRARY)_Dict_rdict.pcm
 UNAME = $(shell uname)
 
 # Set up the default targets
@@ -110,6 +111,16 @@ $(DICTOBJ): $(DICTFILE)
 	@echo "Compiling $<"
 	@mkdir -p $(OBJDIR)
 	@$(CXX) $(CXXFLAGS) -c $(INCLUDES) -o $@ $<
+
+# Rule to install the PCM file when using ROOT 6:
+$(PCMFILE): $(DICTFILE)
+ifneq ($(ROOTCLING),rootcling)
+	@echo "Creating dummy $@"
+	@touch $@
+else
+	@echo "Installing $@"
+	@cp $(SRCDIR)/$(LIBRARY)_Dict_rdict.pcm $@
+endif
 
 # Rule that creates various symbolic links
 setlinks: $(SHLIBFILE)
@@ -147,7 +158,7 @@ $(DEPDIR)/%.d: %.$(SrcSuf)
 	fi
 
 # Rule to combine objects into a unix shared library
-$(SHLIBFILE): $(OLIST) $(DICTOBJ)
+$(SHLIBFILE): $(OLIST) $(DICTOBJ) $(PCMFILE)
 	@echo "Making shared library: $(SHLIBFILE)"
 	@rm -f $(SHLIBFILE)
 ifneq (,$(findstring macosx,$(ARCH)))
@@ -166,14 +177,11 @@ clean:
 	@rm -f $(DICTFILE) $(DICTHEAD)
 	@rm -f $(OBJDIR)/*.o
 	@rm -f $(SHLIBFILE)
-	@rm -f $(SFRAME_LIB_PATH)/lib$(LIBRARY).so
+	@rm -f $(PCMFILE)
 
-distclean:
+distclean: clean
 	@rm -rf $(OBJDIR)
 	@rm -rf $(DEPDIR)
-	@rm -f $(DICTFILE) $(DICTHEAD)
-	@rm -f $(SHLIBFILE)
-	@rm -f $(SFRAME_LIB_PATH)/lib$(LIBRARY).so
 	@rm -f $(SFRAME_LIB_PATH)/$(LIBRARY).par
 
 .PHONY : shlib default clean

@@ -12,6 +12,13 @@
 
 // ROOT include(s):
 #include <Rtypes.h>
+
+//
+// All of this code is only meant for ROOT 5, it's not applicable for ROOT 6.
+//
+#if ROOT_VERSION_CODE < ROOT_VERSION( 5, 99, 0 )
+
+// ROOT include(s):
 #include <Cintex/Cintex.h>
 
 // SFrame include(s):
@@ -40,3 +47,5 @@ Int_t EnableCintex() {
 
 /// The usual trick for executing some code when the library is loaded
 static Int_t dummy = EnableCintex();
+
+#endif // ROOT_VERSION_CODE < ROOT_VERSION( 5, 99, 0 )

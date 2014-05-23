@@ -1,3 +1,6 @@
+2014.05.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Hiding the auto-generated .pcm file from SVN.
+
 2014.03.10 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    * Trying to fix yet another issue with missing input files. This time the
      issue was reported by Christoph Wasicki.

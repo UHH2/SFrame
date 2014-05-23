@@ -37,9 +37,11 @@
   <!-- Enable the following lines if you have to use the ATLAS offline software -->
   <!-- environment with SFrame. The SFrameCintex library makes sure that the    -->
   <!-- code can use the offline Reflex dictionaries when reading the ntuples.   -->
+  <!--
   <Library Name="libCintex" />
   <Library Name="libSFrameCintex" />
   <Package Name="SFrameCintex.par" />
+  -->
 
   <!-- List of cycles to be executed.                                       -->
   <!-- Name: specifies the class name to be executed in this cycle          -->
