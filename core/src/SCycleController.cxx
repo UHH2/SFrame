@@ -36,6 +36,7 @@
 #include <THashList.h>
 #include <TFileInfo.h>
 #include <TObjString.h>
+#include <TInterpreter.h>
 
 // Local include(s):
 #include "../include/SCycleController.h"
@@ -260,6 +261,26 @@ void SCycleController::Initialize() throw( SError ) {
 
                m_parPackages.push_back( packageName );
 
+            } else if( nodes->GetNodeName() == TString( "Macro" ) ) {
+
+               TString macroName;
+               attribIt = nodes->GetAttributes();
+               curAttr = 0;
+               while ( ( curAttr = dynamic_cast< TXMLAttr* >( attribIt() ) ) !=
+                       0 ) {
+                  if( curAttr->GetName() == TString( "Name" ) )
+                     macroName = curAttr->GetValue();
+               }
+               m_logger << DEBUG << "Executing macro: " << macroName
+                        << SLogger::endmsg;
+
+               // Execute the macro:
+               Int_t errorCode = 0;
+               gROOT->Macro( macroName, &errorCode );
+               if( errorCode != TInterpreter::kNoError ) {
+                  REPORT_ERROR( "There was a problem executing macro: "
+                                << macroName );
+               }
             }
 
          } catch( const SError& error ) {

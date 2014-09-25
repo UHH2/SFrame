@@ -1,3 +1,7 @@
+2014.09.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* Updated the JobConfig.dtd file to include the description of the
+	  new Macro node.
+
 2014.05.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Hiding the auto-generated .pcm file from SVN.
 	* Commented the Cintex parts of the example configuration,

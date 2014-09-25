@@ -1,3 +1,11 @@
+2014.09.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* sframe_main.cxx now instantiates a TApplication object to make
+	  it possible to nicely (auto-)load libraries at runtime. The
+	  system should be much more flexible in this respect now.
+	* Added a new configuration option for the XML files: Macro.
+	  It can be used to execute a ROOT macro at initialisation time.
+	  (Which can potentially load libraries.)
+
 2014.05.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Hiding the auto-generated .pcm file from SVN.
 

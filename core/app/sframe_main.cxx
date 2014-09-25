@@ -21,6 +21,7 @@
 
 // ROOT include(s):
 #include <TROOT.h>
+#include <TApplication.h>
 
 // SFrame include(s):
 #include "../include/SCycleController.h"
@@ -43,11 +44,16 @@ int main( int argc, char** argv ) {
    }
 
    // A convenience variable:
-   const char* filename = argv[ 1 ];
+   const std::string filename = argv[ 1 ];
 
    // Set ROOT into batch mode. This is how PROOF knows not to create
    // graphical windows showing the progress of the event processing.
    gROOT->SetBatch( kTRUE );
+
+   // Create an application object. Needed to have library loading working
+   // correctly.
+   TApplication app( argv[ 0 ], &argc, argv );
+   app.Argc(); // To avoid unused variable warnings...
 
    try { // This is where I catch anything not handled internally...
 

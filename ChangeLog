@@ -1,3 +1,14 @@
+2014.09.25 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
+	* sframe_main.cxx now instantiates a TApplication object to make
+	  it possible to nicely (auto-)load libraries at runtime. The
+	  system should be much more flexible in this respect now.
+	* Added a new configuration option for the XML files: Macro.
+	  It can be used to execute a ROOT macro at initialisation time.
+	  (Which can potentially load libraries.)
+	* Updated the JobConfig.dtd file to include the description of the
+	  new Macro node.
+	* Tagging as SFrame-04-00-01
+
 2014.05.23 Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 	* Hiding all the auto-generated .pcm file from SVN.
 	* Hiding the Cintex code from the compiler when ROOT 6 (or newer)

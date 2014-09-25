@@ -13,7 +13,7 @@
 <!--                                                                         -->
 <!-- ======================================================================= -->
 
-<!ELEMENT JobConfiguration ((PyLibrary|Library|Package)*,Cycle+) >
+<!ELEMENT JobConfiguration ((PyLibrary|Library|Package|Macro)*,Cycle+) >
 <!ATTLIST JobConfiguration
         JobName              CDATA            #REQUIRED
         OutputLevel          CDATA            "INFO"
@@ -31,6 +31,11 @@
 
 <!ELEMENT Package EMPTY>
 <!ATTLIST Package
+        Name                 CDATA            #REQUIRED
+>
+
+<!ELEMENT Macro EMPTY>
+<!ATTLIST Macro
         Name                 CDATA            #REQUIRED
 >
 
