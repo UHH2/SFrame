@@ -20,8 +20,9 @@ if [ $SFRAME_DIR ]; then
     return 1
 fi
 
-# speficy the SFRAME base directory, i.e. the directory in which this file lives
-export SFRAME_DIR=${PWD}
+# specify the SFRAME base directory, i.e. the directory in which this file lives
+# do it this way so it can be sourced from anywhere
+export SFRAME_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Modify to describe your directory structure. Default is to use the a structure where
 # all directories are below the SFrame base directory specified above
@@ -63,4 +64,4 @@ fi
 export PATH=${SFRAME_BIN_PATH}:${PATH}
 export PYTHONPATH=${SFRAME_DIR}/python:${PYTHONPATH}
 
-export PAR_PATH=./:${SFRAME_LIB_PATH}
+export PAR_PATH=${SFRAME_DIR}/:${SFRAME_LIB_PATH}

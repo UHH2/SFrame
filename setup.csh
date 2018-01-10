@@ -15,8 +15,10 @@
 # Greet the user
 echo "Setting up environment for compiling/running SFrame"
 
-# speficy the SFRAME base directory, i.e. the directory in which this file lives
-setenv SFRAME_DIR ${PWD}
+# specify the SFRAME base directory, i.e. the directory in which this file lives
+# do it this way so it can be sourced from anywhere
+set rootdir = `dirname $0`       # may be relative path
+setenv SFRAME_DIR `cd $rootdir && pwd`    # ensure absolute path
 
 # Modify to describe your directory structure. Default is to use the a structure
 # where all directories are below the SFrame base directory specified above
@@ -58,4 +60,4 @@ endif
 setenv PATH ${SFRAME_BIN_PATH}:${PATH}
 setenv PYTHONPATH ${SFRAME_DIR}/python:${PYTHONPATH}
 
-setenv PAR_PATH ./:${SFRAME_LIB_PATH}
+setenv PAR_PATH ${SFRAME_DIR}/:${SFRAME_LIB_PATH}
