@@ -50,7 +50,7 @@
 template< class T >
 T* SCycleBaseHist::Book( const T& histo,
                          const char* directory,
-                         Bool_t inFile ) throw( SError ) {
+                         Bool_t inFile ) {
 
    // Put the object into our temporary directory in memory:
    GetTempDir()->cd();
@@ -128,7 +128,7 @@ T* SCycleBaseHist::Book( const T& histo,
 template< class T >
 T* SCycleBaseHist::Retrieve( const char* name,
                              const char* directory,
-                             Bool_t outputOnly ) throw( SError ) {
+                             Bool_t outputOnly ) {
 
    // Just to make sure that we're in the default directory in
    // memory:
@@ -229,7 +229,7 @@ T* SCycleBaseHist::Retrieve( const char* name,
 template< class T >
 std::vector< T* >
 SCycleBaseHist::RetrieveAll( const char* name,
-                             const char* directory ) throw( SError ) {
+                             const char* directory ) {
 
    // The result object:
    std::vector< T* > result;

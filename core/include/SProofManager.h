@@ -58,12 +58,12 @@ public:
 
    /// Function to open/access a PROOF connection
    TProof* Open( const TString& url,
-                 const TString& param = "" ) throw( SError );
+                 const TString& param = "" );
    /// Function to check if a PROOF server connection is configured already
    Bool_t IsConfigured( const TString& url, const TString& param = "" ) const;
    /// Set a given PROOF server to "configured" state
    void SetConfigured( const TString& url, const TString& param = "",
-                       Bool_t state = kTRUE ) throw( SError );
+                       Bool_t state = kTRUE );
    /// Function deleting all the open PROOF connections
    void Cleanup();
 

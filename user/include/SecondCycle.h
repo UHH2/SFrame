@@ -31,15 +31,15 @@ class SecondCycle : public SCycleBase {
 public:
    SecondCycle();
 
-   virtual void BeginCycle() throw( SError );
-   virtual void EndCycle() throw( SError );
+   virtual void BeginCycle();
+   virtual void EndCycle();
 
-   virtual void BeginInputFile( const SInputData& ) throw( SError );
+   virtual void BeginInputFile( const SInputData& );
 
-   virtual void BeginInputData( const SInputData& ) throw( SError );
-   virtual void EndInputData  ( const SInputData& ) throw( SError );
+   virtual void BeginInputData( const SInputData& );
+   virtual void EndInputData  ( const SInputData& );
 
-   virtual void ExecuteEvent( const SInputData&, Double_t weight ) throw( SError );
+   virtual void ExecuteEvent( const SInputData&, Double_t weight );
 
 private:
    std::string m_FirstCycleTreeName;

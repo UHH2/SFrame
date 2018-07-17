@@ -351,7 +351,7 @@ void SCycleBaseExec::Terminate() {
  * This function takes care of accessing the cycle configuration objects on the
  * master and worker nodes.
  */
-void SCycleBaseExec::ReadConfig() throw( SError ) {
+void SCycleBaseExec::ReadConfig() {
 
    //
    // Read the overall cycle configuration:

@@ -62,18 +62,18 @@ protected:
    /// Function placing a ROOT object in the output file
    template< class T > T* Book( const T& histo,
                                 const char* directory = 0,
-                                Bool_t inFile = kFALSE ) throw( SError );
+                                Bool_t inFile = kFALSE );
    /// Function searching for a ROOT object in the output file
    template< class T > T*
    Retrieve( const char* name, const char* directory = 0,
-             Bool_t outputOnly = kFALSE ) throw( SError );
+             Bool_t outputOnly = kFALSE );
    /// Function retrieving all ROOT objects of this name from the input file
    template< class T >
    std::vector< T* > RetrieveAll( const char* name,
-                                  const char* directory = 0 ) throw( SError );
+                                  const char* directory = 0 );
    /// Function for persistifying a ROOT object to the output
    void WriteObj( const TObject& obj,
-                  const char* directory = 0 ) throw( SError );
+                  const char* directory = 0 );
    /// Function searching for 1-dimensional histograms in the output file
    TH1* Hist( const char* name, const char* dir = 0 );
    //@}
@@ -84,23 +84,23 @@ public:
    /// Connect an input variable
    template< typename T >
    bool ConnectVariable( const char* treeName, const char* branchName,
-                         T& variable ) throw ( SError );
+                         T& variable );
    /// Declare an output variable
    template< typename T >
    TBranch* DeclareVariable( T& obj, const char* name,
-                             const char* treeName = 0 ) throw( SError );
+                             const char* treeName = 0 );
    /// Access one of the metadata trees
-   virtual TTree* GetMetadataTree( const char* name ) const throw( SError );
+   virtual TTree* GetMetadataTree( const char* name ) const;
    /// Access one of the input metadata trees
    virtual TTree*
-   GetInputMetadataTree( const char* name ) const throw( SError );
+   GetInputMetadataTree( const char* name ) const;
    /// Access one of the output metadata trees
    virtual TTree*
-   GetOutputMetadataTree( const char* name ) const throw( SError );
+   GetOutputMetadataTree( const char* name ) const;
    /// Access one of the input trees
-   virtual TTree* GetInputTree( const char* treeName ) const throw( SError );
+   virtual TTree* GetInputTree( const char* treeName ) const;
    /// Access one of the output trees
-   virtual TTree* GetOutputTree( const char* treeName ) const throw( SError );
+   virtual TTree* GetOutputTree( const char* treeName ) const;
    //@}
 
 protected:

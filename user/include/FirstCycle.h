@@ -32,18 +32,18 @@ class FirstCycle : public SCycleBase {
 public:
    FirstCycle();
 
-   virtual void BeginCycle() throw( SError );
-   virtual void EndCycle() throw( SError );
+   virtual void BeginCycle();
+   virtual void EndCycle();
 
-   virtual void BeginInputData( const SInputData& ) throw( SError );
-   virtual void EndInputData  ( const SInputData& ) throw( SError );
+   virtual void BeginInputData( const SInputData& );
+   virtual void EndInputData  ( const SInputData& );
 
-   virtual void BeginMasterInputData( const SInputData& ) throw( SError );
-   virtual void EndMasterInputData  ( const SInputData& ) throw( SError );
+   virtual void BeginMasterInputData( const SInputData& );
+   virtual void EndMasterInputData  ( const SInputData& );
 
-   virtual void BeginInputFile( const SInputData& ) throw( SError );
+   virtual void BeginInputFile( const SInputData& );
 
-   virtual void ExecuteEvent( const SInputData&, Double_t weight ) throw( SError );
+   virtual void ExecuteEvent( const SInputData&, Double_t weight );
 
 private:
    //

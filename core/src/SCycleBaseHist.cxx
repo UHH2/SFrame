@@ -67,7 +67,7 @@ TSelectorList* SCycleBaseHist::GetHistOutput() const {
  */
 void SCycleBaseHist::WriteObj( const TObject& obj,
                                const char* directory,
-                               Bool_t inFile ) throw( SError ) {
+                               Bool_t inFile ) {
 
    // Put the object into our temporary directory in memory:
    GetTempDir()->cd();
@@ -131,7 +131,7 @@ void SCycleBaseHist::WriteObj( const TObject& obj,
  * @param name The name of the histogram
  * @param dir  The name of the directory the histogram is in
  */
-TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) throw( SError ) {
+TH1* SCycleBaseHist::Hist( const char* name, const char* dir ) {
 
    TH1* result;
 

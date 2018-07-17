@@ -315,7 +315,7 @@ const Type* SSummedVar< Type >::GetPointer() const {
  * @returns The helper object that should be used by the object currently
  */
 template< class Type >
-ProofSummedVar< Type >* SSummedVar< Type >::GetObject() const throw( SError ) {
+ProofSummedVar< Type >* SSummedVar< Type >::GetObject() const {
 
    //
    // Try to get an already existing object from the output list:

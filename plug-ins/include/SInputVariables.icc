@@ -43,7 +43,7 @@ template< typename T >
 bool SInputVariables< ParentType >::
 ConnectVariable( const char* treeName,
                  const char* branchName,
-                 T& variable ) throw ( SError ) {
+                 T& variable ) {
 
    return m_parent->template ConnectVariable( treeName, branchName, variable );
 }

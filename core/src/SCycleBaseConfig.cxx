@@ -100,7 +100,7 @@ SCycleBaseConfig::SCycleBaseConfig()
  *
  * @param node The top XML node describing the cycle
  */
-void SCycleBaseConfig::Initialize( TXMLNode* node ) throw( SError ) {
+void SCycleBaseConfig::Initialize( TXMLNode* node ) {
 
    m_logger << INFO << "Initializing from configuration" << SLogger::endmsg;
 
@@ -423,7 +423,7 @@ TObject* SCycleBaseConfig::GetConfigObject( const char* name ) const {
 ///////////////////////////////////////////////////////////////////////////
 
 SInputData
-SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
+SCycleBaseConfig::InitializeInputData( TXMLNode* node ) {
 
    // Create the SInputData object
    SInputData inputData;
@@ -605,7 +605,7 @@ SCycleBaseConfig::InitializeInputData( TXMLNode* node ) throw( SError ) {
    return inputData;
 }
 
-void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
+void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) {
 
    REPORT_VERBOSE( "Initializing the user configuration" );
 
@@ -658,7 +658,7 @@ void SCycleBaseConfig::InitializeUserConfig( TXMLNode* node ) throw( SError ) {
 
 void SCycleBaseConfig::
 SetProperty( const std::string& name,
-             const std::string& stringValue ) throw( SError ) {
+             const std::string& stringValue ) {
 
    // Check if the user is specifying the same property multiple times.
    // XML doesn't guarantee in which order the properties are getting
@@ -782,7 +782,7 @@ std::string SCycleBaseConfig::DecodeEnvVar( const std::string& value ) const {
  * @param value The string to be interpreted as a boolean value
  * @returns A boolean value made from the string
  */
-bool SCycleBaseConfig::ToBool( const std::string& value ) throw( SError ) {
+bool SCycleBaseConfig::ToBool( const std::string& value ) {
 
    // The decoding is done using TString:
    TString tvalue( value );

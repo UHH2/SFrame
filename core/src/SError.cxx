@@ -21,7 +21,7 @@
  *
  * @param severity The action request of the exception
  */
-SError::SError( Severity severity ) throw()
+SError::SError( Severity severity )
    : std::exception(), std::ostringstream(), m_severity( severity ) {
 
 }
@@ -38,7 +38,7 @@ SError::SError( Severity severity ) throw()
  * @param description Explanation for the occurance
  * @param severity    The action request of the exception
  */
-SError::SError( const char* description, Severity severity ) throw()
+SError::SError( const char* description, Severity severity )
    : std::exception(), std::ostringstream(), m_severity( severity ) {
 
    this->str( description );
@@ -51,7 +51,7 @@ SError::SError( const char* description, Severity severity ) throw()
  *
  * @param parent The object to clone
  */
-SError::SError( const SError& parent ) throw()
+SError::SError( const SError& parent )
    : std::basic_ios< SError::char_type, SError::traits_type >(),
      std::exception(), std::ostringstream(), m_severity( parent.m_severity ) {
 
@@ -64,7 +64,7 @@ SError::SError( const SError& parent ) throw()
  * doesn't declare that it may throw (an) exception(s), and this is an
  * error on most compilers.
  */
-SError::~SError() throw() {
+SError::~SError() {
 
 }
 
@@ -72,7 +72,7 @@ SError::~SError() throw() {
  * @param description The description that should be associated with this
  *                    exception
  */
-void SError::SetDescription( const char* description ) throw() {
+void SError::SetDescription( const char* description ) {
 
    this->str( description );
    return;
@@ -82,7 +82,7 @@ void SError::SetDescription( const char* description ) throw() {
  * @param severity The action that should be taken as the effect of this
  *                 exception
  */
-void SError::SetSeverity( Severity severity ) throw() {
+void SError::SetSeverity( Severity severity ) {
 
    m_severity = severity;
    return;
@@ -94,7 +94,7 @@ void SError::SetSeverity( Severity severity ) throw() {
  *
  * @returns An explanation about the exception
  */
-const char* SError::what() const throw() {
+const char* SError::what() const noexcept {
 
    return this->str().c_str();
 }
@@ -102,7 +102,7 @@ const char* SError::what() const throw() {
 /**
  * @returns The action that should be taken because of this exception
  */
-SError::Severity SError::request() const throw() {
+SError::Severity SError::request() const {
 
    return m_severity;
 }

@@ -45,7 +45,7 @@ protected:
    /// Declare an output variable
    template< typename T >
    TBranch* DeclareVariable( T& obj, const char* name,
-                             const char* treeName = 0 ) throw( SError );
+                             const char* treeName = 0 );
 
 private:
    ParentType* m_parent; ///< Pointer to the parent cycle

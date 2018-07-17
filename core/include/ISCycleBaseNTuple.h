@@ -59,20 +59,20 @@ public:
 
 protected:
    /// Function creating an output file on demand
-   virtual TDirectory* GetOutputFile() throw( SError ) = 0;
+   virtual TDirectory* GetOutputFile() = 0;
    /// Function closing a potentially open output file
-   virtual void CloseOutputFile() throw( SError ) = 0;
+   virtual void CloseOutputFile() = 0;
    /// Create the output trees
    virtual void
    CreateOutputTrees( const SInputData& id,
-                      std::vector< TTree* >& outTrees ) throw( SError ) = 0;
+                      std::vector< TTree* >& outTrees ) = 0;
    /// Save all the created output trees in the output
-   virtual void SaveOutputTrees() throw( SError ) = 0;
+   virtual void SaveOutputTrees() = 0;
    /// Load the input trees
    virtual void LoadInputTrees( const SInputData& id, TTree* main_tree,
-                                TDirectory*& inputFile ) throw( SError ) = 0;
+                                TDirectory*& inputFile ) = 0;
    /// Read in the event from the "normal" trees
-   virtual void GetEvent( Long64_t entry ) throw( SError ) = 0;
+   virtual void GetEvent( Long64_t entry ) = 0;
    /// Calculate the weight of the current event
    virtual Double_t CalculateWeight( const SInputData& inputData,
                                      Long64_t entry ) const = 0;

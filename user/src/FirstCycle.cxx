@@ -43,7 +43,7 @@ FirstCycle::FirstCycle()
    DeclareProperty( "MetaTreeName", m_metaTreeName );
 }
 
-void FirstCycle::BeginCycle() throw( SError ) {
+void FirstCycle::BeginCycle() {
 
    //
    // Print the properties specified in the XML configuration:
@@ -95,12 +95,12 @@ void FirstCycle::BeginCycle() throw( SError ) {
    return;
 }
 
-void FirstCycle::EndCycle() throw( SError ) {
+void FirstCycle::EndCycle() {
 
    return;
 }
 
-void FirstCycle::BeginInputFile( const SInputData& )  throw( SError ) {
+void FirstCycle::BeginInputFile( const SInputData& )  {
 
    //
    // Connect the input variables:
@@ -114,7 +114,7 @@ void FirstCycle::BeginInputFile( const SInputData& )  throw( SError ) {
    return;
 }
 
-void FirstCycle::BeginInputData( const SInputData& ) throw( SError ) {
+void FirstCycle::BeginInputData( const SInputData& ) {
 
    //
    // Declare the output variables:
@@ -149,7 +149,7 @@ void FirstCycle::BeginInputData( const SInputData& ) throw( SError ) {
    return;
 }
 
-void FirstCycle::EndInputData( const SInputData& ) throw( SError ) {
+void FirstCycle::EndInputData( const SInputData& ) {
 
    static const Int_t n = 5;
    Float_t x_array[ n ] = { 0.0, 1.0, 2.0, 3.0, 4.0 };
@@ -161,12 +161,12 @@ void FirstCycle::EndInputData( const SInputData& ) throw( SError ) {
    return;
 }
 
-void FirstCycle::BeginMasterInputData( const SInputData& ) throw( SError ) {
+void FirstCycle::BeginMasterInputData( const SInputData& ) {
 
    return;
 }
 
-void FirstCycle::EndMasterInputData( const SInputData& ) throw( SError ) {
+void FirstCycle::EndMasterInputData( const SInputData& ) {
 
    m_logger << INFO << "Number of all processed events: "
             << *m_allEvents << " " << ( m_test->size() > 0 ? ( *m_test )[ 0 ] : 0 )
@@ -178,7 +178,7 @@ void FirstCycle::EndMasterInputData( const SInputData& ) throw( SError ) {
    return;
 }
 
-void FirstCycle::ExecuteEvent( const SInputData&, Double_t weight ) throw( SError ) {
+void FirstCycle::ExecuteEvent( const SInputData&, Double_t weight ) {
 
    //
    // If you have vectors (or any other type of containers) in the output,

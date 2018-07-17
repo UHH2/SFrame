@@ -150,7 +150,7 @@ public:
    /// Print the configuration to the screen
    void PrintConfig() const;
    /// Re-arrange the input data objects
-   void ArrangeInputData() throw ( SError );
+   void ArrangeInputData();
    /// Fill the input data objects with information from the files
    void ValidateInput();
 
