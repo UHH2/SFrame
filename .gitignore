@@ -1,0 +1,8 @@
+*.pcm
+*.pyc
+*_Dict.cxx
+
+bin
+lib
+obj
+
