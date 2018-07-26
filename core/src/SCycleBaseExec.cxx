@@ -288,7 +288,8 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
                << ( m_nProcessedEvents - 1 ) << " / "
                << total_events
                << " events processed so far, ~ "
-               << TString::Format("%.2g" , time_remaining) << " " << time_unit << " left)"
+               << TString::Format("%.2g" , time_remaining)
+               << " " << time_unit << " left)"
                << SLogger::endmsg;
    }
 
