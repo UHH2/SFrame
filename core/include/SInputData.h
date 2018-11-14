@@ -253,7 +253,7 @@ public:
    void AddEvents( Long64_t events ) { m_eventsTotal += events; }
 
    /// Collect information about the input files (needed before running)
-   void ValidateInput( const char* pserver = 0 ) throw( SError );
+   void ValidateInput( const char* pserver = 0 );
 
    /// Get the name of the input data type
    const TString& GetType() const { return m_type; }
@@ -308,15 +308,15 @@ public:
 
 private:
    /// This function validates the input when files are specified
-   void ValidateInputFiles() throw( SError );
+   void ValidateInputFiles();
    /// This function validates the input when PQ2 datasets are specified
-   void ValidateInputDataSets( const char* pserver ) throw( SError );
+   void ValidateInputDataSets( const char* pserver );
    /// Function loading all information about a given input file
    Bool_t LoadInfoOnFile( SFile* file, TFileCollection* filecoll );
    /// Function accessing the metadata about a given input file
    TFileInfo* AccessFileInfo( SFile* file, TFileCollection* filecoll );
    /// Function creating a new dataset object for this input data object
-   TDSet* MakeDataSet() const throw( SError );
+   TDSet* MakeDataSet() const;
    /// Function trying to access the dataset object in a given directory
    TDSet* AccessDataSet( TDirectory* dir ) const;
 

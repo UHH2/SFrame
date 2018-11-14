@@ -55,7 +55,7 @@
 template< typename T >
 bool SCycleBaseNTuple::ConnectVariable( const char* treeName,
                                         const char* branchName,
-                                        T& variable ) throw ( SError ) {
+                                        T& variable ) {
 
    REPORT_VERBOSE( "Called with treeName = \"" << treeName
                    << "\", branchName = \"" << branchName << "\"" );
@@ -203,7 +203,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName,
 template< typename T, size_t size >
 bool SCycleBaseNTuple::
 ConnectVariable( const char* treeName, const char* branchName,
-                 T ( &variable )[ size ] ) throw( SError ) {
+                 T ( &variable )[ size ] ) {
 
    // Access the TTree. The function will throw an exception if unsuccessful
    TTree* tree = GetInputTree( treeName );
@@ -268,7 +268,7 @@ ConnectVariable( const char* treeName, const char* branchName,
 template< typename T >
 bool SCycleBaseNTuple::ConnectVariable( const char* treeName,
                                         const char* branchName,
-                                        T*& variable ) throw ( SError ) {
+                                        T*& variable ) {
 
    // Access the TTree. The function will throw an exception if unsuccessful
    TTree* tree = GetInputTree( treeName );
@@ -345,7 +345,7 @@ bool SCycleBaseNTuple::ConnectVariable( const char* treeName,
 template < class T >
 TBranch* SCycleBaseNTuple::
 DeclareVariable( T& obj, const char* name,
-                 const char* treeName ) throw( SError ) {
+                 const char* treeName ) {
 
    TTree*   tree = 0;
    TBranch* branch = 0;

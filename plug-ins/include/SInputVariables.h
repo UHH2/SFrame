@@ -38,7 +38,7 @@ protected:
    /// Connect an input variable
    template< typename T >
    bool ConnectVariable( const char* treeName, const char* branchName,
-                         T& variable ) throw ( SError );
+                         T& variable );
 
 private:
    ParentType* m_parent; ///< Pointer to the parent cycle

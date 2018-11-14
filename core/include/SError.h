@@ -45,24 +45,24 @@ public:
    };
 
    /// Constructor specifying only a severity
-   SError( Severity severity = SkipEvent ) throw();
+   SError( Severity severity = SkipEvent );
    /// Constructor with description and severity
-   SError( const char* description, Severity severity = SkipEvent ) throw();
+   SError( const char* description, Severity severity = SkipEvent );
    /// Copy constructor
-   SError( const SError& parent ) throw();
+   SError( const SError& parent );
 
    /// Destructor
-   virtual ~SError() throw();
+   virtual ~SError();
 
    /// Set the description of the exception
-   void SetDescription( const char* description ) throw();
+   void SetDescription( const char* description );
    /// Set the severity of the exception
-   void SetSeverity( Severity severity ) throw();
+   void SetSeverity( Severity severity );
 
    /// Get the description of the exception
-   virtual const char* what()    const throw();
+   virtual const char* what()    const noexcept;
    /// Get the severity of the exception
-   virtual Severity    request() const throw();
+   virtual Severity    request() const;
 
    /// Function to get the std::ostream functionality
    /**

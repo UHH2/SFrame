@@ -63,7 +63,7 @@ public:
    virtual ~SH1();
 
    /// Increase the contents of the bin at a specific position
-   void Fill( Double_t pos, Type weight = 1 ) throw( SError );
+   void Fill( Double_t pos, Type weight = 1 );
 
    /// Get the number of bins
    Int_t GetNBins() const;

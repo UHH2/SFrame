@@ -37,7 +37,7 @@ template< class ParentType >
 template< typename T >
 TBranch* SOutputVariables< ParentType >::
 DeclareVariable( T& obj, const char* name,
-                 const char* treeName ) throw( SError ) {
+                 const char* treeName ) {
 
    return m_parent->template DeclareVariable( obj, name, treeName );
 }

@@ -114,7 +114,7 @@ SH1< Type >::~SH1() {
  * @param weight The amount with which the bin should be filled
  */
 template< typename Type >
-void SH1< Type >::Fill( Double_t pos, Type weight ) throw( SError ) {
+void SH1< Type >::Fill( Double_t pos, Type weight ) {
 
    // Check if the given parameters make sense:
    if( TMath::IsNaN( pos ) || TMath::IsNaN( weight ) ) {

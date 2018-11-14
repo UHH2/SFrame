@@ -294,7 +294,7 @@ Int_t SCycleOutput::Write( const char* name, Int_t option,
  * @returns Pointer to the created directory
  */
 TDirectory*
-SCycleOutput::MakeDirectory( const TString& path ) const throw( SError ) {
+SCycleOutput::MakeDirectory( const TString& path ) const {
 
    if( ! path.Length() ) return gDirectory;
 

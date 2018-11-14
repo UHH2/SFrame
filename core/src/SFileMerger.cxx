@@ -46,7 +46,7 @@ SFileMerger::~SFileMerger() {
  * @returns <code>kTRUE</code> if everything went correctly,
  *          <code>kFALSE</code> otherwise
  */
-Bool_t SFileMerger::AddFile( const TString& fileName ) throw( SError ) {
+Bool_t SFileMerger::AddFile( const TString& fileName ) {
 
    //
    // Copy the file locally. This is important when reading an ntuple file
@@ -92,7 +92,7 @@ Bool_t SFileMerger::AddFile( const TString& fileName ) throw( SError ) {
  *          <code>kFALSE</code> otherwise
  */
 Bool_t SFileMerger::OutputFile( const TString& fileName,
-                                const TString& mode ) throw( SError ) {
+                                const TString& mode ) {
 
    //
    // Try to open the specified output file. Throw an expection in case of
@@ -121,7 +121,7 @@ Bool_t SFileMerger::OutputFile( const TString& fileName,
  * @returns <code>kTRUE</code> if the merge was successful, <code>kFALSE</code>
  *          otherwise
  */
-Bool_t SFileMerger::Merge() throw( SError ) {
+Bool_t SFileMerger::Merge() {
 
    //
    // Check that we have both input(s) and an output:
@@ -192,7 +192,7 @@ void SFileMerger::CloseFiles() {
  * @param output The output directory
  */
 void SFileMerger::MergeDirectory( TDirectory* input,
-                                  TDirectory* output ) throw( SError ) {
+                                  TDirectory* output ) {
 
    // Get a list of all objects in this directory:
    TList* keyList = input->GetListOfKeys();
@@ -364,7 +364,7 @@ void SFileMerger::MergeDirectory( TDirectory* input,
  * @param in The input object
  * @param out The object into which the input object should be merged
  */
-void SFileMerger::MergeObjects( TObject* in, TObject* out ) throw( SError ) {
+void SFileMerger::MergeObjects( TObject* in, TObject* out ) {
 
    // Put the input object into a list:
    TList list;

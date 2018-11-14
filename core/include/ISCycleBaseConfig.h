@@ -40,7 +40,7 @@ public:
    virtual ~ISCycleBaseConfig() {}
 
    /// Function initialising the cycle
-   virtual void Initialize( TXMLNode* ) throw( SError ) = 0;
+   virtual void Initialize( TXMLNode* ) = 0;
 
    /// Get the full configuration of the cycle
    virtual const SCycleConfig& GetConfig() const = 0;

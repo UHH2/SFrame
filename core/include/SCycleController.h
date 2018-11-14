@@ -51,11 +51,11 @@ public:
    virtual ~SCycleController();
 
    /// Initialise the analysis from the configuration file
-   virtual void Initialize() throw( SError );
+   virtual void Initialize();
    /// Execute the analysis loop for all configured cycles
-   virtual void ExecuteAllCycles() throw( SError );
+   virtual void ExecuteAllCycles();
    /// Execute the analysis loop for the cycle next in line
-   virtual void ExecuteNextCycle() throw( SError );
+   virtual void ExecuteNextCycle();
    /// Set the name of the configuration file
    /**
     * All configuration of the analysis is done in a single XML file.

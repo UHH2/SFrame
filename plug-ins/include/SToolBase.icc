@@ -63,7 +63,7 @@ template< class Type >
 template< class T >
 T* SToolBaseT< Type >::Book( const T& histo,
                              const char* directory,
-                             Bool_t inFile ) throw( SError ) {
+                             Bool_t inFile ) {
 
    return GetParent()->template Book( histo, directory, inFile );
 }
@@ -75,7 +75,7 @@ template< class Type >
 template< class T >
 T* SToolBaseT< Type >::Retrieve( const char* name,
                                  const char* directory,
-                                 Bool_t outputOnly ) throw( SError ) {
+                                 Bool_t outputOnly ) {
 
    return GetParent()->template Retrieve< T >( name, directory, outputOnly );
 }
@@ -87,7 +87,7 @@ template< class Type >
 template< class T >
 std::vector< T* >
 SToolBaseT< Type >::RetrieveAll( const char* name,
-                                 const char* directory ) throw( SError ) {
+                                 const char* directory ) {
 
    return GetParent()->template RetrieveAll< T >( name, directory );
 }
@@ -97,7 +97,7 @@ SToolBaseT< Type >::RetrieveAll( const char* name,
  */
 template< class Type >
 void SToolBaseT< Type >::WriteObj( const TObject& obj,
-                                   const char* directory ) throw( SError ) {
+                                   const char* directory ) {
 
    GetParent()->WriteObj( obj, directory );
    return;
@@ -119,7 +119,7 @@ template< class Type >
 template< typename T >
 bool SToolBaseT< Type >::ConnectVariable( const char* treeName,
                                           const char* branchName,
-                                          T& variable ) throw ( SError ) {
+                                          T& variable ) {
 
    return GetParent()->template ConnectVariable( treeName, branchName,
                                                  variable );
@@ -132,7 +132,7 @@ template< class Type >
 template< typename T >
 TBranch*
 SToolBaseT< Type >::DeclareVariable( T& obj, const char* name,
-                                     const char* treeName ) throw( SError ) {
+                                     const char* treeName ) {
 
    return GetParent()->template DeclareVariable( obj, name, treeName );
 }
@@ -142,7 +142,7 @@ SToolBaseT< Type >::DeclareVariable( T& obj, const char* name,
  */
 template< class Type >
 TTree* SToolBaseT< Type >::
-GetMetadataTree( const char* name ) const throw( SError ) {
+GetMetadataTree( const char* name ) const {
 
    return GetParent()->GetMetadataTree( name );
 }
@@ -152,7 +152,7 @@ GetMetadataTree( const char* name ) const throw( SError ) {
  */
 template< class Type >
 TTree* SToolBaseT< Type >::
-GetInputMetadataTree( const char* name ) const throw( SError ) {
+GetInputMetadataTree( const char* name ) const {
 
    return GetParent()->GetInputMetadataTree( name );
 }
@@ -162,7 +162,7 @@ GetInputMetadataTree( const char* name ) const throw( SError ) {
  */
 template< class Type >
 TTree* SToolBaseT< Type >::
-GetOutputMetadataTree( const char* name ) const throw( SError ) {
+GetOutputMetadataTree( const char* name ) const {
 
    return GetParent()->GetOutputMetadataTree( name );
 }
@@ -172,7 +172,7 @@ GetOutputMetadataTree( const char* name ) const throw( SError ) {
  */
 template< class Type >
 TTree* SToolBaseT< Type >::
-GetInputTree( const char* treeName ) const throw( SError ) {
+GetInputTree( const char* treeName ) const {
 
    return GetParent()->GetInputTree( treeName );
 }
@@ -182,7 +182,7 @@ GetInputTree( const char* treeName ) const throw( SError ) {
  */
 template< class Type >
 TTree* SToolBaseT< Type >::
-GetOutputTree( const char* treeName ) const throw( SError ) {
+GetOutputTree( const char* treeName ) const {
 
    return GetParent()->GetOutputTree( treeName );
 }
