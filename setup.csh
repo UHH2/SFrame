@@ -17,7 +17,7 @@ echo "Setting up environment for compiling/running SFrame"
 
 # specify the SFRAME base directory, i.e. the directory in which this file lives
 # do it this way so it can be sourced from anywhere
-set rootdir = `dirname $0`       # may be relative path
+set rootdir = `pwd`       # may be relative path
 setenv SFRAME_DIR `cd $rootdir && pwd`    # ensure absolute path
 
 # Modify to describe your directory structure. Default is to use the a structure
