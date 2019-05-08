@@ -2,7 +2,7 @@
 *.pyc
 *_Dict.cxx
 
-bin
+bin/sframe_main
 lib
 obj
 
