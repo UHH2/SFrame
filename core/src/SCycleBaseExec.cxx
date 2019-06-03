@@ -13,6 +13,7 @@
 // ROOT include(s):
 #include <TTree.h>
 #include <TSystem.h>
+#include <TFile.h>
 
 // Local include(s):
 #include "../include/SCycleBaseExec.h"
@@ -168,7 +169,8 @@ Bool_t SCycleBaseExec::Notify() {
       this->LoadInputTrees( *m_inputData, m_inputTree, inputFile );
       this->SetHistInputFile( inputFile );
       this->BeginInputFile( *m_inputData );
-
+      m_logger << ::INFO << "Opening " << inputFile->GetFile()->GetName()
+               << SLogger::endmsg;
    } catch( const SError& error ) {
       REPORT_FATAL( "Exception caught with message: " << error.what() );
       throw;
