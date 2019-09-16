@@ -13,6 +13,7 @@
 // ROOT include(s):
 #include <TTree.h>
 #include <TSystem.h>
+#include <TString.h>
 #include <TFile.h>
 
 // Local include(s):
@@ -63,6 +64,7 @@ void SCycleBaseExec::Begin( TTree* ) {
       // Let the user initialize his/her code:
       this->BeginMasterInputData( *m_inputData );
 
+      m_timeStart = clock_::now();
    } catch( const SError& error ) {
       REPORT_FATAL( "Exception caught with message: " << error.what() );
       throw;
@@ -115,6 +117,7 @@ void SCycleBaseExec::SlaveBegin( TTree* ) {
    m_nProcessedEvents = 0;
    m_nSkippedEvents = 0;
    m_firstInit = kTRUE;
+   m_timeStart = clock_::now();
 
    // Print what just happened:
    m_logger << ::INFO << "Initialised InputData \"" << m_inputData->GetType()
@@ -264,16 +267,32 @@ Bool_t SCycleBaseExec::Process( Long64_t entry ) {
 
    ++m_nProcessedEvents;
    if( ! ( m_nProcessedEvents % 1000 ) ) {
+      double time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(
+                             clock_::now() - m_timeStart).count();
+      int total_events = ( m_inputData->GetNEventsMax() < 0 ?
+                           m_inputData->GetEventsTotal() :
+                           m_inputData->GetNEventsMax() );
+      int remaining_events = total_events - m_nProcessedEvents;
+      double time_remaining = remaining_events * (time_elapsed/m_nProcessedEvents);
+      std::string time_unit = "seconds";
+      if (time_remaining > 3600) {
+         time_remaining /= 3600;
+         time_unit = "hours";
+      } else if (time_remaining > 60) {
+         time_remaining /= 60;
+         time_unit = "minutes";
+      }
       // Only print these messages in local mode in INFO level. In PROOF mode
       // they're only needed for debugging.
       m_logger << ( GetConfig().GetRunMode() == SCycleConfig::LOCAL ? ::INFO :
                     ::DEBUG )
                << "Processing entry: " << entry << " ("
                << ( m_nProcessedEvents - 1 ) << " / "
-               << ( m_inputData->GetNEventsMax() < 0 ?
-                    m_inputData->GetEventsTotal() :
-                    m_inputData->GetNEventsMax() )
-               << " events processed so far)" << SLogger::endmsg;
+               << total_events
+               << " events processed so far, ~ "
+               << TString::Format("%.2g" , time_remaining)
+               << " " << time_unit << " left)"
+               << SLogger::endmsg;
    }
 
    // Return gracefully:
