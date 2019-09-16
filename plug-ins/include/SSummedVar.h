@@ -112,7 +112,7 @@ public:
 
 private:
    /// Function for accessing the internal object
-   ProofSummedVar< Type >* GetObject() const throw( SError );
+   ProofSummedVar< Type >* GetObject() const;
 
    TString                         m_objName; ///< Name of the object
    ISCycleBaseHist*                m_parent; ///< Pointer to the parent cycle

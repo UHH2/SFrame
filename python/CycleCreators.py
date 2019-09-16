@@ -66,20 +66,20 @@ public:
    ~%(class)-s();
 
    /// Function called at the beginning of the cycle
-   virtual void BeginCycle() throw( SError );
+   virtual void BeginCycle();
    /// Function called at the end of the cycle
-   virtual void EndCycle() throw( SError );
+   virtual void EndCycle();
 
    /// Function called at the beginning of a new input data
-   virtual void BeginInputData( const SInputData& ) throw( SError );
+   virtual void BeginInputData( const SInputData& );
    /// Function called after finishing to process an input data
-   virtual void EndInputData  ( const SInputData& ) throw( SError );
+   virtual void EndInputData  ( const SInputData& );
 
    /// Function called after opening each new input file
-   virtual void BeginInputFile( const SInputData& ) throw( SError );
+   virtual void BeginInputFile( const SInputData& );
 
    /// Function called for every event
-   virtual void ExecuteEvent( const SInputData&, Double_t ) throw( SError );
+   virtual void ExecuteEvent( const SInputData&, Double_t );
 
 private:
    //
@@ -126,20 +126,20 @@ namespace %(ns)-s {
       ~%(class)-s();
 
       /// Function called at the beginning of the cycle
-      virtual void BeginCycle() throw( SError );
+      virtual void BeginCycle();
       /// Function called at the end of the cycle
-      virtual void EndCycle() throw( SError );
+      virtual void EndCycle();
 
       /// Function called at the beginning of a new input data
-      virtual void BeginInputData( const SInputData& ) throw( SError );
+      virtual void BeginInputData( const SInputData& );
       /// Function called after finishing to process an input data
-      virtual void EndInputData  ( const SInputData& ) throw( SError );
+      virtual void EndInputData  ( const SInputData& );
 
       /// Function called after opening each new input file
-      virtual void BeginInputFile( const SInputData& ) throw( SError );
+      virtual void BeginInputFile( const SInputData& );
 
       /// Function called for every event
-      virtual void ExecuteEvent( const SInputData&, Double_t ) throw( SError );
+      virtual void ExecuteEvent( const SInputData&, Double_t );
 
    private:
       //
@@ -228,37 +228,37 @@ ClassImp( %(class)-s );
 
 }
 
-void %(class)-s::BeginCycle() throw( SError ) {
+void %(class)-s::BeginCycle() {
 
    return;
 
 }
 
-void %(class)-s::EndCycle() throw( SError ) {
+void %(class)-s::EndCycle() {
 
    return;
 
 }
 
-void %(class)-s::BeginInputData( const SInputData& ) throw( SError ) {
+void %(class)-s::BeginInputData( const SInputData& ) {
 
    return;
 
 }
 
-void %(class)-s::EndInputData( const SInputData& ) throw( SError ) {
+void %(class)-s::EndInputData( const SInputData& ) {
 
    return;
 
 }
 
-void %(class)-s::BeginInputFile( const SInputData& ) throw( SError ) {
+void %(class)-s::BeginInputFile( const SInputData& ) {
 
    return;
 
 }
 
-void %(class)-s::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
+void %(class)-s::ExecuteEvent( const SInputData&, Double_t ) {
 
    return;
 
@@ -289,37 +289,37 @@ namespace %(ns)-s {
 
    }
 
-   void %(class)-s::BeginCycle() throw( SError ) {
+   void %(class)-s::BeginCycle() {
 
       return;
 
    }
 
-   void %(class)-s::EndCycle() throw( SError ) {
+   void %(class)-s::EndCycle() {
 
       return;
 
    }
 
-   void %(class)-s::BeginInputData( const SInputData& ) throw( SError ) {
+   void %(class)-s::BeginInputData( const SInputData& ) {
 
       return;
 
    }
 
-   void %(class)-s::EndInputData( const SInputData& ) throw( SError ) {
+   void %(class)-s::EndInputData( const SInputData& ) {
 
       return;
 
    }
 
-   void %(class)-s::BeginInputFile( const SInputData& ) throw( SError ) {
+   void %(class)-s::BeginInputFile( const SInputData& ) {
 
       return;
 
    }
 
-   void %(class)-s::ExecuteEvent( const SInputData&, Double_t ) throw( SError ) {
+   void %(class)-s::ExecuteEvent( const SInputData&, Double_t ) {
 
       return;
 

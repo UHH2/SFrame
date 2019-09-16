@@ -1,0 +1,8 @@
+*.pcm
+*.pyc
+*_Dict.cxx
+
+bin/sframe_main
+lib
+obj
+

@@ -52,7 +52,7 @@ public:
    SCycleBaseConfig();
 
    /// Function initialising the cycle
-   void Initialize( TXMLNode* ) throw( SError );
+   void Initialize( TXMLNode* );
 
    /// Get the overall cycle configuration object
    const SCycleConfig& GetConfig() const;
@@ -95,13 +95,13 @@ public:
 
 protected:
    /// Function that reads an InputData definition
-   virtual SInputData InitializeInputData( TXMLNode* ) throw( SError );
+   virtual SInputData InitializeInputData( TXMLNode* );
    /// Function that reads the user properties from the XML
-   virtual void InitializeUserConfig( TXMLNode* ) throw( SError );
+   virtual void InitializeUserConfig( TXMLNode* );
 
    /// Internal function for setting a property value
    void SetProperty( const std::string& name,
-                     const std::string& value ) throw( SError );
+                     const std::string& value );
 
    /// Function for decoding a shell environment variable
    std::string DecodeEnvVar( const std::string& value ) const; 
@@ -111,7 +111,7 @@ protected:
 
 private:
    /// Function for decoding a string to bool
-   bool ToBool( const std::string& value ) throw( SError );
+   bool ToBool( const std::string& value );
    /// Function used in constructing the user configuration options
    template< typename T >
    void AddUserOptions( const std::map< const std::string, T* >& prefs );

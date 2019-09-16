@@ -345,7 +345,7 @@ void SCycleConfig::PrintConfig() const {
  * After the re-arranging the objects with the same type will end up
  * beside each other.
  */
-void SCycleConfig::ArrangeInputData() throw ( SError ) {
+void SCycleConfig::ArrangeInputData() {
 
    // multimap to hold all type strings of InputData objects; will be
    // used to search InputData objects with the same name, to make

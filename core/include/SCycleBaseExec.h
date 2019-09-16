@@ -94,32 +94,32 @@ public:
     * Analysis-wide configurations, like the setup of some reconstruction
     * algorithm based on properties configured in XML should be done here.
     */
-   virtual void BeginCycle() throw( SError ) = 0;
+   virtual void BeginCycle() = 0;
    /// Finalisation called at the end of a full cycle
    /**
     * This is the last function called after an analysis run, so it
     * could be a good place to print some statistics about the running.
     */
-   virtual void EndCycle() throw( SError ) = 0;
+   virtual void EndCycle() = 0;
    /// Initialisation called on the worker nodes for each input data type
    /**
     * This is the place to declare the output variables for the output
     * TTree(s). This is also the earliest point where histograms can
     * be created.
     */
-   virtual void BeginInputData( const SInputData& ) throw( SError ) = 0;
+   virtual void BeginInputData( const SInputData& ) = 0;
    /// Finalisation called on the worker nodes for each input data type
    /**
     * Mainly used for printing input data statistics, or normalising
     * efficiency histograms by hand.
     */
-   virtual void EndInputData  ( const SInputData& ) throw( SError ) = 0;
+   virtual void EndInputData  ( const SInputData& ) = 0;
    /// Initialisation called for each input file
    /**
     * This is the place to connect the input variables to the branches
     * of the input tree(s).
     */
-   virtual void BeginInputFile( const SInputData& ) throw( SError ) = 0;
+   virtual void BeginInputFile( const SInputData& ) = 0;
    /// Function called for every event
    /**
     * This is the function where the main analysis should be done. By the
@@ -127,7 +127,7 @@ public:
     * contents of the actual event.
     */
    virtual void ExecuteEvent( const SInputData&,
-                              Double_t weight ) throw( SError ) = 0;
+                              Double_t weight ) = 0;
    //@}
 
    /// @name Functions that are optional to be implemented is user code
@@ -137,18 +137,18 @@ public:
     * This function is mostly a placeholder for now. There is not much one
     * can do here yet...
     */
-   virtual void BeginMasterInputData( const SInputData& ) throw( SError ) {}
+   virtual void BeginMasterInputData( const SInputData& ) {}
    /// Finalisation called on the client machine for each input data type
    /**
     * This function is mostly a placeholder for now. There is not much one
     * can do here yet...
     */
-   virtual void EndMasterInputData( const SInputData& ) throw( SError ) {}
+   virtual void EndMasterInputData( const SInputData& ) {}
    //@}
 
 private:
    /// Function for reading the cycle configuration on the worker nodes
-   void ReadConfig() throw( SError );
+   void ReadConfig();
    /// Dummy override for the function defined in TObject
    virtual void ExecuteEvent( Int_t event, Int_t px, Int_t py );
 

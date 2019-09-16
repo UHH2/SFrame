@@ -28,27 +28,27 @@ SecondCycle::SecondCycle()
                     m_FirstCycleTreeName = "FirstCycleTree" );
 }
 
-void SecondCycle::BeginCycle() throw( SError ) {
+void SecondCycle::BeginCycle() {
 
    return;
 }
 
-void SecondCycle::EndCycle() throw( SError ) {
+void SecondCycle::EndCycle() {
 
    return;
 }
 
-void SecondCycle::BeginInputData( const SInputData& ) throw( SError ) {
+void SecondCycle::BeginInputData( const SInputData& ) {
 
    return;
 }
 
-void SecondCycle::EndInputData( const SInputData& ) throw( SError ) {
+void SecondCycle::EndInputData( const SInputData& ) {
 
    return;
 }
 
-void SecondCycle::BeginInputFile( const SInputData& ) throw( SError ) {
+void SecondCycle::BeginInputFile( const SInputData& ) {
 
    //
    // Connect the input variables:
@@ -78,7 +78,7 @@ void SecondCycle::BeginInputFile( const SInputData& ) throw( SError ) {
 }
 
 void SecondCycle::ExecuteEvent( const SInputData&,
-                                Double_t weight ) throw( SError ) {
+                                Double_t weight ) {
 
    // Loop over the simple vector:
    for( std::vector< double >::const_iterator it = m_El_p_T->begin();

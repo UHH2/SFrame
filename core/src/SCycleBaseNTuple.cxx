@@ -100,7 +100,7 @@ TList* SCycleBaseNTuple::GetNTupleInput() const {
  * @returns The pointer to the requested metadata tree
  */
 TTree* SCycleBaseNTuple::
-GetMetadataTree( const char* name ) const throw( SError ) {
+GetMetadataTree( const char* name ) const {
 
    // The result tree:
    TTree* result = 0;
@@ -154,7 +154,7 @@ GetMetadataTree( const char* name ) const throw( SError ) {
  * @returns The pointer to the requested metadata tree
  */
 TTree* SCycleBaseNTuple::
-GetInputMetadataTree( const char* name ) const throw( SError ) {
+GetInputMetadataTree( const char* name ) const {
 
    //
    // Strip off the directory name from the given tree name:
@@ -203,7 +203,7 @@ GetInputMetadataTree( const char* name ) const throw( SError ) {
  * @returns The pointer to the requested metadata tree
  */
 TTree* SCycleBaseNTuple::
-GetOutputMetadataTree( const char* name ) const throw( SError ) {
+GetOutputMetadataTree( const char* name ) const {
 
    //
    // Strip off the directory name from the given tree name:
@@ -252,7 +252,7 @@ GetOutputMetadataTree( const char* name ) const throw( SError ) {
  * @returns A pointer to the requested input tree if successful
  */
 TTree* SCycleBaseNTuple::
-GetInputTree( const char* treeName ) const throw( SError ) {
+GetInputTree( const char* treeName ) const {
 
    //
    // Look for such input tree:
@@ -288,7 +288,7 @@ GetInputTree( const char* treeName ) const throw( SError ) {
  * @return The pointer to the TTree if successful
  */
 TTree* SCycleBaseNTuple::
-GetOutputTree( const char* treeName ) const throw( SError ) {
+GetOutputTree( const char* treeName ) const {
 
    //
    // Look for such output tree:
@@ -324,7 +324,7 @@ GetOutputTree( const char* treeName ) const throw( SError ) {
  * @return A pointer to the output file's directory if successful, a null
  *         pointer if not
  */
-TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
+TDirectory* SCycleBaseNTuple::GetOutputFile() {
 
    // Return right away if we already have an output file opened:
    if( m_outputFile ) return m_outputFile;
@@ -426,7 +426,7 @@ TDirectory* SCycleBaseNTuple::GetOutputFile() throw( SError ) {
  * This function is called at the end of processing an input data block, to
  * save all the output trees, and close the output file properly.
  */
-void SCycleBaseNTuple::CloseOutputFile() throw( SError ) {
+void SCycleBaseNTuple::CloseOutputFile() {
 
    // We only need to do anything if the output file has been made:
    if( m_outputFile ) {
@@ -463,7 +463,7 @@ void SCycleBaseNTuple::CloseOutputFile() throw( SError ) {
  */
 void SCycleBaseNTuple::
 CreateOutputTrees( const SInputData& iD,
-                   std::vector< TTree* >& outTrees ) throw( SError ) {
+                   std::vector< TTree* >& outTrees ) {
 
    // sanity checks
    if( outTrees.size() ) {
@@ -623,7 +623,7 @@ CreateOutputTrees( const SInputData& iD,
  * deletes the TTree objects, so it should really only be called by the
  * framework at the end of processing.
  */
-void SCycleBaseNTuple::SaveOutputTrees() throw( SError ) {
+void SCycleBaseNTuple::SaveOutputTrees() {
 
    // Remember which directory we were in:
    TDirectory* savedir = gDirectory;
@@ -687,7 +687,7 @@ void SCycleBaseNTuple::SaveOutputTrees() throw( SError ) {
 void SCycleBaseNTuple::
 LoadInputTrees( const SInputData& iD,
                 TTree* main_tree,
-                TDirectory*& inputFile ) throw( SError ) {
+                TDirectory*& inputFile ) {
 
    REPORT_VERBOSE( "Loading/accessing the event-level input trees" );
 
@@ -819,7 +819,7 @@ LoadInputTrees( const SInputData& iD,
  *
  * @param entry The event number to read in
  */
-void SCycleBaseNTuple::GetEvent( Long64_t entry ) throw( SError ) {
+void SCycleBaseNTuple::GetEvent( Long64_t entry ) {
 
    // Tell all trees to update their cache:
    for( std::vector< TTree* >::const_iterator it = m_inputTrees.begin();
@@ -945,7 +945,7 @@ void SCycleBaseNTuple::ClearCachedTrees() {
  * @returns The primitive type name in ROOT's format
  */
 const char*
-SCycleBaseNTuple::RootType( const char* typeid_type ) throw( SError ) {
+SCycleBaseNTuple::RootType( const char* typeid_type ) {
 
    // Check that we received a reasonable input:
    if( strlen( typeid_type ) != 1 ) {
@@ -1013,7 +1013,7 @@ SCycleBaseNTuple::RootType( const char* typeid_type ) throw( SError ) {
  * @returns The typeid type name for the ROOT primitive type
  */
 const char*
-SCycleBaseNTuple::TypeidType( const char* root_type ) throw( SError ) {
+SCycleBaseNTuple::TypeidType( const char* root_type ) {
 
    // Do the hard-coded translation:
    if( ! strcmp( root_type, "Char_t" ) ) {
@@ -1054,7 +1054,7 @@ SCycleBaseNTuple::TypeidType( const char* root_type ) throw( SError ) {
  *
  * @param br The branch to remember
  */
-void SCycleBaseNTuple::RegisterInputBranch( TBranch* br ) throw( SError ) {
+void SCycleBaseNTuple::RegisterInputBranch( TBranch* br ) {
 
    // This is a bit slow, but still not the worst part of the code...
    if( std::find( m_inputBranches.begin(), m_inputBranches.end(), br ) !=
@@ -1096,7 +1096,7 @@ void SCycleBaseNTuple::DeleteInputVariables() {
  */
 TDirectory*
 SCycleBaseNTuple::MakeSubDirectory( const TString& path,
-                                    TDirectory* dir ) const throw( SError ) {
+                                    TDirectory* dir ) const {
 
    // Return the parent directory if the path name is empty:
    if( ! path.Length() ) return dir;

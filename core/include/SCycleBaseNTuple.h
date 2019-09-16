@@ -66,33 +66,33 @@ public:
    /// Connect an input variable
    template< typename T >
    bool ConnectVariable( const char* treeName, const char* branchName,
-                         T& variable ) throw ( SError );
+                         T& variable );
    /// Specialisation for primitive arrays
    template< typename T, size_t size >
    bool ConnectVariable( const char* treeName, const char* branchName,
-                         T ( &variable )[ size ] ) throw( SError );
+                         T ( &variable )[ size ] );
    /// Specialisation for object pointers
    template< typename T >
    bool ConnectVariable( const char* treeName, const char* branchName,
-                         T*& variable ) throw( SError );
+                         T*& variable );
 
    /// Declare an output variable
    template< class T >
    TBranch* DeclareVariable( T& obj, const char* name,
-                             const char* treeName = 0 ) throw( SError );
+                             const char* treeName = 0 );
 
    /// Access one of the metadata trees
-   virtual TTree* GetMetadataTree( const char* name ) const throw( SError );
+   virtual TTree* GetMetadataTree( const char* name ) const;
    /// Access one of the input metadata trees
    virtual TTree*
-   GetInputMetadataTree( const char* name ) const throw( SError );
+   GetInputMetadataTree( const char* name ) const;
    /// Access one of the output metadata trees
    virtual TTree*
-   GetOutputMetadataTree( const char* name ) const throw( SError );
+   GetOutputMetadataTree( const char* name ) const;
    /// Access one of the input trees
-   virtual TTree* GetInputTree( const char* treeName ) const throw( SError );
+   virtual TTree* GetInputTree( const char* treeName ) const;
    /// Access one of the output trees
-   virtual TTree* GetOutputTree( const char* treeName ) const throw( SError );
+   virtual TTree* GetOutputTree( const char* treeName ) const;
 
 protected:
    //////////////////////////////////////////////////////////
@@ -102,19 +102,19 @@ protected:
    //////////////////////////////////////////////////////////
 
    /// Function creating an output file on demand
-   virtual TDirectory* GetOutputFile() throw( SError );
+   virtual TDirectory* GetOutputFile();
    /// Function closing a potentially open output file
-   virtual void CloseOutputFile() throw( SError );
+   virtual void CloseOutputFile();
    /// Create the output trees
    void CreateOutputTrees( const SInputData& id,
-                           std::vector< TTree* >& outTrees ) throw( SError );
+                           std::vector< TTree* >& outTrees );
    /// Save all the created output trees in the output
-   void SaveOutputTrees() throw( SError );
+   void SaveOutputTrees();
    /// Load the input trees
    void LoadInputTrees( const SInputData& id, TTree* main_tree,
-                        TDirectory*& inputFile ) throw( SError );
+                        TDirectory*& inputFile );
    /// Read in the event from the "normal" trees
-   void GetEvent( Long64_t entry ) throw( SError );
+   void GetEvent( Long64_t entry );
    /// Calculate the weight of the current event
    Double_t CalculateWeight( const SInputData& inputData,
                              Long64_t entry ) const;
@@ -123,16 +123,16 @@ protected:
 
 private:
    /// Function translating a "typeid type" into a ROOT type character
-   static const char* RootType( const char* typeid_type ) throw( SError );
+   static const char* RootType( const char* typeid_type );
    /// Function translating a ROOT type character into a "typeid type"
-   static const char* TypeidType( const char* root_type ) throw( SError );
+   static const char* TypeidType( const char* root_type );
    /// Function registering an input branch for use during the event loop
-   void RegisterInputBranch( TBranch* br ) throw( SError );
+   void RegisterInputBranch( TBranch* br );
    /// Function deleting the object created on the heap by ROOT
    void DeleteInputVariables();
    /// Function creating a sub-directory inside an existing directory
    TDirectory* MakeSubDirectory( const TString& path,
-                                 TDirectory* dir ) const throw( SError );
+                                 TDirectory* dir ) const;
 
    //
    // These are the objects used to handle the input and output data:

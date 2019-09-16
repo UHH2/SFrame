@@ -62,22 +62,22 @@ public:
    /// Function placing a ROOT object in the output file
    template< class T > T* Book( const T& histo,
                                 const char* directory = 0,
-                                Bool_t inFile = kFALSE ) throw( SError );
+                                Bool_t inFile = kFALSE );
    /// Function searching for a ROOT object in the output file
    template< class T > T* Retrieve( const char* name,
                                     const char* directory = 0,
-                                    Bool_t outputOnly = kFALSE ) throw( SError );
+                                    Bool_t outputOnly = kFALSE );
    /// Function retrieving all ROOT objects of this name from the input file
    template< class T >
    std::vector< T* > RetrieveAll( const char* name,
-                                  const char* directory = 0 ) throw( SError );
+                                  const char* directory = 0 );
    /// Function for persistifying a ROOT object to the output
    void WriteObj( const TObject& obj,
                   const char* directory = 0,
-                  Bool_t inFile = kFALSE ) throw( SError );
+                  Bool_t inFile = kFALSE );
 
    /// Function searching for 1-dimensional histograms in the output file
-   TH1* Hist( const char* name, const char* dir = 0 ) throw( SError );
+   TH1* Hist( const char* name, const char* dir = 0 );
 
 protected:
    /// Set the current input file

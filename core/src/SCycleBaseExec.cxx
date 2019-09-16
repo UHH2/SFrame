@@ -14,6 +14,7 @@
 #include <TTree.h>
 #include <TSystem.h>
 #include <TString.h>
+#include <TFile.h>
 
 // Local include(s):
 #include "../include/SCycleBaseExec.h"
@@ -171,7 +172,8 @@ Bool_t SCycleBaseExec::Notify() {
       this->LoadInputTrees( *m_inputData, m_inputTree, inputFile );
       this->SetHistInputFile( inputFile );
       this->BeginInputFile( *m_inputData );
-
+      m_logger << ::INFO << "Opening " << inputFile->GetFile()->GetName()
+               << SLogger::endmsg;
    } catch( const SError& error ) {
       REPORT_FATAL( "Exception caught with message: " << error.what() );
       throw;
@@ -370,7 +372,7 @@ void SCycleBaseExec::Terminate() {
  * This function takes care of accessing the cycle configuration objects on the
  * master and worker nodes.
  */
-void SCycleBaseExec::ReadConfig() throw( SError ) {
+void SCycleBaseExec::ReadConfig() {
 
    //
    // Read the overall cycle configuration:

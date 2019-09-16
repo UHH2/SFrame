@@ -70,7 +70,7 @@ public:
 
 private:
    /// Return the requested output directory
-   TDirectory* MakeDirectory( const TString& path ) const throw( SError );
+   TDirectory* MakeDirectory( const TString& path ) const;
 
    /// The object that this class wraps
    TObject* m_object;

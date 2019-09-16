@@ -90,7 +90,7 @@ SCycleController::~SCycleController() {
  *
  * @callgraph
  */
-void SCycleController::Initialize() throw( SError ) {
+void SCycleController::Initialize() {
 
    m_logger << INFO << "Initializing" << SLogger::endmsg;
 
@@ -351,7 +351,7 @@ void SCycleController::Initialize() throw( SError ) {
  * @see SCycleController::ExecuteNextCycle
  * @callgraph
  */
-void SCycleController::ExecuteAllCycles() throw( SError ) {
+void SCycleController::ExecuteAllCycles() {
 
    // A little sanity check:
    if( ! m_isInitialized ) {
@@ -378,7 +378,7 @@ void SCycleController::ExecuteAllCycles() throw( SError ) {
  *
  * @callgraph
  */
-void SCycleController::ExecuteNextCycle() throw( SError ) {
+void SCycleController::ExecuteNextCycle() {
 
    // A little sanity check:
    if( ! m_isInitialized ) {

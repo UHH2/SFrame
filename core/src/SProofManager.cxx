@@ -73,7 +73,7 @@ SProofManager* SProofManager::Instance() {
  * @returns The created TProof object
  */
 TProof* SProofManager::Open( const TString& url,
-                             const TString& param ) throw( SError ) {
+                             const TString& param ) {
 
    // Copy the contents of the parameters, as we may have to change them:
    TString urlcopy( url );
@@ -212,7 +212,7 @@ Bool_t SProofManager::IsConfigured( const TString& url,
  */
 void SProofManager::SetConfigured( const TString& url,
                                    const TString& param,
-                                   Bool_t state ) throw( SError ) {
+                                   Bool_t state ) {
 
    // Make sure the connection is open. This call can throw an error
    // if unsuccessful, so no point in checking its return value.

@@ -258,7 +258,7 @@ void SInputData::AddDataSet( const SDataSet& dset ) {
  *
  * @param pserver Name of the PROOF server to use in the validation
  */
-void SInputData::ValidateInput( const char* pserver ) throw( SError ) {
+void SInputData::ValidateInput( const char* pserver ) {
 
    // Check that the user only specified one type of input:
    if( GetSFileIn().size() && GetDataSets().size() ) {
@@ -623,7 +623,7 @@ TString SInputData::GetStringConfig() const {
  * This function looks at all the specified input files to make sure that they
  * exist, and to extract information about the trees inside of them.
  */
-void SInputData::ValidateInputFiles() throw( SError ) {
+void SInputData::ValidateInputFiles() {
 
    //
    // Set up the connection to the InputData cache if it's asked for:
@@ -905,7 +905,7 @@ void SInputData::ValidateInputFiles() throw( SError ) {
  *
  * @param pserver The PROOF server to use in the validation
  */
-void SInputData::ValidateInputDataSets( const char* pserver ) throw( SError ) {
+void SInputData::ValidateInputDataSets( const char* pserver ) {
 
    // Connect to the PROOF server:
    TProof* server = SProofManager::Instance()->Open( pserver );
@@ -1148,7 +1148,7 @@ TFileInfo* SInputData::AccessFileInfo( SFile* file,
  *
  * @returns A validated dataset made from the input files
  */
-TDSet* SInputData::MakeDataSet() const throw( SError ) {
+TDSet* SInputData::MakeDataSet() const {
 
    // Find the name of the "main" TTree in the files:
    const char* treeName = 0;
